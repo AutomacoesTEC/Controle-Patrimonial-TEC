@@ -25,6 +25,7 @@ import {
   totalPagamentos,
   totalPagamentosDiversos,
 } from './demonstrativos';
+import { snapshotHasData } from './reducer';
 
 const anoDeUmaData = (data) => Number(String(data).slice(0, 4));
 const maxData = (a, b) => (a >= b ? a : b);
@@ -37,10 +38,12 @@ export function dadosDoAno(state, ano) {
   return state.historico?.[ano] || null;
 }
 
-// Anos que têm dado real (histórico arquivado + ano corrente, se ele tiver
-// qualquer dado de trabalho). Ordenados.
+// Anos que têm dado real: snapshots do histórico com conteúdo (ano vazio
+// herdado de versão antiga não conta) + ano corrente, se ele tiver dado.
 export function anosComDado(state) {
-  const anos = new Set(Object.keys(state.historico || {}).map(Number));
+  const anos = new Set(
+    Object.keys(state.historico || {}).map(Number).filter(y => snapshotHasData(state.historico[y]))
+  );
   if (state.anoCalendario != null) anos.add(state.anoCalendario);
   return [...anos].sort((a, b) => a - b);
 }

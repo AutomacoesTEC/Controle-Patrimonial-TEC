@@ -1,5 +1,5 @@
 import { useData } from '../store/DataContext';
-import { hasWorkingData as hasWorkingDataCheck } from '../store/reducer';
+import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store/reducer';
 
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
@@ -19,10 +19,13 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
   const { state, dispatch, addToast } = useData();
   let lastSection = '';
 
-  // Só anos com dado real (histórico + ano em edição). Antes da 1ª
-  // importação não há ano nenhum — o seletor fica oculto e no lugar aparece
-  // o onboarding.
-  const anosComDados = [...new Set([...Object.keys(state.historico).map(Number), state.anoCalendario].filter(y => y != null))].sort((a, b) => a - b);
+  // Só anos com dado real: ano em edição (se tiver conteúdo) + snapshots do
+  // histórico que realmente têm dado — ano vazio herdado de versão antiga
+  // ou avançado por engano não aparece.
+  const anosComDados = [...new Set([
+    ...Object.keys(state.historico).map(Number).filter(y => snapshotHasData(state.historico[y])),
+    ...(hasWorkingDataCheck(state) && state.anoCalendario != null ? [state.anoCalendario] : []),
+  ])].sort((a, b) => a - b);
   const proximoAno = anosComDados.length > 0 ? Math.max(...anosComDados) + 1 : new Date().getFullYear();
   const hasWorkingData = hasWorkingDataCheck(state);
 

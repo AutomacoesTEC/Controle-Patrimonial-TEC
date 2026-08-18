@@ -48,6 +48,15 @@ export const hasWorkingData = (state) =>
   state.rendimentos.length > 0 || state.pagamentos.length > 0 ||
   (state.bensRurais || []).length > 0 || (state.pagamentosDiversos || []).length > 0 ||
   !!state.contribuinte;
+// Mesmo critério para um snapshot do histórico: ano "avançado" por engano
+// ou herdado de versão antiga pode existir no histórico completamente vazio
+// — e ano vazio NÃO é "ano com dado" (não entra no seletor nem nos gráficos).
+export const snapshotHasData = (h) =>
+  !!h && hasWorkingData({
+    bens: h.bens || [], dividas: h.dividas || [], rendimentos: h.rendimentos || [],
+    pagamentos: h.pagamentos || [], bensRurais: h.bensRurais || [],
+    pagamentosDiversos: h.pagamentosDiversos || [], contribuinte: h.contribuinte || null,
+  });
 export const blankYear = {
   bens: [], dividas: [], rendimentos: [], pagamentos: [], contribuinte: null,
   bensRurais: [], lancamentosRurais: [], pagamentosDiversos: [],
