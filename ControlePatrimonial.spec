@@ -22,6 +22,7 @@ exe = EXE(
     [],
     exclude_binaries=True,
     name='ControlePatrimonial',
+    icon='assets/cp-tec.ico',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

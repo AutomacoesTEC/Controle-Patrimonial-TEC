@@ -1,7 +1,7 @@
 ; setup.iss — instalador do Controle de Variação Patrimonial (Inno Setup 6)
 ; Gera installer\ControlePatrimonial_Setup.exe a partir de dist-app\ControlePatrimonial\
 
-#define AppName "Controle de Variação Patrimonial"
+#define AppName "CP-TEC — Controle de Variação Patrimonial"
 #define AppVersion "1.2.0"
 #define AppExe "ControlePatrimonial.exe"
 
@@ -9,7 +9,9 @@
 AppId={{7F3A9C21-5E4B-4D8A-9F2C-1B6E8D0A3C55}
 AppName={#AppName}
 AppVersion={#AppVersion}
-AppPublisher=Controle Patrimonial
+AppPublisher=CP-TEC
+SetupIconFile=assets\cp-tec.ico
+UninstallDisplayIcon={app}\{#AppExe}
 DefaultDirName={localappdata}\Programs\ControlePatrimonial
 DefaultGroupName={#AppName}
 OutputDir=installer

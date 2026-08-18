@@ -48,11 +48,11 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       </button>
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <div className="logo-icon">VP</div>
+          <div className="logo-icon">CP</div>
           {!collapsed && (
             <div className="logo-text">
-              <h1>Variação Patrimonial</h1>
-              <span>Controle IRPF</span>
+              <h1>CP-TEC</h1>
+              <span>Variação Patrimonial · IRPF</span>
             </div>
           )}
         </div>
