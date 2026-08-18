@@ -23,7 +23,8 @@ if ($LASTEXITCODE -ne 0) { throw "npm run build falhou" }
 Write-Host "==> 2/4 Ambiente Python (.build-venv)" -ForegroundColor Cyan
 $venv = Join-Path $root '.build-venv'
 if (-not (Test-Path (Join-Path $venv 'Scripts\python.exe'))) {
-    $py = (Get-Command python -ErrorAction SilentlyContinue) ? 'python' : 'py'
+    $py = 'python'
+    if (-not (Get-Command python -ErrorAction SilentlyContinue)) { $py = 'py' }
     & $py -m venv $venv
     if ($LASTEXITCODE -ne 0) { throw "criação do venv falhou" }
 }
@@ -38,7 +39,10 @@ if ($LASTEXITCODE -ne 0) { throw "PyInstaller falhou" }
 
 Write-Host "==> 4/4 Inno Setup" -ForegroundColor Cyan
 $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-if (-not (Test-Path $iscc)) { $iscc = (Get-Command iscc -ErrorAction SilentlyContinue)?.Source }
+if (-not (Test-Path $iscc)) {
+    $isccCmd = Get-Command iscc -ErrorAction SilentlyContinue
+    if ($isccCmd) { $iscc = $isccCmd.Source } else { $iscc = $null }
+}
 if (-not $iscc) {
     Write-Host "Inno Setup 6 não encontrado. Instale de https://jrsoftware.org/isdl.php e rode novamente." -ForegroundColor Yellow
     Write-Host "O executável já está pronto em dist-app\ControlePatrimonial\" -ForegroundColor Yellow
