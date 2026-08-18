@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, GRUPOS_BENS } from '../utils/formatters';
+import { formatCurrency, formatDate, GRUPOS_BENS } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
+import { demonstrativoConciliacao } from '../store/demonstrativos';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b'];
@@ -77,6 +78,29 @@ export default function Dashboard() {
     .filter(d => d.value > 0)
     .sort((a, b) => b.value - a.value);
 
+  // Demonstrativo de Conciliação Patrimonial: mesma técnica da planilha
+  // original, mas com data livre em vez de só 31/12 — o ano vai sendo
+  // lançado ao longo do tempo, então a usuária precisa conferir "até
+  // hoje", não só no fechamento. Opera sobre o ano-calendário CORRENTE
+  // (state.bens etc.), não sobre anos arquivados no histórico: bens
+  // trocam de id na virada de ano (ROLLOVER_ANO), então não dá pra
+  // reconstruir movimentação por data cruzando anos diferentes.
+  const anoEhCorrente = anoCalendario === new Date().getFullYear();
+  const dataAteDefault = anoEhCorrente ? new Date().toISOString().slice(0, 10) : `${anoCalendario}-12-31`;
+  const [dataDe, setDataDe] = useState(`${anoCalendario}-01-01`);
+  const [dataAte, setDataAte] = useState(dataAteDefault);
+  // Trocar de ano-calendário sem sair do Dashboard (seletor da sidebar):
+  // o período tem que acompanhar, senão o demonstrativo continuaria
+  // filtrando pelas datas do ano anterior.
+  useEffect(() => {
+    setDataDe(`${anoCalendario}-01-01`);
+    setDataAte(anoCalendario === new Date().getFullYear() ? new Date().toISOString().slice(0, 10) : `${anoCalendario}-12-31`);
+  }, [anoCalendario]);
+  const demo = useMemo(
+    () => demonstrativoConciliacao(state, dataDe, dataAte),
+    [state, dataDe, dataAte]
+  );
+
   const handleExport = () => {
     const totalBensAnterior = totIni.totalBens;
     const totalBensAtual = totFim.totalBens;
@@ -110,7 +134,66 @@ export default function Dashboard() {
       </div>
       <div className="page-body animate-in">
         <div className="card" style={{ marginBottom: '20px' }}>
-          <div className="card-header"><h3 className="card-title">Comparar período</h3></div>
+          <div className="card-header"><h3 className="card-title">Demonstrativo de Conciliação Patrimonial</h3></div>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '-8px', marginBottom: '16px' }}>
+            Mesma conta que a planilha de controle sempre fez: quanto o patrimônio variou tem que ser coberto pelo que entrou de rendimento e ganho, menos o que saiu em pagamento. O Saldo de Caixa no final é o número de conferência — perto de zero (ou do caixa/cofre que a usuária sabe que tem) indica que nada ficou de fora da declaração.
+          </p>
+          <div className="form-row" style={{ alignItems: 'end', marginBottom: '20px' }}>
+            <div className="form-group">
+              <label>De</label>
+              <input className="form-control" type="date" value={dataDe} onChange={e => setDataDe(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Até</label>
+              <input className="form-control" type="date" value={dataAte} onChange={e => setDataAte(e.target.value)} />
+            </div>
+          </div>
+
+          <table className="demonstrativo-table">
+            <tbody>
+              <tr className="demonstrativo-secao"><td colSpan={2}>Descrição dos Bens</td></tr>
+              <tr><td>Situação em {formatDate(dataDe)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
+              <tr><td>Situação em {formatDate(dataAte)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
+              <tr className="demonstrativo-total"><td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td></tr>
+
+              <tr className="demonstrativo-secao"><td colSpan={2}>Descrição da Dívida</td></tr>
+              <tr><td>Situação em {formatDate(dataDe)} (saldo do início do ano)</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaDe)}</td></tr>
+              <tr><td>Situação em {formatDate(dataAte)} (saldo mais recente lançado)</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaAte)}</td></tr>
+              <tr className="demonstrativo-total"><td>Variação da Dívida</td><td className={`currency ${demo.varPatrimonial.deltaDivida >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDivida)}</td></tr>
+              <tr><td colSpan={2} style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '2px 12px 10px' }}>Dívida não tem movimentação por data ainda (só o saldo anterior/atual da ficha); o filtro acima não muda esses dois valores.</td></tr>
+
+              <tr className="demonstrativo-destaque"><td>Variação Patrimonial Total</td><td className={`currency ${demo.varPatrimonial.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.total)}</td></tr>
+
+              <tr className="demonstrativo-secao"><td colSpan={2}>Descrição dos Rendimentos</td></tr>
+              <tr><td>Tributáveis Recebidos de P.J.</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPJ)}</td></tr>
+              <tr><td>Demais Rend. Tributáveis (Resultado da Atividade Rural)</td><td className={`currency ${demo.rendimentos.demaisTributaveis >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.rendimentos.demaisTributaveis)}</td></tr>
+              <tr><td>Rendimentos Isentos e Não Tributáveis</td><td className="currency">{formatCurrency(demo.rendimentos.isentoValor)}</td></tr>
+              <tr><td>Tributação Exclusiva, bruto</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoBruto)}</td></tr>
+              <tr><td>Tributação Exclusiva, IRRF retido</td><td className="currency negative">{formatCurrency(-demo.rendimentos.exclusivoIrrf)}</td></tr>
+              <tr><td>Tributação Exclusiva, líquido</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoLiquido)}</td></tr>
+              <tr className="demonstrativo-total"><td>Total Geral dos Rendimentos</td><td className="currency positive">{formatCurrency(demo.rendimentos.totalGeral)}</td></tr>
+
+              <tr className="demonstrativo-secao"><td colSpan={2}>Ganhos Apurados</td></tr>
+              <tr><td>Ganho/perda líquido de IRRF nas vendas do período ({demo.ganhos.vendas.length} venda(s))</td><td className={`currency ${demo.ganhos.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.ganhos.total)}</td></tr>
+              {demo.ganhos.semIrrfCount > 0 && (
+                <tr><td colSpan={2} style={{ fontSize: '11px', color: 'var(--accent-warning, #f59e0b)', padding: '2px 12px 10px' }}>
+                  {demo.ganhos.semIrrfCount} venda(s) com ganho sem o IRRF informado — entrou pelo valor bruto, sem descontar. Edite a movimentação e preencha "IRRF pago sobre o ganho" para precisão.
+                </td></tr>
+              )}
+
+              <tr className="demonstrativo-destaque"><td>Saldo de Caixa Geral</td><td className={`currency ${demo.saldoDeCaixaGeral >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
+
+              <tr className="demonstrativo-secao"><td colSpan={2}>Pagamentos</td></tr>
+              <tr><td>Pagamentos Efetuados (ficha dedutível)</td><td className="currency negative">{formatCurrency(-demo.pagamentosEfetuados)}</td></tr>
+              <tr><td>Pagamentos Diversos (despesas gerais)</td><td className="currency negative">{formatCurrency(-demo.pagamentosDiversos)}</td></tr>
+
+              <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa</td><td className={`currency ${demo.saldoDeCaixa >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixa)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header"><h3 className="card-title">Evolução Multianual</h3></div>
           <div className="form-row" style={{ alignItems: 'end' }}>
             <div className="form-group">
               <label>De (situação em 31/12)</label>

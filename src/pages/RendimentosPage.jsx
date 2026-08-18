@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
 import Modal from '../components/Modal';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
@@ -13,7 +13,7 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
   return acc;
 }, {});
 
-const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '' };
+const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: new Date().toISOString().slice(0, 10) };
 
 export default function RendimentosPage() {
   const { state, dispatch, addToast } = useData();
@@ -26,7 +26,7 @@ export default function RendimentosPage() {
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const abrirEdicao = (r) => {
     setEditingId(r.id);
-    setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '' });
+    setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || new Date().toISOString().slice(0, 10) });
     setModalOpen(true);
   };
 
@@ -103,11 +103,12 @@ export default function RendimentosPage() {
                   </div>
                   <div className="table-container">
                     <table>
-                      <thead><tr><th>Tipo</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
+                      <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
                       <tbody>
                         {lista.map(r => (
                           <tr key={r.id}>
                             <td>{describeRendimentoTipo(r.tipo)}</td>
+                            <td>{formatDate(r.data)}</td>
                             <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
                             <td>{(r.nome_fonte || '').substring(0, 50)}</td>
                             <td>{r.beneficiario}</td>
@@ -159,6 +160,7 @@ export default function RendimentosPage() {
                   <div className="form-group"><label>Nome Fonte Pagadora</label><input className="form-control" value={form.nome_fonte} onChange={e => upd('nome_fonte', e.target.value)} /></div>
                 </div>
                 <div className="form-row">
+                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
                   <div className="form-group"><label>Valor</label><input className="form-control" type="number" step="0.01" value={form.valor} onChange={e => upd('valor', e.target.value)} /></div>
                   <div className="form-group"><label>IRRF</label><input className="form-control" type="number" step="0.01" value={form.irrf} onChange={e => upd('irrf', e.target.value)} /></div>
                 </div>

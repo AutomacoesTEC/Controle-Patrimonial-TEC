@@ -19,6 +19,7 @@ export default function GanhosCapitalPage() {
     for (const { b, tipoOrigem } of origem) {
       for (const m of (b.movimentacoes || [])) {
         if ((m.tipo === 'venda_parcial' || m.tipo === 'venda_total') && m.valorVenda != null) {
+          const ganho = m.valorVenda - m.valor;
           lista.push({
             id: m.id,
             origem: tipoOrigem,
@@ -27,7 +28,8 @@ export default function GanhosCapitalPage() {
             tipoVenda: m.tipo === 'venda_total' ? 'Total' : 'Parcial',
             custo: m.valor,
             valorVenda: m.valorVenda,
-            ganho: m.valorVenda - m.valor,
+            ganho,
+            irrf: ganho > 0 ? (m.irrfVenda || 0) : 0,
             descricao: m.descricao,
           });
         }
@@ -74,10 +76,10 @@ export default function GanhosCapitalPage() {
         </div>
         <div className="table-container">
           <table>
-            <thead><tr><th>Bem</th><th>Origem</th><th>Data</th><th>Tipo</th><th style={{ textAlign: 'right' }}>Custo Baixado</th><th style={{ textAlign: 'right' }}>Valor de Venda</th><th style={{ textAlign: 'right' }}>Ganho/Perda</th></tr></thead>
+            <thead><tr><th>Bem</th><th>Origem</th><th>Data</th><th>Tipo</th><th style={{ textAlign: 'right' }}>Custo Baixado</th><th style={{ textAlign: 'right' }}>Valor de Venda</th><th style={{ textAlign: 'right' }}>Ganho/Perda</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
             <tbody>
               {vendas.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma venda com valor de venda registrado ainda.</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma venda com valor de venda registrado ainda.</td></tr>
               ) : vendas.map(v => (
                 <tr key={v.id}>
                   <td style={{ maxWidth: '300px' }}>{(v.bem || '').substring(0, 80)}</td>
@@ -87,6 +89,7 @@ export default function GanhosCapitalPage() {
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(v.custo)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(v.valorVenda)}</td>
                   <td style={{ textAlign: 'right' }} className={`currency ${v.ganho >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganho)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{v.ganho > 0 ? formatCurrency(v.irrf) : '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -95,6 +98,7 @@ export default function GanhosCapitalPage() {
                 <tr style={{ background: 'var(--bg-secondary)' }}>
                   <td colSpan={6} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAL</td>
                   <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className={`currency ${totalGanho >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(totalGanho)}</td>
+                  <td style={{ borderTop: '2px solid var(--border-color)' }}></td>
                 </tr>
               </tfoot>
             )}

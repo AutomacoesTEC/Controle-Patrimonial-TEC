@@ -12,6 +12,7 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
   const [movTipo, setMovTipo] = useState('venda_parcial');
   const [movValor, setMovValor] = useState('');
   const [movValorVenda, setMovValorVenda] = useState('');
+  const [movIrrfVenda, setMovIrrfVenda] = useState('');
   const [movData, setMovData] = useState(new Date().toISOString().slice(0, 10));
   const [movDescricao, setMovDescricao] = useState('');
 
@@ -34,10 +35,16 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
     // sem ele, a movimentação é registrada normalmente, só não entra na
     // aba Ganhos de Capital (que precisa do preço de venda pra calcular).
     if (isVenda && movValorVenda !== '') movimentacao.valorVenda = parseFloat(movValorVenda) || 0;
+    // IRRF pago sobre o ganho da venda (15% em operações comuns de renda
+    // variável/alienação, mas o valor real pago pode variar por alíquota
+    // progressiva) — usado só para o Demonstrativo de Conciliação
+    // Patrimonial do Dashboard calcular o "ganho líquido de IRRF".
+    if (isVenda && movIrrfVenda !== '') movimentacao.irrfVenda = parseFloat(movIrrfVenda) || 0;
     dispatch({ type: actionType, payload: { bemId: bem.id, movimentacao } });
     addToast('Movimentação registrada.', 'success');
     setMovValor('');
     setMovValorVenda('');
+    setMovIrrfVenda('');
     setMovDescricao('');
   };
 
@@ -74,12 +81,21 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
         </div>
       </div>
       {isVenda && (
-        <div className="form-group">
-          <label>Valor de venda (preço recebido, opcional)</label>
-          <input className="form-control" type="number" step="0.01" value={movValorVenda} onChange={e => setMovValorVenda(e.target.value)} placeholder="0,00" />
-          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
-            Preenchendo isso, essa venda aparece calculada sozinha na aba Ganhos de Capital (preço de venda menos a parcela do custo baixada acima).
-          </p>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Valor de venda (preço recebido, opcional)</label>
+            <input className="form-control" type="number" step="0.01" value={movValorVenda} onChange={e => setMovValorVenda(e.target.value)} placeholder="0,00" />
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
+              Preenchendo isso, essa venda aparece calculada sozinha na aba Ganhos de Capital (preço de venda menos a parcela do custo baixada acima).
+            </p>
+          </div>
+          <div className="form-group">
+            <label>IRRF pago sobre o ganho (opcional)</label>
+            <input className="form-control" type="number" step="0.01" value={movIrrfVenda} onChange={e => setMovIrrfVenda(e.target.value)} placeholder="0,00" />
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
+              Usado no Demonstrativo de Conciliação Patrimonial do Dashboard para calcular o ganho líquido.
+            </p>
+          </div>
         </div>
       )}
       <div className="form-group">
@@ -102,6 +118,7 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
                 {' '}em {formatDate(m.data)}
                 {m.valor > 0 && <>, {formatCurrency(m.valor)}</>}
                 {m.valorVenda != null && <>, vendido por {formatCurrency(m.valorVenda)}</>}
+                {m.irrfVenda != null && <>, IRRF {formatCurrency(m.irrfVenda)}</>}
                 {m.descricao && <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>{m.descricao}</div>}
               </div>
             ))}
