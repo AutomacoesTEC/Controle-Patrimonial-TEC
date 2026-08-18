@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
+import Modal from '../components/Modal';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -68,7 +69,6 @@ export default function RendimentosPage() {
       <div className="page-body animate-in">
         {rendimentos.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: '64px' }}>💰</div>
             <h3>Nenhum rendimento cadastrado</h3>
             <p>Importe uma declaração .DBK ou clique em "Novo Rendimento".</p>
           </div>
@@ -115,8 +115,8 @@ export default function RendimentosPage() {
                             <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>
                             <td>
                               <div style={{ display: 'flex', gap: '4px' }}>
-                                <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(r)}>✏️ Editar</button>
-                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r)}>🗑️ Excluir</button>
+                                <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(r)}>Editar</button>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r)}>Excluir</button>
                               </div>
                             </td>
                           </tr>
@@ -130,9 +130,7 @@ export default function RendimentosPage() {
           </>
         )}
       </div>
-      {modalOpen && (
-        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Rendimento' : 'Novo Rendimento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
@@ -165,11 +163,9 @@ export default function RendimentosPage() {
                   <div className="form-group"><label>IRRF</label><input className="form-control" type="number" step="0.01" value={form.irrf} onChange={e => upd('irrf', e.target.value)} /></div>
                 </div>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

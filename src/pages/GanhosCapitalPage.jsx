@@ -59,13 +59,12 @@ export default function GanhosCapitalPage() {
         {semValorVenda > 0 && (
           <div className="card" style={{ marginBottom: '20px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
             <p style={{ margin: 0, fontSize: '13px' }}>
-              ⚠️ Há {semValorVenda} venda(s) registrada(s) sem o valor de venda preenchido, então não entram nesse cálculo. Edite o bem e complete a movimentação se quiser incluí-las.
+              Há {semValorVenda} venda(s) registrada(s) sem o valor de venda preenchido, então não entram nesse cálculo. Edite o bem e complete a movimentação se quiser incluí-las.
             </p>
           </div>
         )}
         <div className="stats-grid" style={{ marginBottom: '24px' }}>
           <div className="stat-card purple">
-            <div className="stat-icon purple">📈</div>
             <div className="stat-info">
               <h3>{formatCurrency(totalGanho)}</h3>
               <p>{totalGanho >= 0 ? 'Ganho apurado no ano' : 'Perda apurada no ano'}</p>

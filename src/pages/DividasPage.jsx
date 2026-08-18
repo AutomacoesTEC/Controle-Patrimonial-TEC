@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency } from '../utils/formatters';
+import Modal from '../components/Modal';
 
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
@@ -71,8 +72,8 @@ export default function DividasPage() {
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor_pago)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
-                      <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(d)}>✏️ Editar</button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(d)}>🗑️ Excluir</button>
+                      <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(d)}>Editar</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(d)}>Excluir</button>
                     </div>
                   </td>
                 </tr>
@@ -92,9 +93,7 @@ export default function DividasPage() {
           </table>
         </div>
       </div>
-      {modalOpen && (
-        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
@@ -108,11 +107,9 @@ export default function DividasPage() {
                   <div className="form-group"><label>Valor Pago no Ano</label><input className="form-control" type="number" step="0.01" value={form.valor_pago} onChange={e => upd('valor_pago', e.target.value)} /></div>
                 </div>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

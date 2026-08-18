@@ -34,13 +34,12 @@ export default function HistoricoPage() {
       <div className="page-header">
         <div className="page-header-left"><h2>Histórico de Declarações</h2><p>Acesse dados de anos anteriores</p></div>
         <div className="page-header-actions">
-          <button className="btn btn-primary" onClick={handleSaveYear}>💾 Salvar {anoCalendario} no Histórico</button>
+          <button className="btn btn-primary" onClick={handleSaveYear}>Salvar {anoCalendario} no Histórico</button>
         </div>
       </div>
       <div className="page-body animate-in">
         {anos.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: '64px' }}>🗂️</div>
             <h3>Nenhum histórico salvo</h3>
             <p>Clique em "Salvar no Histórico" para guardar os dados do ano atual</p>
           </div>
@@ -68,7 +67,7 @@ export default function HistoricoPage() {
                         title={`Excluir o ano-calendário ${ano} do histórico`}
                         onClick={(e) => handleDeleteYear(e, parseInt(ano))}
                       >
-                        🗑️
+                        Excluir
                       </button>
                     </div>
                   </div>

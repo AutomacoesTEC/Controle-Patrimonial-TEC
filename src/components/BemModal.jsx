@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency } from '../utils/formatters';
 import MovimentacaoBemForm from './MovimentacaoBemForm';
+import Modal from './Modal';
 
-export default function BemModal({ bem, onSave, onClose }) {
+export default function BemModal({ open, bem, onSave, onClose }) {
   const { state } = useData();
   const isEditing = !!bem;
   // O valor atual muda por movimentação, não pelo formulário principal —
@@ -58,8 +59,7 @@ export default function BemModal({ bem, onSave, onClose }) {
   const codigosDoGrupo = CODIGOS_POR_GRUPO[form.grupo] || [];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+    <Modal open={open} onClose={onClose} style={{ maxWidth: '800px' }}>
         <div className="modal-header">
           <h3>{bem ? 'Editar Bem' : 'Novo Bem ou Direito'}</h3>
           <button className="modal-close" onClick={onClose}>✕</button>
@@ -174,10 +174,9 @@ export default function BemModal({ bem, onSave, onClose }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">💾 Salvar</button>
+            <button type="submit" className="btn btn-primary">Salvar</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -35,7 +35,12 @@ export function DataProvider({ children }) {
     // o toast ficava preso na tela para sempre).
     const id = Date.now() + Math.random();
     dispatch({ type: 'ADD_TOAST', payload: { id, message, type } });
-    setTimeout(() => dispatch({ type: 'REMOVE_TOAST', payload: id }), 4000);
+    // Fecha em duas etapas: marca "closing" para tocar a animação de saída
+    // (150ms, ver --transition-fast em index.css) e só então tira do estado.
+    setTimeout(() => {
+      dispatch({ type: 'CLOSE_TOAST', payload: id });
+      setTimeout(() => dispatch({ type: 'REMOVE_TOAST', payload: id }), 150);
+    }, 4000);
   }, []);
 
   return (

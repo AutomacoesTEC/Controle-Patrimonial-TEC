@@ -264,6 +264,8 @@ export function reducer(state, action) {
     }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, action.payload] };
+    case 'CLOSE_TOAST':
+      return { ...state, toasts: state.toasts.map(t => t.id === action.payload ? { ...t, closing: true } : t) };
     case 'REMOVE_TOAST':
       return { ...state, toasts: state.toasts.filter(t => t.id !== action.payload) };
     default:

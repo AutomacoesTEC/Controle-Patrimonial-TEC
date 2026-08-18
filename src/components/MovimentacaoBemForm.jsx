@@ -87,7 +87,7 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
         <input className="form-control" value={movDescricao} onChange={e => setMovDescricao(e.target.value)} placeholder="Ex: venda de 1/3 do imóvel para fulano, reforma da cozinha..." />
       </div>
       <button type="button" className="btn btn-sm btn-primary" onClick={handleRegistrar}>
-        ✅ Registrar movimentação
+        Registrar movimentação
       </button>
 
       {(bem.movimentacoes || []).length > 0 && (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
+import Modal from '../components/Modal';
 
 const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '' };
 const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: new Date().toISOString().slice(0, 10), valor: '', descricao: '' };
@@ -20,7 +21,7 @@ export default function AtividadeRuralPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Atividade Rural</h2>
-          <p>Imóveis explorados, bens, receitas/despesas e resultado — ficha própria da declaração, separada de Bens e Direitos.</p>
+          <p>Imóveis explorados, bens, receitas/despesas e resultado. Ficha própria da declaração, separada de Bens e Direitos.</p>
         </div>
       </div>
       <div className="page-body animate-in">
@@ -102,8 +103,8 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast }) {
                 <td>{i.cib}</td>
                 <td>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(i)}>✏️ Editar</button>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(i)}>🗑️ Excluir</button>
+                    <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(i)}>Editar</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(i)}>Excluir</button>
                   </div>
                 </td>
               </tr>
@@ -111,9 +112,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast }) {
           </tbody>
         </table>
       </div>
-      {modalOpen && (
-        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Imóvel' : 'Novo Imóvel'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
@@ -137,11 +136,9 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast }) {
                   Código da Atividade e Condição de Exploração ficam como número livre: não temos essas duas tabelas conferidas em fonte oficial ainda, então preencha com o código que você já usa na declaração.
                 </p>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }
@@ -192,8 +189,8 @@ function BensRuraisSection({ bensRurais, dispatch, addToast }) {
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_atual)}</td>
                 <td>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button className="btn btn-sm btn-secondary" onClick={() => { setEditingBem(bem); setModalOpen(true); }}>✏️ Editar</button>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(bem)}>🗑️ Excluir</button>
+                    <button className="btn btn-sm btn-secondary" onClick={() => { setEditingBem(bem); setModalOpen(true); }}>Editar</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(bem)}>Excluir</button>
                   </div>
                 </td>
               </tr>
@@ -201,9 +198,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast }) {
           </tbody>
         </table>
       </div>
-      {modalOpen && (
-        <BemRuralModal bem={editingBem} onSave={handleSave} onClose={() => { setModalOpen(false); setEditingBem(null); }} />
-      )}
+      <BemRuralModal open={modalOpen} bem={editingBem} onSave={handleSave} onClose={() => { setModalOpen(false); setEditingBem(null); }} />
     </>
   );
 }
@@ -245,15 +240,12 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
     <>
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card blue">
-          <div className="stat-icon blue">🌾</div>
           <div className="stat-info"><h3>{formatCurrency(receitaTotal)}</h3><p>Receita Bruta Total</p></div>
         </div>
         <div className="stat-card orange">
-          <div className="stat-icon orange">💸</div>
           <div className="stat-info"><h3>{formatCurrency(despesaTotal)}</h3><p>Despesa de Custeio/Investimento</p></div>
         </div>
         <div className="stat-card green">
-          <div className="stat-icon green">🌱</div>
           <div className="stat-info">
             <h3>{formatCurrency(resultadoDoAno)}</h3>
             <p>Resultado do Ano</p>
@@ -278,8 +270,8 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
                 <td>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(l)}>✏️ Editar</button>
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(l)}>🗑️ Excluir</button>
+                    <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(l)}>Editar</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(l)}>Excluir</button>
                   </div>
                 </td>
               </tr>
@@ -287,9 +279,7 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
           </tbody>
         </table>
       </div>
-      {modalOpen && (
-        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Lançamento' : 'Novo Lançamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
@@ -305,11 +295,9 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
                 </div>
                 <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: venda de milho, adubo, combustível..." /></div>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

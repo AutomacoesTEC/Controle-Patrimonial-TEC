@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
+import Modal from '../components/Modal';
 
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '' };
 
@@ -70,8 +71,8 @@ export default function PagamentosPage() {
                   <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{(p.descricao || '').substring(0, 40)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
-                      <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(p)}>✏️ Editar</button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p)}>🗑️ Excluir</button>
+                      <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(p)}>Editar</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p)}>Excluir</button>
                     </div>
                   </td>
                 </tr>
@@ -91,9 +92,7 @@ export default function PagamentosPage() {
           </table>
         </div>
       </div>
-      {modalOpen && (
-        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Pagamento' : 'Novo Pagamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
@@ -113,11 +112,9 @@ export default function PagamentosPage() {
                 </div>
                 <div className="form-group"><label>Descrição</label><textarea className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} /></div>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 }

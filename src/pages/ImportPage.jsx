@@ -11,9 +11,10 @@ export default function ImportPage() {
   const [importing, setImporting] = useState(false);
   const [importType, setImportType] = useState(null);
   const [importLog, setImportLog] = useState([]);
+  const [progress, setProgress] = useState(null); // { current, total } | null
   const fileRef = useRef();
 
-  const log = (msg) => setImportLog(prev => [...prev, msg]);
+  const log = (msg, level = 'info') => setImportLog(prev => [...prev, { msg, level }]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
@@ -21,23 +22,25 @@ export default function ImportPage() {
 
     setImporting(true);
     setImportLog([]);
+    setProgress(null);
 
     try {
       let result;
       const ext = file.name.toLowerCase().split('.').pop();
 
       if (ext === 'dbk' || ext === 'dec') {
-        log(`📄 Arquivo selecionado: ${file.name} (${ext.toUpperCase()})`);
+        log(`Arquivo selecionado: ${file.name} (${ext.toUpperCase()})`);
         const text = await file.text();
         result = await parseDBK(text, log);
       } else if (ext === 'pdf') {
-        log(`📄 Arquivo selecionado: ${file.name} (PDF)`);
-        log('📂 Lendo arquivo PDF...');
+        log(`Arquivo selecionado: ${file.name} (PDF)`);
+        log('Lendo arquivo PDF...');
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        result = await parsePDF(pdf, log);
+        setProgress({ current: 0, total: pdf.numPages });
+        result = await parsePDF(pdf, log, (current, total) => setProgress({ current, total }));
       } else {
-        log('❌ Formato não suportado. Use .PDF ou .DBK');
+        log('Formato não suportado. Use .PDF ou .DBK', 'error');
         setImporting(false);
         return;
       }
@@ -67,7 +70,7 @@ export default function ImportPage() {
         }
 
         if (!prosseguir) {
-          log('❌ Importação cancelada. Dados existentes preservados.');
+          log('Importação cancelada. Dados existentes preservados.', 'error');
           setImporting(false);
           return;
         }
@@ -81,16 +84,17 @@ export default function ImportPage() {
           pagamentos: result.pagamentos,
         }});
         log('');
-        log('✅ Importação concluída com sucesso!');
-        log('💡 Revise os dados importados nas abas de cadastro.');
+        log('Importação concluída com sucesso.', 'success');
+        log('Revise os dados importados nas abas de cadastro.');
         addToast('Declaração importada com sucesso!', 'success');
       }
     } catch (err) {
-      log(`❌ Erro na importação: ${err.message}`);
+      log(`Erro na importação: ${err.message}`, 'error');
       addToast('Erro na importação: ' + err.message, 'error');
     }
 
     setImporting(false);
+    setProgress(null);
   };
 
   return (
@@ -107,7 +111,6 @@ export default function ImportPage() {
             className={`import-zone ${importType === 'pdf' ? 'active' : ''}`}
             onClick={() => { setImportType('pdf'); fileRef.current?.click(); }}
           >
-            <div style={{ fontSize: '48px' }}>📄</div>
             <h3>Importar PDF da Declaração</h3>
             <p>Arquivo .PDF gerado pelo programa IRPF (imagem da declaração)</p>
           </div>
@@ -115,7 +118,6 @@ export default function ImportPage() {
             className={`import-zone ${importType === 'dbk' ? 'active' : ''}`}
             onClick={() => { setImportType('dbk'); fileRef.current?.click(); }}
           >
-            <div style={{ fontSize: '48px' }}>💾</div>
             <h3>Importar Arquivo Eletrônico</h3>
             <p>Arquivo .DBK ou .DEC gerado pelo programa IRPF (cópia de segurança)</p>
           </div>
@@ -133,8 +135,21 @@ export default function ImportPage() {
           <div className="card">
             <div className="card-header">
               <h3 className="card-title">Log de Importação</h3>
-              {importing && <span className="badge badge-blue">Processando...</span>}
+              {importing && !progress && <span className="badge badge-blue">Processando...</span>}
+              {importing && progress && (
+                <span className="badge badge-blue">Página {progress.current} de {progress.total}</span>
+              )}
             </div>
+            {importing && progress && (
+              <div style={{ height: '4px', borderRadius: '2px', background: 'var(--bg-input)', overflow: 'hidden', marginBottom: '12px' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.round((progress.current / progress.total) * 100)}%`,
+                  background: 'var(--gradient-primary)',
+                  transition: 'width var(--transition-normal)',
+                }} />
+              </div>
+            )}
             <div style={{
               background: 'var(--bg-input)',
               borderRadius: 'var(--radius-sm)',
@@ -145,9 +160,9 @@ export default function ImportPage() {
               overflowY: 'auto',
               lineHeight: '1.8',
             }}>
-              {importLog.map((line, i) => (
-                <div key={i} style={{ color: line.startsWith('❌') ? 'var(--accent-danger)' : line.startsWith('✅') ? 'var(--accent-success)' : 'var(--text-secondary)' }}>
-                  {line}
+              {importLog.map((entry, i) => (
+                <div key={i} style={{ color: entry.level === 'error' ? 'var(--accent-danger)' : entry.level === 'success' ? 'var(--accent-success)' : entry.level === 'warning' ? 'var(--accent-warning, #f59e0b)' : 'var(--text-secondary)' }}>
+                  {entry.msg}
                 </div>
               ))}
             </div>

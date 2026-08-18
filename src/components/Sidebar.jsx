@@ -2,21 +2,21 @@ import { useData } from '../store/DataContext';
 import { hasWorkingData as hasWorkingDataCheck } from '../store/reducer';
 
 const navItems = [
-  { id: 'importar', label: 'Importar Declaração', icon: '📥', section: 'VISÃO GERAL' },
-  { id: 'dashboard', label: 'Dashboard', icon: '📊', section: 'VISÃO GERAL' },
-  { id: 'bens', label: 'Bens e Direitos', icon: '🏠', section: 'CADASTROS' },
-  { id: 'dividas', label: 'Dívidas e Ônus', icon: '💳', section: 'CADASTROS' },
-  { id: 'rendimentos', label: 'Rendimentos', icon: '💰', section: 'CADASTROS' },
-  { id: 'pagamentos', label: 'Pagamentos', icon: '🧾', section: 'CADASTROS' },
-  { id: 'pagamentosDiversos', label: 'Despesas Gerais', icon: '🧮', section: 'CADASTROS' },
-  { id: 'atividadeRural', label: 'Atividade Rural', icon: '🌾', section: 'ATIVIDADE RURAL' },
-  { id: 'relatorio', label: 'Relatório IRPF', icon: '📋', section: 'RELATÓRIOS' },
-  { id: 'ganhosCapital', label: 'Ganhos de Capital', icon: '📈', section: 'RELATÓRIOS' },
-  { id: 'historico', label: 'Histórico', icon: '🗂️', section: 'RELATÓRIOS' },
+  { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
+  { id: 'dashboard', label: 'Dashboard', short: 'DB', section: 'VISÃO GERAL' },
+  { id: 'bens', label: 'Bens e Direitos', short: 'BE', section: 'CADASTROS' },
+  { id: 'dividas', label: 'Dívidas e Ônus', short: 'DV', section: 'CADASTROS' },
+  { id: 'rendimentos', label: 'Rendimentos', short: 'RE', section: 'CADASTROS' },
+  { id: 'pagamentos', label: 'Pagamentos', short: 'PG', section: 'CADASTROS' },
+  { id: 'pagamentosDiversos', label: 'Despesas Gerais', short: 'DG', section: 'CADASTROS' },
+  { id: 'atividadeRural', label: 'Atividade Rural', short: 'AR', section: 'ATIVIDADE RURAL' },
+  { id: 'relatorio', label: 'Relatório IRPF', short: 'RL', section: 'RELATÓRIOS' },
+  { id: 'ganhosCapital', label: 'Ganhos de Capital', short: 'GC', section: 'RELATÓRIOS' },
+  { id: 'historico', label: 'Histórico', short: 'HS', section: 'RELATÓRIOS' },
 ];
 
 export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed }) {
-  const { state, dispatch, saveToStorage, addToast } = useData();
+  const { state, dispatch, addToast } = useData();
   let lastSection = '';
 
   const anosComDados = [...new Set([...Object.keys(state.historico).map(Number), state.anoCalendario])].sort((a, b) => a - b);
@@ -67,8 +67,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
                 onClick={() => onNavigate(item.id)}
                 title={collapsed ? item.label : undefined}
               >
-                <span style={{ fontSize: '16px' }}>{item.icon}</span>
-                {!collapsed && item.label}
+                {collapsed ? item.short : item.label}
               </button>
             </div>
           );
@@ -78,13 +77,11 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       <div className="sidebar-footer">
         {collapsed ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-            <button className="btn btn-sm btn-secondary" title={`Avançar para ${proximoAno}`} onClick={avancarAno}>➡️</button>
-            <button className="btn btn-sm btn-secondary" title="Salvar Dados" onClick={saveToStorage}>💾</button>
+            <button className="btn btn-sm btn-secondary" title={`Avançar para ${proximoAno}`} onClick={avancarAno}>→</button>
           </div>
         ) : (
           <>
             <div className="year-selector">
-              <span style={{ fontSize: '14px' }}>📅</span>
               <select
                 value={state.anoCalendario}
                 onChange={e => {
@@ -109,11 +106,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
               title={`Fecha ${state.anoCalendario} e inicia ${proximoAno} trazendo o saldo final como situação inicial`}
               onClick={avancarAno}
             >
-              ➡️ Avançar para {proximoAno}
-            </button>
-            <button className="btn btn-sm btn-secondary" style={{ width: '100%', marginTop: '8px', justifyContent: 'center' }}
-              onClick={saveToStorage}>
-              💾 Salvar Dados
+              Avançar para {proximoAno}
             </button>
           </>
         )}

@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { DataProvider, useData } from './store/DataContext';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import ImportPage from './pages/ImportPage';
-import BensPage from './pages/BensPage';
-import DividasPage from './pages/DividasPage';
-import RendimentosPage from './pages/RendimentosPage';
-import PagamentosPage from './pages/PagamentosPage';
-import PagamentosDiversosPage from './pages/PagamentosDiversosPage';
-import AtividadeRuralPage from './pages/AtividadeRuralPage';
-import GanhosCapitalPage from './pages/GanhosCapitalPage';
-import RelatorioPage from './pages/RelatorioPage';
-import HistoricoPage from './pages/HistoricoPage';
+import PageSkeleton from './components/PageSkeleton';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ImportPage = lazy(() => import('./pages/ImportPage'));
+const BensPage = lazy(() => import('./pages/BensPage'));
+const DividasPage = lazy(() => import('./pages/DividasPage'));
+const RendimentosPage = lazy(() => import('./pages/RendimentosPage'));
+const PagamentosPage = lazy(() => import('./pages/PagamentosPage'));
+const PagamentosDiversosPage = lazy(() => import('./pages/PagamentosDiversosPage'));
+const AtividadeRuralPage = lazy(() => import('./pages/AtividadeRuralPage'));
+const GanhosCapitalPage = lazy(() => import('./pages/GanhosCapitalPage'));
+const RelatorioPage = lazy(() => import('./pages/RelatorioPage'));
+const HistoricoPage = lazy(() => import('./pages/HistoricoPage'));
 
 function AppContent() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -49,14 +51,16 @@ function AppContent() {
     <div className="app-layout">
       <Sidebar activeView={activeView} onNavigate={setActiveView} collapsed={sidebarCollapsed} onToggleCollapsed={toggleSidebar} />
       <main className="main-content">
-        {renderPage()}
+        <Suspense fallback={<PageSkeleton />}>
+          {renderPage()}
+        </Suspense>
       </main>
       {/* Toasts */}
       {state.toasts.length > 0 && (
         <div className="toast-container">
           {state.toasts.map(t => (
-            <div key={t.id} className={`toast toast-${t.type}`}>
-              {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : 'ℹ️'} {t.message}
+            <div key={t.id} className={`toast toast-${t.type}${t.closing ? ' closing' : ''}`}>
+              {t.message}
             </div>
           ))}
         </div>

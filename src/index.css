@@ -30,9 +30,13 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms cubic-bezier(0.4,0,0.2,1);
+  /* Curva própria em vez de "ease"/"ease-in-out" do navegador (que não têm
+     força nenhuma): saída rápida, chegada suave, sem oscilar — o tipo de
+     curva que serve ferramenta de uso frequente, não site de vitrine. */
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-snappy);
+  --transition-normal: 220ms var(--ease-snappy);
+  --transition-slow: 320ms var(--ease-snappy);
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -42,6 +46,18 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:10px}
 ::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
+
+/* Respeita quem pede menos movimento: acaba com a duração das animações
+   sem quebrar layout (o estado final continua sendo aplicado). Não é
+   opcional — cobre toda animação/transição da folha de estilo inteira. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 .app-layout{display:flex;height:100vh;width:100vw;overflow:hidden}
 .sidebar{width:260px;min-width:260px;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column;z-index:10;position:relative;transition:width var(--transition-normal),min-width var(--transition-normal)}
@@ -115,6 +131,9 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .btn-danger:hover{background:#dc2626;border-color:#dc2626;box-shadow:0 2px 8px rgba(239,68,68,0.5)}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn-lg{padding:12px 24px;font-size:15px}
+/* Depois de todas as variantes de :hover (mesma especificidade, ordem
+   decide) para o toque tátil do clique não sumir sob o translateY do hover. */
+.btn:active{transform:scale(0.97)}
 
 .table-container{overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--border-color)}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -145,7 +164,9 @@ textarea.form-control{resize:vertical;min-height:80px}
 .tab.active{background:var(--accent-primary);color:white;box-shadow:var(--shadow-sm)}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn var(--transition-fast)}
+.modal-overlay.closing{animation:fadeOut var(--transition-fast) forwards}
 .modal{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-xl);width:90%;max-width:700px;max-height:85vh;overflow-y:auto;animation:slideUp var(--transition-slow)}
+.modal-overlay.closing .modal{animation:slideDown var(--transition-fast) forwards}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-color)}
 .modal-header h3{font-size:18px;font-weight:700}
 .modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:var(--bg-card);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast)}
@@ -162,9 +183,15 @@ textarea.form-control{resize:vertical;min-height:80px}
 
 .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 @keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
-.animate-in{animation:slideUp 0.4s ease-out}
+@keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(12px)}}
+.animate-in{animation:slideUp 0.4s var(--ease-snappy)}
+
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.skeleton{border-radius:var(--radius-sm);background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-card-hover) 50%,var(--bg-card) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
 
 .empty-state{text-align:center;padding:60px 20px}
 .empty-state svg{width:64px;height:64px;color:var(--text-muted);margin-bottom:16px}
@@ -184,7 +211,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 .currency.negative{color:var(--accent-danger)}
 
 .toast-container{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;animation:slideInLeft var(--transition-slow);box-shadow:var(--shadow-lg)}
+.toast{padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;animation:slideInLeft var(--transition-normal);box-shadow:var(--shadow-lg)}
+.toast.closing{animation:slideOutRight var(--transition-fast) forwards}
 .toast-success{background:rgba(16,185,129,0.9);color:white}
 .toast-error{background:rgba(239,68,68,0.9);color:white}
 .toast-info{background:rgba(59,130,246,0.9);color:white}

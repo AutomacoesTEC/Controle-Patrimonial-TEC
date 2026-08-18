@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency } from '../utils/formatters';
 import MovimentacaoBemForm from './MovimentacaoBemForm';
+import Modal from './Modal';
 
 // Mesma lógica do BemModal (Bens e Direitos), mas para a lista separada
 // de Bens da Atividade Rural: não tem grupo/imóvel/veículo (a declaração
 // real só pede um código numérico + discriminação pra esses bens), e a
 // movimentação usa a coleção `bensRurais` em vez de `bens`.
-export default function BemRuralModal({ bem, onSave, onClose }) {
+export default function BemRuralModal({ open, bem, onSave, onClose }) {
   const { state } = useData();
   const isEditing = !!bem;
   const liveBem = isEditing ? (state.bensRurais.find(b => b.id === bem.id) || bem) : null;
@@ -31,8 +32,7 @@ export default function BemRuralModal({ bem, onSave, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+    <Modal open={open} onClose={onClose} style={{ maxWidth: '700px' }}>
         <div className="modal-header">
           <h3>{bem ? 'Editar Bem da Atividade Rural' : 'Novo Bem da Atividade Rural'}</h3>
           <button className="modal-close" onClick={onClose}>✕</button>
@@ -78,10 +78,9 @@ export default function BemRuralModal({ bem, onSave, onClose }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn btn-primary">💾 Salvar</button>
+            <button type="submit" className="btn btn-primary">Salvar</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

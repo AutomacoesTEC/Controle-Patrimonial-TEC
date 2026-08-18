@@ -60,7 +60,7 @@ export default function BensPage() {
         </div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={() => exportBensToXlsx(filtered, anoCalendario)}>
-            📊 Exportar .xlsx
+            Exportar .xlsx
           </button>
           <button className="btn btn-primary" onClick={() => { setEditingBem(null); setModalOpen(true); }}>
             ＋ Novo Bem
@@ -120,8 +120,8 @@ export default function BensPage() {
                     <td style={{ textAlign: 'right' }} className={`currency ${vari >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(vari)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px' }}>
-                        <button className="btn btn-sm btn-secondary" onClick={() => { setEditingBem(bem); setModalOpen(true); }}>✏️ Editar</button>
-                        <button className="btn btn-sm btn-danger" title="Excluir este bem por completo" onClick={() => handleDelete(bem)}>🗑️ Excluir</button>
+                        <button className="btn btn-sm btn-secondary" onClick={() => { setEditingBem(bem); setModalOpen(true); }}>Editar</button>
+                        <button className="btn btn-sm btn-danger" title="Excluir este bem por completo" onClick={() => handleDelete(bem)}>Excluir</button>
                       </div>
                     </td>
                   </tr>
@@ -143,13 +143,12 @@ export default function BensPage() {
         </div>
       </div>
 
-      {modalOpen && (
-        <BemModal
-          bem={editingBem}
-          onSave={handleSave}
-          onClose={() => { setModalOpen(false); setEditingBem(null); }}
-        />
-      )}
+      <BemModal
+        open={modalOpen}
+        bem={editingBem}
+        onSave={handleSave}
+        onClose={() => { setModalOpen(false); setEditingBem(null); }}
+      />
     </>
   );
 }

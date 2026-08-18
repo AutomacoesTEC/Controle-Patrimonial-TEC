@@ -24,7 +24,7 @@ const parseValorN13 = (str) => {
 };
 
 export async function parseDBK(text, log = noop) {
-  log('📄 Lendo arquivo .DBK...');
+  log('Lendo arquivo .DBK...');
   const lines = text.split(/\r\n|\r|\n/);
 
   const contribuinte = { cpf: '', nome: '' };
@@ -155,19 +155,19 @@ export async function parseDBK(text, log = noop) {
   }
 
   if (contribuinte.cpf) {
-    log(`✅ Contribuinte: ${contribuinte.nome} - CPF: ${contribuinte.cpf}`);
+    log(`Contribuinte: ${contribuinte.nome}, CPF: ${contribuinte.cpf}`, 'success');
   } else {
-    log('⚠️ Não foi possível identificar o contribuinte (registro 16 não encontrado).');
+    log('Não foi possível identificar o contribuinte (registro 16 não encontrado).', 'warning');
   }
   if (anoCalendario) {
-    log(`📅 Ano-calendário desta declaração: ${anoCalendario}`);
+    log(`Ano-calendário desta declaração: ${anoCalendario}`);
   } else {
-    log('⚠️ Não foi possível identificar o ano-calendário (registro de cabeçalho "IR" não encontrado). Mantendo o ano selecionado na tela.');
+    log('Não foi possível identificar o ano-calendário (registro de cabeçalho "IR" não encontrado). Mantendo o ano selecionado na tela.', 'warning');
   }
-  log(`🔍 Identificados ${bens.length} bens e direitos`);
-  log(`🔍 Identificadas ${dividas.length} dívidas e ônus reais`);
-  log(`🔍 Identificados ${rendimentos.length} rendimentos`);
-  log(`🔍 Identificados ${pagamentos.length} pagamentos efetuados`);
+  log(`Identificados ${bens.length} bens e direitos`);
+  log(`Identificadas ${dividas.length} dívidas e ônus reais`);
+  log(`Identificados ${rendimentos.length} rendimentos`);
+  log(`Identificados ${pagamentos.length} pagamentos efetuados`);
 
   return { contribuinte, bens, dividas, rendimentos, pagamentos, anoCalendario };
 }
@@ -237,8 +237,8 @@ const isBoilerplateRow = (row) =>
   row.cells.some(c => BOILERPLATE.has(c.text.trim()) || /^(ANO-CALENDÁRIO|EXERCÍCIO) \d{4}$/.test(c.text.trim())) ||
   /^Página \d+ de \d+$/.test(row.cells.map(c => c.text).join(' ').trim());
 
-export async function parsePDF(pdf, log = noop) {
-  log(`✅ PDF aberto, ${pdf.numPages} páginas`);
+export async function parsePDF(pdf, log = noop, onProgress = noop) {
+  log(`PDF aberto, ${pdf.numPages} páginas`, 'success');
 
   const contribuinte = { cpf: '', nome: '' };
   const bens = [];
@@ -269,6 +269,7 @@ export async function parsePDF(pdf, log = noop) {
       .map(it => ({ text: it.str, x: it.transform[4], y: it.transform[5] }))
       .filter(it => it.text.trim() !== '');
     const rows = buildRows(items);
+    onProgress(pageNum, pdf.numPages);
 
     for (let ri = 0; ri < rows.length; ri++) {
       const row = rows[ri];
@@ -451,19 +452,19 @@ export async function parsePDF(pdf, log = noop) {
   if (currentPag) pagamentos.push(currentPag);
 
   if (contribuinte.cpf) {
-    log(`✅ Contribuinte: ${contribuinte.nome}, CPF: ${contribuinte.cpf}`);
+    log(`Contribuinte: ${contribuinte.nome}, CPF: ${contribuinte.cpf}`, 'success');
   } else {
-    log('⚠️ Não foi possível identificar o contribuinte.');
+    log('Não foi possível identificar o contribuinte.', 'warning');
   }
   if (anoCalendario) {
-    log(`📅 Ano-calendário desta declaração: ${anoCalendario}`);
+    log(`Ano-calendário desta declaração: ${anoCalendario}`);
   } else {
-    log('⚠️ Não foi possível identificar o ano-calendário no PDF. Mantendo o ano selecionado na tela.');
+    log('Não foi possível identificar o ano-calendário no PDF. Mantendo o ano selecionado na tela.', 'warning');
   }
-  log(`🔍 Identificados ${bens.length} bens e direitos`);
-  log(`🔍 Identificadas ${dividas.length} dívidas e ônus reais`);
-  log(`🔍 Identificados ${pagamentos.length} pagamentos efetuados`);
-  log('ℹ️ Rendimentos e bens/dívidas do Demonstrativo de Atividade Rural não são lidos do PDF. Se precisar deles, importe pelo arquivo .DBK.');
+  log(`Identificados ${bens.length} bens e direitos`);
+  log(`Identificadas ${dividas.length} dívidas e ônus reais`);
+  log(`Identificados ${pagamentos.length} pagamentos efetuados`);
+  log('Rendimentos e bens/dívidas do Demonstrativo de Atividade Rural não são lidos do PDF. Se precisar deles, importe pelo arquivo .DBK.');
 
   return { contribuinte, bens, dividas, rendimentos: [], pagamentos, anoCalendario };
 }

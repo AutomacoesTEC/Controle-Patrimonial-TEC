@@ -37,7 +37,7 @@ export default function RelatorioPage() {
           <p>Dados do ano-calendário {anoCalendario} prontos para declaração em {anoCalendario + 1}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-success" onClick={handleExport}>📊 Exportar Relatório .xlsx</button>
+          <button className="btn btn-success" onClick={handleExport}>Exportar Relatório .xlsx</button>
         </div>
       </div>
       <div className="page-body animate-in">

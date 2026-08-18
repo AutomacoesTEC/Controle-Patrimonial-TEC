@@ -46,7 +46,19 @@ export default function Dashboard() {
     return { ano: a, data: `31/12/${a}`, bens: t.totalBens, dividas: t.totalDividas, liquido: t.liquido };
   });
 
-  const totIni = totaisAno(ini);
+  // Com um único ano selecionado (ini === fim), comparar totaisAno(ini) com
+  // totaisAno(fim) daria sempre variação zero (mesma situacao_atual dos dois
+  // lados). Nesse caso o período natural é a abertura do próprio ano
+  // (situacao_anterior) contra o fechamento (situacao_atual) — dado que já
+  // existe por bem, sem precisar de um segundo ano arquivado.
+  const totaisAberturaAno = (ano) => {
+    const { bens, dividas } = getDadosAno(ano);
+    const totalBens = bens.reduce((s, b) => s + (parseFloat(b.situacao_anterior) || 0), 0);
+    const totalDividas = dividas.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
+    return { totalBens, totalDividas, liquido: totalBens - totalDividas, qtdBens: bens.length, qtdDividas: dividas.length };
+  };
+
+  const totIni = ini === fim ? totaisAberturaAno(ini) : totaisAno(ini);
   const totFim = totaisAno(fim);
   const variacaoPeriodo = totFim.liquido - totIni.liquido;
   const varPctPeriodo = totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : 0;
@@ -92,7 +104,7 @@ export default function Dashboard() {
         </div>
         <div className="page-header-actions">
           <button className="btn btn-success" onClick={handleExport}>
-            📊 Exportar .xlsx
+            Exportar .xlsx
           </button>
         </div>
       </div>
@@ -112,19 +124,11 @@ export default function Dashboard() {
                 {anosDisponiveis.map(a => <option key={a} value={a}>31/12/{a}</option>)}
               </select>
             </div>
-            <div className="form-group">
-              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
-                {anosDisponiveis.length <= 1
-                  ? 'Só há dado salvo para um ano ainda. Importe outra declaração ou avance de ano para poder comparar.'
-                  : `Comparando 31/12/${ini} com 31/12/${fim}.`}
-              </p>
-            </div>
           </div>
         </div>
 
         <div className="stats-grid">
           <div className="stat-card blue">
-            <div className="stat-icon blue">🏦</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.totalBens)}</h3>
               <p>Bens e Direitos</p>
@@ -132,7 +136,6 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="stat-card orange">
-            <div className="stat-icon orange">💳</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.totalDividas)}</h3>
               <p>Dívidas</p>
@@ -140,14 +143,12 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="stat-card green">
-            <div className="stat-icon green">💎</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.liquido)}</h3>
               <p>Patrimônio Líquido</p>
             </div>
           </div>
           <div className="stat-card purple">
-            <div className="stat-icon purple">📈</div>
             <div className="stat-info">
               <h3>{formatCurrency(variacaoPeriodo)}</h3>
               <p>Variação no período</p>
@@ -157,10 +158,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '-16px', marginBottom: '20px' }}>
-          Valores em 31/12/{fim}. Variação calculada de 31/12/{ini} a 31/12/{fim}.
-        </p>
-
         <div className="charts-grid">
           <div className="card">
             <div className="card-header">
