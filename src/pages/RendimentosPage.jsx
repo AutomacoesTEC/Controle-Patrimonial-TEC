@@ -1,16 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO } from '../utils/formatters';
+import { formatCurrency, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
 
-const TIPOS_CADASTRO = {
-  tributavel_pj: 'Tributável recebido de pessoa jurídica',
-  isento_09: 'Isento, código 09 (lucros e dividendos)',
-  isento_10: 'Isento, código 10',
-  isento_12: 'Isento, código 12 (poupança/LCI/LCA/CRI/CRA)',
-  exclusivo_01: 'Tributação exclusiva, código 01 (13º salário)',
-  exclusivo_06: 'Tributação exclusiva, código 06 (aplicações financeiras)',
-  exclusivo_10: 'Tributação exclusiva, código 10 (juros sobre capital próprio)',
-};
+// Lista completa (26 códigos isentos + 14 de tributação exclusiva),
+// conferida contra o manual oficial do programa IRPF2026 — ver
+// RENDIMENTO_TIPOS_CONHECIDOS em formatters.js. Agrupada por categoria
+// para o <select> não virar uma lista de 40 itens sem organização.
+const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS).reduce((acc, [tipo, label]) => {
+  const cat = categoriaRendimento(tipo);
+  (acc[cat] ||= []).push({ tipo, label });
+  return acc;
+}, {});
 
 const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '' };
 
@@ -139,7 +139,15 @@ export default function RendimentosPage() {
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
-                      {Object.entries(TIPOS_CADASTRO).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      {Object.entries(CATEGORIAS_RENDIMENTO).map(([cat, meta]) => {
+                        const opcoes = TIPOS_CADASTRO_POR_CATEGORIA[cat];
+                        if (!opcoes || opcoes.length === 0) return null;
+                        return (
+                          <optgroup key={cat} label={meta.label}>
+                            {opcoes.map(({ tipo, label }) => <option key={tipo} value={tipo}>{label}</option>)}
+                          </optgroup>
+                        );
+                      })}
                     </select>
                   </div>
                   <div className="form-group"><label>Beneficiário</label>

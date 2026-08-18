@@ -42,7 +42,7 @@ export function formatDate(dateStr) {
 // manual. Qualquer código isento/exclusivo fora desta tabela (o manual não
 // muda todo ano, mas pode ganhar código novo) cai no fallback abaixo, que
 // mostra o número em vez de esconder ou inventar um rótulo.
-const RENDIMENTO_TIPOS_CONHECIDOS = {
+export const RENDIMENTO_TIPOS_CONHECIDOS = {
   tributavel_pj: 'Tributável recebido de pessoa jurídica',
   isento_01: 'Isento: bolsa de estudo/pesquisa (doação, exceto médico-residente)',
   isento_02: 'Isento: bolsa de estudo/pesquisa (doação a médico-residente)',
@@ -113,6 +113,48 @@ export const CATEGORIAS_RENDIMENTO = {
   exclusivo: { label: 'Tributação exclusiva/definitiva', cor: 'purple' },
   outro: { label: 'Outros', cor: 'orange' },
 };
+
+// Tabela Códigos de Pagamentos, conferida em 17/08/2026 contra o manual
+// oficial do programa IRPF2026 ("AjudaIRPF-new.pdf", ficha "Pagamentos
+// Efetuados"). Nomes truncados para caber no <select>.
+export const CODIGOS_PAGAMENTO = [
+  { codigo: '01', nome: 'Despesa com instrução no Brasil' },
+  { codigo: '02', nome: 'Despesa com instrução no exterior' },
+  { codigo: '09', nome: 'Fonoaudiólogos no Brasil' },
+  { codigo: '10', nome: 'Médicos no Brasil' },
+  { codigo: '11', nome: 'Dentistas no Brasil' },
+  { codigo: '12', nome: 'Psicólogos no Brasil' },
+  { codigo: '13', nome: 'Fisioterapeutas no Brasil' },
+  { codigo: '14', nome: 'Terapeutas ocupacionais no Brasil' },
+  { codigo: '15', nome: 'Médicos no exterior' },
+  { codigo: '16', nome: 'Dentistas no exterior' },
+  { codigo: '17', nome: 'Psicólogos no exterior' },
+  { codigo: '18', nome: 'Fisioterapeutas no exterior' },
+  { codigo: '19', nome: 'Terapeutas ocupacionais no exterior' },
+  { codigo: '20', nome: 'Fonoaudiólogos no exterior' },
+  { codigo: '21', nome: 'Hospitais, clínicas e laboratórios no Brasil' },
+  { codigo: '22', nome: 'Hospitais, clínicas e laboratórios no exterior' },
+  { codigo: '26', nome: 'Planos de saúde no Brasil' },
+  { codigo: '30', nome: 'Pensão alimentícia judicial, alimentando residente no Brasil' },
+  { codigo: '31', nome: 'Pensão alimentícia judicial, alimentando não residente no Brasil' },
+  { codigo: '33', nome: 'Pensão alimentícia por escritura pública, residente no Brasil' },
+  { codigo: '34', nome: 'Pensão alimentícia por escritura pública, não residente no Brasil' },
+  { codigo: '36', nome: 'Previdência complementar (inclusive Fapi)' },
+  { codigo: '37', nome: 'Entidade de previdência complementar (§15 art. 40 CF)' },
+  { codigo: '60', nome: 'Advogados, ação judicial exceto trabalhista' },
+  { codigo: '61', nome: 'Advogados, ação judicial trabalhista' },
+  { codigo: '62', nome: 'Advogados, demais honorários' },
+  { codigo: '66', nome: 'Engenheiros, arquitetos e demais profissionais liberais' },
+  { codigo: '70', nome: 'Aluguéis de imóveis' },
+  { codigo: '71', nome: 'Administrador de imóvel' },
+  { codigo: '72', nome: 'Corretor de imóveis' },
+  { codigo: '76', nome: 'Arrendamento rural' },
+  { codigo: '99', nome: 'Outros' },
+];
+
+export function describePagamentoCodigo(codigo) {
+  return CODIGOS_PAGAMENTO.find(c => c.codigo === codigo)?.nome || '';
+}
 
 // Tipo de movimentação de um bem: como a situação atual dele muda quando a
 // usuária registra uma compra, venda, benfeitoria etc (ver BemModal e

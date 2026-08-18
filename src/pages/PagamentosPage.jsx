@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
 
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '' };
 
@@ -57,7 +57,12 @@ export default function PagamentosPage() {
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum pagamento cadastrado.</td></tr>
               ) : pagamentos.map(p => (
                 <tr key={p.id}>
-                  <td><span className="badge badge-orange">{p.codigo}</span></td>
+                  <td>
+                    <span className="badge badge-orange">{p.codigo}</span>
+                    {describePagamentoCodigo(p.codigo) && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{describePagamentoCodigo(p.codigo)}</div>
+                    )}
+                  </td>
                   <td>{(p.nome_beneficiario || '').substring(0, 40)}</td>
                   <td>{p.cpf_cnpj}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor_pago)}</td>
@@ -93,7 +98,12 @@ export default function PagamentosPage() {
             <form onSubmit={handleSave}>
               <div className="modal-body">
                 <div className="form-row">
-                  <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} placeholder="10, 21, 26, 36, 76..." /></div>
+                  <div className="form-group">
+                    <label>Código</label>
+                    <select className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)}>
+                      {CODIGOS_PAGAMENTO.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
+                    </select>
+                  </div>
                   <div className="form-group"><label>CPF/CNPJ Beneficiário</label><input className="form-control" value={form.cpf_cnpj} onChange={e => upd('cpf_cnpj', e.target.value)} /></div>
                 </div>
                 <div className="form-group"><label>Nome do Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
