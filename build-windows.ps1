@@ -17,8 +17,20 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
 Write-Host "==> 1/4 Build do frontend (Vite)" -ForegroundColor Cyan
-npm run build
-if ($LASTEXITCODE -ne 0) { throw "npm run build falhou" }
+if ($root.StartsWith('\\')) {
+    # Projeto dentro do WSL: o cmd.exe do Windows não aceita pasta UNC como
+    # diretório atual, então o npm/vite daqui não roda. O dist/ precisa ter
+    # sido gerado antes, DE DENTRO do WSL, com:  npm run build
+    if (Test-Path (Join-Path $root 'dist\index.html')) {
+        Write-Host "    Projeto no WSL (caminho UNC): usando dist/ já gerado." -ForegroundColor Yellow
+        Write-Host "    Para rebuildar o frontend, rode 'npm run build' dentro do WSL antes." -ForegroundColor Yellow
+    } else {
+        throw "dist/ não encontrado. Rode 'npm run build' DENTRO do WSL (na pasta do projeto) e rode este script de novo."
+    }
+} else {
+    npm run build
+    if ($LASTEXITCODE -ne 0) { throw "npm run build falhou" }
+}
 
 Write-Host "==> 2/4 Ambiente Python (.build-venv)" -ForegroundColor Cyan
 $venv = Join-Path $root '.build-venv'
