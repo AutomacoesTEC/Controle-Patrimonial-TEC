@@ -19,12 +19,15 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
   const { state, dispatch, addToast } = useData();
   let lastSection = '';
 
-  const anosComDados = [...new Set([...Object.keys(state.historico).map(Number), state.anoCalendario])].sort((a, b) => a - b);
-  const proximoAno = Math.max(...anosComDados) + 1;
+  // Só anos com dado real (histórico + ano em edição). Antes da 1ª
+  // importação não há ano nenhum — o seletor fica oculto e no lugar aparece
+  // o onboarding.
+  const anosComDados = [...new Set([...Object.keys(state.historico).map(Number), state.anoCalendario].filter(y => y != null))].sort((a, b) => a - b);
+  const proximoAno = anosComDados.length > 0 ? Math.max(...anosComDados) + 1 : new Date().getFullYear();
   const hasWorkingData = hasWorkingDataCheck(state);
 
   const avancarAno = () => {
-    const confirmado = !hasWorkingData || confirm(
+    const confirmado = !hasWorkingData || state.anoCalendario == null || confirm(
       `Iniciar o ano-calendário ${proximoAno}?\n\n` +
       `A situação em 31/12/${state.anoCalendario} de cada bem e dívida vira a situação anterior de ${proximoAno}. ` +
       `Os valores atuais começam iguais, até você registrar uma movimentação real durante o ano.`
@@ -75,7 +78,25 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       </nav>
 
       <div className="sidebar-footer">
-        {collapsed ? (
+        {state.anoCalendario == null ? (
+          // Onboarding: nenhum ano definido ainda. O caminho principal é
+          // importar a declaração do ano anterior (define o ano sozinho);
+          // quem preferir pode começar cadastrando à mão no ano corrente.
+          collapsed ? null : (
+            <>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px' }}>
+                Importe a primeira declaração para definir o ano-calendário, ou comece cadastrando à mão:
+              </p>
+              <button
+                className="btn btn-sm btn-secondary"
+                style={{ width: '100%', justifyContent: 'center' }}
+                onClick={avancarAno}
+              >
+                Começar pelo ano {proximoAno}
+              </button>
+            </>
+          )
+        ) : collapsed ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <button className="btn btn-sm btn-secondary" title={`Avançar para ${proximoAno}`} onClick={avancarAno}>→</button>
           </div>

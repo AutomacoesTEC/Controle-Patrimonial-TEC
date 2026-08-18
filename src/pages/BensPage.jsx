@@ -56,7 +56,7 @@ export default function BensPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Bens e Direitos</h2>
-          <p>{filtered.length} itens, total em 31/12/{anoCalendario}: {formatCurrency(totals.atual)}</p>
+          <p>{filtered.length} itens{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totals.atual)}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={() => exportBensToXlsx(filtered, anoCalendario)}>
@@ -91,8 +91,8 @@ export default function BensPage() {
                 <th>Grupo</th>
                 <th>Cód.</th>
                 <th style={{ minWidth: '300px' }}>Discriminação</th>
-                <th style={{ textAlign: 'right' }}>31/12/{anoCalendario - 1}</th>
-                <th style={{ textAlign: 'right' }}>31/12/{anoCalendario}</th>
+                <th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Situação anterior'}</th>
+                <th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Situação atual'}</th>
                 <th style={{ textAlign: 'right' }}>Variação</th>
                 <th>Ações</th>
               </tr>

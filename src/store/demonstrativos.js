@@ -57,15 +57,37 @@ export function totalBensAteData(listaBens, dataCorte, lado = 'ate') {
   return (listaBens || []).reduce((s, b) => s + situacaoBemAteData(b, dataCorte, lado), 0);
 }
 
-// Dívidas não têm movimentação com data granular (só o saldo em 31/12
-// anterior/atual, igual à ficha oficial) — não dá pra reconstruir "quanto
-// devia numa data X do meio do ano". Por isso, ao contrário dos bens, o
-// filtro de data não se aplica aqui: "De" sempre usa a situação anterior
-// (início do ano) e "Até" sempre usa a situação atual (a mais recente
-// lançada), qualquer que seja a data escolhida.
-export function totalDividas(dividas, ponto) {
-  const campo = ponto === 'de' ? 'situacao_anterior' : 'situacao_atual';
-  return (dividas || []).reduce((s, d) => s + (parseFloat(d[campo]) || 0), 0);
+// Reconstrói o saldo devedor de uma dívida numa data de corte, a partir da
+// situacao_anterior + movimentações datadas (contratação soma, amortização
+// subtrai sem passar de zero, quitação zera, ajuste substitui) — mesma
+// lógica de situacaoBemAteData, com os tipos de dívida.
+//
+// Migração suave: dívida SEM movimentação registrada (importada ou
+// cadastrada antes desse recurso existir) não tem como ser reconstruída no
+// meio do ano — vale a convenção conservadora de sempre: "de" usa a
+// situação anterior, "ate" usa a atual.
+export function situacaoDividaAteData(divida, dataCorte, lado = 'ate') {
+  const semMovimentacao = !(divida.movimentacoes || []).length;
+  if (!dataCorte || semMovimentacao) {
+    return lado === 'de'
+      ? (parseFloat(divida.situacao_anterior) || 0)
+      : (parseFloat(divida.situacao_atual) || 0);
+  }
+  const movs = (divida.movimentacoes || [])
+    .filter(m => emDataOuAntes(m.data, dataCorte))
+    .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.id || 0) - (b.id || 0));
+  let saldo = parseFloat(divida.situacao_anterior) || 0;
+  for (const m of movs) {
+    if (m.tipo === 'contratacao') saldo += m.valor;
+    else if (m.tipo === 'amortizacao') saldo = Math.max(0, saldo - m.valor);
+    else if (m.tipo === 'quitacao') saldo = 0;
+    else if (m.tipo === 'ajuste') saldo = m.valor;
+  }
+  return saldo;
+}
+
+export function totalDividas(dividas, ponto, dataCorte) {
+  return (dividas || []).reduce((s, d) => s + situacaoDividaAteData(d, dataCorte, ponto === 'de' ? 'de' : 'ate'), 0);
 }
 
 // Variação Patrimonial Total = -(Δ Bens) + (Δ Dívida). Negativo quando o
@@ -75,8 +97,8 @@ export function totalDividas(dividas, ponto) {
 export function variacaoPatrimonialTotal({ bens, bensRurais, dividas }, dataDe, dataAte) {
   const bensDe = totalBensAteData(bens, dataDe, 'de') + totalBensAteData(bensRurais, dataDe, 'de');
   const bensAte = totalBensAteData(bens, dataAte, 'ate') + totalBensAteData(bensRurais, dataAte, 'ate');
-  const dividaDe = totalDividas(dividas, 'de');
-  const dividaAte = totalDividas(dividas, 'ate');
+  const dividaDe = totalDividas(dividas, 'de', dataDe);
+  const dividaAte = totalDividas(dividas, 'ate', dataAte);
   return {
     bensDe, bensAte, deltaBens: bensAte - bensDe,
     dividaDe, dividaAte, deltaDivida: dividaAte - dividaDe,

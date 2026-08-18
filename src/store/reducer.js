@@ -3,7 +3,10 @@
 // reducer.test.js). O DataContext.jsx só faz a fiação com useReducer.
 
 export const initialState = {
-  anoCalendario: 2025,
+  // null até a primeira importação/cadastro: o app é genérico, não nasce
+  // preso a um ano fixo. A Sidebar oferece "começar pelo ano X" e o import
+  // define o ano a partir do cabeçalho da declaração.
+  anoCalendario: null,
   contribuinte: null,
   dependentes: [],
   bens: [],
@@ -83,6 +86,8 @@ export function reducer(state, action) {
     case 'DELETE_PAGAMENTO':
       return { ...state, pagamentos: state.pagamentos.filter(p => p.id !== action.payload) };
     case 'SAVE_HISTORICO': {
+      // Sem ano definido (antes da 1ª importação) não há o que arquivar.
+      if (state.anoCalendario == null) return state;
       const ano = state.anoCalendario;
       return { ...state, historico: { ...state.historico, [ano]: snapshotYear(state) } };
     }
@@ -92,7 +97,7 @@ export function reducer(state, action) {
       if (!h) return state;
       // Arquiva o ano corrente antes de trocar, senão dados não salvos no
       // histórico seriam sobrescritos silenciosamente pelo ano carregado.
-      const historico = hasWorkingData(state)
+      const historico = hasWorkingData(state) && state.anoCalendario != null
         ? { ...state.historico, [state.anoCalendario]: snapshotYear(state) }
         : state.historico;
       return { ...state, ...h, historico, anoCalendario: targetAno };
@@ -104,7 +109,7 @@ export function reducer(state, action) {
     case 'SWITCH_ANO': {
       const novoAno = action.payload;
       if (novoAno === state.anoCalendario) return state;
-      const historico = hasWorkingData(state)
+      const historico = hasWorkingData(state) && state.anoCalendario != null
         ? { ...state.historico, [state.anoCalendario]: snapshotYear(state) }
         : state.historico;
       const destino = historico[novoAno] || blankYear;
@@ -122,9 +127,17 @@ export function reducer(state, action) {
     case 'ROLLOVER_ANO': {
       const novoAno = action.payload;
       if (novoAno === state.anoCalendario) return state;
-      const historico = hasWorkingData(state)
+      const historico = hasWorkingData(state) && state.anoCalendario != null
         ? { ...state.historico, [state.anoCalendario]: snapshotYear(state) }
         : state.historico;
+      // Sem ano definido (antes da 1ª importação): se o ano de destino tem
+      // histórico, carrega; senão, o que foi cadastrado manualmente pertence
+      // ao ano que está sendo iniciado agora.
+      if (state.anoCalendario == null) {
+        const existente = historico[novoAno];
+        if (existente) return { ...state, ...existente, historico, anoCalendario: novoAno };
+        return { ...state, historico, anoCalendario: novoAno };
+      }
       const existente = historico[novoAno];
       if (existente) return { ...state, ...existente, historico, anoCalendario: novoAno };
       let seq = Date.now();
@@ -142,7 +155,7 @@ export function reducer(state, action) {
         historico,
         anoCalendario: novoAno,
         bens: state.bens.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual })),
-        dividas: state.dividas.map(d => ({ ...d, id: seq++, situacao_anterior: d.situacao_atual, valor_pago: 0 })),
+        dividas: state.dividas.map(d => ({ ...d, id: seq++, situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
         bensRurais: state.bensRurais.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual })),
         rendimentos: [],
         pagamentos: [],
@@ -160,12 +173,15 @@ export function reducer(state, action) {
     // ali para não apagar uma categoria que o import não cobriu.
     case 'IMPORT_DECLARACAO': {
       const { anoCalendario, contribuinte, bens, dividas, rendimentos, pagamentos } = action.payload;
-      const ano = anoCalendario || state.anoCalendario;
+      const ano = anoCalendario || state.anoCalendario || new Date().getFullYear();
       const mesmoAno = ano === state.anoCalendario;
-      const historico = !mesmoAno && hasWorkingData(state)
+      const historico = !mesmoAno && hasWorkingData(state) && state.anoCalendario != null
         ? { ...state.historico, [state.anoCalendario]: snapshotYear(state) }
         : state.historico;
-      const base = mesmoAno ? state : blankYear;
+      // Antes da 1ª importação (anoCalendario null), dados cadastrados à mão
+      // pertencem ao ano da declaração que está entrando — mescla em vez de
+      // zerar.
+      const base = (mesmoAno || state.anoCalendario == null) ? state : blankYear;
       return {
         ...state,
         historico,
@@ -210,6 +226,28 @@ export function reducer(state, action) {
           else if (mov.tipo === 'venda_total' || mov.tipo === 'baixa') situacao_atual = 0;
           else if (mov.tipo === 'ajuste') situacao_atual = mov.valor;
           return { ...b, situacao_atual, movimentacoes: [...(b.movimentacoes || []), mov] };
+        }),
+      };
+    }
+    // Mesma mecânica do REGISTRAR_MOVIMENTACAO_BEM acima, mas para dívidas:
+    // contratação soma ao saldo, amortização subtrai (sem passar de zero),
+    // quitação zera, ajuste substitui. Sem isso, o filtro por data do
+    // demonstrativo não tem como reconstruir o saldo de uma dívida no meio
+    // do ano (só existiam os saldos de 31/12 anterior/atual). O payload
+    // reaproveita a chave `bemId` do MovimentacaoBemForm (o form é genérico).
+    case 'REGISTRAR_MOVIMENTACAO_DIVIDA': {
+      const { bemId: dividaId, movimentacao } = action.payload;
+      return {
+        ...state,
+        dividas: state.dividas.map(d => {
+          if (d.id !== dividaId) return d;
+          const mov = { ...movimentacao, id: Date.now() };
+          let situacao_atual = d.situacao_atual;
+          if (mov.tipo === 'contratacao') situacao_atual += mov.valor;
+          else if (mov.tipo === 'amortizacao') situacao_atual = Math.max(0, situacao_atual - mov.valor);
+          else if (mov.tipo === 'quitacao') situacao_atual = 0;
+          else if (mov.tipo === 'ajuste') situacao_atual = mov.valor;
+          return { ...d, situacao_atual, movimentacoes: [...(d.movimentacoes || []), mov] };
         }),
       };
     }
@@ -258,7 +296,14 @@ export function reducer(state, action) {
       const historico = { ...state.historico };
       delete historico[ano];
       if (ano === state.anoCalendario) {
-        return { ...state, historico, ...blankYear };
+        // Sem ano fantasma: se sobrou outro ano com dado, passa a exibir o
+        // mais recente dele; se não sobrou nenhum, volta ao estado inicial
+        // sem ano (onboarding), em vez de um ano sem registro nenhum.
+        const restantes = Object.keys(historico).map(Number).sort((a, b) => b - a);
+        if (restantes.length > 0) {
+          return { ...state, ...historico[restantes[0]], historico, anoCalendario: restantes[0] };
+        }
+        return { ...state, ...blankYear, historico, anoCalendario: null };
       }
       return { ...state, historico };
     }

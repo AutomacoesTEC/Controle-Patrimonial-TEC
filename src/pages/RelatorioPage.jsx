@@ -6,6 +6,25 @@ export default function RelatorioPage() {
   const { state } = useData();
   const { bens, dividas, rendimentos, pagamentos, anoCalendario, contribuinte } = state;
 
+  // Sem ano definido (antes da 1ª importação) não há relatório a emitir.
+  if (anoCalendario == null) {
+    return (
+      <>
+        <div className="page-header">
+          <div className="page-header-left"><h2>Relatório para IRPF</h2><p>Prévia dos dados para a declaração</p></div>
+        </div>
+        <div className="page-body animate-in">
+          <div className="card">
+            <div className="empty-state" style={{ padding: '60px 20px' }}>
+              <p style={{ fontSize: '16px', fontWeight: 600 }}>Nenhum ano-calendário definido</p>
+              <p>Importe a declaração do ano anterior na aba <strong>Importar</strong> para o relatório aparecer aqui.</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const totalBensAnterior = bens.reduce((s, b) => s + (parseFloat(b.situacao_anterior) || 0), 0);
   const totalBensAtual = bens.reduce((s, b) => s + (parseFloat(b.situacao_atual) || 0), 0);
   const totalDividasAnterior = dividas.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);

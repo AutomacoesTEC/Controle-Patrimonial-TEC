@@ -1,130 +1,116 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, GRUPOS_BENS } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
-import { demonstrativoConciliacao } from '../store/demonstrativos';
+import { situacaoBemAteData } from '../store/demonstrativos';
+import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b'];
 const GRUPO_LABELS = Object.fromEntries(GRUPOS_BENS.map(g => [g.codigo, g.nome]));
 
+// Período padrão: do início do primeiro ano com dado até hoje (se o ano
+// corrente for um ano com dado) ou até 31/12 do último ano com dado. Nada
+// de ano fixo no código — o app nasce sem data nenhuma até a 1ª importação.
+function periodoPadrao(state) {
+  const anos = anosComDado(state);
+  if (anos.length === 0) return { de: '', ate: '' };
+  const hoje = new Date();
+  const ultimo = anos[anos.length - 1];
+  const fim = ultimo === hoje.getFullYear()
+    ? hoje.toISOString().slice(0, 10)
+    : `${ultimo}-12-31`;
+  return { de: `${anos[0]}-01-01`, ate: fim };
+}
+
 export default function Dashboard() {
   const { state } = useData();
-  const { anoCalendario } = state;
 
-  // Anos com dado real: o ano corrente (em edição) mais tudo que já foi
-  // arquivado no histórico. O comparador de período só pode navegar entre
-  // esses — é o propósito do app funcionar para vários anos, não só o atual.
-  const anosDisponiveis = useMemo(
-    () => [...new Set([...Object.keys(state.historico).map(Number), anoCalendario])].sort((a, b) => a - b),
-    [state.historico, anoCalendario]
-  );
+  const padrao = useMemo(() => periodoPadrao(state), [state]);
+  const [dataDe, setDataDe] = useState(padrao.de);
+  const [dataAte, setDataAte] = useState(padrao.ate);
+  // Se o filtro ainda não foi tocado (vazio) e chegou dado novo (ex.: primeira
+  // importação), adota o período padrão; depois disso a escolha é da usuária.
+  const de = dataDe || padrao.de;
+  const ate = dataAte || padrao.ate;
 
-  const [anoDeSel, setAnoDeSel] = useState(anosDisponiveis[0]);
-  const [anoAteSel, setAnoAteSel] = useState(anoCalendario);
-  const anoDe = anosDisponiveis.includes(anoDeSel) ? anoDeSel : anosDisponiveis[0];
-  const anoAte = anosDisponiveis.includes(anoAteSel) ? anoAteSel : anoCalendario;
-  const ini = Math.min(anoDe, anoAte);
-  const fim = Math.max(anoDe, anoAte);
+  const temDado = anosComDado(state).length > 0;
 
-  const getDadosAno = (ano) => {
-    if (ano === anoCalendario) return { bens: state.bens, dividas: state.dividas };
-    const h = state.historico[ano];
-    return h ? { bens: h.bens || [], dividas: h.dividas || [] } : { bens: [], dividas: [] };
-  };
-
-  const totaisAno = (ano) => {
-    const { bens, dividas } = getDadosAno(ano);
-    const totalBens = bens.reduce((s, b) => s + (parseFloat(b.situacao_atual) || 0), 0);
-    const totalDividas = dividas.reduce((s, d) => s + (parseFloat(d.situacao_atual) || 0), 0);
-    return { totalBens, totalDividas, liquido: totalBens - totalDividas, qtdBens: bens.length, qtdDividas: dividas.length };
-  };
-
-  const serieAnos = [];
-  for (let a = ini; a <= fim; a++) serieAnos.push(a);
-  const evolucaoData = serieAnos.map(a => {
-    const t = totaisAno(a);
-    return { ano: a, data: `31/12/${a}`, bens: t.totalBens, dividas: t.totalDividas, liquido: t.liquido };
-  });
-
-  // Com um único ano selecionado (ini === fim), comparar totaisAno(ini) com
-  // totaisAno(fim) daria sempre variação zero (mesma situacao_atual dos dois
-  // lados). Nesse caso o período natural é a abertura do próprio ano
-  // (situacao_anterior) contra o fechamento (situacao_atual) — dado que já
-  // existe por bem, sem precisar de um segundo ano arquivado.
-  const totaisAberturaAno = (ano) => {
-    const { bens, dividas } = getDadosAno(ano);
-    const totalBens = bens.reduce((s, b) => s + (parseFloat(b.situacao_anterior) || 0), 0);
-    const totalDividas = dividas.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
-    return { totalBens, totalDividas, liquido: totalBens - totalDividas, qtdBens: bens.length, qtdDividas: dividas.length };
-  };
-
-  const totIni = ini === fim ? totaisAberturaAno(ini) : totaisAno(ini);
-  const totFim = totaisAno(fim);
-  const variacaoPeriodo = totFim.liquido - totIni.liquido;
-  const varPctPeriodo = totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : 0;
-
-  // Distribuição por categoria e comparativo mostram o ano final do período
-  // selecionado, não sempre o ano corrente.
-  const { bens: bensFim, dividas: dividasFim } = getDadosAno(fim);
-  const byGrupo = {};
-  bensFim.forEach(b => {
-    const g = b.grupo || '99';
-    if (!byGrupo[g]) byGrupo[g] = { atual: 0 };
-    byGrupo[g].atual += parseFloat(b.situacao_atual) || 0;
-  });
-  const pieData = Object.entries(byGrupo)
-    .map(([g, v]) => ({ name: GRUPO_LABELS[g] || `Grupo ${g}`, value: v.atual }))
-    .filter(d => d.value > 0)
-    .sort((a, b) => b.value - a.value);
-
-  // Demonstrativo de Conciliação Patrimonial: mesma técnica da planilha
-  // original, mas com data livre em vez de só 31/12 — o ano vai sendo
-  // lançado ao longo do tempo, então a usuária precisa conferir "até
-  // hoje", não só no fechamento. Opera sobre o ano-calendário CORRENTE
-  // (state.bens etc.), não sobre anos arquivados no histórico: bens
-  // trocam de id na virada de ano (ROLLOVER_ANO), então não dá pra
-  // reconstruir movimentação por data cruzando anos diferentes.
-  const anoEhCorrente = anoCalendario === new Date().getFullYear();
-  const dataAteDefault = anoEhCorrente ? new Date().toISOString().slice(0, 10) : `${anoCalendario}-12-31`;
-  const [dataDe, setDataDe] = useState(`${anoCalendario}-01-01`);
-  const [dataAte, setDataAte] = useState(dataAteDefault);
-  // Trocar de ano-calendário sem sair do Dashboard (seletor da sidebar):
-  // o período tem que acompanhar, senão o demonstrativo continuaria
-  // filtrando pelas datas do ano anterior.
-  useEffect(() => {
-    setDataDe(`${anoCalendario}-01-01`);
-    setDataAte(anoCalendario === new Date().getFullYear() ? new Date().toISOString().slice(0, 10) : `${anoCalendario}-12-31`);
-  }, [anoCalendario]);
+  // UM filtro de período dirigindo TUDO: demonstrativo, cards, gráficos,
+  // pizza e export — todos leem o mesmo de/ate, via motor multi-ano.
   const demo = useMemo(
-    () => demonstrativoConciliacao(state, dataDe, dataAte),
-    [state, dataDe, dataAte]
+    () => (de && ate ? demonstrativoPeriodo(state, de, ate) : null),
+    [state, de, ate]
   );
+
+  const totIni = useMemo(() => totaisNaData(state, de, 'de'), [state, de]);
+  const totFim = useMemo(() => totaisNaData(state, ate, 'ate'), [state, ate]);
+  const evolucaoData = useMemo(() => serieEvolucao(state, de, ate), [state, de, ate]);
+
+  const variacaoPeriodo = totIni && totFim ? totFim.liquido - totIni.liquido : 0;
+  const varPctPeriodo = totIni && totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : 0;
+
+  // Distribuição por categoria na data "Até" — valor de cada bem RECONSTRUÍDO
+  // naquela data (não o situacao_atual cru), senão a pizza discordaria dos
+  // cards e do demonstrativo.
+  const pieData = useMemo(() => {
+    if (!ate) return [];
+    const dados = dadosDoAno(state, Number(ate.slice(0, 4)));
+    if (!dados) return [];
+    const byGrupo = {};
+    [...(dados.bens || []), ...(dados.bensRurais || [])].forEach(b => {
+      const valor = situacaoBemAteData(b, ate, 'ate');
+      if (valor <= 0) return;
+      const g = b.grupo || '99';
+      byGrupo[g] = (byGrupo[g] || 0) + valor;
+    });
+    return Object.entries(byGrupo)
+      .map(([g, v]) => ({ name: GRUPO_LABELS[g] || `Grupo ${g}`, value: v }))
+      .sort((a, b) => b.value - a.value);
+  }, [state, ate]);
 
   const handleExport = () => {
-    const totalBensAnterior = totIni.totalBens;
-    const totalBensAtual = totFim.totalBens;
-    const totalDividasAnterior = totIni.totalDividas;
-    const totalDividasAtual = totFim.totalDividas;
+    const dadosFim = ate ? dadosDoAno(state, Number(ate.slice(0, 4))) : null;
     exportToXlsx({
-      bens: bensFim,
-      dividas: dividasFim,
-      rendimentos: fim === anoCalendario ? state.rendimentos : (state.historico[fim]?.rendimentos || []),
-      pagamentos: fim === anoCalendario ? state.pagamentos : (state.historico[fim]?.pagamentos || []),
-      totalBensAnterior,
-      totalBensAtual,
-      totalDividasAnterior,
-      totalDividasAtual,
-      anoCalendario: fim,
+      bens: dadosFim?.bens || [],
+      dividas: dadosFim?.dividas || [],
+      rendimentos: dadosFim?.rendimentos || [],
+      pagamentos: dadosFim?.pagamentos || [],
+      totalBensAnterior: totIni?.totalBens || 0,
+      totalBensAtual: totFim?.totalBens || 0,
+      totalDividasAnterior: totIni?.totalDividas || 0,
+      totalDividasAtual: totFim?.totalDividas || 0,
+      anoCalendario: ate ? Number(ate.slice(0, 4)) : 'periodo',
     }, 'variacao_patrimonial');
   };
+
+  if (!temDado) {
+    return (
+      <>
+        <div className="page-header">
+          <div className="page-header-left">
+            <h2>Dashboard</h2>
+            <p>Visão geral do patrimônio</p>
+          </div>
+        </div>
+        <div className="page-body animate-in">
+          <div className="card">
+            <div className="empty-state" style={{ padding: '60px 20px' }}>
+              <p style={{ fontSize: '16px', fontWeight: 600 }}>Nenhum dado ainda</p>
+              <p>Importe a declaração do ano anterior na aba <strong>Importar</strong> para começar — a partir daí o dashboard mostra evolução, demonstrativo de conciliação e consulta por qualquer período.</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <div className="page-header">
         <div className="page-header-left">
           <h2>Dashboard</h2>
-          <p>Visão geral do patrimônio no ano-calendário {anoCalendario}</p>
+          <p>Consulta livre por período — de {formatDate(de)} até {formatDate(ate)}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-success" onClick={handleExport}>
@@ -134,33 +120,47 @@ export default function Dashboard() {
       </div>
       <div className="page-body animate-in">
         <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header"><h3 className="card-title">Período da consulta</h3></div>
+          <div className="form-row" style={{ alignItems: 'end', marginBottom: 0 }}>
+            <div className="form-group">
+              <label>De</label>
+              <input className="form-control" type="date" value={de} onChange={e => setDataDe(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Até</label>
+              <input className="form-control" type="date" value={ate} onChange={e => setDataAte(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <button className="btn btn-secondary" onClick={() => { setDataDe(padrao.de); setDataAte(padrao.ate); }}>
+                Todo o histórico
+              </button>
+            </div>
+          </div>
+          {demo && demo.anosSemDado.length > 0 && (
+            <p style={{ fontSize: '12px', color: 'var(--accent-warning, #f59e0b)', marginTop: '12px', marginBottom: 0 }}>
+              Sem dado importado para {demo.anosSemDado.join(', ')} — esses anos entram como zero nos fluxos e não aparecem nos gráficos. O resultado cobre só {demo.anosCobertos.join(', ')}.
+            </p>
+          )}
+        </div>
+
+        {demo && (
+        <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Demonstrativo de Conciliação Patrimonial</h3></div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '-8px', marginBottom: '16px' }}>
             Mesma conta que a planilha de controle sempre fez: quanto o patrimônio variou tem que ser coberto pelo que entrou de rendimento e ganho, menos o que saiu em pagamento. O Saldo de Caixa no final é o número de conferência — perto de zero (ou do caixa/cofre que a usuária sabe que tem) indica que nada ficou de fora da declaração.
           </p>
-          <div className="form-row" style={{ alignItems: 'end', marginBottom: '20px' }}>
-            <div className="form-group">
-              <label>De</label>
-              <input className="form-control" type="date" value={dataDe} onChange={e => setDataDe(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Até</label>
-              <input className="form-control" type="date" value={dataAte} onChange={e => setDataAte(e.target.value)} />
-            </div>
-          </div>
 
           <table className="demonstrativo-table">
             <tbody>
               <tr className="demonstrativo-secao"><td colSpan={2}>Descrição dos Bens</td></tr>
-              <tr><td>Situação em {formatDate(dataDe)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
-              <tr><td>Situação em {formatDate(dataAte)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
+              <tr><td>Situação em {formatDate(de)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
+              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
               <tr className="demonstrativo-total"><td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td></tr>
 
               <tr className="demonstrativo-secao"><td colSpan={2}>Descrição da Dívida</td></tr>
-              <tr><td>Situação em {formatDate(dataDe)} (saldo do início do ano)</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaDe)}</td></tr>
-              <tr><td>Situação em {formatDate(dataAte)} (saldo mais recente lançado)</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaAte)}</td></tr>
+              <tr><td>Situação em {formatDate(de)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaDe)}</td></tr>
+              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaAte)}</td></tr>
               <tr className="demonstrativo-total"><td>Variação da Dívida</td><td className={`currency ${demo.varPatrimonial.deltaDivida >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDivida)}</td></tr>
-              <tr><td colSpan={2} style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '2px 12px 10px' }}>Dívida não tem movimentação por data ainda (só o saldo anterior/atual da ficha); o filtro acima não muda esses dois valores.</td></tr>
 
               <tr className="demonstrativo-destaque"><td>Variação Patrimonial Total</td><td className={`currency ${demo.varPatrimonial.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.total)}</td></tr>
 
@@ -191,43 +191,26 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
-
-        <div className="card" style={{ marginBottom: '20px' }}>
-          <div className="card-header"><h3 className="card-title">Evolução Multianual</h3></div>
-          <div className="form-row" style={{ alignItems: 'end' }}>
-            <div className="form-group">
-              <label>De (situação em 31/12)</label>
-              <select className="form-control" value={anoDe} onChange={e => setAnoDeSel(parseInt(e.target.value))}>
-                {anosDisponiveis.map(a => <option key={a} value={a}>31/12/{a}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Até (situação em 31/12)</label>
-              <select className="form-control" value={anoAte} onChange={e => setAnoAteSel(parseInt(e.target.value))}>
-                {anosDisponiveis.map(a => <option key={a} value={a}>31/12/{a}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="stats-grid">
           <div className="stat-card blue">
             <div className="stat-info">
-              <h3>{formatCurrency(totFim.totalBens)}</h3>
-              <p>Bens e Direitos</p>
-              <span className="stat-change positive">{totFim.qtdBens} itens</span>
+              <h3>{formatCurrency(totFim?.totalBens || 0)}</h3>
+              <p>Bens e Direitos em {formatDate(ate)}</p>
+              <span className="stat-change positive">{totFim?.qtdBens || 0} itens</span>
             </div>
           </div>
           <div className="stat-card orange">
             <div className="stat-info">
-              <h3>{formatCurrency(totFim.totalDividas)}</h3>
-              <p>Dívidas</p>
-              <span className="stat-change negative">{totFim.qtdDividas} itens</span>
+              <h3>{formatCurrency(totFim?.totalDividas || 0)}</h3>
+              <p>Dívidas em {formatDate(ate)}</p>
+              <span className="stat-change negative">{totFim?.qtdDividas || 0} itens</span>
             </div>
           </div>
           <div className="stat-card green">
             <div className="stat-info">
-              <h3>{formatCurrency(totFim.liquido)}</h3>
+              <h3>{formatCurrency(totFim?.liquido || 0)}</h3>
               <p>Patrimônio Líquido</p>
             </div>
           </div>
@@ -244,7 +227,7 @@ export default function Dashboard() {
         <div className="charts-grid">
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">Distribuição por Categoria em 31/12/{fim}</h3>
+              <h3 className="card-title">Distribuição por Categoria em {formatDate(ate)}</h3>
             </div>
             {pieData.length > 0 ? (
               // Sem rótulo grudado na fatia: nome de categoria comprido
@@ -260,42 +243,42 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="empty-state"><p>Sem bens cadastrados em 31/12/{fim}</p></div>
+              <div className="empty-state"><p>Sem bens com valor nesta data</p></div>
             )}
           </div>
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">Bens e Dívidas no período selecionado</h3>
+              <h3 className="card-title">Bens e Dívidas no período</h3>
             </div>
             {evolucaoData.some(d => d.bens > 0 || d.dividas > 0) ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={evolucaoData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                  <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                  <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={d => formatDate(d)} />
                   <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
-                  <Tooltip formatter={v => formatCurrency(v)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
+                  <Tooltip formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
                   <Bar dataKey="bens" name="Bens" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="dividas" name="Dívidas" fill="#ef4444" radius={[4, 4, 0, 0]} />
                   <Legend />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="empty-state"><p>Importe uma declaração para visualizar</p></div>
+              <div className="empty-state"><p>Sem dado neste período</p></div>
             )}
           </div>
         </div>
 
-        {serieAnos.length > 1 && (
+        {evolucaoData.length > 1 && (
           <div className="card" style={{ marginTop: '20px' }}>
             <div className="card-header">
-              <h3 className="card-title">Evolução do Patrimônio Líquido, 31/12/{ini} a 31/12/{fim}</h3>
+              <h3 className="card-title">Evolução do Patrimônio Líquido, {formatDate(de)} a {formatDate(ate)}</h3>
             </div>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={evolucaoData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={d => formatDate(d)} />
                 <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
-                <Tooltip formatter={v => formatCurrency(v)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
+                <Tooltip formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
                 <Line type="monotone" dataKey="liquido" name="Patrimônio Líquido" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>

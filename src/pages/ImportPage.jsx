@@ -47,7 +47,9 @@ export default function ImportPage() {
 
       if (result) {
         const anoDestino = result.anoCalendario || state.anoCalendario;
-        const trocaAno = anoDestino !== state.anoCalendario;
+        // Antes da 1ª importação não há ano definido: nada de "troca de ano",
+        // a declaração simplesmente define o ano-calendário inicial.
+        const trocaAno = state.anoCalendario != null && anoDestino !== state.anoCalendario;
         // O que já existe no ano de destino: o próprio estado corrente (se
         // for o mesmo ano) ou o que estiver arquivado no histórico daquele
         // ano — sem isso, importar por engano sobrescreveria em silêncio

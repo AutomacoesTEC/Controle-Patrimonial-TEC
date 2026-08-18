@@ -34,7 +34,9 @@ export default function HistoricoPage() {
       <div className="page-header">
         <div className="page-header-left"><h2>Histórico de Declarações</h2><p>Acesse dados de anos anteriores</p></div>
         <div className="page-header-actions">
-          <button className="btn btn-primary" onClick={handleSaveYear}>Salvar {anoCalendario} no Histórico</button>
+          {anoCalendario != null && (
+            <button className="btn btn-primary" onClick={handleSaveYear}>Salvar {anoCalendario} no Histórico</button>
+          )}
         </div>
       </div>
       <div className="page-body animate-in">

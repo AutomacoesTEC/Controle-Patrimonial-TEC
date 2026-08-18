@@ -46,7 +46,7 @@ export default function PagamentosPage() {
   return (
     <>
       <div className="page-header">
-        <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registros no ano-calendário {state.anoCalendario}, total {formatCurrency(totalPago)}</p></div>
+        <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}, total {formatCurrency(totalPago)}</p></div>
         <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Novo Pagamento</button></div>
       </div>
       <div className="page-body animate-in">

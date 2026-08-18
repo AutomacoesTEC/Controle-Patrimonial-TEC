@@ -7,9 +7,19 @@ import { formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatt
 // Atividade Rural. `actionType` escolhe qual reducer action disparar
 // (REGISTRAR_MOVIMENTACAO_BEM ou REGISTRAR_MOVIMENTACAO_BEM_RURAL) — as
 // duas fazem a mesma coisa, só em coleções diferentes do estado.
-export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIMENTACAO_BEM' }) {
+// Também serve para dívidas (DividasPage): `tipos` troca a tabela de
+// rótulos/ajuda (MOVIMENTACAO_DIVIDA_TIPOS), `tipoInicial` o tipo
+// pré-selecionado e `textoIntro` o parágrafo de explicação. Como nenhum
+// tipo de dívida é venda, os campos valorVenda/irrfVenda nem aparecem.
+export default function MovimentacaoBemForm({
+  bem,
+  actionType = 'REGISTRAR_MOVIMENTACAO_BEM',
+  tipos = MOVIMENTACAO_TIPOS,
+  tipoInicial = 'venda_parcial',
+  textoIntro = 'Vendeu parte, vendeu tudo, comprou mais, fez uma benfeitoria? Registre aqui: o valor atual do bem é recalculado a partir da movimentação, e fica guardado o motivo de cada mudança de valor.',
+}) {
   const { dispatch, addToast } = useData();
-  const [movTipo, setMovTipo] = useState('venda_parcial');
+  const [movTipo, setMovTipo] = useState(tipoInicial);
   const [movValor, setMovValor] = useState('');
   const [movValorVenda, setMovValorVenda] = useState('');
   const [movIrrfVenda, setMovIrrfVenda] = useState('');
@@ -19,12 +29,13 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
   const isVenda = movTipo === 'venda_parcial' || movTipo === 'venda_total';
 
   const handleRegistrar = () => {
-    // Venda total/baixa zeram o bem, o campo "valor" fica desabilitado na
-    // tela — mas ainda precisa guardar QUANTO estava sendo baixado (é o
-    // custo de aquisição que sai), senão a aba Ganhos de Capital não tem
-    // como calcular o ganho/perda de uma venda total depois. Usa o valor
-    // vivo do bem no momento do registro.
-    const zeraTudo = movTipo === 'venda_total' || movTipo === 'baixa';
+    // Tipos com sinal '0' (venda_total/baixa em bens, quitacao em dívidas)
+    // zeram o saldo e o campo "valor" fica desabilitado na tela — mas ainda
+    // precisa guardar QUANTO estava sendo baixado (em bens, é o custo de
+    // aquisição que sai, senão a aba Ganhos de Capital não tem como calcular
+    // o ganho/perda de uma venda total depois). Usa o valor vivo no momento
+    // do registro.
+    const zeraTudo = tipos[movTipo]?.sinal === '0';
     const valor = zeraTudo ? bem.situacao_atual : (parseFloat(movValor) || 0);
     if (!zeraTudo && valor <= 0) {
       alert('Informe um valor maior que zero para essa movimentação.');
@@ -54,16 +65,16 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
         Registrar movimentação
       </div>
       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0, marginBottom: '12px' }}>
-        Vendeu parte, vendeu tudo, comprou mais, fez uma benfeitoria? Registre aqui: o valor atual do bem é recalculado a partir da movimentação, e fica guardado o motivo de cada mudança de valor.
+        {textoIntro}
       </p>
       <div className="form-row">
         <div className="form-group">
           <label>Tipo de movimentação</label>
           <select className="form-control" value={movTipo} onChange={e => setMovTipo(e.target.value)}>
-            {Object.entries(MOVIMENTACAO_TIPOS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            {Object.entries(tipos).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
           <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
-            {MOVIMENTACAO_TIPOS[movTipo].ajuda}
+            {tipos[movTipo].ajuda}
           </p>
         </div>
         <div className="form-group">
@@ -76,7 +87,7 @@ export default function MovimentacaoBemForm({ bem, actionType = 'REGISTRAR_MOVIM
             className="form-control" type="number" step="0.01" value={movValor}
             onChange={e => setMovValor(e.target.value)}
             placeholder="0,00"
-            disabled={movTipo === 'venda_total' || movTipo === 'baixa'}
+            disabled={tipos[movTipo]?.sinal === '0'}
           />
         </div>
       </div>

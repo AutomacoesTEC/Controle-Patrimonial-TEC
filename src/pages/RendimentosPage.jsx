@@ -63,7 +63,7 @@ export default function RendimentosPage() {
   return (
     <>
       <div className="page-header">
-        <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registros no ano-calendário {state.anoCalendario}</p></div>
+        <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}</p></div>
         <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Novo Rendimento</button></div>
       </div>
       <div className="page-body animate-in">

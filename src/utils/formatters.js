@@ -180,6 +180,16 @@ export const MOVIMENTACAO_TIPOS = {
   ajuste: { label: 'Ajuste direto de valor', sinal: '=', ajuda: 'Substitui o valor declarado do bem pelo valor informado. Use só para corrigir um erro de cadastro, não para registrar uma movimentação real.' },
 };
 
+// Tipos de movimentação de uma dívida: como o saldo devedor muda quando a
+// usuária registra uma contração, amortização etc (ver DividasPage). Mesmo
+// formato de MOVIMENTACAO_TIPOS para o MovimentacaoBemForm servir aos dois.
+export const MOVIMENTACAO_DIVIDA_TIPOS = {
+  contratacao: { label: 'Contratação (nova dívida ou refinanciamento)', sinal: '+', ajuda: 'Valor novo contratado. Soma ao saldo devedor.' },
+  amortizacao: { label: 'Amortização ou pagamento parcial', sinal: '-', ajuda: 'Valor pago que abate o saldo devedor (parcela de principal, não os juros). Subtrai do saldo, sem passar de zero.' },
+  quitacao: { label: 'Quitação (zera o saldo)', sinal: '0', ajuda: 'Zera o saldo devedor. Guarde o valor total pago na descrição, se quiser rastreá-lo.' },
+  ajuste: { label: 'Ajuste direto de saldo', sinal: '=', ajuda: 'Substitui o saldo devedor pelo valor informado. Use só para corrigir um erro de cadastro, não para registrar uma movimentação real.' },
+};
+
 // Grupos e códigos de Bens e Direitos conferidos em 17/08/2026 contra o
 // manual de ajuda do programa IRPF2026 ("AjudaIRPF-new.pdf", "Tabela de
 // Códigos de Bens e Direitos"). O grupo 08 (Criptoativos) e vários códigos
