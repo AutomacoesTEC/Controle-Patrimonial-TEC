@@ -15,6 +15,18 @@ export function formatCNPJ(cnpj) {
   return nums.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 }
 
+// Campo que pode guardar CPF (11 dígitos) ou CNPJ (14), conforme o
+// beneficiário: detecta pela quantidade de dígitos. Fora desses dois
+// tamanhos (campo vazio, incompleto, ou já formatado de outro jeito),
+// devolve o valor como veio, sem tentar adivinhar.
+export function formatCpfCnpj(valor) {
+  if (!valor) return '';
+  const nums = String(valor).replace(/\D/g, '');
+  if (nums.length === 11) return formatCPF(nums);
+  if (nums.length === 14) return formatCNPJ(nums);
+  return valor;
+}
+
 export function parseBRLCurrency(str) {
   if (!str) return 0;
   const clean = String(str).replace(/[R$\s.]/g, '').replace(',', '.');

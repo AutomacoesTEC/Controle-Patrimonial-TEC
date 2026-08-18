@@ -1,4 +1,9 @@
 import * as XLSX from 'xlsx';
+import { formatCpfCnpj, formatDate, MOVIMENTACAO_TIPOS } from './formatters';
+
+const resumoMovimentacoes = (bem) => (bem.movimentacoes || []).map(m =>
+  `${MOVIMENTACAO_TIPOS[m.tipo]?.label || m.tipo} em ${formatDate(m.data)}`
+).join('; ');
 
 export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
   const wb = XLSX.utils.book_new();
@@ -13,12 +18,13 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
       'Situação Ano Atual': b.situacao_atual || 0,
       'Variação': (b.situacao_atual || 0) - (b.situacao_anterior || 0),
       'Localização': b.localizacao || '',
-      'CNPJ/CPF': b.cnpj || '',
+      'CNPJ/CPF': formatCpfCnpj(b.cnpj),
       'Beneficiário': b.beneficiario || 'Titular',
+      'Movimentações no Ano': resumoMovimentacoes(b),
     }));
     const ws1 = XLSX.utils.json_to_sheet(bensData);
     ws1['!cols'] = [
-      {wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:18},{wch:12},{wch:20},{wch:12}
+      {wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:18},{wch:12},{wch:20},{wch:12},{wch:50}
     ];
     XLSX.utils.book_append_sheet(wb, ws1, 'Bens e Direitos');
   }
@@ -40,7 +46,7 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
   if (data.rendimentos && data.rendimentos.length > 0) {
     const rendData = data.rendimentos.map(r => ({
       'Tipo': r.tipo || '',
-      'CNPJ Fonte': r.cnpj_fonte || '',
+      'CNPJ Fonte': formatCpfCnpj(r.cnpj_fonte),
       'Nome Fonte': r.nome_fonte || '',
       'Beneficiário': r.beneficiario || 'Titular',
       'Valor': r.valor || 0,
@@ -54,7 +60,7 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
     const pagData = data.pagamentos.map(p => ({
       'Código': p.codigo || '',
       'Nome Beneficiário': p.nome_beneficiario || '',
-      'CPF/CNPJ': p.cpf_cnpj || '',
+      'CPF/CNPJ': formatCpfCnpj(p.cpf_cnpj),
       'Valor Pago': p.valor_pago || 0,
       'Parcela Não Dedutível': p.parcela_nao_dedutivel || 0,
       'Descrição': p.descricao || '',
@@ -92,14 +98,15 @@ export function exportBensToXlsx(bens, anoCalendario) {
     'Situação 31/12 Atual': b.situacao_atual || 0,
     'Variação R$': (b.situacao_atual || 0) - (b.situacao_anterior || 0),
     'Localização': b.localizacao || '',
-    'CNPJ': b.cnpj || '',
+    'CNPJ': formatCpfCnpj(b.cnpj),
     'Inscrição Municipal': b.inscricao_municipal || '',
     'Matrícula': b.matricula || '',
     'RENAVAM': b.renavam || '',
     'Beneficiário': b.beneficiario || 'Titular',
+    'Movimentações no Ano': resumoMovimentacoes(b),
   }));
   const ws = XLSX.utils.json_to_sheet(bensData);
-  ws['!cols'] = [{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:10},{wch:20},{wch:18},{wch:12},{wch:16},{wch:12}];
+  ws['!cols'] = [{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:10},{wch:20},{wch:18},{wch:12},{wch:16},{wch:12},{wch:50}];
   XLSX.utils.book_append_sheet(wb, ws, 'Bens e Direitos');
   const today = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `bens_direitos_${anoCalendario || ''}_${today}.xlsx`);

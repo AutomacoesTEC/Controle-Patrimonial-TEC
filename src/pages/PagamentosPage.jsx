@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
 
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '' };
 
@@ -64,7 +64,7 @@ export default function PagamentosPage() {
                     )}
                   </td>
                   <td>{(p.nome_beneficiario || '').substring(0, 40)}</td>
-                  <td>{p.cpf_cnpj}</td>
+                  <td>{formatCpfCnpj(p.cpf_cnpj)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor_pago)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.parcela_nao_dedutivel)}</td>
                   <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{(p.descricao || '').substring(0, 40)}</td>

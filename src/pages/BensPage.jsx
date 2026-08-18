@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, GRUPOS_BENS } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, GRUPOS_BENS } from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 
@@ -112,7 +112,7 @@ export default function BensPage() {
                       <div style={{ fontWeight: 500, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {(bem.discriminacao || '').substring(0, 80)}
                       </div>
-                      {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {bem.cnpj}</div>}
+                      {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
                     </td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_anterior)}</td>

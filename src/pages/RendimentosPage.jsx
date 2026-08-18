@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -108,7 +108,7 @@ export default function RendimentosPage() {
                         {lista.map(r => (
                           <tr key={r.id}>
                             <td>{describeRendimentoTipo(r.tipo)}</td>
-                            <td>{r.cnpj_fonte}</td>
+                            <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
                             <td>{(r.nome_fonte || '').substring(0, 50)}</td>
                             <td>{r.beneficiario}</td>
                             <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.valor)}</td>

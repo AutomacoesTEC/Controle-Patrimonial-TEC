@@ -1,5 +1,5 @@
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, GRUPOS_BENS, MOVIMENTACAO_TIPOS } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
 
 export default function RelatorioPage() {
@@ -46,7 +46,7 @@ export default function RelatorioPage() {
             <div className="card-header"><h3 className="card-title">Identificação do Contribuinte</h3></div>
             <div className="form-row">
               <div><strong style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>NOME:</strong><br />{contribuinte.nome}</div>
-              <div><strong style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>CPF:</strong><br />{contribuinte.cpf}</div>
+              <div><strong style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>CPF:</strong><br />{formatCpfCnpj(contribuinte.cpf)}</div>
             </div>
           </div>
         )}
