@@ -12,7 +12,18 @@ import HistoricoPage from './pages/HistoricoPage';
 
 function AppContent() {
   const [activeView, setActiveView] = useState('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem('controle-patrimonial-sidebar') === 'collapsed'; } catch { return false; }
+  });
   const { state } = useData();
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const novo = !prev;
+      try { localStorage.setItem('controle-patrimonial-sidebar', novo ? 'collapsed' : 'expanded'); } catch {}
+      return novo;
+    });
+  };
 
   const renderPage = () => {
     switch (activeView) {
@@ -30,7 +41,7 @@ function AppContent() {
 
   return (
     <div className="app-layout">
-      <Sidebar activeView={activeView} onNavigate={setActiveView} />
+      <Sidebar activeView={activeView} onNavigate={setActiveView} collapsed={sidebarCollapsed} onToggleCollapsed={toggleSidebar} />
       <main className="main-content">
         {renderPage()}
       </main>

@@ -127,7 +127,7 @@ export default function Dashboard() {
             <div className="stat-icon blue">🏦</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.totalBens)}</h3>
-              <p>Total Bens e Direitos em 31/12/{fim}</p>
+              <p>Bens e Direitos</p>
               <span className="stat-change positive">{totFim.qtdBens} itens</span>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
             <div className="stat-icon orange">💳</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.totalDividas)}</h3>
-              <p>Total Dívidas em 31/12/{fim}</p>
+              <p>Dívidas</p>
               <span className="stat-change negative">{totFim.qtdDividas} itens</span>
             </div>
           </div>
@@ -143,20 +143,23 @@ export default function Dashboard() {
             <div className="stat-icon green">💎</div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim.liquido)}</h3>
-              <p>Patrimônio Líquido em 31/12/{fim}</p>
+              <p>Patrimônio Líquido</p>
             </div>
           </div>
           <div className="stat-card purple">
             <div className="stat-icon purple">📈</div>
             <div className="stat-info">
               <h3>{formatCurrency(variacaoPeriodo)}</h3>
-              <p>Variação de 31/12/{ini} a 31/12/{fim}</p>
+              <p>Variação no período</p>
               <span className={`stat-change ${variacaoPeriodo >= 0 ? 'positive' : 'negative'}`}>
                 {variacaoPeriodo >= 0 ? '▲' : '▼'} {varPctPeriodo.toFixed(1)}%
               </span>
             </div>
           </div>
         </div>
+        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '-16px', marginBottom: '20px' }}>
+          Valores em 31/12/{fim}. Variação calculada de 31/12/{ini} a 31/12/{fim}.
+        </p>
 
         <div className="charts-grid">
           <div className="card">
@@ -164,12 +167,16 @@ export default function Dashboard() {
               <h3 className="card-title">Distribuição por Categoria em 31/12/{fim}</h3>
             </div>
             {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              // Sem rótulo grudado na fatia: nome de categoria comprido
+              // ("Aplicações e Investimentos") vazava para fora do card.
+              // Legenda embaixo, com espaço próprio, não tem esse risco.
+              <ResponsiveContainer width="100%" height={320}>
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  <Pie data={pieData} cx="50%" cy="45%" outerRadius={90} dataKey="value" label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
                     {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip formatter={v => formatCurrency(v)} />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (

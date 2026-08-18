@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
-import { GRUPOS_BENS, CODIGOS_IMOVEL, CODIGOS_VEICULO, formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
+import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
 
 export default function BemModal({ bem, onSave, onClose }) {
   const { state, dispatch, addToast } = useData();
@@ -74,7 +74,7 @@ export default function BemModal({ bem, onSave, onClose }) {
 
   const isImovel = form.grupo === '01';
   const isVeiculo = form.grupo === '02';
-  const isParticipacao = form.grupo === '03';
+  const codigosDoGrupo = CODIGOS_POR_GRUPO[form.grupo] || [];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -88,25 +88,19 @@ export default function BemModal({ bem, onSave, onClose }) {
             <div className="form-row">
               <div className="form-group">
                 <label>Grupo</label>
-                <select className="form-control" value={form.grupo} onChange={e => upd('grupo', e.target.value)}>
+                <select
+                  className="form-control" value={form.grupo}
+                  onChange={e => setForm(prev => ({ ...prev, grupo: e.target.value, codigo_bem: '' }))}
+                >
                   {GRUPOS_BENS.map(g => <option key={g.codigo} value={g.codigo}>{g.codigo} - {g.nome}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label>Código do Bem</label>
-                {isImovel ? (
-                  <select className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)}>
-                    <option value="">Selecione...</option>
-                    {CODIGOS_IMOVEL.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
-                  </select>
-                ) : isVeiculo ? (
-                  <select className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)}>
-                    <option value="">Selecione...</option>
-                    {CODIGOS_VEICULO.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
-                  </select>
-                ) : (
-                  <input className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)} placeholder="Ex: 01, 02, 99" />
-                )}
+                <select className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)}>
+                  <option value="">Selecione...</option>
+                  {codigosDoGrupo.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
+                </select>
               </div>
               <div className="form-group">
                 <label>Beneficiário</label>

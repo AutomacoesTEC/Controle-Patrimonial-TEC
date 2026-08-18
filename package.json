@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "electron:start": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "electron:dev": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"npm run electron:start\"",
     "electron:build": "npm run build && electron-builder"
@@ -19,6 +20,7 @@
     "electron-builder": "^26.15.3",
     "typescript": "~6.0.2",
     "vite": "^8.2.1",
+    "vitest": "^4.1.10",
     "wait-on": "^9.1.0"
   },
   "dependencies": {
