@@ -97,7 +97,7 @@ export default function Dashboard() {
           <div className="card">
             <div className="empty-state" style={{ padding: '60px 20px' }}>
               <p style={{ fontSize: '16px', fontWeight: 600 }}>Nenhum dado ainda</p>
-              <p>Importe a declaração do ano anterior na aba <strong>Importar</strong> para começar — a partir daí o dashboard mostra evolução, demonstrativo de conciliação e consulta por qualquer período.</p>
+              <p>Importe a declaração do ano anterior na aba <strong>Importar</strong> para começar. A partir daí o dashboard mostra evolução, demonstrativo de conciliação e consulta por qualquer período.</p>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function Dashboard() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Dashboard</h2>
-          <p>Consulta livre por período — de {formatDate(de)} até {formatDate(ate)}</p>
+          <p>Período de {formatDate(de)} até {formatDate(ate)}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-success" onClick={handleExport}>
@@ -136,9 +136,14 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          {demo && demo.anosSemDado.length > 0 && (
+          {demo && demo.anosCobertos.length === 0 && (
+            <p style={{ fontSize: '13px', color: 'var(--accent-warning, #f59e0b)', marginTop: '12px', marginBottom: 0 }}>
+              Não há dados neste período. Ajuste as datas ou importe a declaração do ano correspondente na aba Importar.
+            </p>
+          )}
+          {demo && demo.anosCobertos.length > 0 && demo.anosSemDado.length > 0 && (
             <p style={{ fontSize: '12px', color: 'var(--accent-warning, #f59e0b)', marginTop: '12px', marginBottom: 0 }}>
-              Sem dado importado para {demo.anosSemDado.join(', ')} — esses anos entram como zero nos fluxos e não aparecem nos gráficos. O resultado cobre só {demo.anosCobertos.join(', ')}.
+              Sem dados de {demo.anosSemDado.join(', ')}. Esses anos ficam de fora das contas e dos gráficos.
             </p>
           )}
         </div>
@@ -147,7 +152,7 @@ export default function Dashboard() {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Demonstrativo de Conciliação Patrimonial</h3></div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '-8px', marginBottom: '16px' }}>
-            Mesma conta que a planilha de controle sempre fez: quanto o patrimônio variou tem que ser coberto pelo que entrou de rendimento e ganho, menos o que saiu em pagamento. O Saldo de Caixa no final é o número de conferência — perto de zero (ou do caixa/cofre que a usuária sabe que tem) indica que nada ficou de fora da declaração.
+            A mesma conta da planilha de controle: a variação do patrimônio precisa bater com o que entrou de rendimento e ganho, menos o que saiu em pagamento. O Saldo de Caixa no final serve para conferir: perto de zero (ou do valor que você sabe que tem em caixa) indica que nada ficou de fora.
           </p>
 
           <table className="demonstrativo-table">
@@ -177,7 +182,7 @@ export default function Dashboard() {
               <tr><td>Ganho/perda líquido de IRRF nas vendas do período ({demo.ganhos.vendas.length} venda(s))</td><td className={`currency ${demo.ganhos.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.ganhos.total)}</td></tr>
               {demo.ganhos.semIrrfCount > 0 && (
                 <tr><td colSpan={2} style={{ fontSize: '11px', color: 'var(--accent-warning, #f59e0b)', padding: '2px 12px 10px' }}>
-                  {demo.ganhos.semIrrfCount} venda(s) com ganho sem o IRRF informado — entrou pelo valor bruto, sem descontar. Edite a movimentação e preencha "IRRF pago sobre o ganho" para precisão.
+                  {demo.ganhos.semIrrfCount} venda(s) com ganho sem o IRRF informado entraram pelo valor bruto. Edite a movimentação e preencha "IRRF pago sobre o ganho" para precisão.
                 </td></tr>
               )}
 
