@@ -169,6 +169,25 @@ describe('IMPORT_DECLARACAO (import atômico com ano detectado no arquivo)', () 
     });
     expect(state.anoCalendario).toBe(2025);
   });
+
+  it('trocar de ano pelo import zera bens rurais/despesas gerais do ano antigo (o import não cobre isso, não pode vazar pro ano novo)', () => {
+    let state = {
+      ...initialState, anoCalendario: 2024,
+      bensRurais: [{ id: 1, discriminacao: 'Trator 2024' }],
+      pagamentosDiversos: [{ id: 1, descricao: 'Cartão 2024' }],
+      imoveisRurais: [{ id: 1, nomeLocalizacao: 'Fazenda X' }],
+      prejuizoRuralAcompensar: -500,
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 9, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [] },
+    });
+    expect(state.bensRurais).toHaveLength(0);
+    expect(state.pagamentosDiversos).toHaveLength(0);
+    // imóveis explorados e prejuízo a compensar atravessam anos, esses continuam
+    expect(state.imoveisRurais).toHaveLength(1);
+    expect(state.prejuizoRuralAcompensar).toBe(-500);
+  });
 });
 
 describe('DELETE_HISTORICO_ANO (excluir declaração importada/salva)', () => {
@@ -202,5 +221,106 @@ describe('SWITCH_ANO (seletor de ano da sidebar)', () => {
     const state = { ...initialState, anoCalendario: 2025, bens: [{ ...bemBase }] };
     const result = reducer(state, { type: 'SWITCH_ANO', payload: 2025 });
     expect(result).toBe(state); // mesma referência: reducer não gerou um novo objeto à toa
+  });
+});
+
+describe('Ganhos de Capital: valorVenda na movimentação de bem', () => {
+  it('venda parcial/total guarda valorVenda junto da movimentação, sem afetar o cálculo de situacao_atual', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }] };
+    state = reducer(state, {
+      type: 'REGISTRAR_MOVIMENTACAO_BEM',
+      payload: { bemId: 1, movimentacao: { tipo: 'venda_parcial', valor: 30000, valorVenda: 45000, data: '2025-06-01', descricao: 'venda 1/4' } },
+    });
+    // situacao_atual só reage ao `valor` (parcela do custo), não ao valorVenda
+    expect(state.bens[0].situacao_atual).toBe(100000);
+    expect(state.bens[0].movimentacoes[0].valorVenda).toBe(45000);
+  });
+});
+
+describe('Atividade Rural', () => {
+  it('ADD/UPDATE/DELETE_IMOVEL_RURAL', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_IMOVEL_RURAL', payload: { nomeLocalizacao: 'Fazenda X', area: 100, participacao: 100 } });
+    expect(state.imoveisRurais).toHaveLength(1);
+    const id = state.imoveisRurais[0].id;
+    state = reducer(state, { type: 'UPDATE_IMOVEL_RURAL', payload: { id, nomeLocalizacao: 'Fazenda X Y', area: 100, participacao: 100 } });
+    expect(state.imoveisRurais[0].nomeLocalizacao).toBe('Fazenda X Y');
+    state = reducer(state, { type: 'DELETE_IMOVEL_RURAL', payload: id });
+    expect(state.imoveisRurais).toHaveLength(0);
+  });
+
+  it('ADD/UPDATE/DELETE_BEM_RURAL e REGISTRAR_MOVIMENTACAO_BEM_RURAL reaproveitam a mesma lógica de bens comuns', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_BEM_RURAL', payload: { discriminacao: 'Trator', situacao_anterior: 30000, situacao_atual: 30000 } });
+    const id = state.bensRurais[0].id;
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM_RURAL', payload: { bemId: id, movimentacao: { tipo: 'benfeitoria', valor: 5000, data: '2025-03-01', descricao: 'reforma' } } });
+    expect(state.bensRurais[0].situacao_atual).toBe(35000);
+    state = reducer(state, { type: 'DELETE_BEM_RURAL', payload: id });
+    expect(state.bensRurais).toHaveLength(0);
+  });
+
+  it('ADD/UPDATE/DELETE_LANCAMENTO_RURAL', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_LANCAMENTO_RURAL', payload: { tipo: 'receita', valor: 1000, data: '2025-01-10', descricao: 'venda de milho' } });
+    expect(state.lancamentosRurais).toHaveLength(1);
+    const id = state.lancamentosRurais[0].id;
+    state = reducer(state, { type: 'DELETE_LANCAMENTO_RURAL', payload: id });
+    expect(state.lancamentosRurais).toHaveLength(0);
+  });
+
+  it('AJUSTAR_PREJUIZO_RURAL soma (prejuízo, negativo) ou subtrai (compensação, positivo) o saldo', () => {
+    let state = { ...initialState, prejuizoRuralAcompensar: -1000 };
+    state = reducer(state, { type: 'AJUSTAR_PREJUIZO_RURAL', payload: -500 }); // mais prejuízo
+    expect(state.prejuizoRuralAcompensar).toBe(-1500);
+    state = reducer(state, { type: 'AJUSTAR_PREJUIZO_RURAL', payload: 1500 }); // compensou tudo
+    expect(state.prejuizoRuralAcompensar).toBe(0);
+  });
+
+  it('ROLLOVER_ANO: resultado rural negativo do ano vira prejuízo a compensar; positivo não mexe no saldo sozinho', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025, prejuizoRuralAcompensar: -1000,
+      lancamentosRurais: [{ id: 1, tipo: 'receita', valor: 1000 }, { id: 2, tipo: 'despesa', valor: 4000 }], // resultado = -3000
+    };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.prejuizoRuralAcompensar).toBe(-4000); // -1000 + (-3000)
+    expect(state.lancamentosRurais).toHaveLength(0); // fluxo do ano zera
+
+    let state2 = {
+      ...initialState, anoCalendario: 2025, prejuizoRuralAcompensar: -1000,
+      lancamentosRurais: [{ id: 1, tipo: 'receita', valor: 5000 }, { id: 2, tipo: 'despesa', valor: 1000 }], // resultado = +4000 (lucro)
+    };
+    state2 = reducer(state2, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state2.prejuizoRuralAcompensar).toBe(-1000); // lucro não abate sozinho, precisa de AJUSTAR_PREJUIZO_RURAL
+  });
+
+  it('ROLLOVER_ANO: bens rurais viram situação anterior igual ao resto do app; imóveis explorados continuam os mesmos', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      bensRurais: [{ id: 1, discriminacao: 'Trator', situacao_anterior: 30000, situacao_atual: 35000 }],
+      imoveisRurais: [{ id: 1, nomeLocalizacao: 'Fazenda X' }],
+    };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.bensRurais[0].situacao_anterior).toBe(35000);
+    expect(state.bensRurais[0].situacao_atual).toBe(35000);
+    expect(state.imoveisRurais).toHaveLength(1); // não reseta: continua explorando a mesma fazenda
+  });
+});
+
+describe('Pagamentos Diversos (não é ficha da declaração, é controle de gasto geral)', () => {
+  it('ADD/UPDATE/DELETE_PAGAMENTO_DIVERSO', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_PAGAMENTO_DIVERSO', payload: { descricao: 'Cartão de crédito', valor: 1000 } });
+    expect(state.pagamentosDiversos).toHaveLength(1);
+    const id = state.pagamentosDiversos[0].id;
+    state = reducer(state, { type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { id, descricao: 'Cartão de crédito Nubank', valor: 1000 } });
+    expect(state.pagamentosDiversos[0].descricao).toBe('Cartão de crédito Nubank');
+    state = reducer(state, { type: 'DELETE_PAGAMENTO_DIVERSO', payload: id });
+    expect(state.pagamentosDiversos).toHaveLength(0);
+  });
+
+  it('ROLLOVER_ANO zera pagamentos diversos (é fluxo do ano, não saldo)', () => {
+    let state = { ...initialState, anoCalendario: 2025, pagamentosDiversos: [{ id: 1, descricao: 'x', valor: 100 }] };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.pagamentosDiversos).toHaveLength(0);
   });
 });

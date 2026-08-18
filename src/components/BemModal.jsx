@@ -1,35 +1,16 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
-import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
+import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency } from '../utils/formatters';
+import MovimentacaoBemForm from './MovimentacaoBemForm';
 
 export default function BemModal({ bem, onSave, onClose }) {
-  const { state, dispatch, addToast } = useData();
+  const { state } = useData();
   const isEditing = !!bem;
   // O valor atual muda por movimentação, não pelo formulário principal —
   // sempre ler do estado vivo, não do snapshot capturado na abertura do
   // modal, senão salvar o formulário depois de uma movimentação desfaria o
   // efeito dela.
   const liveBem = isEditing ? (state.bens.find(b => b.id === bem.id) || bem) : null;
-
-  const [movTipo, setMovTipo] = useState('venda_parcial');
-  const [movValor, setMovValor] = useState('');
-  const [movData, setMovData] = useState(new Date().toISOString().slice(0, 10));
-  const [movDescricao, setMovDescricao] = useState('');
-
-  const handleRegistrarMovimentacao = () => {
-    const valor = parseFloat(movValor) || 0;
-    if (!['venda_total', 'baixa'].includes(movTipo) && valor <= 0) {
-      alert('Informe um valor maior que zero para essa movimentação.');
-      return;
-    }
-    dispatch({
-      type: 'REGISTRAR_MOVIMENTACAO_BEM',
-      payload: { bemId: bem.id, movimentacao: { tipo: movTipo, valor, data: movData, descricao: movDescricao } },
-    });
-    addToast('Movimentação registrada.', 'success');
-    setMovValor('');
-    setMovDescricao('');
-  };
 
   const [form, setForm] = useState(bem || {
     grupo: '01',
@@ -149,65 +130,7 @@ export default function BemModal({ bem, onSave, onClose }) {
               </div>
             )}
 
-            {isEditing && (
-              <div style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                  Registrar movimentação
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0, marginBottom: '12px' }}>
-                  Vendeu parte, vendeu tudo, comprou mais, fez uma benfeitoria? Registre aqui: o valor atual do bem é recalculado a partir da movimentação, e fica guardado o motivo de cada mudança de valor.
-                </p>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Tipo de movimentação</label>
-                    <select className="form-control" value={movTipo} onChange={e => setMovTipo(e.target.value)}>
-                      {Object.entries(MOVIMENTACAO_TIPOS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                    </select>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
-                      {MOVIMENTACAO_TIPOS[movTipo].ajuda}
-                    </p>
-                  </div>
-                  <div className="form-group">
-                    <label>Data</label>
-                    <input className="form-control" type="date" value={movData} onChange={e => setMovData(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label>{movTipo === 'ajuste' ? 'Novo valor' : 'Valor da movimentação'}</label>
-                    <input
-                      className="form-control" type="number" step="0.01" value={movValor}
-                      onChange={e => setMovValor(e.target.value)}
-                      placeholder="0,00"
-                      disabled={movTipo === 'venda_total' || movTipo === 'baixa'}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Descrição da movimentação</label>
-                  <input className="form-control" value={movDescricao} onChange={e => setMovDescricao(e.target.value)} placeholder="Ex: venda de 1/3 do imóvel para fulano, reforma da cozinha..." />
-                </div>
-                <button type="button" className="btn btn-sm btn-primary" onClick={handleRegistrarMovimentacao}>
-                  ✅ Registrar movimentação
-                </button>
-
-                {(liveBem.movimentacoes || []).length > 0 && (
-                  <div style={{ marginTop: '16px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                      Movimentações já registradas
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {[...liveBem.movimentacoes].reverse().map(m => (
-                        <div key={m.id} style={{ fontSize: '12px', padding: '8px 10px', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                          <strong>{MOVIMENTACAO_TIPOS[m.tipo]?.label || m.tipo}</strong>
-                          {' '}em {formatDate(m.data)}
-                          {m.valor > 0 && <>, {formatCurrency(m.valor)}</>}
-                          {m.descricao && <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>{m.descricao}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            {isEditing && <MovimentacaoBemForm bem={liveBem} actionType="REGISTRAR_MOVIMENTACAO_BEM" />}
 
             {isImovel && (
               <>

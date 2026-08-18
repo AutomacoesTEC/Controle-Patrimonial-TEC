@@ -7,6 +7,9 @@ import BensPage from './pages/BensPage';
 import DividasPage from './pages/DividasPage';
 import RendimentosPage from './pages/RendimentosPage';
 import PagamentosPage from './pages/PagamentosPage';
+import PagamentosDiversosPage from './pages/PagamentosDiversosPage';
+import AtividadeRuralPage from './pages/AtividadeRuralPage';
+import GanhosCapitalPage from './pages/GanhosCapitalPage';
 import RelatorioPage from './pages/RelatorioPage';
 import HistoricoPage from './pages/HistoricoPage';
 
@@ -33,6 +36,9 @@ function AppContent() {
       case 'dividas': return <DividasPage />;
       case 'rendimentos': return <RendimentosPage />;
       case 'pagamentos': return <PagamentosPage />;
+      case 'pagamentosDiversos': return <PagamentosDiversosPage />;
+      case 'atividadeRural': return <AtividadeRuralPage />;
+      case 'ganhosCapital': return <GanhosCapitalPage />;
       case 'relatorio': return <RelatorioPage />;
       case 'historico': return <HistoricoPage />;
       default: return <Dashboard />;

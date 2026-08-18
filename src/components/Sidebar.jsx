@@ -1,4 +1,5 @@
 import { useData } from '../store/DataContext';
+import { hasWorkingData as hasWorkingDataCheck } from '../store/reducer';
 
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', icon: '📥', section: 'VISÃO GERAL' },
@@ -7,7 +8,10 @@ const navItems = [
   { id: 'dividas', label: 'Dívidas e Ônus', icon: '💳', section: 'CADASTROS' },
   { id: 'rendimentos', label: 'Rendimentos', icon: '💰', section: 'CADASTROS' },
   { id: 'pagamentos', label: 'Pagamentos', icon: '🧾', section: 'CADASTROS' },
+  { id: 'pagamentosDiversos', label: 'Despesas Gerais', icon: '🧮', section: 'CADASTROS' },
+  { id: 'atividadeRural', label: 'Atividade Rural', icon: '🌾', section: 'ATIVIDADE RURAL' },
   { id: 'relatorio', label: 'Relatório IRPF', icon: '📋', section: 'RELATÓRIOS' },
+  { id: 'ganhosCapital', label: 'Ganhos de Capital', icon: '📈', section: 'RELATÓRIOS' },
   { id: 'historico', label: 'Histórico', icon: '🗂️', section: 'RELATÓRIOS' },
 ];
 
@@ -17,7 +21,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
 
   const anosComDados = [...new Set([...Object.keys(state.historico).map(Number), state.anoCalendario])].sort((a, b) => a - b);
   const proximoAno = Math.max(...anosComDados) + 1;
-  const hasWorkingData = state.bens.length > 0 || state.dividas.length > 0 || state.rendimentos.length > 0 || state.pagamentos.length > 0;
+  const hasWorkingData = hasWorkingDataCheck(state);
 
   const avancarAno = () => {
     const confirmado = !hasWorkingData || confirm(

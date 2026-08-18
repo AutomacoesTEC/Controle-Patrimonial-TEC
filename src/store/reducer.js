@@ -10,7 +10,19 @@ export const initialState = {
   dividas: [],
   rendimentos: [],
   pagamentos: [],
-  atividadeRural: null,
+  // Atividade Rural: ficha própria da declaração, fora do escopo de
+  // bens/dívidas/rendimentos "comuns". imoveisRurais e bensRurais são
+  // listas à parte (não entram em Bens e Direitos); lancamentosRurais é o
+  // fluxo de receita/despesa do ano (log conforme acontece, como o resto
+  // do app); prejuizoRuralAcompensar é um saldo que atravessa anos.
+  imoveisRurais: [],
+  bensRurais: [],
+  lancamentosRurais: [],
+  prejuizoRuralAcompensar: 0,
+  // Despesas gerais (cartão, seguro, IPVA...) que NÃO são a ficha
+  // "Pagamentos Efetuados" da declaração (essa é só o que é dedutível) —
+  // fica separada de propósito.
+  pagamentosDiversos: [],
   historico: {},
   toasts: [],
 };
@@ -21,12 +33,26 @@ export const snapshotYear = (state) => ({
   rendimentos: state.rendimentos,
   pagamentos: state.pagamentos,
   contribuinte: state.contribuinte,
+  imoveisRurais: state.imoveisRurais,
+  bensRurais: state.bensRurais,
+  lancamentosRurais: state.lancamentosRurais,
+  prejuizoRuralAcompensar: state.prejuizoRuralAcompensar,
+  pagamentosDiversos: state.pagamentosDiversos,
   savedAt: new Date().toISOString(),
 });
 export const hasWorkingData = (state) =>
   state.bens.length > 0 || state.dividas.length > 0 ||
-  state.rendimentos.length > 0 || state.pagamentos.length > 0 || !!state.contribuinte;
-export const blankYear = { bens: [], dividas: [], rendimentos: [], pagamentos: [], contribuinte: null };
+  state.rendimentos.length > 0 || state.pagamentos.length > 0 ||
+  (state.bensRurais || []).length > 0 || (state.pagamentosDiversos || []).length > 0 ||
+  !!state.contribuinte;
+export const blankYear = {
+  bens: [], dividas: [], rendimentos: [], pagamentos: [], contribuinte: null,
+  bensRurais: [], lancamentosRurais: [], pagamentosDiversos: [],
+  // imoveisRurais e prejuizoRuralAcompensar NÃO entram aqui de propósito:
+  // imóveis explorados normalmente continuam os mesmos de um ano pro
+  // outro (ver ROLLOVER_ANO) e o prejuízo é um saldo que atravessa anos,
+  // não algo que zera ao começar um ano em branco.
+};
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -102,14 +128,27 @@ export function reducer(state, action) {
       const existente = historico[novoAno];
       if (existente) return { ...state, ...existente, historico, anoCalendario: novoAno };
       let seq = Date.now();
+      // Se a atividade rural deu prejuízo no ano que está fechando, esse
+      // prejuízo se soma ao saldo a compensar (regra real: prejuízo de
+      // atividade rural pode ser compensado nos anos seguintes). Se deu
+      // lucro, o saldo a compensar não muda sozinho — quanto compensar
+      // desse lucro é escolha da usuária (ver AJUSTAR_PREJUIZO_RURAL).
+      const resultadoRuralDoAno = (state.lancamentosRurais || []).reduce(
+        (s, l) => s + (l.tipo === 'receita' ? l.valor : -l.valor), 0
+      );
+      const prejuizoRuralAcompensar = state.prejuizoRuralAcompensar + Math.min(0, resultadoRuralDoAno);
       return {
         ...state,
         historico,
         anoCalendario: novoAno,
         bens: state.bens.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual })),
         dividas: state.dividas.map(d => ({ ...d, id: seq++, situacao_anterior: d.situacao_atual, valor_pago: 0 })),
+        bensRurais: state.bensRurais.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual })),
         rendimentos: [],
         pagamentos: [],
+        lancamentosRurais: [],
+        pagamentosDiversos: [],
+        prejuizoRuralAcompensar,
       };
     }
     // Import atômico de uma declaração já parseada (.DBK/.DEC ou PDF). Se o
@@ -136,17 +175,33 @@ export function reducer(state, action) {
         dividas: (dividas && dividas.length > 0) ? dividas : base.dividas,
         rendimentos: (rendimentos && rendimentos.length > 0) ? rendimentos : base.rendimentos,
         pagamentos: (pagamentos && pagamentos.length > 0) ? pagamentos : base.pagamentos,
+        // O import não traz nada de atividade rural (fora do escopo dos
+        // parsers) nem de despesas gerais — ao trocar de ano, essas listas
+        // têm que zerar como as demais, senão o ano novo nasceria com bens
+        // rurais/despesas de um ano completamente diferente coladas nele.
+        // imoveisRurais e prejuizoRuralAcompensar continuam como estão
+        // (mesmo raciocínio do ROLLOVER_ANO/SWITCH_ANO: são coisas que
+        // atravessam anos, não um fluxo do período).
+        bensRurais: base.bensRurais,
+        lancamentosRurais: base.lancamentosRurais,
+        pagamentosDiversos: base.pagamentosDiversos,
       };
     }
     // Registra uma movimentação (venda total/parcial, compra, benfeitoria,
     // baixa, ajuste) num bem existente: guarda a movimentação no histórico
     // do próprio bem (rastreável, não é uma sobrescrita muda) e recalcula a
-    // situação atual a partir dela.
-    case 'REGISTRAR_MOVIMENTACAO_BEM': {
+    // situação atual a partir dela. `colecao` deixa reaproveitar a mesma
+    // lógica para os bens da atividade rural (ver REGISTRAR_MOVIMENTACAO_BEM_RURAL).
+    // Vendas podem trazer `valorVenda` (preço recebido, diferente do
+    // `valor` = parcela do custo que sai) — é o dado que a aba Ganhos de
+    // Capital usa pra calcular ganho/perda automaticamente.
+    case 'REGISTRAR_MOVIMENTACAO_BEM':
+    case 'REGISTRAR_MOVIMENTACAO_BEM_RURAL': {
       const { bemId, movimentacao } = action.payload;
+      const colecao = action.type === 'REGISTRAR_MOVIMENTACAO_BEM_RURAL' ? 'bensRurais' : 'bens';
       return {
         ...state,
-        bens: state.bens.map(b => {
+        [colecao]: state[colecao].map(b => {
           if (b.id !== bemId) return b;
           const mov = { ...movimentacao, id: Date.now() };
           let situacao_atual = b.situacao_atual;
@@ -158,6 +213,43 @@ export function reducer(state, action) {
         }),
       };
     }
+    case 'ADD_BEM_RURAL':
+      return { ...state, bensRurais: [...state.bensRurais, { ...action.payload, id: Date.now() }] };
+    case 'UPDATE_BEM_RURAL':
+      return { ...state, bensRurais: state.bensRurais.map(b => b.id === action.payload.id ? action.payload : b) };
+    case 'DELETE_BEM_RURAL':
+      return { ...state, bensRurais: state.bensRurais.filter(b => b.id !== action.payload) };
+
+    case 'ADD_IMOVEL_RURAL':
+      return { ...state, imoveisRurais: [...state.imoveisRurais, { ...action.payload, id: Date.now() }] };
+    case 'UPDATE_IMOVEL_RURAL':
+      return { ...state, imoveisRurais: state.imoveisRurais.map(i => i.id === action.payload.id ? action.payload : i) };
+    case 'DELETE_IMOVEL_RURAL':
+      return { ...state, imoveisRurais: state.imoveisRurais.filter(i => i.id !== action.payload) };
+
+    // Receita/despesa da atividade rural, lançada conforme acontece (como
+    // o resto do app) em vez de preencher um formulário anual de uma vez.
+    case 'ADD_LANCAMENTO_RURAL':
+      return { ...state, lancamentosRurais: [...state.lancamentosRurais, { ...action.payload, id: Date.now() }] };
+    case 'UPDATE_LANCAMENTO_RURAL':
+      return { ...state, lancamentosRurais: state.lancamentosRurais.map(l => l.id === action.payload.id ? action.payload : l) };
+    case 'DELETE_LANCAMENTO_RURAL':
+      return { ...state, lancamentosRurais: state.lancamentosRurais.filter(l => l.id !== action.payload) };
+
+    // Ajusta o saldo de prejuízo da atividade rural a compensar (soma ou
+    // subtrai o valor informado). Fica como ação explícita porque quanto
+    // compensar num ano de lucro é uma escolha da usuária, não uma conta
+    // automática — não temos confirmação da regra atual de limite de
+    // compensação para aplicar isso sozinho.
+    case 'AJUSTAR_PREJUIZO_RURAL':
+      return { ...state, prejuizoRuralAcompensar: state.prejuizoRuralAcompensar + action.payload };
+
+    case 'ADD_PAGAMENTO_DIVERSO':
+      return { ...state, pagamentosDiversos: [...state.pagamentosDiversos, { ...action.payload, id: Date.now() }] };
+    case 'UPDATE_PAGAMENTO_DIVERSO':
+      return { ...state, pagamentosDiversos: state.pagamentosDiversos.map(p => p.id === action.payload.id ? action.payload : p) };
+    case 'DELETE_PAGAMENTO_DIVERSO':
+      return { ...state, pagamentosDiversos: state.pagamentosDiversos.filter(p => p.id !== action.payload) };
     // Exclui um ano inteiro do histórico (declaração importada/salva). Se for
     // o ano corrente sendo exibido, limpa também a tela, senão ficaria um
     // ano "fantasma" sem registro nenhum no histórico.

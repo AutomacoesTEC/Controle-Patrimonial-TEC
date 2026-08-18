@@ -1,0 +1,107 @@
+import { useState } from 'react';
+import { useData } from '../store/DataContext';
+import { formatCurrency } from '../utils/formatters';
+
+const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: new Date().toISOString().slice(0, 10) };
+
+export default function PagamentosDiversosPage() {
+  const { state, dispatch, addToast } = useData();
+  const { pagamentosDiversos } = state;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(FORM_VAZIO);
+  const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
+  const abrirEdicao = (p) => {
+    setEditingId(p.id);
+    setForm({ descricao: p.descricao || '', categoria: p.categoria || '', valor: p.valor, data: p.data || '' });
+    setModalOpen(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    const payload = { ...form, valor: parseFloat(form.valor) || 0 };
+    if (editingId) {
+      dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
+      addToast('Despesa atualizada!', 'success');
+    } else {
+      dispatch({ type: 'ADD_PAGAMENTO_DIVERSO', payload });
+      addToast('Despesa cadastrada!', 'success');
+    }
+    setModalOpen(false);
+  };
+
+  const handleDelete = (p) => {
+    if (confirm(`Excluir "${p.descricao || 'esta despesa'}" (${formatCurrency(p.valor)})?\n\nEssa ação não pode ser desfeita.`)) {
+      dispatch({ type: 'DELETE_PAGAMENTO_DIVERSO', payload: p.id });
+      addToast('Despesa excluída', 'info');
+    }
+  };
+
+  const total = pagamentosDiversos.reduce((s, p) => s + (parseFloat(p.valor) || 0), 0);
+
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-header-left">
+          <h2>Despesas Gerais</h2>
+          <p>Cartão de crédito, seguro, condomínio, IPVA e outros gastos do ano. Não é ficha da declaração (não confundir com Pagamentos Efetuados, que é só o dedutível), fica aqui para fechar a conta do fluxo de caixa.</p>
+        </div>
+        <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Despesa</button></div>
+      </div>
+      <div className="page-body animate-in">
+        <div className="table-container">
+          <table>
+            <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
+            <tbody>
+              {pagamentosDiversos.length === 0 ? (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma despesa cadastrada.</td></tr>
+              ) : pagamentosDiversos.map(p => (
+                <tr key={p.id}>
+                  <td>{p.descricao}</td>
+                  <td>{p.categoria}</td>
+                  <td>{p.data ? new Date(p.data + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor)}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(p)}>✏️ Editar</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p)}>🗑️ Excluir</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            {pagamentosDiversos.length > 0 && (
+              <tfoot>
+                <tr style={{ background: 'var(--bg-secondary)' }}>
+                  <td colSpan={3} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAL</td>
+                  <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(total)}</td>
+                  <td style={{ borderTop: '2px solid var(--border-color)' }}></td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
+      {modalOpen && (
+        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header"><h3>{editingId ? 'Editar Despesa' : 'Nova Despesa'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
+            <form onSubmit={handleSave}>
+              <div className="modal-body">
+                <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: Cartão de crédito Nubank" /></div>
+                <div className="form-row">
+                  <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>
+                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
+                  <div className="form-group"><label>Valor</label><input className="form-control" type="number" step="0.01" value={form.valor} onChange={e => upd('valor', e.target.value)} /></div>
+                </div>
+              </div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">💾 Salvar</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
