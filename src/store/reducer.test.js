@@ -190,6 +190,35 @@ describe('IMPORT_DECLARACAO (import atômico com ano detectado no arquivo)', () 
   });
 });
 
+describe('origemAnoAtual (declaração importada x ano avançado manualmente)', () => {
+  it('IMPORT_DECLARACAO marca o ano como importado', () => {
+    let state = { ...initialState };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [] },
+    });
+    expect(state.origemAnoAtual).toBe('importacao');
+  });
+
+  it('ROLLOVER_ANO pra um ano novo (nunca importado) marca como manual', () => {
+    let state = { ...initialState, anoCalendario: 2025, origemAnoAtual: 'importacao', bens: [{ ...bemBase }] };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.origemAnoAtual).toBe('manual');
+  });
+
+  it('trocar de ano e voltar restaura a origem de cada ano a partir do que foi arquivado', () => {
+    let state = { ...initialState, anoCalendario: 2025, origemAnoAtual: 'importacao', bens: [{ ...bemBase }] };
+    // avança pra um ano novo, manual
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.origemAnoAtual).toBe('manual');
+    expect(state.historico[2025].origem).toBe('importacao'); // 2025 arquivado guarda a origem certa
+    // volta pro 2025 (que era importado)
+    state = reducer(state, { type: 'SWITCH_ANO', payload: 2025 });
+    expect(state.origemAnoAtual).toBe('importacao');
+    expect(state.historico[2026].origem).toBe('manual'); // 2026 arquivado ao sair, guarda 'manual'
+  });
+});
+
 describe('DELETE_HISTORICO_ANO (excluir declaração importada/salva)', () => {
   it('remove um ano arquivado que não é o corrente, sem afetar a tela', () => {
     let state = {
@@ -322,5 +351,154 @@ describe('Pagamentos Diversos (não é ficha da declaração, é controle de gas
     let state = { ...initialState, anoCalendario: 2025, pagamentosDiversos: [{ id: 1, descricao: 'x', valor: 100 }] };
     state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
     expect(state.pagamentosDiversos).toHaveLength(0);
+  });
+});
+
+describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retificadora)', () => {
+  it('ADD_BEM/ADD_DIVIDA/ADD_RENDIMENTO/ADD_PAGAMENTO marcam origem: manual', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_BEM', payload: { discriminacao: 'Carro', situacao_atual: 50000 } });
+    state = reducer(state, { type: 'ADD_DIVIDA', payload: { discriminacao: 'Financiamento', situacao_atual: 1000 } });
+    state = reducer(state, { type: 'ADD_RENDIMENTO', payload: { tipo: 'tributavel_pj', valor: 500 } });
+    state = reducer(state, { type: 'ADD_PAGAMENTO', payload: { codigo: '21', valor_pago: 200 } });
+    expect(state.bens[0].origem).toBe('manual');
+    expect(state.dividas[0].origem).toBe('manual');
+    expect(state.rendimentos[0].origem).toBe('manual');
+    expect(state.pagamentos[0].origem).toBe('manual');
+  });
+
+  it('IMPORT_DECLARACAO marca origem: importacao em cada bem/dívida/rendimento/pagamento importado', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'IMPORT_DECLARACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: [{ id: 1, codigo: '21', discriminacao: 'Apto', situacao_anterior: 100, situacao_atual: 100 }],
+      dividas: [], rendimentos: [], pagamentos: [],
+    }});
+    expect(state.bens[0].origem).toBe('importacao');
+  });
+
+  it('UPDATE_BEM mescla em vez de substituir o item inteiro, preservando a origem já gravada', () => {
+    let state = { ...initialState, bens: [{ id: 1, codigo: '21', discriminacao: 'Apto', situacao_atual: 100, origem: 'importacao' }] };
+    state = reducer(state, { type: 'UPDATE_BEM', payload: { id: 1, discriminacao: 'Apto reformado' } });
+    expect(state.bens[0].origem).toBe('importacao');
+    expect(state.bens[0].discriminacao).toBe('Apto reformado');
+  });
+
+  it('vincula item da retificadora a um bem já importado: atualiza dados declarados, preserva id e movimentações, mantém o delta já movimentado', () => {
+    // Bem importado com situação anterior 100.000 e atual 130.000 (uma
+    // compra de 30.000 já lançada). A retificadora corrige a situação
+    // anterior para 90.000 — o delta de +30.000 da movimentação tem que
+    // continuar valendo em cima do novo valor de partida, não sumir.
+    const bemAntigo = {
+      id: 42, codigo_bem: '21', discriminacao: 'Apartamento', situacao_anterior: 100000, situacao_atual: 130000,
+      origem: 'importacao', movimentacoes: [{ id: 1, tipo: 'compra', valor: 30000 }],
+    };
+    let state = { ...initialState, anoCalendario: 2025, bens: [bemAntigo], dividas: [] };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: { vinculados: [{ idAntigo: 42, dados: { codigo_bem: '21', discriminacao: 'Apartamento (corrigido)', situacao_anterior: 90000 } }], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.bens).toHaveLength(1);
+    expect(state.bens[0].id).toBe(42);
+    expect(state.bens[0].discriminacao).toBe('Apartamento (corrigido)');
+    expect(state.bens[0].situacao_anterior).toBe(90000);
+    expect(state.bens[0].situacao_atual).toBe(120000); // 90.000 + delta de 30.000 preservado
+    expect(state.bens[0].movimentacoes).toHaveLength(1);
+  });
+
+  it('item novo da retificadora entra como importação; item antigo em removerAntigos some; item manual não mencionado fica intocado', () => {
+    const bemManual = { id: 1, codigo_bem: '99', discriminacao: 'Terreno cadastrado à mão', situacao_atual: 5000, origem: 'manual' };
+    const bemOrfao = { id: 2, codigo_bem: '21', discriminacao: 'Item que saiu da retificadora', situacao_atual: 1000, origem: 'importacao', movimentacoes: [] };
+    let state = { ...initialState, anoCalendario: 2025, bens: [bemManual, bemOrfao] };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: {
+        vinculados: [],
+        novos: [{ codigo_bem: '12', discriminacao: 'Bem novo na retificadora', situacao_anterior: 8000, situacao_atual: 8000 }],
+        removerAntigos: [2],
+      },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.bens).toHaveLength(2);
+    expect(state.bens.find(b => b.id === 1)).toEqual(bemManual);
+    expect(state.bens.find(b => b.id === 2)).toBeUndefined();
+    const novo = state.bens.find(b => b.codigo_bem === '12');
+    expect(novo.origem).toBe('importacao');
+    expect(novo.discriminacao).toBe('Bem novo na retificadora');
+  });
+
+  it('rendimentos/pagamentos: substitui só os de origem importacao, preserva os manuais', () => {
+    const rendManual = { id: 1, tipo: 'isento', valor: 300, origem: 'manual' };
+    const rendImportadoAntigo = { id: 2, tipo: 'tributavel_pj', valor: 1000, origem: 'importacao' };
+    let state = { ...initialState, anoCalendario: 2025, rendimentos: [rendManual, rendImportadoAntigo] };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [{ tipo: 'tributavel_pj', valor: 1200 }],
+      pagamentos: [],
+    }});
+    expect(state.rendimentos).toHaveLength(2);
+    expect(state.rendimentos.find(r => r.id === 1)).toEqual(rendManual);
+    const novo = state.rendimentos.find(r => r.origem === 'importacao');
+    expect(novo.valor).toBe(1200);
+  });
+});
+
+describe('titular e dependentes (cadastro manual)', () => {
+  it('SET_CONTRIBUINTE substitui o titular', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'SET_CONTRIBUINTE', payload: { nome: 'Fulano', cpf: '11111111111' } });
+    expect(state.contribuinte).toEqual({ nome: 'Fulano', cpf: '11111111111' });
+  });
+
+  it('ADD/UPDATE/DELETE_DEPENDENTE seguem o mesmo padrão de bens/dívidas', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_DEPENDENTE', payload: { nome: 'Filho', cpf: '', dataNascimento: '2015-01-01', parentesco: '21' } });
+    expect(state.dependentes).toHaveLength(1);
+    const id = state.dependentes[0].id;
+    state = reducer(state, { type: 'UPDATE_DEPENDENTE', payload: { id, nome: 'Filho Corrigido' } });
+    expect(state.dependentes[0].nome).toBe('Filho Corrigido');
+    state = reducer(state, { type: 'DELETE_DEPENDENTE', payload: id });
+    expect(state.dependentes).toHaveLength(0);
+  });
+
+  it('bug real: dependentes precisam estar no snapshot do ano, senão trocar de ano e voltar perde a lista', () => {
+    let state = { ...initialState, anoCalendario: 2025, dependentes: [{ id: 1, nome: 'Filho 2025' }] };
+    state = reducer(state, { type: 'SWITCH_ANO', payload: 2026 });
+    expect(state.dependentes).toEqual([]); // ano novo, em branco
+    state = reducer(state, { type: 'ADD_DEPENDENTE', payload: { nome: 'Filho 2026' } });
+    state = reducer(state, { type: 'SWITCH_ANO', payload: 2025 });
+    expect(state.dependentes).toEqual([{ id: 1, nome: 'Filho 2025' }]); // volta pro 2025, com o dependente de 2025 intacto
+  });
+
+  it('bug real: IMPORT_DECLARACAO de um titular DIFERENTE não pode deixar o dependente do titular anterior grudado', () => {
+    let state = { ...initialState, anoCalendario: 2025, contribuinte: { cpf: '11111111111', nome: 'Fulano' }, dependentes: [{ id: 1, nome: 'Filho de Fulano' }] };
+    state = reducer(state, { type: 'IMPORT_DECLARACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '99999999999', nome: 'Cicrano' },
+      dependentes: [], // ImportPage manda vazio explicitamente quando detecta titular diferente
+      bens: [], dividas: [], rendimentos: [], pagamentos: [],
+    }});
+    expect(state.contribuinte).toEqual({ cpf: '99999999999', nome: 'Cicrano' });
+    expect(state.dependentes).toEqual([]);
+  });
+
+  it('IMPORT_DECLARACAO preserva os dependentes já cadastrados no ano de destino (import não traz dependentes)', () => {
+    let state = { ...initialState, anoCalendario: 2025, dependentes: [{ id: 1, nome: 'Filho' }] };
+    state = reducer(state, { type: 'IMPORT_DECLARACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: [{ id: 1, codigo_bem: '21', situacao_anterior: 100, situacao_atual: 100 }],
+      dividas: [], rendimentos: [], pagamentos: [],
+    }});
+    expect(state.dependentes).toEqual([{ id: 1, nome: 'Filho' }]);
   });
 });
