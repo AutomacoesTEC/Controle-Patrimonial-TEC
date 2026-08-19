@@ -4,6 +4,7 @@ import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
   { id: 'dashboard', label: 'Dashboard', short: 'DB', section: 'VISÃO GERAL' },
+  { id: 'titular', label: 'Titular e Dependentes', short: 'TD', section: 'CADASTROS' },
   { id: 'bens', label: 'Bens e Direitos', short: 'BE', section: 'CADASTROS' },
   { id: 'dividas', label: 'Dívidas e Ônus', short: 'DV', section: 'CADASTROS' },
   { id: 'rendimentos', label: 'Rendimentos', short: 'RE', section: 'CADASTROS' },
@@ -12,10 +13,10 @@ const navItems = [
   { id: 'atividadeRural', label: 'Atividade Rural', short: 'AR', section: 'ATIVIDADE RURAL' },
   { id: 'relatorio', label: 'Relatório IRPF', short: 'RL', section: 'RELATÓRIOS' },
   { id: 'ganhosCapital', label: 'Ganhos de Capital', short: 'GC', section: 'RELATÓRIOS' },
-  { id: 'historico', label: 'Histórico', short: 'HS', section: 'RELATÓRIOS' },
+  { id: 'historico', label: 'Histórico de Alterações', short: 'HS', section: 'RELATÓRIOS' },
 ];
 
-export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed }) {
+export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed, onTrocarPerfil }) {
   const { state, dispatch, addToast } = useData();
   let lastSection = '';
 
@@ -26,19 +27,6 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
     ...Object.keys(state.historico).map(Number).filter(y => snapshotHasData(state.historico[y])),
     ...(hasWorkingDataCheck(state) && state.anoCalendario != null ? [state.anoCalendario] : []),
   ])].sort((a, b) => a - b);
-  const proximoAno = anosComDados.length > 0 ? Math.max(...anosComDados) + 1 : new Date().getFullYear();
-  const hasWorkingData = hasWorkingDataCheck(state);
-
-  const avancarAno = () => {
-    const confirmado = !hasWorkingData || state.anoCalendario == null || confirm(
-      `Iniciar o ano-calendário ${proximoAno}?\n\n` +
-      `A situação em 31/12/${state.anoCalendario} de cada bem e dívida vira a situação anterior de ${proximoAno}. ` +
-      `Os valores atuais começam iguais, até você registrar uma movimentação real durante o ano.`
-    );
-    if (!confirmado) return;
-    dispatch({ type: 'ROLLOVER_ANO', payload: proximoAno });
-    addToast(`Ano-calendário ${proximoAno} iniciado.`, 'success');
-  };
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -55,10 +43,20 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
           {!collapsed && (
             <div className="logo-text">
               <h1>CP-TEC</h1>
-              <span>Variação Patrimonial · IRPF</span>
+              <span>{state.contribuinte?.nome || 'Variação Patrimonial · IRPF'}</span>
             </div>
           )}
         </div>
+        {!collapsed && (
+          <button
+            className="btn btn-sm btn-secondary"
+            style={{ width: '100%', marginTop: '10px' }}
+            onClick={onTrocarPerfil}
+            title="Voltar para a tela de seleção de perfil"
+          >
+            Trocar Perfil
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav">
@@ -81,58 +79,40 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       </nav>
 
       <div className="sidebar-footer">
-        {state.anoCalendario == null ? (
-          // Onboarding: nenhum ano definido ainda. O caminho principal é
-          // importar a declaração do ano anterior (define o ano sozinho);
-          // quem preferir pode começar cadastrando à mão no ano corrente.
-          collapsed ? null : (
-            <>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px' }}>
-                Importe a primeira declaração para definir o ano-calendário, ou comece cadastrando à mão:
-              </p>
-              <button
-                className="btn btn-sm btn-secondary"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={avancarAno}
-              >
-                Começar pelo ano {proximoAno}
-              </button>
-            </>
-          )
-        ) : collapsed ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-            <button className="btn btn-sm btn-secondary" title={`Avançar para ${proximoAno}`} onClick={avancarAno}>→</button>
-          </div>
-        ) : (
-          <>
-            <div className="year-selector">
-              <select
-                value={state.anoCalendario}
-                onChange={e => {
-                  const novoAno = parseInt(e.target.value);
-                  if (novoAno === state.anoCalendario) return;
-                  dispatch({ type: 'SWITCH_ANO', payload: novoAno });
-                  addToast(`Ano-calendário alterado para ${novoAno}`, 'info');
-                }}
-              >
-                {/* Só lista os anos que realmente têm dado (salvo no histórico
-                    ou sendo editado agora). Uma lista fixa de anos que não
-                    existem só confundia: nada para escolher, nenhuma
-                    declaração ali. */}
-                {anosComDados.map(y => (
-                  <option key={y} value={y}>Ano-Calendário {y}</option>
-                ))}
-              </select>
-            </div>
-            <button
-              className="btn btn-sm btn-secondary"
-              style={{ width: '100%', marginTop: '8px', justifyContent: 'center' }}
-              title={`Fecha ${state.anoCalendario} e inicia ${proximoAno} trazendo o saldo final como situação inicial`}
-              onClick={avancarAno}
+        {!collapsed && (
+          <div className="year-selector">
+            <select
+              value={state.anoCalendario ?? ''}
+              onChange={e => {
+                const novoAno = parseInt(e.target.value);
+                // Sem dado, o valor do "option" vazio é "" — parseInt vira
+                // NaN, não um ano de verdade. Sem essa checagem, escolher
+                // essa linha (que só existe pra confirmar que a lista abriu,
+                // não pra ser selecionável) disparava SWITCH_ANO com NaN.
+                if (Number.isNaN(novoAno) || novoAno === state.anoCalendario) return;
+                dispatch({ type: 'SWITCH_ANO', payload: novoAno });
+                addToast(`Ano-calendário alterado para ${novoAno}`, 'info');
+              }}
             >
-              Avançar para {proximoAno}
-            </button>
-          </>
+              {/* Acompanha os dados que o app realmente tem: nenhum ano
+                  cadastrado ainda, nenhuma opção pra escolher — o primeiro
+                  ano nasce sozinho ao importar uma declaração ou ao criar o
+                  primeiro registro em qualquer cadastro (ver
+                  AnoCalendarioModal, que já faz o ROLLOVER_ANO sozinho —
+                  não precisa de um botão "Avançar" à parte na sidebar). Sem
+                  `disabled`: um select desabilitado não abre a lista ao
+                  clicar (parecia que o clique não fazia nada) — melhor
+                  deixar clicável e mostrar a própria ausência de dado como
+                  a única linha da lista. */}
+              {anosComDados.length === 0 ? (
+                <option value="">Nenhum dado disponível</option>
+              ) : (
+                anosComDados.map(y => (
+                  <option key={y} value={y}>Ano-Calendário {y}</option>
+                ))
+              )}
+            </select>
+          </div>
         )}
       </div>
     </aside>

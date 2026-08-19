@@ -294,3 +294,13 @@ export const CODIGOS_POR_GRUPO = {
 // Mantidos por compatibilidade com quem já importava estes nomes.
 export const CODIGOS_IMOVEL = CODIGOS_POR_GRUPO['01'];
 export const CODIGOS_VEICULO = CODIGOS_POR_GRUPO['02'];
+
+// Duas letras pra identificar um perfil visualmente sem depender de foto
+// (avatar da tela de seleção/desbloqueio de perfil): iniciais do primeiro
+// e do último nome, ou as duas primeiras letras se só houver uma palavra.
+export function iniciaisNome(nome) {
+  const partes = (nome || '').trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return '?';
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
