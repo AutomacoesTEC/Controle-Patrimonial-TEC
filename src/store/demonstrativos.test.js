@@ -145,6 +145,44 @@ describe('situacaoBemAteData — reconstrução de bem por data', () => {
     expect(situacaoBemAteData(bemVendido, '2025-05-14')).toBe(1000);
     expect(situacaoBemAteData(bemVendido, '2025-05-15')).toBe(0);
   });
+
+  // Bug real (achado testando o Dashboard com dado de verdade): um bem
+  // cadastrado direto com anterior≠atual (ex.: veio de importação, ou
+  // digitou o valor final na hora de cadastrar) e que DEPOIS recebe uma
+  // movimentação datada — a reconstrução esquecia esse salto inicial sem
+  // data assim que existia QUALQUER movimentação, porque só olhava as
+  // movimentações registradas partindo de situacao_anterior.
+  test('bug real: salto inicial sem data não some quando o bem também tem movimentação depois', () => {
+    const bemComSaltoEMovimentacao = {
+      situacao_anterior: 0,
+      situacao_atual: 150000, // 0 -> 100000 (cadastro direto) -> 150000 (+50000 comprado depois)
+      movimentacoes: [{ tipo: 'compra', valor: 50000, data: '2025-06-15' }],
+    };
+    // "ate" antes da movimentação: já conta o salto sem data (100000), a
+    // compra de 15/06 ainda não entra.
+    expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-03-01', 'ate')).toBe(100000);
+    // "ate" depois da movimentação: bate com o valor real, 150000.
+    expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-12-31', 'ate')).toBe(150000);
+    // "de": convenção conservadora de sempre, nem o salto nem a compra
+    // ainda aconteceram.
+    expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-01-01', 'de')).toBe(0);
+  });
+
+  // Bug real (reportado pela usuária): selecionar De=01/01/2026 e cadastrar
+  // algo NAQUELE mesmo dia não pode sumir dentro do "saldo anterior" — senão
+  // a variação do período fica menor que a de verdade, escondendo um
+  // lançamento que devia contar. "De" precisa ler como a véspera (a real
+  // fronteira do período), não o próprio dia.
+  test('bug real: movimentação datada exatamente em "De" conta como variação, não como saldo anterior', () => {
+    const bem = {
+      situacao_anterior: 100000,
+      situacao_atual: 130000,
+      movimentacoes: [{ tipo: 'compra', valor: 30000, data: '2026-01-01' }],
+    };
+    expect(situacaoBemAteData(bem, '2026-01-01', 'de')).toBe(100000); // véspera: a compra ainda não entra
+    expect(situacaoBemAteData(bem, '2026-01-01', 'ate')).toBe(130000); // "ate" no mesmo dia já inclui
+    expect(situacaoBemAteData(bem, '2026-08-19', 'ate')).toBe(130000);
+  });
 });
 
 describe('totalBensAteData', () => {

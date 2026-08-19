@@ -141,6 +141,36 @@ describe('serieEvolucao — gráfico só com anos reais', () => {
     expect(pontos[0].liquido).toBe(100000 - 50000);
     expect(pontos[1].liquido).toBe(130000 - 35000);
   });
+
+  // Dentro de um ano só (o caso comum, já que o Dashboard abre no
+  // ano-calendário selecionado): granularidade mensal, senão o período
+  // inteiro virava 1 ponto só (sempre em "Até", ignorando "De") e o gráfico
+  // parecia não acompanhar as datas escolhidas.
+  test('dentro do mesmo ano, um ponto por mês entre De e Até', () => {
+    const s = estadoDoisAnos();
+    const pontos = serieEvolucao(s, '2025-01-01', '2025-12-31');
+    expect(pontos.length).toBe(13); // 01/01 + 12 fins de mês
+    expect(pontos[0].data).toBe('2025-01-01');
+    expect(pontos[0].bens).toBe(100000);
+    expect(pontos[0].dividas).toBe(50000);
+    expect(pontos[pontos.length - 1].data).toBe('2025-12-31');
+    expect(pontos[pontos.length - 1].bens).toBe(130000);
+    expect(pontos[pontos.length - 1].dividas).toBe(35000);
+  });
+
+  test('respeita De/Até exatos, não só fins de mês, e reflete movimentação no meio', () => {
+    const s = estadoDoisAnos();
+    // benfeitoria em 10/04 soma 30000 ao bem; amortização em 01/03 tira 10000
+    // da dívida — período pega os dois.
+    const pontos = serieEvolucao(s, '2025-03-15', '2025-04-20');
+    expect(pontos[0].data).toBe('2025-03-15');
+    expect(pontos[0].bens).toBe(100000);
+    expect(pontos[0].dividas).toBe(40000); // já passou a amortização de 01/03
+    const ultimo = pontos[pontos.length - 1];
+    expect(ultimo.data).toBe('2025-04-20');
+    expect(ultimo.bens).toBe(130000); // já passou a benfeitoria de 10/04
+    expect(ultimo.dividas).toBe(40000);
+  });
 });
 
 describe('totaisNaData / anosComDado', () => {

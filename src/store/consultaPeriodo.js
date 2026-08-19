@@ -137,19 +137,57 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   };
 }
 
-// Série temporal da evolução patrimonial dentro do período: um ponto por ano
-// COM dado (na data de corte daquele ano dentro do período). Anos sem dado
-// não entram — o gráfico nunca inventa ano intermediário zerado.
+// Fim de cada mês entre duas datas (inclusive), em ISO. Usado só dentro de
+// um ano só — ver serieEvolucao.
+function fimDeCadaMesEntre(dataDe, dataAte) {
+  let [ano, mes] = dataDe.split('-').map(Number);
+  const [anoFim, mesFim] = dataAte.split('-').map(Number);
+  const pontos = [];
+  while (ano < anoFim || (ano === anoFim && mes <= mesFim)) {
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    pontos.push(`${ano}-${String(mes).padStart(2, '0')}-${String(ultimoDia).padStart(2, '0')}`);
+    mes += 1;
+    if (mes > 12) { mes = 1; ano += 1; }
+  }
+  return pontos;
+}
+
+// Série temporal da evolução patrimonial dentro do período.
+// Dentro de UM ano só (o caso mais comum, já que o Dashboard abre no
+// ano-calendário selecionado): um ponto por mês, do início ao fim do
+// período — sem isso, o intervalo virava sempre 1 ponto só (sempre na data
+// "Até", ignorando a "De"), e o gráfico parecia não acompanhar as datas
+// escolhidas.
+// Cruzando anos: um ponto por ano COM dado (na data de corte daquele ano
+// dentro do período) — granularidade mensal ano a ano viraria ruído demais
+// numa consulta de vários anos. Ano sem dado não entra — o gráfico nunca
+// inventa ano intermediário zerado.
 export function serieEvolucao(state, dataDe, dataAte) {
   if (!dataDe || !dataAte || dataDe > dataAte) return [];
+
+  const anoDe = anoDeUmaData(dataDe);
+  const anoAte = anoDeUmaData(dataAte);
+
+  const pontoNaData = (dados, ano, data) => {
+    const bens = totalBensAteData(dados.bens, data, 'ate') + totalBensAteData(dados.bensRurais, data, 'ate');
+    const dividas = totalDividas(dados.dividas, 'ate', data);
+    return { ano, data, bens, dividas, liquido: bens - dividas };
+  };
+
+  if (anoDe === anoAte) {
+    const dados = dadosDoAno(state, anoDe);
+    if (!dados) return [];
+    const cortes = [dataDe, ...fimDeCadaMesEntre(dataDe, dataAte).map(c => minData(c, dataAte))];
+    const semRepetido = [...new Set(cortes)];
+    return semRepetido.map(corte => pontoNaData(dados, anoDe, corte));
+  }
+
   const pontos = [];
-  for (let ano = anoDeUmaData(dataDe); ano <= anoDeUmaData(dataAte); ano++) {
+  for (let ano = anoDe; ano <= anoAte; ano++) {
     const dados = dadosDoAno(state, ano);
     if (!dados) continue;
     const corte = minData(dataAte, `${ano}-12-31`);
-    const bens = totalBensAteData(dados.bens, corte, 'ate') + totalBensAteData(dados.bensRurais, corte, 'ate');
-    const dividas = totalDividas(dados.dividas, 'ate', corte);
-    pontos.push({ ano, data: corte, bens, dividas, liquido: bens - dividas });
+    pontos.push(pontoNaData(dados, ano, corte));
   }
   return pontos;
 }

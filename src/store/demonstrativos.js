@@ -11,6 +11,16 @@
 // montar componente.
 
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
+
+// Um dia antes de uma data ISO (aaaa-mm-dd). "De" é o INÍCIO do período de
+// consulta — o saldo anterior tem que ser da véspera, não do próprio dia,
+// senão uma movimentação cadastrada exatamente no dia "De" ficava escondida
+// dentro do saldo anterior em vez de contar como variação do período.
+export function diaAnterior(dataIso) {
+  const d = new Date(`${dataIso}T00:00:00`);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
 // Sem filtro ativo (dataDe e dataAte ambos vazios), conta o item mesmo sem
 // `data` — registros de rendimento/pagamento cadastrados antes desse campo
 // existir não podem sumir do total só porque não tinha onde informar a
@@ -35,22 +45,38 @@ const noPeriodo = (data, dataDe, dataAte) => {
 // (usa a situação atual). Essa convenção fecha certo no caso mais comum —
 // o ano inteiro, De=01/01 a Até=hoje/31-12 — e é conservadora nos casos de
 // sub-período em que a data exata da mudança é mesmo desconhecida.
+function aplicarMovimentoBem(situacao, m) {
+  if (m.tipo === 'compra' || m.tipo === 'benfeitoria') return situacao + m.valor;
+  if (m.tipo === 'venda_parcial') return Math.max(0, situacao - m.valor);
+  if (m.tipo === 'venda_total' || m.tipo === 'baixa') return 0;
+  if (m.tipo === 'ajuste') return m.valor;
+  return situacao;
+}
+
+const ordenarPorData = (movs) =>
+  [...movs].sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.id || 0) - (b.id || 0));
+
 export function situacaoBemAteData(bem, dataCorte, lado = 'ate') {
-  const semMovimentacao = !(bem.movimentacoes || []).length;
-  if (!dataCorte || semMovimentacao) {
+  const movs = bem.movimentacoes || [];
+  if (!dataCorte || movs.length === 0) {
     return lado === 'de' ? bem.situacao_anterior : bem.situacao_atual;
   }
-  const movs = (bem.movimentacoes || [])
-    .filter(m => emDataOuAntes(m.data, dataCorte))
-    .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.id || 0) - (b.id || 0));
-  let situacao = bem.situacao_anterior;
-  for (const m of movs) {
-    if (m.tipo === 'compra' || m.tipo === 'benfeitoria') situacao += m.valor;
-    else if (m.tipo === 'venda_parcial') situacao = Math.max(0, situacao - m.valor);
-    else if (m.tipo === 'venda_total' || m.tipo === 'baixa') situacao = 0;
-    else if (m.tipo === 'ajuste') situacao = m.valor;
-  }
-  return situacao;
+  // As movimentações registradas explicam só uma PARTE do caminho de
+  // situacao_anterior até situacao_atual: o resto ("salto sem data") é o
+  // que já mudou antes de qualquer movimentação existir — bem importado ou
+  // cadastrado com um valor atual diferente do anterior direto no
+  // formulário. Sem isso, um bem que tem ESSE salto e TAMBÉM alguma
+  // movimentação datada perdia o salto inteiro na reconstrução (o corte por
+  // data ficava sempre menor que o valor de verdade). Mesma convenção do
+  // bem sem NENHUMA movimentação (documentada acima): "ate" assume que o
+  // salto sem data já aconteceu, "de" assume que ainda não.
+  const explicadoPelasMovimentacoes = ordenarPorData(movs).reduce(aplicarMovimentoBem, bem.situacao_anterior);
+  const saltoSemData = bem.situacao_atual - explicadoPelasMovimentacoes;
+
+  const corteReal = lado === 'de' ? diaAnterior(dataCorte) : dataCorte;
+  const movsAteCorte = ordenarPorData(movs.filter(m => emDataOuAntes(m.data, corteReal)));
+  const inicio = bem.situacao_anterior + (lado === 'ate' ? saltoSemData : 0);
+  return movsAteCorte.reduce(aplicarMovimentoBem, inicio);
 }
 
 export function totalBensAteData(listaBens, dataCorte, lado = 'ate') {
@@ -66,24 +92,32 @@ export function totalBensAteData(listaBens, dataCorte, lado = 'ate') {
 // cadastrada antes desse recurso existir) não tem como ser reconstruída no
 // meio do ano — vale a convenção conservadora de sempre: "de" usa a
 // situação anterior, "ate" usa a atual.
-export function situacaoDividaAteData(divida, dataCorte, lado = 'ate') {
-  const semMovimentacao = !(divida.movimentacoes || []).length;
-  if (!dataCorte || semMovimentacao) {
-    return lado === 'de'
-      ? (parseFloat(divida.situacao_anterior) || 0)
-      : (parseFloat(divida.situacao_atual) || 0);
-  }
-  const movs = (divida.movimentacoes || [])
-    .filter(m => emDataOuAntes(m.data, dataCorte))
-    .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.id || 0) - (b.id || 0));
-  let saldo = parseFloat(divida.situacao_anterior) || 0;
-  for (const m of movs) {
-    if (m.tipo === 'contratacao') saldo += m.valor;
-    else if (m.tipo === 'amortizacao') saldo = Math.max(0, saldo - m.valor);
-    else if (m.tipo === 'quitacao') saldo = 0;
-    else if (m.tipo === 'ajuste') saldo = m.valor;
-  }
+function aplicarMovimentoDivida(saldo, m) {
+  if (m.tipo === 'contratacao') return saldo + m.valor;
+  if (m.tipo === 'amortizacao') return Math.max(0, saldo - m.valor);
+  if (m.tipo === 'quitacao') return 0;
+  if (m.tipo === 'ajuste') return m.valor;
   return saldo;
+}
+
+export function situacaoDividaAteData(divida, dataCorte, lado = 'ate') {
+  const movs = divida.movimentacoes || [];
+  const anterior = parseFloat(divida.situacao_anterior) || 0;
+  const atual = parseFloat(divida.situacao_atual) || 0;
+  if (!dataCorte || movs.length === 0) {
+    return lado === 'de' ? anterior : atual;
+  }
+  // Mesmo raciocínio de situacaoBemAteData: o salto sem data (dívida
+  // importada/cadastrada com anterior≠atual antes de qualquer movimentação)
+  // segue a convenção "ate" já aconteceu / "de" ainda não, em vez de sumir
+  // quando a dívida também tem movimentação datada.
+  const explicadoPelasMovimentacoes = ordenarPorData(movs).reduce(aplicarMovimentoDivida, anterior);
+  const saltoSemData = atual - explicadoPelasMovimentacoes;
+
+  const corteReal = lado === 'de' ? diaAnterior(dataCorte) : dataCorte;
+  const movsAteCorte = ordenarPorData(movs.filter(m => emDataOuAntes(m.data, corteReal)));
+  const inicio = anterior + (lado === 'ate' ? saltoSemData : 0);
+  return movsAteCorte.reduce(aplicarMovimentoDivida, inicio);
 }
 
 export function totalDividas(dividas, ponto, dataCorte) {

@@ -1,18 +1,59 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, GRUPOS_BENS } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
-import { situacaoBemAteData } from '../store/demonstrativos';
+import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado } from '../store/consultaPeriodo';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
+import DateInput from '../components/DateInput';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#64748b'];
 const GRUPO_LABELS = Object.fromEntries(GRUPOS_BENS.map(g => [g.codigo, g.nome]));
 
-// Período padrão: do início do primeiro ano com dado até hoje (se o ano
-// corrente for um ano com dado) ou até 31/12 do último ano com dado. Nada
-// de ano fixo no código — o app nasce sem data nenhuma até a 1ª importação.
-function periodoPadrao(state) {
+// Paleta categórica validada (skill dataviz): 8 tons, ordem fixa, checada por
+// CVD contra as cores reais do app (fundo escuro #161d2e e claro #ffffff) —
+// `node scripts/validate_palette.js` passou nos dois modos. Os gráficos
+// escolhem o par certo sozinhos, acompanhando o botão de tema.
+const CATEGORICAS = {
+  dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
+  light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+};
+const CROMO_GRAFICO = {
+  dark: { grid: '#2c2c2a', axis: '#383835', tick: '#94a3b8', tooltipBg: '#1a2332', tooltipBorder: 'rgba(148,163,184,0.15)', tooltipText: '#f1f5f9' },
+  light: { grid: '#e1e0d9', axis: '#c3c2b7', tick: '#5c6168', tooltipBg: '#ffffff', tooltipBorder: 'rgba(123,129,138,0.25)', tooltipText: '#1e273e' },
+};
+
+// Acompanha o botão de tema (data-theme no <html>, ver App.jsx) — os
+// gráficos são SVG puro do Recharts, não leem as CSS custom properties do
+// resto do app, então precisam da própria leitura do tema.
+function useTemaAtual() {
+  const ler = () => (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+  const [tema, setTema] = useState(ler);
+  useEffect(() => {
+    const obs = new MutationObserver(() => setTema(ler()));
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return tema;
+}
+
+// Período padrão: o ano-calendário selecionado na sidebar (01/01 até 31/12,
+// ou até hoje se for o ano corrente) — o Dashboard já abre mostrando o ano
+// que a usuária está trabalhando, sem precisar digitar nada. Continua
+// independente dele: é só o valor de partida; ver o efeito abaixo que
+// resincroniza esse padrão quando o ano selecionado muda, e "Todo o
+// histórico" que usa periodoTodoHistorico em vez deste.
+function periodoAnoSelecionado(state) {
+  if (state.anoCalendario == null) return { de: '', ate: '' };
+  const hoje = new Date();
+  const ano = state.anoCalendario;
+  const fim = ano === hoje.getFullYear() ? hoje.toISOString().slice(0, 10) : `${ano}-12-31`;
+  return { de: `${ano}-01-01`, ate: fim };
+}
+
+// Do início do primeiro ano com dado até hoje (ou até 31/12 do último ano
+// com dado) — usado só pelo botão "Todo o histórico", uma escolha explícita
+// da usuária, não o padrão de abertura do Dashboard.
+function periodoTodoHistorico(state) {
   const anos = anosComDado(state);
   if (anos.length === 0) return { de: '', ate: '' };
   const hoje = new Date();
@@ -25,8 +66,12 @@ function periodoPadrao(state) {
 
 export default function Dashboard() {
   const { state } = useData();
+  const tema = useTemaAtual();
+  const cores = CATEGORICAS[tema];
+  const cromo = CROMO_GRAFICO[tema];
 
-  const padrao = useMemo(() => periodoPadrao(state), [state]);
+  const padrao = useMemo(() => periodoAnoSelecionado(state), [state]);
+  const todoHistorico = useMemo(() => periodoTodoHistorico(state), [state]);
   const [dataDe, setDataDe] = useState(padrao.de);
   const [dataAte, setDataAte] = useState(padrao.ate);
   // Se o filtro ainda não foi tocado (vazio) e chegou dado novo (ex.: primeira
@@ -34,7 +79,33 @@ export default function Dashboard() {
   const de = dataDe || padrao.de;
   const ate = dataAte || padrao.ate;
 
-  const temDado = anosComDado(state).length > 0;
+  // Trocar o ano-calendário selecionado (sidebar) reabre o Dashboard no
+  // período desse ano — "acompanha o ano selecionado" — descartando um
+  // período customizado que pertencia ao ano anterior. Só reage à TROCA de
+  // ano, não a toda mudança de estado, senão cadastrar um bem no mesmo ano
+  // apagaria o filtro que a usuária acabou de digitar.
+  useEffect(() => {
+    setDataDe('');
+    setDataAte('');
+  }, [state.anoCalendario]);
+
+  const anosDisponiveis = useMemo(() => anosComDado(state), [state]);
+  const temDado = anosDisponiveis.length > 0;
+
+  // "De" é o INÍCIO do período consultado: o saldo anterior de verdade é da
+  // véspera, não do próprio dia — senão um lançamento cadastrado exatamente
+  // em "De" ficava escondido dentro do saldo anterior em vez de contar como
+  // variação do período (mesma correção em situacaoBemAteData/
+  // situacaoDividaAteData, que já usam a véspera por baixo dos panos).
+  const dataSaldoAnterior = de ? diaAnterior(de) : '';
+
+  // Limites do campo de data (DateInput valida contra eles antes de
+  // confirmar): sem isso, um ano digitado fora de posição como "0024"
+  // passava batido e o relatório recalculava pra um período sem sentido,
+  // parecendo "travado" (números somem/zeram) em vez de dar erro claro.
+  const anoMinData = anosDisponiveis.length > 0 ? anosDisponiveis[0] : new Date().getFullYear();
+  const dateMinAttr = `${anoMinData}-01-01`;
+  const dateMaxAttr = new Date().toISOString().slice(0, 10);
 
   // UM filtro de período dirigindo TUDO: demonstrativo, cards, gráficos,
   // pizza e export — todos leem o mesmo de/ate, via motor multi-ano.
@@ -46,6 +117,11 @@ export default function Dashboard() {
   const totIni = useMemo(() => totaisNaData(state, de, 'de'), [state, de]);
   const totFim = useMemo(() => totaisNaData(state, ate, 'ate'), [state, ate]);
   const evolucaoData = useMemo(() => serieEvolucao(state, de, ate), [state, de, ate]);
+  // ~6 marcações no eixo X, sempre igualmente espaçadas — o intervalo
+  // automático do Recharts pulava mês de forma desigual (parecia quebrado)
+  // quando o período caía dentro de um ano só (13 pontos: 01/01 + 12 fins
+  // de mês).
+  const tickIntervalX = Math.max(0, Math.ceil(evolucaoData.length / 6) - 1);
 
   const variacaoPeriodo = totIni && totFim ? totFim.liquido - totIni.liquido : 0;
   const varPctPeriodo = totIni && totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : 0;
@@ -124,14 +200,14 @@ export default function Dashboard() {
           <div className="form-row" style={{ alignItems: 'end', marginBottom: 0 }}>
             <div className="form-group">
               <label>De</label>
-              <input className="form-control" type="date" value={de} onChange={e => setDataDe(e.target.value)} />
+              <DateInput value={de} onChange={setDataDe} min={dateMinAttr} max={dateMaxAttr} />
             </div>
             <div className="form-group">
               <label>Até</label>
-              <input className="form-control" type="date" value={ate} onChange={e => setDataAte(e.target.value)} />
+              <DateInput value={ate} onChange={setDataAte} min={dateMinAttr} max={dateMaxAttr} />
             </div>
             <div className="form-group">
-              <button className="btn btn-secondary" onClick={() => { setDataDe(padrao.de); setDataAte(padrao.ate); }}>
+              <button className="btn btn-secondary" onClick={() => { setDataDe(todoHistorico.de); setDataAte(todoHistorico.ate); }}>
                 Todo o histórico
               </button>
             </div>
@@ -151,19 +227,16 @@ export default function Dashboard() {
         {demo && (
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Demonstrativo de Conciliação Patrimonial</h3></div>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '-8px', marginBottom: '16px' }}>
-            A mesma conta da planilha de controle: a variação do patrimônio precisa bater com o que entrou de rendimento e ganho, menos o que saiu em pagamento. O Saldo de Caixa no final serve para conferir: perto de zero (ou do valor que você sabe que tem em caixa) indica que nada ficou de fora.
-          </p>
 
           <table className="demonstrativo-table">
             <tbody>
               <tr className="demonstrativo-secao"><td colSpan={2}>Descrição dos Bens</td></tr>
-              <tr><td>Situação em {formatDate(de)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
+              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
               <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
               <tr className="demonstrativo-total"><td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td></tr>
 
               <tr className="demonstrativo-secao"><td colSpan={2}>Descrição da Dívida</td></tr>
-              <tr><td>Situação em {formatDate(de)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaDe)}</td></tr>
+              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaDe)}</td></tr>
               <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaAte)}</td></tr>
               <tr className="demonstrativo-total"><td>Variação da Dívida</td><td className={`currency ${demo.varPatrimonial.deltaDivida >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDivida)}</td></tr>
 
@@ -213,10 +286,10 @@ export default function Dashboard() {
               <span className="stat-change negative">{totFim?.qtdDividas || 0} itens</span>
             </div>
           </div>
-          <div className="stat-card green">
+          <div className="stat-card blue">
             <div className="stat-info">
-              <h3>{formatCurrency(totFim?.liquido || 0)}</h3>
-              <p>Patrimônio Líquido</p>
+              <h3>{formatCurrency(totIni?.liquido || 0)}</h3>
+              <p>Patrimônio Líquido em {formatDate(dataSaldoAnterior)}</p>
             </div>
           </div>
           <div className="stat-card purple">
@@ -228,49 +301,80 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
+          <div className="stat-card green">
+            <div className="stat-info">
+              <h3>{formatCurrency(totFim?.liquido || 0)}</h3>
+              <p>Patrimônio Líquido em {formatDate(ate)}</p>
+            </div>
+          </div>
         </div>
-        <div className="charts-grid">
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Distribuição por Categoria em {formatDate(ate)}</h3>
-            </div>
-            {pieData.length > 0 ? (
-              // Sem rótulo grudado na fatia: nome de categoria comprido
-              // ("Aplicações e Investimentos") vazava para fora do card.
-              // Legenda embaixo, com espaço próprio, não tem esse risco.
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="45%" outerRadius={90} dataKey="value" label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
-                    {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={v => formatCurrency(v)} />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="empty-state"><p>Sem bens com valor nesta data</p></div>
-            )}
+        <div className="card" style={{ marginTop: '20px' }}>
+          <div className="card-header">
+            <h3 className="card-title">Distribuição por Categoria em {formatDate(ate)}</h3>
           </div>
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Bens e Dívidas no período</h3>
-            </div>
-            {evolucaoData.some(d => d.bens > 0 || d.dividas > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={evolucaoData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                  <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={d => formatDate(d)} />
-                  <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
-                  <Tooltip formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
-                  <Bar dataKey="bens" name="Bens" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="dividas" name="Dívidas" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="empty-state"><p>Sem dado neste período</p></div>
-            )}
+          {pieData.length > 0 ? (
+            // Barra horizontal, não pizza: com 7-8 categorias e nomes longos
+            // ("Aplicações e Investimentos"), fatia + rótulo colado sempre
+            // amontoa — o rótulo do eixo Y já identifica a categoria, então
+            // nem precisa de legenda à parte.
+            <ResponsiveContainer width="100%" height={Math.max(220, pieData.length * 42 + 20)}>
+              <BarChart data={pieData} layout="vertical" margin={{ top: 4, right: 110, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke={cromo.grid} />
+                <XAxis
+                  type="number" domain={[0, dataMax => dataMax * 1.2]} tick={{ fill: cromo.tick, fontSize: 11 }}
+                  tickFormatter={v => `${(v / 1000000).toFixed(1)}M`}
+                  axisLine={{ stroke: cromo.axis }} tickLine={false}
+                />
+                <YAxis
+                  type="category" dataKey="name" width={190}
+                  tick={{ fill: cromo.tick, fontSize: 12 }} axisLine={{ stroke: cromo.axis }} tickLine={false}
+                />
+                <Tooltip
+                  formatter={v => formatCurrency(v)}
+                  contentStyle={{ background: cromo.tooltipBg, border: `1px solid ${cromo.tooltipBorder}`, borderRadius: '8px' }}
+                  labelStyle={{ color: cromo.tooltipText }}
+                  cursor={{ fill: 'rgba(148,163,184,0.06)' }}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={20}>
+                  {pieData.map((_, i) => <Cell key={i} fill={cores[i % cores.length]} />)}
+                  <LabelList dataKey="value" position="right" formatter={formatCurrency} style={{ fill: cromo.tick, fontSize: 11 }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="empty-state"><p>Sem bens com valor nesta data</p></div>
+          )}
+        </div>
+
+        <div className="card" style={{ marginTop: '20px' }}>
+          <div className="card-header">
+            <h3 className="card-title">Bens e Dívidas no período</h3>
           </div>
+          {evolucaoData.some(d => d.bens > 0 || d.dividas > 0) ? (
+            // Linha, não barra: é tendência ao longo do tempo — com até 13
+            // pontos (um por mês dentro do mesmo ano), barras lado a lado
+            // ficavam finas demais e o eixo pulava mês de forma desigual.
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={evolucaoData} margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
+                <CartesianGrid stroke={cromo.grid} vertical={false} />
+                <XAxis
+                  dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
+                  axisLine={{ stroke: cromo.axis }} tickLine={false} interval={tickIntervalX}
+                />
+                <YAxis tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} axisLine={false} tickLine={false} />
+                <Tooltip
+                  formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)}
+                  contentStyle={{ background: cromo.tooltipBg, border: `1px solid ${cromo.tooltipBorder}`, borderRadius: '8px' }}
+                  labelStyle={{ color: cromo.tooltipText }}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line type="monotone" dataKey="bens" name="Bens" stroke={cores[0]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="dividas" name="Dívidas" stroke={cores[7]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="empty-state"><p>Sem dado neste período</p></div>
+          )}
         </div>
 
         {evolucaoData.length > 1 && (
@@ -279,12 +383,19 @@ export default function Dashboard() {
               <h3 className="card-title">Evolução do Patrimônio Líquido, {formatDate(de)} a {formatDate(ate)}</h3>
             </div>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={evolucaoData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                <XAxis dataKey="data" tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={d => formatDate(d)} />
-                <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} />
-                <Tooltip formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)} contentStyle={{ background: '#1a2332', border: '1px solid rgba(148,163,184,0.1)', borderRadius: '8px' }} />
-                <Line type="monotone" dataKey="liquido" name="Patrimônio Líquido" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />
+              <LineChart data={evolucaoData} margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
+                <CartesianGrid stroke={cromo.grid} vertical={false} />
+                <XAxis
+                  dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
+                  axisLine={{ stroke: cromo.axis }} tickLine={false} interval={tickIntervalX}
+                />
+                <YAxis tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={v => `${(v / 1000000).toFixed(1)}M`} axisLine={false} tickLine={false} />
+                <Tooltip
+                  formatter={v => formatCurrency(v)} labelFormatter={d => formatDate(d)}
+                  contentStyle={{ background: cromo.tooltipBg, border: `1px solid ${cromo.tooltipBorder}`, borderRadius: '8px' }}
+                  labelStyle={{ color: cromo.tooltipText }}
+                />
+                <Line type="monotone" dataKey="liquido" name="Patrimônio Líquido" stroke={cores[2]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
