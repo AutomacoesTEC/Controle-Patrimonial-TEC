@@ -1,28 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency } from '../utils/formatters';
 import MovimentacaoBemForm from './MovimentacaoBemForm';
 import Modal from './Modal';
+import MoneyInput from './MoneyInput';
 
 // Mesma lógica do BemModal (Bens e Direitos), mas para a lista separada
 // de Bens da Atividade Rural: não tem grupo/imóvel/veículo (a declaração
 // real só pede um código numérico + discriminação pra esses bens), e a
 // movimentação usa a coleção `bensRurais` em vez de `bens`.
+const FORM_VAZIO = {
+  codigo: '',
+  discriminacao: '',
+  situacao_anterior: '',
+  situacao_atual: '',
+};
+
 export default function BemRuralModal({ open, bem, onSave, onClose }) {
-  const { state } = useData();
+  const { state, garantirAnoCadastro } = useData();
   const isEditing = !!bem;
   const liveBem = isEditing ? (state.bensRurais.find(b => b.id === bem.id) || bem) : null;
 
-  const [form, setForm] = useState(bem || {
-    codigo: '',
-    discriminacao: '',
-    situacao_anterior: '',
-    situacao_atual: '',
-  });
+  const [form, setForm] = useState(bem || FORM_VAZIO);
+  // Ressincroniza a cada abertura — o modal fica montado o tempo todo, só
+  // alterna `open` — senão o formulário guardava o que ficou do
+  // cadastro/edição anterior (ver mesma correção no BemModal).
+  useEffect(() => {
+    if (open) setForm(bem || FORM_VAZIO);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, bem]);
+  const [anoCadastro, setAnoCadastro] = useState(() => state.anoCalendario);
+  useEffect(() => {
+    if (open && !isEditing) setAnoCadastro(state.anoCalendario);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   const upd = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isEditing && !garantirAnoCadastro(anoCadastro)) return;
     onSave({
       ...form,
       situacao_anterior: isEditing ? liveBem.situacao_anterior : (parseFloat(form.situacao_anterior) || 0),
@@ -39,6 +55,17 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {!isEditing && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ano-calendário</label>
+                  <input
+                    className="form-control" type="number"
+                    value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                  />
+                </div>
+              </div>
+            )}
             <div className="form-row">
               <div className="form-group">
                 <label>Código</label>
@@ -65,11 +92,11 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
               <div className="form-row">
                 <div className="form-group">
                   <label>Situação em 31/12 (Ano Anterior)</label>
-                  <input className="form-control" type="number" step="0.01" value={form.situacao_anterior} onChange={e => upd('situacao_anterior', e.target.value)} placeholder="0,00" />
+                  <MoneyInput value={form.situacao_anterior} onChange={v => upd('situacao_anterior', v)} />
                 </div>
                 <div className="form-group">
                   <label>Situação em 31/12 (Ano Atual)</label>
-                  <input className="form-control" type="number" step="0.01" value={form.situacao_atual} onChange={e => upd('situacao_atual', e.target.value)} placeholder="0,00" />
+                  <MoneyInput value={form.situacao_atual} onChange={v => upd('situacao_atual', v)} />
                 </div>
               </div>
             )}

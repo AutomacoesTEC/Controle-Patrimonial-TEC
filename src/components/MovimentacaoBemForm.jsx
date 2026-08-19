@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
+import MoneyInput from './MoneyInput';
 
 // Bloco de "registrar movimentação" de um bem (venda, compra, benfeitoria,
 // baixa, ajuste), reaproveitado entre Bens e Direitos (BemModal) e Bens da
@@ -83,10 +84,9 @@ export default function MovimentacaoBemForm({
         </div>
         <div className="form-group">
           <label>{movTipo === 'ajuste' ? 'Novo valor' : 'Valor da movimentação'}</label>
-          <input
-            className="form-control" type="number" step="0.01" value={movValor}
-            onChange={e => setMovValor(e.target.value)}
-            placeholder="0,00"
+          <MoneyInput
+            value={movValor}
+            onChange={setMovValor}
             disabled={tipos[movTipo]?.sinal === '0'}
           />
         </div>
@@ -95,14 +95,14 @@ export default function MovimentacaoBemForm({
         <div className="form-row">
           <div className="form-group">
             <label>Valor de venda (preço recebido, opcional)</label>
-            <input className="form-control" type="number" step="0.01" value={movValorVenda} onChange={e => setMovValorVenda(e.target.value)} placeholder="0,00" />
+            <MoneyInput value={movValorVenda} onChange={setMovValorVenda} />
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
-              Preenchendo isso, essa venda aparece calculada sozinha na aba Ganhos de Capital (preço de venda menos a parcela do custo baixada acima).
+              Campo opcional. Se informado, o ganho desta venda é calculado automaticamente na aba Ganhos de Capital (preço de venda menos a parcela do custo baixada acima).
             </p>
           </div>
           <div className="form-group">
             <label>IRRF pago sobre o ganho (opcional)</label>
-            <input className="form-control" type="number" step="0.01" value={movIrrfVenda} onChange={e => setMovIrrfVenda(e.target.value)} placeholder="0,00" />
+            <MoneyInput value={movIrrfVenda} onChange={setMovIrrfVenda} />
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px', marginBottom: 0 }}>
               Usado no Demonstrativo de Conciliação Patrimonial do Dashboard para calcular o ganho líquido.
             </p>

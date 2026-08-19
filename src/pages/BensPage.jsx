@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, GRUPOS_BENS } from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
+import AnoCalendarioModal from '../components/AnoCalendarioModal';
 
 export default function BensPage() {
   const { state, dispatch, addToast } = useData();
@@ -11,6 +12,14 @@ export default function BensPage() {
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
+  const [anoModalOpen, setAnoModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
+
+  const abrirNovo = () => { setEditingBem(null); setModalOpen(true); };
+  const handleNovoClick = () => {
+    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
+    abrirNovo();
+  };
 
   const filtered = useMemo(() => {
     return bens.filter(b => {
@@ -62,7 +71,7 @@ export default function BensPage() {
           <button className="btn btn-secondary" onClick={() => exportBensToXlsx(filtered, anoCalendario)}>
             Exportar .xlsx
           </button>
-          <button className="btn btn-primary" onClick={() => { setEditingBem(null); setModalOpen(true); }}>
+          <button className="btn btn-primary" onClick={handleNovoClick}>
             ＋ Novo Bem
           </button>
         </div>
@@ -148,6 +157,11 @@ export default function BensPage() {
         bem={editingBem}
         onSave={handleSave}
         onClose={() => { setModalOpen(false); setEditingBem(null); }}
+      />
+      <AnoCalendarioModal
+        open={anoModalOpen}
+        onClose={() => setAnoModalOpen(false)}
+        onConfirm={() => { setAnoModalOpen(false); pendingActionRef.current?.(); pendingActionRef.current = null; }}
       />
     </>
   );
