@@ -1,7 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
 import Modal from '../components/Modal';
+import AnoCalendarioModal from '../components/AnoCalendarioModal';
+import MoneyInput from '../components/MoneyInput';
+import { exportListaToXlsx } from '../utils/exportXlsx';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -16,14 +19,21 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
 const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: new Date().toISOString().slice(0, 10) };
 
 export default function RendimentosPage() {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { rendimentos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
+  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
+  const [anoModalOpen, setAnoModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
+  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const handleNovoClick = () => {
+    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
+    abrirNovo();
+  };
   const abrirEdicao = (r) => {
     setEditingId(r.id);
     setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || new Date().toISOString().slice(0, 10) });
@@ -37,6 +47,7 @@ export default function RendimentosPage() {
       dispatch({ type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
       addToast('Rendimento atualizado!', 'success');
     } else {
+      if (!garantirAnoCadastro(anoCadastro)) return;
       dispatch({ type: 'ADD_RENDIMENTO', payload });
       addToast('Rendimento cadastrado!', 'success');
     }
@@ -60,11 +71,28 @@ export default function RendimentosPage() {
   const totalPorCategoria = (lista) => lista.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
   const totalIRRF = rendimentos.reduce((s, r) => s + (parseFloat(r.irrf) || 0), 0);
 
+  const handleExport = () => exportListaToXlsx(
+    rendimentos,
+    [
+      ['Tipo', r => describeRendimentoTipo(r.tipo)],
+      ['Data', r => formatDate(r.data)],
+      ['CNPJ Fonte', r => formatCpfCnpj(r.cnpj_fonte)],
+      ['Nome Fonte Pagadora', r => r.nome_fonte || ''],
+      ['Beneficiário', r => r.beneficiario || 'Titular'],
+      ['Valor', r => r.valor || 0],
+      ['IRRF', r => r.irrf || 0],
+    ],
+    'Rendimentos', 'rendimentos', state.anoCalendario
+  );
+
   return (
     <>
       <div className="page-header">
         <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}</p></div>
-        <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Novo Rendimento</button></div>
+        <div className="page-header-actions">
+          <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
+          <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Rendimento</button>
+        </div>
       </div>
       <div className="page-body animate-in">
         {rendimentos.length === 0 ? (
@@ -135,6 +163,11 @@ export default function RendimentosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Rendimento' : 'Novo Rendimento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                {!editingId && (
+                  <div className="form-row">
+                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
@@ -161,13 +194,18 @@ export default function RendimentosPage() {
                 </div>
                 <div className="form-row">
                   <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
-                  <div className="form-group"><label>Valor</label><input className="form-control" type="number" step="0.01" value={form.valor} onChange={e => upd('valor', e.target.value)} /></div>
-                  <div className="form-group"><label>IRRF</label><input className="form-control" type="number" step="0.01" value={form.irrf} onChange={e => upd('irrf', e.target.value)} /></div>
+                  <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
+                  <div className="form-group"><label>IRRF</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
                 </div>
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
+      <AnoCalendarioModal
+        open={anoModalOpen}
+        onClose={() => setAnoModalOpen(false)}
+        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
+      />
     </>
   );
 }

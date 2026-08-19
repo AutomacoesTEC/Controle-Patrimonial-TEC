@@ -88,6 +88,25 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
   XLSX.writeFile(wb, `${fileName}_${data.anoCalendario || 'export'}_${today}.xlsx`);
 }
 
+// Exportador genérico de uma aba só: cada página de cadastro (Dívidas,
+// Rendimentos, Pagamentos, Despesas Gerais...) passa suas próprias colunas,
+// pra exportar exatamente o que está naquela tela — não um recorte de um
+// export combinado de outra aba.
+export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoCalendario) {
+  const wb = XLSX.utils.book_new();
+  const dados = linhas.map(linha => {
+    const obj = {};
+    colunas.forEach(([cabecalho, valor]) => { obj[cabecalho] = valor(linha); });
+    return obj;
+  });
+  const ws = XLSX.utils.json_to_sheet(dados);
+  XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+  const today = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `${prefixoArquivo}_${anoCalendario || ''}_${today}.xlsx`);
+}
+
+export { resumoMovimentacoes };
+
 export function exportBensToXlsx(bens, anoCalendario) {
   const wb = XLSX.utils.book_new();
   const bensData = bens.map(b => ({

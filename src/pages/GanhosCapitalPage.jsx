@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { exportListaToXlsx } from '../utils/exportXlsx';
+import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 
 // Ganhos de Capital não tem cadastro próprio: é calculado a partir das
 // movimentações de venda (venda_parcial/venda_total) que já foram
@@ -9,12 +11,25 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 // preço de venda − parcela do custo baixada.
 export default function GanhosCapitalPage() {
   const { state } = useData();
+  const anosDisponiveis = anosComDado(state);
+  const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
+
+  // Acompanha o ano-calendário selecionado na sidebar por padrão (mesmo
+  // comportamento do Dashboard), mas a escolha aqui é independente dele —
+  // só resincroniza quando o ano ATIVO muda.
+  useEffect(() => {
+    setAnoEscolhido(state.anoCalendario);
+  }, [state.anoCalendario]);
+
+  const dados = anoEscolhido != null ? dadosDoAno(state, anoEscolhido) : null;
+  const bensDoAno = dados?.bens || [];
+  const bensRuraisDoAno = dados?.bensRurais || [];
 
   const vendas = useMemo(() => {
     const lista = [];
     const origem = [
-      ...state.bens.map(b => ({ b, tipoOrigem: 'Bens e Direitos' })),
-      ...state.bensRurais.map(b => ({ b, tipoOrigem: 'Atividade Rural' })),
+      ...bensDoAno.map(b => ({ b, tipoOrigem: 'Bens e Direitos' })),
+      ...bensRuraisDoAno.map(b => ({ b, tipoOrigem: 'Atividade Rural' })),
     ];
     for (const { b, tipoOrigem } of origem) {
       for (const m of (b.movimentacoes || [])) {
@@ -36,18 +51,45 @@ export default function GanhosCapitalPage() {
       }
     }
     return lista.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
-  }, [state.bens, state.bensRurais]);
+  }, [bensDoAno, bensRuraisDoAno]);
 
   const totalGanho = vendas.reduce((s, v) => s + v.ganho, 0);
   const semValorVenda = useMemo(() => {
     let count = 0;
-    for (const b of [...state.bens, ...state.bensRurais]) {
+    for (const b of [...bensDoAno, ...bensRuraisDoAno]) {
       for (const m of (b.movimentacoes || [])) {
         if ((m.tipo === 'venda_parcial' || m.tipo === 'venda_total') && m.valorVenda == null) count++;
       }
     }
     return count;
-  }, [state.bens, state.bensRurais]);
+  }, [bensDoAno, bensRuraisDoAno]);
+
+  const handleExport = () => exportListaToXlsx(
+    vendas,
+    [
+      ['Origem', v => v.origem],
+      ['Bem', v => v.bem || ''],
+      ['Data', v => formatDate(v.data)],
+      ['Tipo de Venda', v => v.tipoVenda],
+      ['Custo Baixado', v => v.custo],
+      ['Valor de Venda', v => v.valorVenda],
+      ['Ganho/Perda', v => v.ganho],
+      ['IRRF', v => v.irrf],
+      ['Descrição', v => v.descricao || ''],
+    ],
+    'Ganhos de Capital', 'ganhos_capital', anoEscolhido
+  );
+
+  const seletorAno = anosDisponiveis.length > 0 && (
+    <select
+      className="form-control"
+      style={{ width: 'auto' }}
+      value={anoEscolhido ?? ''}
+      onChange={e => setAnoEscolhido(e.target.value === '' ? null : Number(e.target.value))}
+    >
+      {anosDisponiveis.map(y => <option key={y} value={y}>Ano-Calendário {y}</option>)}
+    </select>
+  );
 
   return (
     <>
@@ -55,6 +97,10 @@ export default function GanhosCapitalPage() {
         <div className="page-header-left">
           <h2>Ganhos de Capital</h2>
           <p>Calculado sozinho a partir das vendas registradas em Bens e Direitos e Bens da Atividade Rural. Para uma venda entrar aqui, preencha o "Valor de venda" ao registrar a movimentação.</p>
+        </div>
+        <div className="page-header-actions">
+          {seletorAno}
+          {vendas.length > 0 && <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>}
         </div>
       </div>
       <div className="page-body animate-in">

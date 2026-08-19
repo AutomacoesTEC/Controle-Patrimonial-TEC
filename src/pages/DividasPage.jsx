@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
 import Modal from '../components/Modal';
+import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
+import MoneyInput from '../components/MoneyInput';
+import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 export default function DividasPage() {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { dividas, anoCalendario } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
+  const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
+  const [anoModalOpen, setAnoModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
@@ -20,7 +26,16 @@ export default function DividasPage() {
   // amortização registrada no modal desfaria o efeito dela.
   const liveDivida = editingId ? state.dividas.find(d => d.id === editingId) : null;
 
-  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
+  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  // Sem ano-calendário ainda, o primeiro registro é quem pergunta qual ano
+  // (ver AnoCalendarioModal); a ação real só roda depois de confirmado, com
+  // o ano que acabou de ser escolhido — não com `anoCalendario` capturado
+  // aqui, que nesse instante ainda é null (React só atualiza no próximo
+  // render, depois do dispatch do ROLLOVER_ANO).
+  const handleNovoClick = () => {
+    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
+    abrirNovo();
+  };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
     setForm({ codigo: d.codigo, discriminacao: d.discriminacao || '', situacao_anterior: d.situacao_anterior, situacao_atual: d.situacao_atual, valor_pago: d.valor_pago || '' });
@@ -37,6 +52,7 @@ export default function DividasPage() {
       dispatch({ type: 'UPDATE_DIVIDA', payload: { ...payload, id: editingId, situacao_anterior: liveDivida.situacao_anterior, situacao_atual: liveDivida.situacao_atual, movimentacoes: liveDivida.movimentacoes } });
       addToast('Dívida atualizada!', 'success');
     } else {
+      if (!garantirAnoCadastro(anoCadastro)) return;
       dispatch({ type: 'ADD_DIVIDA', payload });
       addToast('Dívida cadastrada!', 'success');
     }
@@ -54,6 +70,20 @@ export default function DividasPage() {
   const totalAnterior = dividas.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
   const totalAtual = dividas.reduce((s, d) => s + (parseFloat(d.situacao_atual) || 0), 0);
 
+  const handleExport = () => exportListaToXlsx(
+    dividas,
+    [
+      ['Código', d => d.codigo || ''],
+      ['Discriminação', d => d.discriminacao || ''],
+      ['Situação 31/12 Anterior', d => d.situacao_anterior || 0],
+      ['Situação 31/12 Atual', d => d.situacao_atual || 0],
+      ['Variação', d => (d.situacao_atual || 0) - (d.situacao_anterior || 0)],
+      ['Valor Pago no Ano', d => d.valor_pago || 0],
+      ['Movimentações no Ano', d => resumoMovimentacoes(d)],
+    ],
+    'Dívidas e Ônus', 'dividas_onus', anoCalendario
+  );
+
   return (
     <>
       <div className="page-header">
@@ -62,7 +92,8 @@ export default function DividasPage() {
           <p>{dividas.length} itens{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totalAtual)}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Dívida</button>
+          <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
+          <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Dívida</button>
         </div>
       </div>
       <div className="page-body animate-in">
@@ -106,6 +137,11 @@ export default function DividasPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                {!editingId && (
+                  <div className="form-row">
+                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} placeholder="Ex: 11, 12, 13" /></div>
                 </div>
@@ -121,7 +157,7 @@ export default function DividasPage() {
                         <label>Saldo atual (muda por movimentação)</label>
                         <div className="form-control" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', fontWeight: 700 }}>{formatCurrency(liveDivida.situacao_atual)}</div>
                       </div>
-                      <div className="form-group"><label>Valor Pago no Ano</label><input className="form-control" type="number" step="0.01" value={form.valor_pago} onChange={e => upd('valor_pago', e.target.value)} /></div>
+                      <div className="form-group"><label>Valor Pago no Ano</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
                     </div>
                     <MovimentacaoBemForm
                       bem={liveDivida}
@@ -133,15 +169,20 @@ export default function DividasPage() {
                   </>
                 ) : (
                 <div className="form-row">
-                  <div className="form-group"><label>Situação 31/12 Anterior</label><input className="form-control" type="number" step="0.01" value={form.situacao_anterior} onChange={e => upd('situacao_anterior', e.target.value)} /></div>
-                  <div className="form-group"><label>Situação 31/12 Atual</label><input className="form-control" type="number" step="0.01" value={form.situacao_atual} onChange={e => upd('situacao_atual', e.target.value)} /></div>
-                  <div className="form-group"><label>Valor Pago no Ano</label><input className="form-control" type="number" step="0.01" value={form.valor_pago} onChange={e => upd('valor_pago', e.target.value)} /></div>
+                  <div className="form-group"><label>Situação 31/12 Anterior</label><MoneyInput value={form.situacao_anterior} onChange={v => upd('situacao_anterior', v)} /></div>
+                  <div className="form-group"><label>Situação 31/12 Atual</label><MoneyInput value={form.situacao_atual} onChange={v => upd('situacao_atual', v)} /></div>
+                  <div className="form-group"><label>Valor Pago no Ano</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
                 </div>
                 )}
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
+      <AnoCalendarioModal
+        open={anoModalOpen}
+        onClose={() => setAnoModalOpen(false)}
+        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
+      />
     </>
   );
 }

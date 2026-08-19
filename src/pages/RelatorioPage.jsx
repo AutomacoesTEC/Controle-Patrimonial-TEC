@@ -1,17 +1,45 @@
+import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS } from '../utils/formatters';
-import { exportToXlsx } from '../utils/exportXlsx';
+import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
+import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 
 export default function RelatorioPage() {
   const { state } = useData();
-  const { bens, dividas, rendimentos, pagamentos, anoCalendario, contribuinte } = state;
+  const anosDisponiveis = anosComDado(state);
+  const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
+
+  // O relatório acompanha o ano-calendário selecionado na sidebar por
+  // padrão (mesmo comportamento do Dashboard), mas a escolha aqui é
+  // independente dele — só resincroniza quando o ano ATIVO muda, nunca a
+  // cada cadastro, senão ver o relatório de outro ano seria impossível sem
+  // trocar o ano de trabalho na sidebar.
+  useEffect(() => {
+    setAnoEscolhido(state.anoCalendario);
+  }, [state.anoCalendario]);
+
+  const anoCalendario = anoEscolhido;
+  const dados = anoCalendario != null ? dadosDoAno(state, anoCalendario) : null;
+  const { bens = [], dividas = [], rendimentos = [], pagamentos = [], contribuinte } = dados || {};
+
+  const seletorAno = anosDisponiveis.length > 0 && (
+    <select
+      className="form-control"
+      style={{ width: 'auto' }}
+      value={anoCalendario ?? ''}
+      onChange={e => setAnoEscolhido(e.target.value === '' ? null : Number(e.target.value))}
+    >
+      {anosDisponiveis.map(y => <option key={y} value={y}>Ano-Calendário {y}</option>)}
+    </select>
+  );
 
   // Sem ano definido (antes da 1ª importação) não há relatório a emitir.
-  if (anoCalendario == null) {
+  if (anoCalendario == null || !dados) {
     return (
       <>
         <div className="page-header">
           <div className="page-header-left"><h2>Relatório para IRPF</h2><p>Prévia dos dados para a declaração</p></div>
+          {seletorAno && <div className="page-header-actions">{seletorAno}</div>}
         </div>
         <div className="page-body animate-in">
           <div className="card">
@@ -32,13 +60,6 @@ export default function RelatorioPage() {
   const patrimonioAnterior = totalBensAnterior - totalDividasAnterior;
   const patrimonioAtual = totalBensAtual - totalDividasAtual;
 
-  const handleExport = () => {
-    exportToXlsx({
-      bens, dividas, rendimentos, pagamentos,
-      totalBensAnterior, totalBensAtual, totalDividasAnterior, totalDividasAtual, anoCalendario,
-    }, `relatorio_irpf_${anoCalendario}`);
-  };
-
   const byGrupo = {};
   bens.forEach(b => {
     const g = b.grupo || '99';
@@ -48,6 +69,25 @@ export default function RelatorioPage() {
     byGrupo[g].atual += parseFloat(b.situacao_atual) || 0;
   });
 
+  // Mesma organização por grupo que a tela mostra: uma linha por bem, com o
+  // grupo por extenso, na mesma ordem em que os cards aparecem aqui.
+  const handleExport = () => {
+    const bensOrdenados = Object.keys(byGrupo).flatMap(g => byGrupo[g].items);
+    exportListaToXlsx(
+      bensOrdenados,
+      [
+        ['Grupo', b => { const g = GRUPOS_BENS.find(gb => gb.codigo === (b.grupo || '99')); return g ? `${g.codigo} - ${g.nome}` : `Grupo ${b.grupo || '99'}`; }],
+        ['Código', b => b.codigo_bem || ''],
+        ['Discriminação', b => b.discriminacao || ''],
+        [`31/12/${anoCalendario - 1}`, b => b.situacao_anterior || 0],
+        [`31/12/${anoCalendario}`, b => b.situacao_atual || 0],
+        ['Variação', b => (b.situacao_atual || 0) - (b.situacao_anterior || 0)],
+        ['Movimentações no Ano', b => resumoMovimentacoes(b)],
+      ],
+      `Relatório IRPF ${anoCalendario}`, 'relatorio_irpf', anoCalendario
+    );
+  };
+
   return (
     <>
       <div className="page-header">
@@ -56,6 +96,7 @@ export default function RelatorioPage() {
           <p>Dados do ano-calendário {anoCalendario} prontos para declaração em {anoCalendario + 1}</p>
         </div>
         <div className="page-header-actions">
+          {seletorAno}
           <button className="btn btn-success" onClick={handleExport}>Exportar Relatório .xlsx</button>
         </div>
       </div>

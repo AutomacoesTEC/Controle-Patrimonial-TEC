@@ -1,19 +1,29 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import Modal from '../components/Modal';
+import AnoCalendarioModal from '../components/AnoCalendarioModal';
+import MoneyInput from '../components/MoneyInput';
+import { exportListaToXlsx } from '../utils/exportXlsx';
 
 const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: new Date().toISOString().slice(0, 10) };
 
 export default function PagamentosDiversosPage() {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { pagamentosDiversos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
+  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
+  const [anoModalOpen, setAnoModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
+  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const handleNovoClick = () => {
+    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
+    abrirNovo();
+  };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
     setForm({ descricao: p.descricao || '', categoria: p.categoria || '', valor: p.valor, data: p.data || '' });
@@ -27,6 +37,7 @@ export default function PagamentosDiversosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
       addToast('Despesa atualizada!', 'success');
     } else {
+      if (!garantirAnoCadastro(anoCadastro)) return;
       dispatch({ type: 'ADD_PAGAMENTO_DIVERSO', payload });
       addToast('Despesa cadastrada!', 'success');
     }
@@ -42,6 +53,17 @@ export default function PagamentosDiversosPage() {
 
   const total = pagamentosDiversos.reduce((s, p) => s + (parseFloat(p.valor) || 0), 0);
 
+  const handleExport = () => exportListaToXlsx(
+    pagamentosDiversos,
+    [
+      ['Descrição', p => p.descricao || ''],
+      ['Categoria', p => p.categoria || ''],
+      ['Data', p => formatDate(p.data)],
+      ['Valor', p => p.valor || 0],
+    ],
+    'Despesas Gerais', 'despesas_gerais', state.anoCalendario
+  );
+
   return (
     <>
       <div className="page-header">
@@ -49,7 +71,10 @@ export default function PagamentosDiversosPage() {
           <h2>Despesas Gerais</h2>
           <p>Cartão de crédito, seguro, condomínio, IPVA e outros gastos do ano. Não é ficha da declaração (não confundir com Pagamentos Efetuados, que é só o dedutível), fica aqui para fechar a conta do fluxo de caixa.</p>
         </div>
-        <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Despesa</button></div>
+        <div className="page-header-actions">
+          <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
+          <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Despesa</button>
+        </div>
       </div>
       <div className="page-body animate-in">
         <div className="table-container">
@@ -89,16 +114,26 @@ export default function PagamentosDiversosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Despesa' : 'Nova Despesa'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                {!editingId && (
+                  <div className="form-row">
+                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
+                  </div>
+                )}
                 <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: Cartão de crédito Nubank" /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>
                   <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
-                  <div className="form-group"><label>Valor</label><input className="form-control" type="number" step="0.01" value={form.valor} onChange={e => upd('valor', e.target.value)} /></div>
+                  <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
+      <AnoCalendarioModal
+        open={anoModalOpen}
+        onClose={() => setAnoModalOpen(false)}
+        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
+      />
     </>
   );
 }

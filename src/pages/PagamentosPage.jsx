@@ -1,19 +1,29 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
 import Modal from '../components/Modal';
+import AnoCalendarioModal from '../components/AnoCalendarioModal';
+import MoneyInput from '../components/MoneyInput';
+import { exportListaToXlsx } from '../utils/exportXlsx';
 
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', data: new Date().toISOString().slice(0, 10) };
 
 export default function PagamentosPage() {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { pagamentos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
+  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
+  const [anoModalOpen, setAnoModalOpen] = useState(false);
+  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
+  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const handleNovoClick = () => {
+    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
+    abrirNovo();
+  };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
     setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', data: p.data || new Date().toISOString().slice(0, 10) });
@@ -27,6 +37,7 @@ export default function PagamentosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });
       addToast('Pagamento atualizado!', 'success');
     } else {
+      if (!garantirAnoCadastro(anoCadastro)) return;
       dispatch({ type: 'ADD_PAGAMENTO', payload });
       addToast('Pagamento cadastrado!', 'success');
     }
@@ -43,11 +54,29 @@ export default function PagamentosPage() {
   const totalPago = pagamentos.reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
   const totalNaoDedutivel = pagamentos.reduce((s, p) => s + (parseFloat(p.parcela_nao_dedutivel) || 0), 0);
 
+  const handleExport = () => exportListaToXlsx(
+    pagamentos,
+    [
+      ['Código', p => p.codigo || ''],
+      ['Descrição do Código', p => describePagamentoCodigo(p.codigo) || ''],
+      ['Data', p => formatDate(p.data)],
+      ['Nome Beneficiário', p => p.nome_beneficiario || ''],
+      ['CPF/CNPJ', p => formatCpfCnpj(p.cpf_cnpj)],
+      ['Valor Pago', p => p.valor_pago || 0],
+      ['Parcela Não Dedutível', p => p.parcela_nao_dedutivel || 0],
+      ['Descrição', p => p.descricao || ''],
+    ],
+    'Pagamentos', 'pagamentos_efetuados', state.anoCalendario
+  );
+
   return (
     <>
       <div className="page-header">
         <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}, total {formatCurrency(totalPago)}</p></div>
-        <div className="page-header-actions"><button className="btn btn-primary" onClick={abrirNovo}>＋ Novo Pagamento</button></div>
+        <div className="page-header-actions">
+          <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
+          <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Pagamento</button>
+        </div>
       </div>
       <div className="page-body animate-in">
         <div className="table-container">
@@ -97,6 +126,11 @@ export default function PagamentosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Pagamento' : 'Novo Pagamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                {!editingId && (
+                  <div className="form-row">
+                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Código</label>
@@ -109,14 +143,19 @@ export default function PagamentosPage() {
                 <div className="form-group"><label>Nome do Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
-                  <div className="form-group"><label>Valor Pago</label><input className="form-control" type="number" step="0.01" value={form.valor_pago} onChange={e => upd('valor_pago', e.target.value)} /></div>
-                  <div className="form-group"><label>Parcela Não Dedutível</label><input className="form-control" type="number" step="0.01" value={form.parcela_nao_dedutivel} onChange={e => upd('parcela_nao_dedutivel', e.target.value)} /></div>
+                  <div className="form-group"><label>Valor Pago</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
+                  <div className="form-group"><label>Parcela Não Dedutível</label><MoneyInput value={form.parcela_nao_dedutivel} onChange={v => upd('parcela_nao_dedutivel', v)} /></div>
                 </div>
                 <div className="form-group"><label>Descrição</label><textarea className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} /></div>
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
+      <AnoCalendarioModal
+        open={anoModalOpen}
+        onClose={() => setAnoModalOpen(false)}
+        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
+      />
     </>
   );
 }
