@@ -23,6 +23,22 @@ const parseValorN13 = (str) => {
   return parseInt(digits, 10) / 100;
 };
 
+// O campo de CPF/CNPJ do beneficiário (registro 26) tem largura fixa de 19
+// caracteres, com um prefixo de preenchimento de exatamente 5 caracteres
+// antes do número real — 11 dígitos de CPF (campo fica com 16 chars
+// significativos) ou 14 de CNPJ (19 chars, sem sobra). Conferido contra o
+// mesmo pagamento já extraído (corretamente) pelo caminho PDF: o prefixo
+// de preenchimento NÃO é necessariamente só zeros (ex.: "00001" antes de
+// um CNPJ real), então tirar "zeros à esquerda" na unha cortava um dígito
+// de verdade — o certo é sempre pegar os últimos 11 ou 14 caracteres,
+// nunca inferir o tamanho do preenchimento pelo conteúdo dele.
+export const normalizarCpfCnpj = (raw) => {
+  const campo = (raw || '').trim();
+  if (!campo) return '';
+  const alvo = campo.length <= 16 ? 11 : 14;
+  return campo.slice(-alvo).padStart(alvo, '0');
+};
+
 export async function parseDBK(text, log = noop) {
   log('Lendo arquivo .DBK...');
   const lines = text.split(/\r\n|\r|\n/);
@@ -144,7 +160,7 @@ export async function parseDBK(text, log = noop) {
           id: pagId++,
           codigo,
           nome_beneficiario: beneficiario,
-          cpf_cnpj: ni,
+          cpf_cnpj: normalizarCpfCnpj(ni),
           valor_pago: valorPago,
           parcela_nao_dedutivel: parcelaNaoDedutivel,
           descricao: '',
@@ -233,6 +249,28 @@ const textInColumn = (row, pick, colName, joinChar = ' ') =>
 const BOILERPLATE = new Set([
   'NOME:', 'CPF:', 'DECLARAÇÃO DE AJUSTE ANUAL', 'IMPOSTO SOBRE A RENDA - PESSOA FÍSICA',
 ]);
+
+// Linhas de continuação de um bem (endereço, texto que estourou a coluna)
+// entram na discriminação por padrão — mas o formulário tem uma seção de
+// campos estruturados própria por grupo (endereço e cartório para
+// imóveis; chassi/RENAVAM/cor para veículos; banco/agência/conta para
+// contas; CNPJ/bolsa para participações...), cada um no formato "Rótulo:
+// valor", e grudar isso na discriminação vira uma frase só sem sentido
+// (achado em auditoria real contra uma declaração de 172 bens: dezenas de
+// rótulos diferentes, um por grupo). Em vez de listar cada rótulo (a
+// variedade é grande e cresce por grupo), reconhece o FORMATO — uma frase
+// curta terminando em ":" logo no início da linha — que o texto descritivo
+// de um bem nunca usa.
+const ROTULO_METADADO_RE = /(^|\s)[A-ZÀ-Ý][\wÀ-ÿ()°ºª./-]*(\s[A-ZÀ-Üa-zà-ÿ()°ºª./-]{1,20}){0,3}:(\s|$)/;
+export const isBensMetadataRow = (row) => {
+  const texto = normSpace(row.cells.map(c => c.text).join(' '));
+  if (texto === 'Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)?') return true;
+  // A linha pode trazer o rótulo grudado a um pedacinho de boilerplate do
+  // próprio formulário antes dele (ex.: "105 - BRASIL Bem com usufruto:
+  // Não") — o rótulo não precisa estar bem no início da linha pra ela
+  // inteira ser metadado, não discriminação de verdade.
+  return ROTULO_METADADO_RE.test(texto);
+};
 const isBoilerplateRow = (row) =>
   row.cells.some(c => BOILERPLATE.has(c.text.trim()) || /^(ANO-CALENDÁRIO|EXERCÍCIO) \d{4}$/.test(c.text.trim())) ||
   /^Página \d+ de \d+$/.test(row.cells.map(c => c.text).join(' ').trim());
@@ -358,7 +396,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
             localizacao: '105',
             beneficiario: 'Titular',
           };
-        } else if (currentBem && !rowHasCell(row, 'Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)?')) {
+        } else if (currentBem && !isBensMetadataRow(row)) {
           const extra = normSpace(row.cells.map(c => c.text).join(' '));
           if (extra) currentBem.discriminacao = normSpace((currentBem.discriminacao + ' ' + extra)).substring(0, 500);
         }
@@ -464,7 +502,8 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   log(`Identificados ${bens.length} bens e direitos`);
   log(`Identificadas ${dividas.length} dívidas e ônus reais`);
   log(`Identificados ${pagamentos.length} pagamentos efetuados`);
-  log('Rendimentos e bens/dívidas do Demonstrativo de Atividade Rural não são lidos do PDF. Se precisar deles, importe pelo arquivo .DBK.');
+  log('Rendimentos do Demonstrativo de Atividade Rural não são lidos do PDF; importe pelo arquivo .DBK se precisar deles.', 'warning');
+  log('Imóveis, bens e dívidas da Atividade Rural não são lidos nem pelo PDF nem pelo .DBK — cadastre-os na aba Atividade Rural.', 'warning');
 
   return { contribuinte, bens, dividas, rendimentos: [], pagamentos, anoCalendario };
 }

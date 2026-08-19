@@ -10,7 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
-import { parseDBK, parsePDF } from './importParsers';
+import { parseDBK, parsePDF, normalizarCpfCnpj, isBensMetadataRow } from './importParsers';
 
 const DIR = '/home/automacaotec/PROJETOS/Planilha Eudúcio';
 const DBK_PATH = `${DIR}/CPF-DO-DECLARANTE-1-IRPF-A-2026-2025-ORIGI.DBK`;
@@ -62,4 +62,52 @@ describe.skipIf(!temArquivos)('parsePDF (arquivo real, o mesmo declarante do .DB
     const somaPag = r.pagamentos.reduce((s, p) => s + p.valor_pago, 0);
     expect(somaPag).toBeCloseTo(270991.20, 2);
   }, 30000); // PDF de 59 páginas: dá tempo do pdfjs processar
+});
+
+// Sintéticos (não dependem dos arquivos reais) — cobrem os dois bugs
+// achados numa auditoria item a item contra a declaração real acima.
+describe('normalizarCpfCnpj (bug real: CPF/CNPJ do beneficiário no .DBK)', () => {
+  it('reconstrói um CPF de 11 dígitos a partir do campo zero-padded do registro 26, mesmo quando o próprio CPF começa com zero', () => {
+    // Campo bruto real: 5 caracteres de preenchimento (não necessariamente
+    // zeros) + 11 dígitos do CPF, largura total 16.
+    expect(normalizarCpfCnpj('0000009096353668')).toBe('09096353668');
+  });
+
+  it('reconstrói um CNPJ de 14 dígitos — bug real: tirar "zeros à esquerda" cortava um dígito de verdade quando o preenchimento não era só zeros', () => {
+    // "00001" + "22908713000190": stripar "zeros à esquerda" na unha para
+    // nesse "1" e devolve 15 dígitos errados — o certo é sempre pegar os
+    // ÚLTIMOS 14 caracteres, não inferir pelo conteúdo do preenchimento.
+    expect(normalizarCpfCnpj('0000122908713000190')).toBe('22908713000190');
+  });
+
+  it('campo vazio devolve string vazia', () => {
+    expect(normalizarCpfCnpj('')).toBe('');
+    expect(normalizarCpfCnpj('   ')).toBe('');
+  });
+});
+
+describe('isBensMetadataRow (bug real: campos do formulário — endereço, cartório, veículo, CNPJ do titular — grudando na discriminação)', () => {
+  const linha = (texto) => ({ cells: [{ text: texto, x: 0 }] });
+
+  it('reconhece rótulos de campo isolados', () => {
+    expect(isBensMetadataRow(linha('Bem com usufruto: Não'))).toBe(true);
+    expect(isBensMetadataRow(linha('Logradouro: RUA RIO DE JANEIRO'))).toBe(true);
+    expect(isBensMetadataRow(linha('Registrado no Cartório: Sim'))).toBe(true);
+    expect(isBensMetadataRow(linha('CHASSI: 9BD341ACXNY761745'))).toBe(true);
+  });
+
+  it('reconhece o rótulo mesmo grudado a um pedaço de boilerplate antes dele (achado real)', () => {
+    expect(isBensMetadataRow(linha('105 - BRASIL Bem com usufruto: Não'))).toBe(true);
+    expect(isBensMetadataRow(linha('105 - BRASIL Titular CNPJ: 59.844.109/0001-58'))).toBe(true);
+  });
+
+  it('reconhece a pergunta fixa sobre perdas a compensar', () => {
+    expect(isBensMetadataRow(linha('Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)?'))).toBe(true);
+  });
+
+  it('NÃO trata texto descritivo real do bem como metadado, mesmo mencionando CNPJ sem ser um rótulo', () => {
+    expect(isBensMetadataRow(linha('GALPAO URBANO'))).toBe(false);
+    expect(isBensMetadataRow(linha('CONSTITUIDO EM 2023 CNPJ 34.368.882'))).toBe(false);
+    expect(isBensMetadataRow(linha('APARTAMENTO SITUADO A RUA SANTA CATARINA NUMERO 1466'))).toBe(false);
+  });
 });
