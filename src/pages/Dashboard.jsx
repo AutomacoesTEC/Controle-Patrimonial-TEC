@@ -364,9 +364,17 @@ export default function Dashboard({ onNavigate } = {}) {
           </div>
         )}
 
-        {/* Aviso mais grave que o de "importação parcial": ali as fichas que
-            faltam vêm vazias na declaração; aqui elas têm dado que não entrou.
-            Por isso vem antes e com a borda de erro. */}
+        {/* Único aviso sobre ficha que ficou de fora. Só aparece quando a
+            declaração REALMENTE tem dado numa ficha que o app não lê — o
+            parser confirma isso lendo cada ficha e distinguindo "Sem
+            Informações" de conteúdo (ver fichasNaoLidasComConteudo em
+            importParsers.js). O carnê-leão (rendimentos de pessoa física e do
+            exterior) é uma dessas fichas: se vier preenchido no PDF, cai aqui
+            nomeado; se vier vazio, não há o que avisar, e a linha zerada
+            abaixo está correta. Antes existia um segundo aviso ("Importação
+            parcial") que gritava em TODO import por PDF mesmo com o carnê-leão
+            vazio — alarme falso removido, porque um aviso que grita à toa
+            deixa de ser lido quando gritar por um motivo real. */}
         {fichasNaoLidas.length > 0 && (
           <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-danger, #ef4444)' }}>
             <div className="card-header"><h3 className="card-title">Parte da declaração não foi importada</h3></div>
@@ -383,23 +391,6 @@ export default function Dashboard({ onNavigate } = {}) {
           </div>
         )}
 
-        {anosImportadosPorPdf.length > 0 && (
-          <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <div className="card-header"><h3 className="card-title">Importação parcial: confira antes de usar estes números</h3></div>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              {anosImportadosPorPdf.length === 1
-                ? `A declaração de ${anosImportadosPorPdf[0]} foi importada do PDF.`
-                : `As declarações de ${anosImportadosPorPdf.join(', ')} foram importadas do PDF.`}
-              {' '}O PDF traz Bens e Direitos, Dívidas e Ônus Reais, Pagamentos Efetuados, Doações, Dependentes,
-              o Resumo com o Imposto Devido, a Apuração do Ganho de Capital, as fichas mensais de Renda Variável
-              a Atividade Rural completa e os Rendimentos tributáveis de pessoa jurídica, isentos e de
-              tributação exclusiva. Ele não traz apenas os rendimentos recebidos de pessoa física e do
-              exterior (carnê-leão), que vêm só pelo arquivo .DBK, então essa linha aparece zerada
-              abaixo mesmo que a declaração tenha valores.
-              Importe o arquivo .DBK da mesma declaração para completar, ou cadastre esses dados à mão.
-            </p>
-          </div>
-        )}
 
         {demo && (
         <>
