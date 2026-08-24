@@ -87,7 +87,6 @@ export default function TitularPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Titular e Dependentes</h2>
-          <p>Identificação do contribuinte e dependentes{anoCalendario != null ? ` do ano-calendário ${anoCalendario}` : ''}. Preenchido pela importação, mas pode ser cadastrado ou corrigido aqui.</p>
         </div>
       </div>
       <div className="page-body animate-in">

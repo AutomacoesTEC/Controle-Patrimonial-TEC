@@ -73,7 +73,6 @@ export default function PagamentosDiversosPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Despesas Gerais</h2>
-          <p>Cartão de crédito, seguro, condomínio, IPVA e outros gastos do ano. Não é ficha da declaração (não confundir com Pagamentos Efetuados, que é só o dedutível), fica aqui para fechar a conta do fluxo de caixa.</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
