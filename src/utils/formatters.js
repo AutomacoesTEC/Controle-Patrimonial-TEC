@@ -1,6 +1,13 @@
 export function formatCurrency(value) {
   if (value === null || value === undefined || isNaN(value)) return 'R$ 0,00';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  // Normaliza o zero negativo antes de formatar. O Intl formata -0 como
+  // "-R$ 0,00", e o Dashboard exibia exatamente isso na Variação Patrimonial
+  // Total de um período sem variação, porque aquela linha inverte o sinal
+  // para exibição (formatCurrency(-total), ver ATUALIZAÇÃO 18). Corrigir
+  // aqui resolve de uma vez em qualquer lugar que inverta sinal. Achado na
+  // auditoria de 21/08/2026.
+  const n = Object.is(value, -0) || value === 0 ? 0 : value;
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 }
 
 export function formatCPF(cpf) {
@@ -56,6 +63,8 @@ export function formatDate(dateStr) {
 // mostra o número em vez de esconder ou inventar um rótulo.
 export const RENDIMENTO_TIPOS_CONHECIDOS = {
   tributavel_pj: 'Tributável recebido de pessoa jurídica',
+  tributavel_pf_exterior: 'Tributável recebido de pessoa física ou do exterior (carnê-leão)',
+  tributavel_rra: 'Tributável recebido acumuladamente (RRA)',
   isento_01: 'Isento: bolsa de estudo/pesquisa (doação, exceto médico-residente)',
   isento_02: 'Isento: bolsa de estudo/pesquisa (doação a médico-residente)',
   isento_03: 'Isento: capital de apólice de seguro/pecúlio por morte',
@@ -81,9 +90,9 @@ export const RENDIMENTO_TIPOS_CONHECIDOS = {
   isento_23: 'Isento: até 90% do rendimento de transporte de carga',
   isento_24: 'Isento: até 40% do rendimento de transporte de passageiros',
   isento_25: 'Isento: restituição do IR de anos-calendário anteriores',
+  isento_26: 'Isento: outros (linha 99 da ficha impressa)',
   isento_27: 'Isento: juros dos Rendimentos Recebidos Acumuladamente',
   isento_28: 'Isento: pensão alimentícia',
-  isento_99: 'Isento: outros',
   exclusivo_01: 'Tributação exclusiva: 13º salário',
   exclusivo_02: 'Tributação exclusiva: ganho de capital na alienação de bens/direitos',
   exclusivo_03: 'Tributação exclusiva: ganho de capital, bens em moeda estrangeira',
@@ -95,9 +104,19 @@ export const RENDIMENTO_TIPOS_CONHECIDOS = {
   exclusivo_09: 'Tributação exclusiva: rendimentos recebidos acumuladamente por dependente',
   exclusivo_10: 'Tributação exclusiva: juros sobre capital próprio',
   exclusivo_11: 'Tributação exclusiva: participação nos lucros ou resultados',
-  exclusivo_12: 'Tributação exclusiva: aplicações financeiras/lucros no exterior (Lei 14.754/2023)',
-  exclusivo_13: 'Tributação exclusiva: prêmios líquidos em loterias de aposta de quota fixa',
-  exclusivo_99: 'Tributação exclusiva: outros',
+  // ATENÇÃO à numeração daqui para baixo. O arquivo da declaração usa o CÓDIGO
+  // INTERNO do rendimento, e a ficha IMPRESSA numera as linhas da tela — as
+  // duas coincidem até o 11 e divergem depois, porque a Lei 14.754/2023 e os
+  // prêmios de loteria foram inseridos e a ficha renumerou. A tabela de-para
+  // está na classe `CadastroTabelasIRPF` do programa da Receita (ver o
+  // comentário em importParsers.js).
+  //
+  // Esta tabela usa o CÓDIGO INTERNO, que é o que os dois parsers geram desde
+  // 24/08/2026. O número entre parênteses é como a ficha impressa chama a mesma
+  // linha, para quem estiver conferindo no papel.
+  exclusivo_12: 'Tributação exclusiva: outros (linha 99 da ficha impressa)',
+  exclusivo_13: 'Tributação exclusiva: aplicações financeiras/lucros no exterior, Lei 14.754/2023 (linha 12 da ficha impressa)',
+  exclusivo_14: 'Tributação exclusiva: prêmios líquidos em loterias de aposta de quota fixa, Lei 14.790/2023 (linha 13 da ficha impressa)',
 };
 
 export function describeRendimentoTipo(tipo) {
@@ -105,6 +124,17 @@ export function describeRendimentoTipo(tipo) {
   if (RENDIMENTO_TIPOS_CONHECIDOS[tipo]) return RENDIMENTO_TIPOS_CONHECIDOS[tipo];
   const m = /^(isento|exclusivo)_(\d+)$/.exec(tipo);
   if (m) {
+    // O MESMO código chega aqui em dois formatos, e essa normalização é o que
+    // faz os rótulos aparecerem para rendimento IMPORTADO. Os parsers geram o
+    // código com 4 dígitos, como o .DBK o grava ("isento_0009"), enquanto o
+    // cadastro manual da tela usa as chaves de 2 dígitos desta mesma tabela
+    // ("isento_09"). Sem normalizar, todo rendimento vindo de arquivo caía no
+    // texto genérico "código 0009, confira na tabela do programa da Receita",
+    // e a tabela acima só valia para o que a usuária digitasse à mão. Defeito
+    // antigo, que só ficou visível quando o caminho PDF passou a importar as
+    // fichas de isentos e de tributação exclusiva, em 23/08/2026.
+    const curto = `${m[1]}_${m[2].replace(/^0+(?=\d\d)/, '')}`;
+    if (RENDIMENTO_TIPOS_CONHECIDOS[curto]) return RENDIMENTO_TIPOS_CONHECIDOS[curto];
     const categoria = m[1] === 'isento' ? 'Isento' : 'Tributação exclusiva';
     return `${categoria}, código ${m[2]} (confira este código na tabela do programa da Receita)`;
   }
@@ -164,6 +194,15 @@ export const CODIGOS_PAGAMENTO = [
   { codigo: '99', nome: 'Outros' },
 ];
 
+// Diferente dos rendimentos isentos e de tributação exclusiva, os códigos de
+// PAGAMENTO não têm tradução entre o número impresso na ficha e o gravado no
+// arquivo: o programa da Receita só define constantes `_TELA` para as duas
+// fichas de rendimento (conferido varrendo `CadastroTabelasIRPF` em
+// 24/08/2026 — são exatamente seis, todas de rendimento). Os códigos abaixo
+// foram conferidos contra o manual, página 107, e batem inclusive na redação.
+//
+// Vale registrar a ausência: foi justamente supor que "código é código" que
+// produziu o erro de rótulo da Lei 14.754, corrigido na ATUALIZAÇÃO 56.
 export function describePagamentoCodigo(codigo) {
   return CODIGOS_PAGAMENTO.find(c => c.codigo === codigo)?.nome || '';
 }
@@ -174,8 +213,8 @@ export function describePagamentoCodigo(codigo) {
 export const MOVIMENTACAO_TIPOS = {
   compra: { label: 'Compra ou aquisição adicional', sinal: '+', ajuda: 'Valor pago pela aquisição. Soma ao valor declarado do bem.' },
   benfeitoria: { label: 'Benfeitoria ou melhoria', sinal: '+', ajuda: 'Custo da benfeitoria (reforma, construção, plantio etc). Soma ao valor declarado do bem.' },
-  venda_parcial: { label: 'Venda parcial', sinal: '-', ajuda: 'A "Situação em 31/12" é o custo de aquisição, não o valor de mercado: informe a PARCELA DO CUSTO que sai (ex: vendeu 1/3 do imóvel, tire 1/3 do valor declarado), não o preço recebido na venda. Guarde o preço de venda na descrição, para o cálculo de ganho de capital.' },
-  venda_total: { label: 'Venda total (zera o valor)', sinal: '0', ajuda: 'Zera o valor declarado do bem. Guarde o preço de venda na descrição, para o cálculo de ganho de capital.' },
+  venda_parcial: { label: 'Venda parcial', sinal: '-', ajuda: '"Situação em 31/12" é custo de aquisição, não valor de mercado: informe a parcela do custo que sai (ex: vendeu 1/3, tire 1/3 do valor). O preço recebido vai no campo "Valor de venda" abaixo.' },
+  venda_total: { label: 'Venda total (zera o valor)', sinal: '0', ajuda: 'Zera o valor declarado do bem. O preço recebido vai no campo "Valor de venda" abaixo.' },
   baixa: { label: 'Baixa: perda, doação, destruição (zera o valor)', sinal: '0', ajuda: 'Zera o valor declarado do bem.' },
   ajuste: { label: 'Ajuste direto de valor', sinal: '=', ajuda: 'Substitui o valor declarado do bem pelo valor informado. Use só para corrigir um erro de cadastro, não para registrar uma movimentação real.' },
 };
@@ -304,3 +343,40 @@ export function iniciaisNome(nome) {
   if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
   return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
 }
+
+// Resume uma lista de meses em texto curto, por ano: "o ano inteiro de 2025",
+// "01 a 06/2025", "03, 07 e 11/2025". Listar os 12 meses um a um, que era o
+// que a tela fazia, gasta três linhas para dizer "todos".
+export const resumirMeses = (lista) => {
+  // Sem esta guarda, lista vazia caía na junção com "e" lá embaixo e devolvia
+  // " e undefined" (achado pelo próprio teste). Hoje a tela só chama isto
+  // quando há mês, mas a função não deve depender disso.
+  if (!lista || lista.length === 0) return '';
+  const porAno = new Map();
+  for (const { mes, ano } of (lista || [])) {
+    if (!mes || !ano) continue;
+    if (!porAno.has(ano)) porAno.set(ano, []);
+    porAno.get(ano).push(mes);
+  }
+  const dois = (n) => String(n).padStart(2, '0');
+  const trechos = [...porAno.entries()].sort((a, b) => a[0] - b[0]).map(([ano, meses]) => {
+    const ordenados = [...new Set(meses)].sort((a, b) => a - b);
+    if (ordenados.length === 12) return `o ano inteiro de ${ano}`;
+    // Comprime sequências seguidas: 1,2,3,7 vira "01 a 03 e 07".
+    const faixas = [];
+    let ini = ordenados[0], ant = ordenados[0];
+    for (const m of ordenados.slice(1)) {
+      if (m === ant + 1) { ant = m; continue; }
+      faixas.push(ini === ant ? dois(ini) : `${dois(ini)} a ${dois(ant)}`);
+      ini = m; ant = m;
+    }
+    faixas.push(ini === ant ? dois(ini) : `${dois(ini)} a ${dois(ant)}`);
+    const texto = faixas.length === 1 ? faixas[0]
+      : `${faixas.slice(0, -1).join(', ')} e ${faixas[faixas.length - 1]}`;
+    return `${texto}/${ano}`;
+  });
+  if (trechos.length === 0) return '';
+  return trechos.length === 1 ? trechos[0]
+    : `${trechos.slice(0, -1).join(', ')} e ${trechos[trechos.length - 1]}`;
+};
+

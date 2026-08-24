@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import { exportListaToXlsx } from '../utils/exportXlsx';
+import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -21,6 +22,9 @@ const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', bene
 export default function RendimentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { rendimentos } = state;
+  // Aba por categoria (mesmo padrão de BensPage: "Todos" + uma por grupo) —
+  // pedido da usuária pra não ficar uma lista contínua de cards empilhados.
+  const [categoriaFilter, setCategoriaFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
@@ -42,6 +46,9 @@ export default function RendimentosPage() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Tipo', form.tipo], ['Nome Fonte Pagadora', form.nome_fonte]])
+      || primeiroValorZerado([['Valor', form.valor]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0 };
     if (editingId) {
       dispatch({ type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
@@ -70,6 +77,8 @@ export default function RendimentosPage() {
 
   const totalPorCategoria = (lista) => lista.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
   const totalIRRF = rendimentos.reduce((s, r) => s + (parseFloat(r.irrf) || 0), 0);
+
+  const filtrados = categoriaFilter === 'all' ? rendimentos : porCategoria[categoriaFilter];
 
   const handleExport = () => exportListaToXlsx(
     rendimentos,
@@ -120,42 +129,50 @@ export default function RendimentosPage() {
               </div>
             </div>
 
-            {Object.entries(CATEGORIAS_RENDIMENTO).map(([key, meta]) => {
-              const lista = porCategoria[key];
-              if (lista.length === 0) return null;
-              return (
-                <div className="card" style={{ marginBottom: '16px' }} key={key}>
-                  <div className="card-header">
-                    <h3 className="card-title">{meta.label}</h3>
-                    <span className={`badge badge-${meta.cor}`}>{formatCurrency(totalPorCategoria(lista))}</span>
-                  </div>
-                  <div className="table-container">
-                    <table>
-                      <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
-                      <tbody>
-                        {lista.map(r => (
-                          <tr key={r.id}>
-                            <td>{describeRendimentoTipo(r.tipo)}</td>
-                            <td>{formatDate(r.data)}</td>
-                            <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
-                            <td>{(r.nome_fonte || '').substring(0, 50)}</td>
-                            <td>{r.beneficiario}</td>
-                            <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.valor)}</td>
-                            <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>
-                            <td>
-                              <div style={{ display: 'flex', gap: '4px' }}>
-                                <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(r)}>Editar</button>
-                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r)}>Excluir</button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="tabs" style={{ marginBottom: '20px' }}>
+              <button className={`tab ${categoriaFilter === 'all' ? 'active' : ''}`} onClick={() => setCategoriaFilter('all')}>Todos</button>
+              {Object.entries(CATEGORIAS_RENDIMENTO).map(([key, meta]) => {
+                if (porCategoria[key].length === 0) return null;
+                return (
+                  <button key={key} className={`tab ${categoriaFilter === key ? 'active' : ''}`} onClick={() => setCategoriaFilter(key)}>
+                    {meta.label} ({porCategoria[key].length})
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">{categoriaFilter === 'all' ? 'Todos os Rendimentos' : CATEGORIAS_RENDIMENTO[categoriaFilter].label}</h3>
+                <span className={`badge badge-${categoriaFilter === 'all' ? 'blue' : CATEGORIAS_RENDIMENTO[categoriaFilter].cor}`}>{formatCurrency(totalPorCategoria(filtrados))}</span>
+              </div>
+              <div className="table-container">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
+                  <tbody>
+                    {filtrados.length === 0 ? (
+                      <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum rendimento nesta categoria.</td></tr>
+                    ) : filtrados.map(r => (
+                      <tr key={r.id}>
+                        <td>{describeRendimentoTipo(r.tipo)}</td>
+                        <td>{formatDate(r.data)}</td>
+                        <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
+                        <td>{(r.nome_fonte || '').substring(0, 50)}</td>
+                        <td>{r.beneficiario}</td>
+                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.valor)}</td>
+                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(r)}>Editar</button>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r)}>Excluir</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </>
         )}
       </div>

@@ -11,7 +11,7 @@ import { sugerirVinculos } from '../utils/reconciliacaoRetificadora';
 // exclui cada sugestão antes de confirmar — nada é salvo até "Confirmar
 // Conciliação".
 export default function ReconciliacaoRetificadoraModal({
-  open, anoDestino, contribuinte,
+  open, anoDestino, contribuinte, formato,
   bensAntigos, bensNovos, dividasAntigas, dividasNovas,
   rendimentosNovos, pagamentosNovos,
   onConfirm, onCancel,
@@ -27,6 +27,7 @@ export default function ReconciliacaoRetificadoraModal({
     onConfirm({
       anoCalendario: anoDestino,
       contribuinte,
+      formato,
       bens: resultadoBens,
       dividas: resultadoDividas,
       rendimentos: rendimentosNovos,
@@ -37,13 +38,13 @@ export default function ReconciliacaoRetificadoraModal({
   return (
     <Modal open={open} onClose={onCancel} style={{ maxWidth: '900px', width: '95vw' }}>
       <div className="modal-header">
-        <h3>Conciliação da retificadora — Ano-calendário {anoDestino}</h3>
+        <h3>Conciliação da retificadora, ano-calendário {anoDestino}</h3>
         <button className="modal-close" onClick={onCancel}>✕</button>
       </div>
       <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
           Já existe uma declaração importada para {anoDestino} com o mesmo titular. Abaixo, cada item novo vem
-          com uma sugestão automática de vínculo (por código e semelhança da discriminação) — revise, corrija ou
+          com uma sugestão automática de vínculo (por código e semelhança da discriminação). Revise, corrija ou
           desvincule antes de confirmar. Item vinculado atualiza os valores declarados mas preserva movimentações
           já lançadas nele. Nada é salvo até você confirmar. Bens/dívidas cadastrados manualmente não entram aqui
           e não são afetados.
@@ -166,7 +167,7 @@ function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
                           setVinculoPorNovo(prev => prev.map((x, idx) => (idx === i ? v : x)));
                         }}
                       >
-                        <option value="">— Item novo (sem vínculo) —</option>
+                        <option value="">Item novo (sem vínculo)</option>
                         {opcoesDisponiveis.map(a => (
                           <option key={a.id} value={a.id}>
                             {a[campoCodigo]} - {(a.discriminacao || '').substring(0, 60)}

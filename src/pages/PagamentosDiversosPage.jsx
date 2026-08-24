@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import { exportListaToXlsx } from '../utils/exportXlsx';
+import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
 const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: new Date().toISOString().slice(0, 10) };
 
@@ -32,6 +33,9 @@ export default function PagamentosDiversosPage() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Descrição', form.descricao]])
+      || primeiroValorZerado([['Valor', form.valor]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0 };
     if (editingId) {
       dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });

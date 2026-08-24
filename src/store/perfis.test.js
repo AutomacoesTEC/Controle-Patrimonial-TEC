@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   novoPerfil, adicionarPerfil, atualizarPerfil, removerPerfil,
-  sincronizarPerfilComContribuinte, perfilAPartirDeDadosLegados, dataStorageKeyFor, perfilParaResumir,
+  sincronizarPerfilComContribuinte, perfilAPartirDeDadosLegados, dataStorageKeyFor,
   protegerPerfil, desprotegerPerfil,
 } from './perfis';
 
@@ -75,23 +75,6 @@ describe('perfilAPartirDeDadosLegados (migração de quem já usava o app antes 
     const p = perfilAPartirDeDadosLegados({}, AGORA);
     expect(p.nome).toBe('');
     expect(p.cpf).toBe('');
-  });
-});
-
-describe('perfilParaResumir (auto-entrar no último perfil usado, ao abrir o app)', () => {
-  const perfis = [novoPerfil({ nome: 'Fulano' }, AGORA)];
-
-  it('resume o perfil salvo, se ele ainda existir na lista', () => {
-    expect(perfilParaResumir(perfis, perfis[0].id)).toBe(perfis[0].id);
-  });
-
-  it('não resume (mostra a tela de seleção) se o perfil salvo foi excluído nesse meio tempo', () => {
-    expect(perfilParaResumir(perfis, 'id-que-nao-existe-mais')).toBe(null);
-  });
-
-  it('não resume nada sem um ponteiro salvo (primeira vez, ou depois de "Trocar perfil")', () => {
-    expect(perfilParaResumir(perfis, null)).toBe(null);
-    expect(perfilParaResumir(perfis, undefined)).toBe(null);
   });
 });
 

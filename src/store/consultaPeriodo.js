@@ -53,13 +53,24 @@ export function anosComDado(state) {
 // mais `anosSemDado`/`anosCobertos` para a UI ser honesta sobre lacunas.
 export function demonstrativoPeriodo(state, dataDe, dataAte) {
   const vazio = {
-    varPatrimonial: { bensDe: 0, bensAte: 0, deltaBens: 0, dividaDe: 0, dividaAte: 0, deltaDivida: 0, total: 0 },
-    rendimentos: { tributavelPJ: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 },
-    ganhos: { vendas: [], total: 0, semIrrfCount: 0 },
+    varPatrimonial: {
+      bensDe: 0, bensAte: 0, deltaBens: 0,
+      dividaComumDe: 0, dividaComumAte: 0, deltaDividaComum: 0,
+      dividaRuralDe: 0, dividaRuralAte: 0, deltaDividaRural: 0,
+      dividaDe: 0, dividaAte: 0, deltaDivida: 0, total: 0,
+    },
+    rendimentos: { tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 },
+    ganhos: { vendas: [], total: 0, semIrrfCount: 0, daDeclaracao: false },
     saldoDeCaixaGeral: 0,
     pagamentosEfetuados: 0,
     pagamentosDiversos: 0,
+    totalDoacoes: 0,
+    temDoacaoImportada: false,
     saldoDeCaixa: 0,
+    rendaVariavelMeses: [],
+    rendaVariavelResultado: 0,
+    rendaVariavelImposto: 0,
+    rendaVariavelComValor: false,
     anosSemDado: [],
     anosCobertos: [],
   };
@@ -75,26 +86,55 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   if (!dadosIni) anosSemDado.push(anoIni);
   if (!dadosFim && anoFim !== anoIni) anosSemDado.push(anoFim);
 
-  const bensDe = dadosIni
-    ? totalBensAteData(dadosIni.bens, dataDe, 'de') + totalBensAteData(dadosIni.bensRurais, dataDe, 'de')
-    : 0;
-  const bensAte = dadosFim
-    ? totalBensAteData(dadosFim.bens, dataAte, 'ate') + totalBensAteData(dadosFim.bensRurais, dataAte, 'ate')
-    : 0;
-  const dividaDe = dadosIni ? totalDividas(dadosIni.dividas, 'de', dataDe) : 0;
-  const dividaAte = dadosFim ? totalDividas(dadosFim.dividas, 'ate', dataAte) : 0;
+  // bensRurais NÃO entram na Variação Patrimonial (mesmo critério de
+  // demonstrativos.js/variacaoPatrimonialTotal): o bem rural já passa pelo
+  // Livro Caixa da Atividade Rural via despesa de investimento, dedutível
+  // integralmente no resultado (que já entra no demonstrativo como
+  // rendimento) — contar o bem aqui também duplicaria o gasto. dividasRurais
+  // SIM entram, porque o empréstimo rural não passa pelo livro-caixa e é a
+  // fonte real do dinheiro.
+  //
+  // dividaComum/dividaRural ficam separados (além do combinado dividaDe/
+  // dividaAte, usado no `total`) porque o Dashboard exibe as duas origens em
+  // linhas próprias — pedido da usuária pra não misturar visualmente Dívidas
+  // e Ônus Reais com Dívida Rural.
+  const bensDe = dadosIni ? totalBensAteData(dadosIni.bens, dataDe, 'de') : 0;
+  const bensAte = dadosFim ? totalBensAteData(dadosFim.bens, dataAte, 'ate') : 0;
+  const dividaComumDe = dadosIni ? totalDividas(dadosIni.dividas, 'de', dataDe) : 0;
+  const dividaComumAte = dadosFim ? totalDividas(dadosFim.dividas, 'ate', dataAte) : 0;
+  const dividaRuralDe = dadosIni ? totalDividas(dadosIni.dividasRurais, 'de', dataDe) : 0;
+  const dividaRuralAte = dadosFim ? totalDividas(dadosFim.dividasRurais, 'ate', dataAte) : 0;
+  const dividaDe = dividaComumDe + dividaRuralDe;
+  const dividaAte = dividaComumAte + dividaRuralAte;
   const varPatrimonial = {
     bensDe, bensAte, deltaBens: bensAte - bensDe,
+    dividaComumDe, dividaComumAte, deltaDividaComum: dividaComumAte - dividaComumDe,
+    dividaRuralDe, dividaRuralAte, deltaDividaRural: dividaRuralAte - dividaRuralDe,
     dividaDe, dividaAte, deltaDivida: dividaAte - dividaDe,
     total: -(bensAte - bensDe) + (dividaAte - dividaDe),
   };
 
   // Fluxos: cada ano do intervalo contribui com o trecho que lhe cabe.
-  const rend = { tributavelPJ: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 };
+  const rend = { tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 };
   const vendas = [];
   let semIrrfCount = 0;
   let pagamentosEfetuados = 0;
   let pagamentosDiversos = 0;
+  let totalDoacoes = 0;
+  // Só as doações que vieram do ARQUIVO carregam a ressalva de layout não
+  // confirmado. Doação cadastrada à mão (ADD_DOACAO_*, que marca
+  // origem 'manual') foi digitada pela usuária e não tem layout nenhum a
+  // confirmar — avisar ali dizia à pessoa para conferir na declaração um
+  // valor que ela mesma acabou de digitar. Achado ao auditar a declaração de
+  // um segundo contribuinte em 21/08/2026.
+  let temDoacaoImportada = false;
+  const rendaVariavelMeses = [];
+  // Ganho líquido e imposto de Renda Variável do período. Só ficam confiáveis
+  // quando a importação foi por PDF; `rendaVariavelComValor` é o que a tela usa
+  // para não exibir um zero que na verdade significa "não foi possível ler".
+  let rendaVariavelResultado = 0;
+  let rendaVariavelImposto = 0;
+  let rendaVariavelComValor = false;
   const anosCobertos = [];
 
   for (let ano = anoIni; ano <= anoFim; ano++) {
@@ -107,7 +147,8 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     const trechoDe = maxData(dataDe, `${ano}-01-01`);
     const trechoAte = minData(dataAte, `${ano}-12-31`);
 
-    const rural = resultadoAtividadeRuralPeriodo(dados.lancamentosRurais, trechoDe, trechoAte);
+    const rural = resultadoAtividadeRuralPeriodo(dados.lancamentosRurais, trechoDe, trechoAte,
+      { meses: dados.receitasDespesasRuraisOficial, ano });
     const r = totalRendimentos(dados.rendimentos, rural, trechoDe, trechoAte);
     for (const k of Object.keys(rend)) rend[k] += r[k];
 
@@ -117,12 +158,61 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
 
     pagamentosEfetuados += totalPagamentos(dados.pagamentos, trechoDe, trechoAte);
     pagamentosDiversos += totalPagamentosDiversos(dados.pagamentosDiversos, trechoDe, trechoAte);
+
+    // Doações: ficha anual da declaração (Oficial, lida do PDF — sem data
+    // por item, então entra o ano inteiro sempre que o ano cai dentro do
+    // período, mesmo critério de "estoque anual" que Ganho de Capital
+    // Oficial etc. já usam). É dinheiro que efetivamente saiu do caixa da
+    // pessoa física, então reduz o Saldo de Caixa igual Pagamentos —
+    // ficaria de fora da reconciliação (e o Saldo de Caixa pareceria
+    // "sobrando" dinheiro que na verdade virou doação).
+    const somaDoacoes = (lista) => (lista || []).reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
+    totalDoacoes += somaDoacoes(dados.doacoesEfetuadasOficial) + somaDoacoes(dados.doacoesPartidosOficial) + somaDoacoes(dados.doacoesEcaIdosoOficial);
+    // Importada = sem a marca 'manual' (o import grava a lista direto, sem
+    // carimbar origem, então "não é manual" é o teste que também vale para
+    // dado gravado antes desta distinção existir).
+    temDoacaoImportada = temDoacaoImportada || [
+      ...(dados.doacoesEfetuadasOficial || []),
+      ...(dados.doacoesPartidosOficial || []),
+      ...(dados.doacoesEcaIdosoOficial || []),
+    // Só a doação importada por PDF carrega a ressalva de layout: pelo `.DBK`
+    // as posições são oficiais (registros 34/90/91/92), e pelo cadastro manual
+    // não há layout nenhum a confirmar.
+    ].some(d => d.origem !== 'manual' && !d.layoutOficial);
+
+    // Renda Variável. Pelo .DBK vem só o MÊS de cada ficha mensal (o campo de
+    // valor do registro 76 nunca pôde ser decifrado, ver nota no import); pelo
+    // PDF vêm também os valores. Aqui os dois casos convivem: `mes` sempre, e
+    // o resultado do mês só quando a ficha o traz.
+    //
+    // Um mesmo mês pode aparecer DUAS vezes, porque titular e dependentes são
+    // fichas separadas na declaração — daí a deduplicação por ano+mês para a
+    // linha de meses, enquanto o resultado SOMA as duas (é o ganho líquido do
+    // conjunto declarado, que é como a própria declaração consolida).
+    for (const m of (dados.rendaVariavelMensalOficial || [])) {
+      if (!rendaVariavelMeses.some(x => x.ano === ano && x.mes === m.mes)) {
+        rendaVariavelMeses.push({ ano, mes: m.mes });
+      }
+      if (m.comuns || m.daytrade) {
+        rendaVariavelResultado += (m.comuns?.resultadoLiquidoMes || 0) + (m.daytrade?.resultadoLiquidoMes || 0);
+        rendaVariavelImposto += m.consolidacao?.totalImpostoDevido || 0;
+        rendaVariavelComValor = true;
+      }
+    }
   }
 
   const rendimentos = rend;
-  const ganhos = { vendas, total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0), semIrrfCount };
+  // `daDeclaracao`: toda venda do período veio da Apuração do Ganho de Capital
+  // importada, e não de movimentação lançada (ver ganhosApuradosPeriodo). A
+  // tela usa isso só para dizer de onde saiu o número.
+  const ganhos = {
+    vendas,
+    total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0),
+    semIrrfCount,
+    daDeclaracao: vendas.length > 0 && vendas.every(v => v.daDeclaracao),
+  };
   const saldoDeCaixaGeral = varPatrimonial.total + rendimentos.totalGeral + ganhos.total;
-  const saldoDeCaixa = saldoDeCaixaGeral - pagamentosEfetuados - pagamentosDiversos;
+  const saldoDeCaixa = saldoDeCaixaGeral - pagamentosEfetuados - pagamentosDiversos - totalDoacoes;
 
   return {
     varPatrimonial,
@@ -131,7 +221,13 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     saldoDeCaixaGeral,
     pagamentosEfetuados,
     pagamentosDiversos,
+    totalDoacoes,
+    temDoacaoImportada,
     saldoDeCaixa,
+    rendaVariavelMeses,
+    rendaVariavelResultado,
+    rendaVariavelImposto,
+    rendaVariavelComValor,
     anosSemDado: anosSemDado.sort((a, b) => a - b),
     anosCobertos,
   };
@@ -168,9 +264,17 @@ export function serieEvolucao(state, dataDe, dataAte) {
   const anoDe = anoDeUmaData(dataDe);
   const anoAte = anoDeUmaData(dataAte);
 
+  // bensRurais fica de fora (mesmo critério do Demonstrativo de Conciliação
+  // — ver variacaoPatrimonialTotal/demonstrativoPeriodo): sem isso, "Bens"
+  // aqui contava um valor diferente do que "Bens e Direitos" mostra em todo
+  // resto do app (BensPage, a tabela de conciliação), inclusive um bem
+  // rural sem `grupo` da taxonomia de Bens e Direitos não faz sentido
+  // nenhum misturado nesse total. dividasRurais continua somando junto de
+  // dividas, mesmo raciocínio de sempre (empréstimo rural não passa pelo
+  // livro-caixa da atividade rural).
   const pontoNaData = (dados, ano, data) => {
-    const bens = totalBensAteData(dados.bens, data, 'ate') + totalBensAteData(dados.bensRurais, data, 'ate');
-    const dividas = totalDividas(dados.dividas, 'ate', data);
+    const bens = totalBensAteData(dados.bens, data, 'ate');
+    const dividas = totalDividas(dados.dividas, 'ate', data) + totalDividas(dados.dividasRurais, 'ate', data);
     return { ano, data, bens, dividas, liquido: bens - dividas };
   };
 
@@ -198,13 +302,43 @@ export function totaisNaData(state, dataCorte, lado = 'ate') {
   if (!dataCorte) return null;
   const dados = dadosDoAno(state, anoDeUmaData(dataCorte));
   if (!dados) return null;
-  const totalBens = totalBensAteData(dados.bens, dataCorte, lado) + totalBensAteData(dados.bensRurais, dataCorte, lado);
-  const totalDividas_ = totalDividas(dados.dividas, lado, dataCorte);
+  // bensRurais fica de fora — mesmo critério de serieEvolucao/pontoNaData
+  // logo acima (ver o comentário lá): "Bens" precisa significar a mesma
+  // coisa em toda tela do Dashboard, e igual à BensPage.
+  const totalBens = totalBensAteData(dados.bens, dataCorte, lado);
+  const totalDividas_ = totalDividas(dados.dividas, lado, dataCorte) + totalDividas(dados.dividasRurais, lado, dataCorte);
   return {
     totalBens,
     totalDividas: totalDividas_,
     liquido: totalBens - totalDividas_,
-    qtdBens: (dados.bens || []).length + (dados.bensRurais || []).length,
-    qtdDividas: (dados.dividas || []).length,
+    qtdBens: (dados.bens || []).length,
+    qtdDividas: (dados.dividas || []).length + (dados.dividasRurais || []).length,
   };
+}
+
+// Lista as movimentações (de bens ou de dívidas) de UMA coleção
+// (`categoria`: 'bens' | 'dividas' | 'dividasRurais') com data dentro do
+// período, cruzando quantos anos forem necessários — o detalhe por trás de
+// clicar numa linha "Variação de..." no Dashboard ("quais lançamentos
+// compõem esse saldo"). Cada item volta com a discriminação/nome de quem
+// sofreu a movimentação, pra identificar de qual bem/dívida ela é. Sem data
+// (`de`/`ate` vazios) não dá pra saber o que está "dentro" do período —
+// devolve lista vazia em vez de tentar adivinhar.
+export function movimentacoesNoPeriodo(state, categoria, dataDe, dataAte) {
+  if (!dataDe || !dataAte || dataDe > dataAte) return [];
+  const anoIni = anoDeUmaData(dataDe);
+  const anoFim = anoDeUmaData(dataAte);
+  const resultado = [];
+  for (let ano = anoIni; ano <= anoFim; ano++) {
+    const dados = dadosDoAno(state, ano);
+    if (!dados) continue;
+    for (const item of (dados[categoria] || [])) {
+      for (const m of (item.movimentacoes || [])) {
+        if (m.data && m.data >= dataDe && m.data <= dataAte) {
+          resultado.push({ ...m, discriminacao: item.discriminacao || '', itemId: item.id });
+        }
+      }
+    }
+  }
+  return resultado.sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 }

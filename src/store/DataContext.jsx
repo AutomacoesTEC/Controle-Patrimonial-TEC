@@ -64,6 +64,27 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
 
   const saveToStorage = useCallback(() => {
     try {
+      // Achado real: excluir um perfil (PerfilLauncherPage remove a chave
+      // de dados e tira o perfil da lista) e o dado "voltar" sozinho —
+      // causa era um autosave em voo escrevendo por cima DEPOIS da
+      // exclusão, sobretudo pelo caminho assíncrono do Web Crypto abaixo
+      // (a criptografia pode resolver alguns milissegundos depois do clique
+      // em "Excluir"). Reconferir aqui, e de novo dentro do `.then()`
+      // assíncrono, é o que fecha a corrida: se o perfil já não existe mais
+      // na lista, não há o que salvar.
+      // Em caso de falha ao ler/parsear a lista (não deveria acontecer),
+      // assume que o perfil existe: o objetivo aqui é só barrar a escrita
+      // quando dá pra CONFIRMAR a exclusão, nunca arriscar perder um
+      // autosave legítimo por causa de uma leitura que deu errado.
+      const perfilAindaExiste = () => {
+        try {
+          const perfisSalvos = JSON.parse(localStorage.getItem(PERFIS_STORAGE_KEY) || '[]');
+          return perfisSalvos.some(p => p.id === perfilId);
+        } catch {
+          return true;
+        }
+      };
+      if (!perfilAindaExiste()) return;
       const { toasts, ...data } = state;
       if (chave) {
         // Assíncrono de propósito (Web Crypto): dispara e não espera — o
@@ -71,7 +92,10 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
         // poucos milissegundos na escrita não é perceptível, e nunca é o
         // caminho crítico de nenhuma ação da usuária.
         criptografarObjeto(chave, data)
-          .then(envelope => localStorage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(envelope)))
+          .then(envelope => {
+            if (!perfilAindaExiste()) return;
+            localStorage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(envelope));
+          })
           .catch(() => {});
       } else {
         localStorage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(data));

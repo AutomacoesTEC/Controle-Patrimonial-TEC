@@ -35,7 +35,7 @@ export default function AnoCalendarioModal({ open, onClose, onConfirm }) {
         <div className="modal-body">
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '18px', lineHeight: 1.5 }}>
             Ainda não há um ano-calendário definido. Este cadastro passa a pertencer
-            ao ano que você escolher agora — não precisa ser o ano corrente.
+            ao ano que você escolher agora, não precisa ser o ano corrente.
           </p>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label>Ano-calendário</label>

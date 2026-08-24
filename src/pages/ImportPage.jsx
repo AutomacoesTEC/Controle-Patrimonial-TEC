@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj } from '../utils/formatters';
+import { formatCpfCnpj } from '../utils/formatters';
 import { snapshotYear } from '../store/reducer';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -22,7 +22,7 @@ function mesmoTitular(a, b) {
 }
 
 export default function ImportPage() {
-  const { state, dispatch, addToast, saveToStorage } = useData();
+  const { state, dispatch, addToast } = useData();
   const [importing, setImporting] = useState(false);
   const [importType, setImportType] = useState(null);
   const [importLog, setImportLog] = useState([]);
@@ -31,12 +31,6 @@ export default function ImportPage() {
   const fileRef = useRef();
 
   const log = (msg, level = 'info') => setImportLog(prev => [...prev, { msg, level }]);
-
-  const handleSaveYear = () => {
-    dispatch({ type: 'SAVE_HISTORICO' });
-    saveToStorage();
-    addToast(`Dados de ${state.anoCalendario} salvos no histórico!`, 'success');
-  };
 
   const handleLoadYear = (ano) => {
     dispatch({ type: 'LOAD_HISTORICO', payload: ano });
@@ -82,7 +76,24 @@ export default function ImportPage() {
       let result;
       const ext = file.name.toLowerCase().split('.').pop();
 
-      if (ext === 'dbk' || ext === 'dec') {
+      // Extensões OFICIAIS do programa da Receita, conferidas na classe
+      // `ConstantesGlobais` do próprio IRPF 2026 em 24/08/2026:
+      //   .DEC  arquivo da declaração        (EXTENSAO_ARQ_DECLARACAO)
+      //   .DBK  cópia de segurança           (EXTENSAO_COPIA_SEGURA)
+      //   .F2B  backup do ano anterior       (EXTENSAO_BACKUP_ANO_ANTERIOR)
+      //   .REC  recibo de entrega            (EXTENSAO_COMPL_RECIBO)
+      // Os três primeiros são gravados pelo mesmo componente e têm o mesmo
+      // layout de registros; o `.REC` é só o recibo e NÃO é declaração, por
+      // isso fica de fora.
+      //
+      // O `.F2B` é aceito mas nunca foi testado contra um arquivo real — se o
+      // layout divergir, o parser avisa sobre os tipos de registro que não
+      // reconhece, em vez de importar errado em silêncio.
+      //
+      // `.bak` saiu daqui: NÃO é extensão do programa, e mesmo assim estava no
+      // `accept` do seletor de arquivo. Quem escolhesse um `.bak` recebia
+      // "Formato não suportado" do próprio app que tinha oferecido a opção.
+      if (ext === 'dbk' || ext === 'dec' || ext === 'f2b') {
         log(`Arquivo selecionado: ${file.name} (${ext.toUpperCase()})`);
         const text = await file.text();
         result = await parseDBK(text, log);
@@ -94,7 +105,7 @@ export default function ImportPage() {
         setProgress({ current: 0, total: pdf.numPages });
         result = await parsePDF(pdf, log, (current, total) => setProgress({ current, total }));
       } else {
-        log('Formato não suportado. Use .PDF ou .DBK', 'error');
+        log('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC, .DBK ou .F2B gerado pelo programa da Receita.', 'error');
         setImporting(false);
         return;
       }
@@ -140,6 +151,7 @@ export default function ImportPage() {
           }
           dispatch({ type: 'IMPORT_DECLARACAO', payload: {
             anoCalendario: result.anoCalendario,
+            formato: result.formato,
             contribuinte: result.contribuinte,
             // Titular novo: os dependentes do titular anterior não são dele,
             // não seguem junto (evita misturar as duas famílias no mesmo
@@ -149,6 +161,22 @@ export default function ImportPage() {
             dividas: result.dividas,
             rendimentos: result.rendimentos,
             pagamentos: result.pagamentos,
+            impostoDevido: result.impostoDevido,
+            apuracaoGanhoCapital: result.apuracaoGanhoCapital,
+            imoveisRurais: result.imoveisRurais,
+            bensRurais: result.bensRurais,
+            dividasRurais: result.dividasRurais,
+            receitasDespesasRuraisOficial: result.receitasDespesasRuraisOficial,
+            apuracaoResultadoRuralOficial: result.apuracaoResultadoRuralOficial,
+            movimentacaoRebanhoOficial: result.movimentacaoRebanhoOficial,
+            participantesRuraisOficial: result.participantesRuraisOficial,
+            demonstrativoExteriorOficial: result.demonstrativoExteriorOficial,
+            rendaVariavelMensalOficial: result.rendaVariavelMensalOficial,
+          fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
+            fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
+            doacoesEfetuadasOficial: result.doacoesEfetuadasOficial,
+            doacoesPartidosOficial: result.doacoesPartidosOficial,
+            doacoesEcaIdosoOficial: result.doacoesEcaIdosoOficial,
           }});
           log('');
           log('Importação concluída com sucesso (titular trocado).', 'success');
@@ -178,7 +206,7 @@ export default function ImportPage() {
           const prosseguirRetificadora = confirm(
             `Você já importou uma declaração para o ano-calendário ${anoDestino}${nomeTitular ? ` (titular ${nomeTitular})` : ''}. ` +
             `Tem certeza que quer sobrescrever os dados importados dessa declaração anterior com esta retificadora? ` +
-            `Na próxima tela você revisa e confirma item a item — o que foi incluído manualmente não é tocado.`
+            `Na próxima tela você revisa e confirma item a item. O que foi incluído manualmente não é tocado.`
           );
           if (!prosseguirRetificadora) {
             log('Importação cancelada. Dados existentes preservados.', 'error');
@@ -188,6 +216,7 @@ export default function ImportPage() {
           setReconciliacao({
             anoDestino,
             contribuinte: result.contribuinte,
+            formato: result.formato,
             bensAntigos: (existenteNoDestino.bens || []).filter(b => b.origem === 'importacao'),
             bensNovos: result.bens || [],
             dividasAntigas: (existenteNoDestino.dividas || []).filter(d => d.origem === 'importacao'),
@@ -224,11 +253,28 @@ export default function ImportPage() {
 
         dispatch({ type: 'IMPORT_DECLARACAO', payload: {
           anoCalendario: result.anoCalendario,
+          formato: result.formato,
           contribuinte: result.contribuinte,
           bens: result.bens,
           dividas: result.dividas,
           rendimentos: result.rendimentos,
           pagamentos: result.pagamentos,
+          dependentes: result.dependentes,
+          impostoDevido: result.impostoDevido,
+          apuracaoGanhoCapital: result.apuracaoGanhoCapital,
+          imoveisRurais: result.imoveisRurais,
+          bensRurais: result.bensRurais,
+          dividasRurais: result.dividasRurais,
+          receitasDespesasRuraisOficial: result.receitasDespesasRuraisOficial,
+          apuracaoResultadoRuralOficial: result.apuracaoResultadoRuralOficial,
+          movimentacaoRebanhoOficial: result.movimentacaoRebanhoOficial,
+          participantesRuraisOficial: result.participantesRuraisOficial,
+          demonstrativoExteriorOficial: result.demonstrativoExteriorOficial,
+          rendaVariavelMensalOficial: result.rendaVariavelMensalOficial,
+          fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
+          doacoesEfetuadasOficial: result.doacoesEfetuadasOficial,
+          doacoesPartidosOficial: result.doacoesPartidosOficial,
+          doacoesEcaIdosoOficial: result.doacoesEcaIdosoOficial,
         }});
         log('');
         log('Importação concluída com sucesso.', 'success');
@@ -274,14 +320,14 @@ export default function ImportPage() {
             onClick={() => { setImportType('dbk'); fileRef.current?.click(); }}
           >
             <h3>Importar Arquivo Eletrônico</h3>
-            <p>Arquivo .DBK ou .DEC gerado pelo programa IRPF (cópia de segurança)</p>
+            <p>Arquivo .DEC, .DBK ou .F2B gerado pelo programa IRPF (declaração, cópia de segurança ou backup do ano anterior)</p>
           </div>
         </div>
 
         <input
           ref={fileRef}
           type="file"
-          accept=".pdf,.dbk,.dec,.bak"
+          accept=".pdf,.dbk,.dec,.f2b"
           style={{ display: 'none' }}
           onChange={handleFileSelect}
         />
@@ -326,21 +372,17 @@ export default function ImportPage() {
 
         <div className="card-header" style={{ marginTop: '32px', marginBottom: '16px' }}>
           <h3 className="card-title">Histórico de Declarações</h3>
-          {state.anoCalendario != null && (
-            <button className="btn btn-secondary btn-sm" onClick={handleSaveYear}>Salvar {state.anoCalendario} no Histórico</button>
-          )}
         </div>
         {anosHistorico.length === 0 ? (
           <div className="empty-state">
             <h3>Nenhuma declaração salva no histórico</h3>
-            <p>Importe uma declaração ou clique em "Salvar no Histórico" para guardar os dados do ano atual</p>
+            <p>Importe uma declaração para ela aparecer aqui</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gap: '16px' }}>
             {anosHistorico.map(ano => {
               const h = snapshotDoAno(ano);
               const ehAtivo = ano === state.anoCalendario;
-              const totalBens = (h.bens || []).reduce((s, b) => s + (parseFloat(b.situacao_atual) || 0), 0);
               return (
                 <div
                   className="card" key={ano}
@@ -350,18 +392,16 @@ export default function ImportPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Ano-Calendário {ano}</h3>
-                      <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                        {(h.bens || []).length} bens, {(h.dividas || []).length} dívidas
-                        {h.savedAt ? `, salvo em ${new Date(h.savedAt).toLocaleDateString('pt-BR')}` : ''}
-                      </p>
+                      {h.savedAt && (
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                          Salvo em {new Date(h.savedAt).toLocaleDateString('pt-BR')}
+                        </p>
+                      )}
                     </div>
                     <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div>
-                        <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(totalBens)}</div>
-                        {ehAtivo
-                          ? <span className="badge badge-green">Ano ativo</span>
-                          : <span className="badge badge-blue">Carregar</span>}
-                      </div>
+                      {ehAtivo
+                        ? <span className="badge badge-green">Ano ativo</span>
+                        : <span className="badge badge-blue">Carregar</span>}
                       <button
                         className="btn btn-sm btn-danger"
                         title={`Excluir o ano-calendário ${ano} do histórico`}

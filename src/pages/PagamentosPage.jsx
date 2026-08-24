@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import { exportListaToXlsx } from '../utils/exportXlsx';
+import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', data: new Date().toISOString().slice(0, 10) };
 
@@ -32,6 +33,9 @@ export default function PagamentosPage() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Código', form.codigo], ['Nome do Beneficiário', form.nome_beneficiario]])
+      || primeiroValorZerado([['Valor Pago', form.valor_pago]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor_pago: parseFloat(form.valor_pago) || 0, parcela_nao_dedutivel: parseFloat(form.parcela_nao_dedutivel) || 0 };
     if (editingId) {
       dispatch({ type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });

@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { formatCpfCnpj, formatDate, MOVIMENTACAO_TIPOS } from './formatters';
+import { formatCpfCnpj, formatDate, describeRendimentoTipo, MOVIMENTACAO_TIPOS } from './formatters';
 
 const resumoMovimentacoes = (bem) => (bem.movimentacoes || []).map(m =>
   `${MOVIMENTACAO_TIPOS[m.tipo]?.label || m.tipo} em ${formatDate(m.data)}`
@@ -44,12 +44,20 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
 
   // Aba 3: Rendimentos
   if (data.rendimentos && data.rendimentos.length > 0) {
+    // `describeRendimentoTipo`, e não o código cru: esta planilha é o que vai
+    // para quem preenche a declaração, e "isento_09" não diz nada, enquanto
+    // "Isento: lucros e dividendos recebidos" diz. A tela de Rendimentos já
+    // exportava assim; só esta aba do export do Dashboard tinha ficado para
+    // trás, junto com as colunas Data e IRRF, que faltavam. Achado na
+    // auditoria de 21/08/2026.
     const rendData = data.rendimentos.map(r => ({
-      'Tipo': r.tipo || '',
+      'Tipo': describeRendimentoTipo(r.tipo),
+      'Data': formatDate(r.data),
       'CNPJ Fonte': formatCpfCnpj(r.cnpj_fonte),
       'Nome Fonte': r.nome_fonte || '',
       'Beneficiário': r.beneficiario || 'Titular',
       'Valor': r.valor || 0,
+      'IRRF': r.irrf || 0,
     }));
     const ws3 = XLSX.utils.json_to_sheet(rendData);
     XLSX.utils.book_append_sheet(wb, ws3, 'Rendimentos');

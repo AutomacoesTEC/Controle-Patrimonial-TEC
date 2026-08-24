@@ -8,8 +8,17 @@
 // sem montar nada.
 
 export const PERFIS_STORAGE_KEY = 'controle-patrimonial-perfis';
-export const PERFIL_ATIVO_STORAGE_KEY = 'controle-patrimonial-perfil-ativo';
 export const LEGADO_STORAGE_KEY = 'controle-patrimonial-data';
+
+// Qual perfil está aberto NESTA sessão do app. Fica em sessionStorage, e a
+// escolha do armazenamento é a regra de negócio inteira: sessionStorage
+// sobrevive ao recarregar a página (F5) e é apagado quando a janela fecha.
+// É exatamente a fronteira que a usuária pediu em 21/08/2026: atualizar
+// mantém o titular aberto, abrir o app depois de fechado volta para a lista
+// de perfis. A chave ANTIGA `controle-patrimonial-perfil-ativo` era de
+// localStorage e por isso retomava o perfil até depois de fechar o app; foi
+// removida e não deve voltar.
+export const PERFIL_SESSAO_KEY = 'controle-patrimonial-perfil-sessao';
 
 export const dataStorageKeyFor = (perfilId) => `controle-patrimonial-data-${perfilId}`;
 
@@ -67,6 +76,15 @@ export function sincronizarPerfilComContribuinte(perfis, perfilId, contribuinte)
   return atualizarPerfil(perfis, perfilId, { nome, cpf });
 }
 
+// Devolve o perfil apontado pela sessão, ou null. O id guardado pode ter
+// virado pó desde que foi escrito (perfil excluído noutra aba, dado do
+// navegador limpo pela metade), e nesse caso a resposta certa é a tela de
+// perfis, não um app apontando para um titular que não existe mais.
+export function perfilDaSessao(perfis, idSalvo) {
+  if (!idSalvo || !Array.isArray(perfis)) return null;
+  return perfis.find(p => p && p.id === idSalvo) || null;
+}
+
 // Migração de quem já usava o app ANTES de perfis existirem: os dados
 // ficavam soltos numa chave única (LEGADO_STORAGE_KEY). Na primeira
 // abertura depois dessa mudança, sem isso a pessoa cairia numa tela de
@@ -77,16 +95,4 @@ export function sincronizarPerfilComContribuinte(perfis, perfilId, contribuinte)
 export function perfilAPartirDeDadosLegados(dadosLegado, agora = new Date()) {
   const contribuinte = dadosLegado?.contribuinte;
   return novoPerfil({ nome: contribuinte?.nome, cpf: contribuinte?.cpf, apelido: '' }, agora);
-}
-
-// Qual perfil abrir sozinho ao iniciar o app (sem passar pela tela de
-// seleção), a partir do que ficou salvo da última vez. Só resume se esse
-// perfil ainda existir na lista — ele pode ter sido excluído entre uma
-// sessão e outra, e nesse caso o app NUNCA entra sozinho em outro perfil
-// qualquer (isso seria misturar sem a pessoa escolher). "Trocar perfil"
-// (ver App.jsx) limpa esse ponteiro de propósito, pra próxima abertura
-// pedir a escolha de novo.
-export function perfilParaResumir(perfis, perfilAtivoSalvo) {
-  if (!perfilAtivoSalvo) return null;
-  return perfis.some(p => p.id === perfilAtivoSalvo) ? perfilAtivoSalvo : null;
 }

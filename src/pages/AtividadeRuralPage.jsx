@@ -1,20 +1,39 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import DateInput from '../components/DateInput';
+import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
+import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
+const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '', dataAquisicao: '' };
 const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: new Date().toISOString().slice(0, 10), valor: '', descricao: '' };
+const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
-export default function AtividadeRuralPage() {
+// Mesmo critério de BensPage.jsx (ver comentário lá): um bem da Atividade Rural que já entrou no
+// ano com as duas situações zeradas e nenhuma movimentação registrada NESTE ano não tem mais nada
+// a conferir na declaração deste ano -- deixa de aparecer na listagem (pedido da usuária,
+// 21/08/2026). O terceiro critério (sem movimentações) distingue esse caso do bem que está SENDO
+// baixado justamente NESTE ano, que continua aparecendo.
+function bemZeradoSemMovimentacaoNoAno(bem) {
+  const anterior = parseFloat(bem.situacao_anterior) || 0;
+  const atual = parseFloat(bem.situacao_atual) || 0;
+  return anterior === 0 && atual === 0 && (bem.movimentacoes || []).length === 0;
+}
+
+export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
-  const { imoveisRurais, bensRurais, lancamentosRurais, prejuizoRuralAcompensar, anoCalendario } = state;
-  const [subView, setSubView] = useState('imoveis');
+  const {
+    imoveisRurais, bensRurais, dividasRurais, lancamentosRurais, prejuizoRuralAcompensar, anoCalendario,
+    receitasDespesasRuraisOficial, apuracaoResultadoRuralOficial, movimentacaoRebanhoOficial,
+    participantesRuraisOficial,
+  } = state;
+  const [subView, setSubView] = useState(abaInicial || 'imoveis');
 
   const receitaTotal = lancamentosRurais.filter(l => l.tipo === 'receita').reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
   const despesaTotal = lancamentosRurais.filter(l => l.tipo === 'despesa').reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
@@ -24,6 +43,7 @@ export default function AtividadeRuralPage() {
     <>
       <div className="page-header">
         <div className="page-header-left">
+          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
           <h2>Atividade Rural</h2>
           <p>Imóveis explorados, bens, receitas/despesas e resultado. Ficha própria da declaração, separada de Bens e Direitos.</p>
         </div>
@@ -32,25 +52,42 @@ export default function AtividadeRuralPage() {
         <div className="tabs" style={{ marginBottom: '20px' }}>
           <button className={`tab ${subView === 'imoveis' ? 'active' : ''}`} onClick={() => setSubView('imoveis')}>Imóveis Explorados</button>
           <button className={`tab ${subView === 'bens' ? 'active' : ''}`} onClick={() => setSubView('bens')}>Bens da Atividade Rural</button>
+          <button className={`tab ${subView === 'dividas' ? 'active' : ''}`} onClick={() => setSubView('dividas')}>Dívidas Vinculadas</button>
           <button className={`tab ${subView === 'lancamentos' ? 'active' : ''}`} onClick={() => setSubView('lancamentos')}>Receitas e Despesas</button>
           <button className={`tab ${subView === 'resultado' ? 'active' : ''}`} onClick={() => setSubView('resultado')}>Resultado</button>
+          {movimentacaoRebanhoOficial.length > 0 && (
+            <button className={`tab ${subView === 'rebanho' ? 'active' : ''}`} onClick={() => setSubView('rebanho')}>Movimentação do Rebanho</button>
+          )}
+          {participantesRuraisOficial.length > 0 && (
+            <button className={`tab ${subView === 'participantes' ? 'active' : ''}`} onClick={() => setSubView('participantes')}>Participantes</button>
+          )}
         </div>
 
-        {subView === 'imoveis' && <ImoveisRuraisSection imoveisRurais={imoveisRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro} />}
+        {subView === 'imoveis' && (
+          <ImoveisRuraisSection
+            imoveisRurais={imoveisRurais} dispatch={dispatch} addToast={addToast}
+            anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro}
+          />
+        )}
         {subView === 'bens' && <BensRuraisSection bensRurais={bensRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} />}
+        {subView === 'dividas' && <DividasRuraisSection dividasRurais={dividasRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} />}
         {subView === 'lancamentos' && (
           <LancamentosRuraisSection
             lancamentosRurais={lancamentosRurais} dispatch={dispatch} addToast={addToast}
             receitaTotal={receitaTotal} despesaTotal={despesaTotal} resultadoDoAno={resultadoDoAno}
             anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro}
+            receitasDespesasRuraisOficial={receitasDespesasRuraisOficial}
           />
         )}
         {subView === 'resultado' && (
           <ResultadoSection
             receitaTotal={receitaTotal} despesaTotal={despesaTotal} resultadoDoAno={resultadoDoAno}
             prejuizoRuralAcompensar={prejuizoRuralAcompensar} dispatch={dispatch} addToast={addToast}
+            apuracaoResultadoRuralOficial={apuracaoResultadoRuralOficial}
           />
         )}
+        {subView === 'rebanho' && <RebanhoSection movimentacaoRebanhoOficial={movimentacaoRebanhoOficial} />}
+        {subView === 'participantes' && <ParticipantesRuraisSection participantesRuraisOficial={participantesRuraisOficial} />}
       </div>
     </>
   );
@@ -77,6 +114,8 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
   };
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Nome e Localização', form.nomeLocalizacao]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, area: parseFloat(form.area) || 0, participacao: parseFloat(form.participacao) || 0 };
     if (editingId) {
       dispatch({ type: 'UPDATE_IMOVEL_RURAL', payload: { ...payload, id: editingId } });
@@ -183,6 +222,49 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
   );
 }
 
+// Puramente informativo, igual RebanhoSection. Fica numa aba própria (não
+// dentro de ImoveisRuraisSection) de propósito: um .card grande ao lado do
+// .table-container dos imóveis (que tem flex:1;min-height:0 pra preencher
+// o .page-body) faz o CSS espremer o table-container quase a zero de
+// altura — achado real, visto com Playwright (24 imóveis somem da tela,
+// tabela com offsetHeight:2px). Aba separada evita o conflito de layout
+// sem mexer no CSS compartilhado.
+function ParticipantesRuraisSection({ participantesRuraisOficial }) {
+  // Os DOIS caminhos entregam o vínculo com o imóvel desde 24/08/2026: o PDF
+  // pelo aninhamento impresso sob cada fazenda, o .DBK pela chave NR_CHAVE_AR
+  // dos registros 50 e 57. A coluna só some se a importação não trouxer o
+  // vínculo (declaração de um exercício cujo layout não tenha a chave, ou dado
+  // cadastrado à mão), em vez de ficar vazia sem explicação.
+  const temVinculo = participantesRuraisOficial.some(p => p.imovelNome);
+  return (
+    <div className="card" style={{ marginBottom: '20px' }}>
+      <div className="card-header">
+        <h3 className="card-title">Participantes dos Imóveis</h3>
+        <span className="badge badge-blue" title="Lida da declaração importada, não depende de cadastro nenhum feito no app">Da declaração original</span>
+      </div>
+      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
+        {temVinculo
+          ? `A declaração lista ${participantesRuraisOficial.length} participante(s) de imóveis explorados em condomínio ou parceria, com o imóvel de cada um.`
+          : `A declaração lista ${participantesRuraisOficial.length} participante(s) de imóveis explorados em condomínio ou parceria, mas o arquivo importado não indica a qual imóvel cada um se refere. Confira o vínculo na declaração original.`}
+      </p>
+      <div className="table-container">
+        <table>
+          <thead><tr><th>Nome</th><th>CPF</th>{temVinculo && <th>Imóvel</th>}</tr></thead>
+          <tbody>
+            {participantesRuraisOficial.map((p, i) => (
+              <tr key={i}>
+                <td>{p.nome}</td>
+                <td>{formatCpfCnpj(p.cpf)}</td>
+                {temVinculo && <td>{p.imovelNome || '-'}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
@@ -194,6 +276,12 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
     if (anoCalendario == null) { pendingActionRef.current = abrirNovoBem; setAnoModalOpen(true); return; }
     abrirNovoBem();
   };
+
+  // Filtra a lista de origem antes de qualquer total/exportação/listagem derivada dela.
+  const bensRuraisVisiveis = useMemo(
+    () => bensRurais.filter(b => !bemZeradoSemMovimentacaoNoAno(b)),
+    [bensRurais]
+  );
 
   const handleSave = (bemPayload) => {
     if (editingBem) {
@@ -215,10 +303,10 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
     }
   };
 
-  const totalAtual = bensRurais.reduce((s, b) => s + (parseFloat(b.situacao_atual) || 0), 0);
+  const totalAtual = bensRuraisVisiveis.reduce((s, b) => s + (parseFloat(b.situacao_atual) || 0), 0);
 
   const handleExport = () => exportListaToXlsx(
-    bensRurais,
+    bensRuraisVisiveis,
     [
       ['Código', b => b.codigo || ''],
       ['Discriminação', b => b.discriminacao || ''],
@@ -233,7 +321,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{bensRurais.length} itens, total {formatCurrency(totalAtual)}</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{bensRuraisVisiveis.length} itens, total {formatCurrency(totalAtual)}</p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Bem</button>
@@ -243,9 +331,9 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
         <table>
           <thead><tr><th>Código</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th>Ações</th></tr></thead>
           <tbody>
-            {bensRurais.length === 0 ? (
+            {bensRuraisVisiveis.length === 0 ? (
               <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum bem cadastrado.</td></tr>
-            ) : bensRurais.map(bem => (
+            ) : bensRuraisVisiveis.map(bem => (
               <tr key={bem.id}>
                 <td>{bem.codigo}</td>
                 <td style={{ maxWidth: '400px' }}>{(bem.discriminacao || '').substring(0, 100)}</td>
@@ -272,7 +360,158 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
   );
 }
 
-function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, receitaTotal, despesaTotal, resultadoDoAno, anoCalendario, garantirAnoCadastro }) {
+// Mesmo padrão de DividasPage.jsx, só que na coleção dividasRurais — sem o
+// campo "Código" (as dívidas vinculadas à atividade rural, tanto no
+// cadastro manual quanto na importação, não têm essa classificação por
+// código como as dívidas comuns).
+function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(FORM_DIVIDA_RURAL_VAZIO);
+
+  const liveDivida = editingId ? dividasRurais.find(d => d.id === editingId) : null;
+  const upd = (campo, valor) => setForm(p => ({ ...p, [campo]: valor }));
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_DIVIDA_RURAL_VAZIO); setModalOpen(true); };
+  const abrirEdicao = (d) => {
+    setEditingId(d.id);
+    setForm({ discriminacao: d.discriminacao || '', situacao_anterior: '', situacao_atual: '', valor_pago: d.valor_pago || '' });
+    setModalOpen(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    const falta = primeiroCampoVazio([['Discriminação', form.discriminacao]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
+    if (editingId) {
+      dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
+      addToast('Dívida atualizada com sucesso!', 'success');
+    } else {
+      dispatch({
+        type: 'ADD_DIVIDA_RURAL',
+        payload: {
+          discriminacao: form.discriminacao,
+          situacao_anterior: parseFloat(form.situacao_anterior) || 0,
+          situacao_atual: parseFloat(form.situacao_atual) || 0,
+          valor_pago: parseFloat(form.valor_pago) || 0,
+        },
+      });
+      addToast('Dívida cadastrada com sucesso!', 'success');
+    }
+    setModalOpen(false);
+    setEditingId(null);
+  };
+
+  const handleDelete = (d) => {
+    if (confirm(`EXCLUIR "${(d.discriminacao || 'esta dívida').substring(0, 60)}"?\n\nEssa ação não pode ser desfeita.`)) {
+      dispatch({ type: 'DELETE_DIVIDA_RURAL', payload: d.id });
+      addToast('Dívida excluída', 'info');
+    }
+  };
+
+  const totalAnterior = dividasRurais.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
+  const totalAtual = dividasRurais.reduce((s, d) => s + (parseFloat(d.situacao_atual) || 0), 0);
+
+  const handleExport = () => exportListaToXlsx(
+    dividasRurais,
+    [
+      ['Discriminação', d => d.discriminacao || ''],
+      ['Situação Anterior', d => d.situacao_anterior || 0],
+      ['Situação Atual', d => d.situacao_atual || 0],
+      ['Valor Pago', d => d.valor_pago || 0],
+      ['Movimentações no Ano', d => resumoMovimentacoes(d)],
+    ],
+    'Dívidas Vinculadas à Atividade Rural', 'dividas_atividade_rural', anoCalendario
+  );
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{dividasRurais.length} itens</p>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
+          <button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Dívida</button>
+        </div>
+      </div>
+      <div className="table-container">
+        <table>
+          <thead><tr><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
+          <tbody>
+            {dividasRurais.length === 0 ? (
+              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma dívida cadastrada.</td></tr>
+            ) : dividasRurais.map(d => (
+              <tr key={d.id}>
+                <td style={{ maxWidth: '400px' }}>{(d.discriminacao || '').substring(0, 100)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_anterior)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_atual)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor_pago)}</td>
+                <td>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(d)}>Editar</button>
+                    <button className="btn btn-sm btn-danger" onClick={() => handleDelete(d)}>Excluir</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          {dividasRurais.length > 0 && (
+            <tfoot>
+              <tr style={{ background: 'var(--bg-secondary)' }}>
+                <td style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAIS</td>
+                <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totalAnterior)}</td>
+                <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totalAtual)}</td>
+                <td style={{ borderTop: '2px solid var(--border-color)' }}></td>
+                <td style={{ borderTop: '2px solid var(--border-color)' }}></td>
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
+        <form onSubmit={handleSave}>
+          <div className="modal-body">
+            <div className="form-group"><label>Discriminação</label><textarea className="form-control" value={form.discriminacao} onChange={e => upd('discriminacao', e.target.value)} /></div>
+            {editingId && liveDivida ? (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Saldo em 31/12 Anterior (não editável aqui)</label>
+                    <div className="form-control" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>{formatCurrency(liveDivida.situacao_anterior)}</div>
+                  </div>
+                  <div className="form-group">
+                    <label>Saldo atual (muda por movimentação)</label>
+                    <div className="form-control" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', fontWeight: 700 }}>{formatCurrency(liveDivida.situacao_atual)}</div>
+                  </div>
+                  <div className="form-group"><label>Valor Pago no Ano</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
+                </div>
+                <MovimentacaoBemForm
+                  bem={liveDivida}
+                  actionType="REGISTRAR_MOVIMENTACAO_DIVIDA_RURAL"
+                  tipos={MOVIMENTACAO_DIVIDA_TIPOS}
+                  tipoInicial="amortizacao"
+                  anoCalendario={anoCalendario}
+                />
+              </>
+            ) : (
+              <div className="form-row">
+                <div className="form-group"><label>Situação 31/12 Anterior</label><MoneyInput value={form.situacao_anterior} onChange={v => upd('situacao_anterior', v)} /></div>
+                <div className="form-group"><label>Situação 31/12 Atual</label><MoneyInput value={form.situacao_atual} onChange={v => upd('situacao_atual', v)} /></div>
+                <div className="form-group"><label>Valor Pago no Ano</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
+              </div>
+            )}
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn-primary">{editingId ? 'Salvar Dados da Dívida' : 'Salvar'}</button>
+          </div>
+        </form>
+      </Modal>
+    </>
+  );
+}
+
+function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, receitaTotal, despesaTotal, resultadoDoAno, anoCalendario, garantirAnoCadastro, receitasDespesasRuraisOficial = [] }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_LANCAMENTO_VAZIO);
@@ -293,6 +532,9 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
   };
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Data', form.data], ['Descrição', form.descricao]])
+      || primeiroValorZerado([['Valor', form.valor]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0 };
     if (editingId) {
       dispatch({ type: 'UPDATE_LANCAMENTO_RURAL', payload: { ...payload, id: editingId } });
@@ -324,8 +566,40 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
     'Receitas e Despesas Rural', 'receitas_despesas_rural', anoCalendario
   );
 
+  const totalReceitaOficial = receitasDespesasRuraisOficial.reduce((s, m) => s + m.receitaBruta, 0);
+  const totalDespesaOficial = receitasDespesasRuraisOficial.reduce((s, m) => s + m.despesaCusteioInvestimento, 0);
+
   return (
     <>
+      {receitasDespesasRuraisOficial.length > 0 && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header">
+            <h3 className="card-title">Receitas e Despesas Mensais</h3>
+            <span className="badge badge-blue" title="Lida da declaração importada (.DBK ou PDF), não depende de lançamento nenhum feito no app">Da declaração original</span>
+          </div>
+          <div className="table-container">
+            <table>
+              <thead><tr><th>Mês</th><th style={{ textAlign: 'right' }}>Receita Bruta</th><th style={{ textAlign: 'right' }}>Despesa de Custeio/Investimento</th></tr></thead>
+              <tbody>
+                {receitasDespesasRuraisOficial.map(m => (
+                  <tr key={m.mes}>
+                    <td>{NOMES_MES[m.mes - 1] || m.mes}</td>
+                    <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(m.receitaBruta)}</td>
+                    <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(m.despesaCusteioInvestimento)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ background: 'var(--bg-secondary)' }}>
+                  <td style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAL</td>
+                  <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totalReceitaOficial)}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totalDespesaOficial)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card blue">
           <div className="stat-info"><h3>{formatCurrency(receitaTotal)}</h3><p>Receita Bruta Total</p></div>
@@ -401,7 +675,7 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
   );
 }
 
-function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizoRuralAcompensar, dispatch, addToast }) {
+function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizoRuralAcompensar, dispatch, addToast, apuracaoResultadoRuralOficial }) {
   const [valorCompensar, setValorCompensar] = useState('');
 
   const compensar = () => {
@@ -415,6 +689,70 @@ function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizo
 
   return (
     <>
+      {apuracaoResultadoRuralOficial && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header">
+            <h3 className="card-title">Apuração do Resultado Oficial</h3>
+            <span className="badge badge-blue" title="Lida da declaração importada (.DBK ou PDF), não depende de lançamento nenhum feito no app">Da declaração original</span>
+          </div>
+          <div className="stats-grid" style={{ marginBottom: 0 }}>
+            <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Receita Bruta Total</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.receitaBrutaTotal)}</div>
+            </div>
+            <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Despesa Total</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.despesaTotal)}</div>
+            </div>
+            <div style={{ padding: '16px', background: apuracaoResultadoRuralOficial.resultado >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Resultado</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.resultado)}</div>
+            </div>
+            <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Prejuízo de Exercícios Anteriores</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.saldoPrejuizoExercicioAnterior)}</div>
+            </div>
+            <div style={{ padding: '16px', background: 'rgba(59,130,246,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(59,130,246,0.2)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--accent-primary)', textTransform: 'uppercase', fontWeight: 600 }}>Resultado Tributável</div>
+              <div style={{ fontSize: '20px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.resultadoTributavel)}</div>
+            </div>
+            <div style={{ padding: '16px', background: 'rgba(239,68,68,0.1)', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Prejuízo a Compensar no Ano Seguinte</div>
+              <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.saldoPrejuizoExercicioSeguinte)}</div>
+            </div>
+            {apuracaoResultadoRuralOficial.limite20PctReceitaBruta > 0 && (
+              <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Limite de 20% da Receita Bruta</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.limite20PctReceitaBruta)}</div>
+              </div>
+            )}
+            {apuracaoResultadoRuralOficial.compensacaoPrejuizoAnterior > 0 && (
+              <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Compensação de Prejuízo no Ano</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.compensacaoPrejuizoAnterior)}</div>
+              </div>
+            )}
+            {apuracaoResultadoRuralOficial.adiantamentoVendaFutura > 0 && (
+              <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Adiantamento de Venda Futura Recebido no Ano</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.adiantamentoVendaFutura)}</div>
+              </div>
+            )}
+            {apuracaoResultadoRuralOficial.adiantamentoAnosAnteriores > 0 && (
+              <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Adiantamento de Anos Anteriores</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.adiantamentoAnosAnteriores)}</div>
+              </div>
+            )}
+            {apuracaoResultadoRuralOficial.resultadoNaoTributavel > 0 && (
+              <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Resultado Não Tributável</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(apuracaoResultadoRuralOficial.resultadoNaoTributavel)}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div className="card" style={{ marginBottom: '20px' }}>
         <div className="card-header"><h3 className="card-title">Apuração do Resultado</h3></div>
         <div className="stats-grid" style={{ marginBottom: 0 }}>
@@ -454,5 +792,54 @@ function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizo
         {prejuizoRuralAcompensar >= 0 && <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Não há prejuízo acumulado para compensar.</p>}
       </div>
     </>
+  );
+}
+
+// Nomes das espécies só são conhecidos com confiança para o código "01"
+// (Bovinos e bufalinos, o único confirmado contra uma declaração real —
+// ver HANDOFF-2026-08-20.md); qualquer outro código aparece cru na tela em
+// vez de arriscar uma tradução inventada para um código nunca visto.
+const ESPECIE_REBANHO_NOME = { '01': 'Bovinos e bufalinos' };
+const formatCabecas = (v) => (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Puramente informativo (igual impostoDevido/apuracaoGanhoCapital): mostra
+// o que a PRÓPRIA declaração apurou, sem cadastro manual equivalente no
+// app hoje.
+function RebanhoSection({ movimentacaoRebanhoOficial }) {
+  return (
+    <div className="card" style={{ marginBottom: '20px' }}>
+      <div className="card-header">
+        <h3 className="card-title">Movimentação do Rebanho</h3>
+        <span className="badge badge-blue" title="Lida do arquivo .DBK importado, não depende de lançamento nenhum feito no app">Da declaração original</span>
+      </div>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Espécie</th>
+              <th style={{ textAlign: 'right' }}>Estoque Inicial</th>
+              <th style={{ textAlign: 'right' }}>Aquisições</th>
+              <th style={{ textAlign: 'right' }}>Nascimentos</th>
+              <th style={{ textAlign: 'right' }}>Consumo e Perdas</th>
+              <th style={{ textAlign: 'right' }}>Vendas</th>
+              <th style={{ textAlign: 'right' }}>Estoque Final</th>
+            </tr>
+          </thead>
+          <tbody>
+            {movimentacaoRebanhoOficial.map((m, i) => (
+              <tr key={i}>
+                <td>{ESPECIE_REBANHO_NOME[m.especieCodigo] || `Espécie (código ${m.especieCodigo})`}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.estoqueInicial)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.aquisicoes)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.nascimentos)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.consumoPerdas)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.vendas)}</td>
+                <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.estoqueFinal)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

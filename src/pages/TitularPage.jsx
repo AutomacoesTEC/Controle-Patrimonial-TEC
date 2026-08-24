@@ -4,6 +4,7 @@ import { formatCpfCnpj, formatDate } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import DateInput from '../components/DateInput';
+import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 
 const FORM_DEPENDENTE_VAZIO = { nome: '', cpf: '', dataNascimento: '', parentesco: '' };
 
@@ -30,6 +31,11 @@ export default function TitularPage() {
   const updDependente = (f, v) => setFormDependente(p => ({ ...p, [f]: v }));
 
   const salvarTitular = (ano = anoCalendario) => {
+    // Sem esta guarda, salvar o formulário vazio disparava SET_CONTRIBUINTE
+    // com nome e CPF em branco e APAGAVA o titular que a importação tinha
+    // preenchido.
+    const falta = primeiroCampoVazio([['Nome Completo', formTitular.nome]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     if (!garantirAnoCadastro(ano)) return;
     dispatch({ type: 'SET_CONTRIBUINTE', payload: { nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
     addToast('Titular atualizado!', 'success');
@@ -53,6 +59,11 @@ export default function TitularPage() {
 
   const handleSalvarDependente = (e) => {
     e.preventDefault();
+    // Achado na auditoria de 21/08/2026: sem validação, o dependente entrava
+    // com nome vazio e o Histórico registrava "Cadastrou dependente: (sem
+    // descrição)".
+    const falta = primeiroCampoVazio([['Nome Completo', formDependente.nome]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     if (editingId) {
       dispatch({ type: 'UPDATE_DEPENDENTE', payload: { ...formDependente, id: editingId } });
       addToast('Dependente atualizado!', 'success');

@@ -85,6 +85,7 @@ export default function HistoricoPage() {
                   <th style={{ minWidth: '150px' }}>Quando</th>
                   <th>Ano-calendário</th>
                   <th style={{ minWidth: '300px' }}>O que mudou</th>
+                  <th>IP</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,6 +94,7 @@ export default function HistoricoPage() {
                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>{formatDataHora(a.data)}</td>
                     <td>{a.anoCalendario != null ? <span className="badge badge-blue">{a.anoCalendario}</span> : ''}</td>
                     <td>{a.descricao}</td>
+                    <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>{a.ip || '-'}</td>
                   </tr>
                 ))}
               </tbody>

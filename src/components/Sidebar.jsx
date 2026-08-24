@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store/reducer';
+import ConfirmarDependentesModal from './ConfirmarDependentesModal';
 
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
@@ -10,6 +12,7 @@ const navItems = [
   { id: 'rendimentos', label: 'Rendimentos', short: 'RE', section: 'CADASTROS' },
   { id: 'pagamentos', label: 'Pagamentos', short: 'PG', section: 'CADASTROS' },
   { id: 'pagamentosDiversos', label: 'Despesas Gerais', short: 'DG', section: 'CADASTROS' },
+  { id: 'doacoes', label: 'Doações', short: 'DO', section: 'CADASTROS' },
   { id: 'atividadeRural', label: 'Atividade Rural', short: 'AR', section: 'ATIVIDADE RURAL' },
   { id: 'relatorio', label: 'Relatório IRPF', short: 'RL', section: 'RELATÓRIOS' },
   { id: 'ganhosCapital', label: 'Ganhos de Capital', short: 'GC', section: 'RELATÓRIOS' },
@@ -19,6 +22,12 @@ const navItems = [
 export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed, onTrocarPerfil }) {
   const { state, dispatch, addToast } = useData();
   let lastSection = '';
+  const [confirmarDependentesOpen, setConfirmarDependentesOpen] = useState(false);
+
+  const avancarAno = (proximoAno) => {
+    dispatch({ type: 'ROLLOVER_ANO', payload: proximoAno });
+    addToast(`Ano-calendário ${proximoAno} iniciado.`, 'success');
+  };
 
   // Só anos com dado real: ano em edição (se tiver conteúdo) + snapshots do
   // histórico que realmente têm dado — ano vazio herdado de versão antiga
@@ -43,7 +52,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
           {!collapsed && (
             <div className="logo-text">
               <h1>CP-TEC</h1>
-              <span>{state.contribuinte?.nome || 'Variação Patrimonial · IRPF'}</span>
+              <span title={state.contribuinte?.nome || undefined}>{state.contribuinte?.nome || 'Variação Patrimonial · IRPF'}</span>
             </div>
           )}
         </div>
@@ -84,7 +93,26 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
             <select
               value={state.anoCalendario ?? ''}
               onChange={e => {
-                const novoAno = parseInt(e.target.value);
+                const valor = e.target.value;
+                // Achado real (usuária, 21/08/2026): registrar uma
+                // movimentação num bem já existente não cria o ano seguinte
+                // (só o campo "Ano-calendário" escondido dentro de um
+                // formulário de "Novo X" fazia isso) — confuso, ela teve que
+                // descobrir na unha. Essa opção resolve direto aqui: avança
+                // pro ano seguinte ao ativo sem exigir nenhum cadastro.
+                if (valor === '__avancar__') {
+                  const proximoAno = state.anoCalendario + 1;
+                  // Pedido real da usuária: dependente pode deixar de sê-lo
+                  // de um ano pro outro — confirma antes de levar todo mundo
+                  // adiante em silêncio (ver ConfirmarDependentesModal).
+                  if (state.dependentes.length > 0) {
+                    setConfirmarDependentesOpen(true);
+                    return;
+                  }
+                  avancarAno(proximoAno);
+                  return;
+                }
+                const novoAno = parseInt(valor);
                 // Sem dado, o valor do "option" vazio é "" — parseInt vira
                 // NaN, não um ano de verdade. Sem essa checagem, escolher
                 // essa linha (que só existe pra confirmar que a lista abriu,
@@ -98,23 +126,44 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
                   cadastrado ainda, nenhuma opção pra escolher — o primeiro
                   ano nasce sozinho ao importar uma declaração ou ao criar o
                   primeiro registro em qualquer cadastro (ver
-                  AnoCalendarioModal, que já faz o ROLLOVER_ANO sozinho —
-                  não precisa de um botão "Avançar" à parte na sidebar). Sem
-                  `disabled`: um select desabilitado não abre a lista ao
+                  AnoCalendarioModal, que já faz o ROLLOVER_ANO sozinho).
+                  Sem `disabled`: um select desabilitado não abre a lista ao
                   clicar (parecia que o clique não fazia nada) — melhor
                   deixar clicável e mostrar a própria ausência de dado como
                   a única linha da lista. */}
               {anosComDados.length === 0 ? (
                 <option value="">Nenhum dado disponível</option>
               ) : (
-                anosComDados.map(y => (
-                  <option key={y} value={y}>Ano-Calendário {y}</option>
-                ))
+                <>
+                  {anosComDados.map(y => (
+                    <option key={y} value={y}>Ano-Calendário {y}</option>
+                  ))}
+                  {state.anoCalendario != null && (
+                    <option value="__avancar__">Avançar para {state.anoCalendario + 1}</option>
+                  )}
+                </>
               )}
             </select>
           </div>
         )}
       </div>
+
+      <ConfirmarDependentesModal
+        open={confirmarDependentesOpen}
+        dependentes={state.dependentes}
+        proximoAno={state.anoCalendario != null ? state.anoCalendario + 1 : null}
+        onClose={() => setConfirmarDependentesOpen(false)}
+        onConfirmar={(idsQueSaem) => {
+          const proximoAno = state.anoCalendario + 1;
+          setConfirmarDependentesOpen(false);
+          avancarAno(proximoAno);
+          // Despachado DEPOIS do ROLLOVER_ANO de propósito: o reducer
+          // processa em ordem, então essa exclusão mira o dependente já no
+          // ANO NOVO (que herdou todos por padrão), sem tocar no ano
+          // anterior arquivado.
+          idsQueSaem.forEach(id => dispatch({ type: 'DELETE_DEPENDENTE', payload: id }));
+        }}
+      />
     </aside>
   );
 }

@@ -6,9 +6,16 @@ import PerfilLauncherPage from './pages/PerfilLauncherPage';
 import DesbloquearPerfilPage from './pages/DesbloquearPerfilPage';
 import { snapshotHasData } from './store/reducer';
 import {
-  PERFIS_STORAGE_KEY, PERFIL_ATIVO_STORAGE_KEY, LEGADO_STORAGE_KEY,
-  perfilAPartirDeDadosLegados, perfilParaResumir, dataStorageKeyFor,
+  PERFIS_STORAGE_KEY, LEGADO_STORAGE_KEY, PERFIL_SESSAO_KEY,
+  perfilAPartirDeDadosLegados, perfilDaSessao, dataStorageKeyFor,
 } from './store/perfis';
+import { iniciarBuscaIp } from './utils/ipTracker';
+
+// Dispara uma vez, no carregamento do módulo (não a cada render de
+// componente): busca o IP público em segundo plano para já estar disponível
+// quando a primeira alteração for registrada no Histórico (ver
+// reducer.js/reducerComHistorico e ipTracker.js).
+iniciarBuscaIp();
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ImportPage = lazy(() => import('./pages/ImportPage'));
@@ -18,6 +25,7 @@ const DividasPage = lazy(() => import('./pages/DividasPage'));
 const RendimentosPage = lazy(() => import('./pages/RendimentosPage'));
 const PagamentosPage = lazy(() => import('./pages/PagamentosPage'));
 const PagamentosDiversosPage = lazy(() => import('./pages/PagamentosDiversosPage'));
+const DoacoesPage = lazy(() => import('./pages/DoacoesPage'));
 const AtividadeRuralPage = lazy(() => import('./pages/AtividadeRuralPage'));
 const GanhosCapitalPage = lazy(() => import('./pages/GanhosCapitalPage'));
 const RelatorioPage = lazy(() => import('./pages/RelatorioPage'));
@@ -36,52 +44,79 @@ const MoonIcon = () => (
   </svg>
 );
 
-// Decide com QUAL perfil o app abre, sem depender de nada em tela ainda —
-// roda uma vez, na inicialização do estado do componente App (ver
-// inicialRef abaixo).
-// 1) Se já existe um registro de perfis, resume o último usado (se ele
-//    ainda existir). Um perfil PROTEGIDO por senha nunca é resumido direto
-//    pro app — ele vira "perfilPendente" (pede a senha na hora, sem passar
-//    pela lista de novo) porque resumir sozinho por cima da senha
-//    derrotaria a proteção inteira.
-// 2) Senão, é alguém que já usava o app ANTES de perfis existirem: os
-//    dados estão soltos na chave antiga (LEGADO_STORAGE_KEY) — migra pra
-//    virar o primeiro perfil automaticamente, sem exigir uma escolha (é a
-//    mesma pessoa continuando de onde parou, não uma decisão nova). A
-//    chave antiga não é apagada (fica inerte, só não é mais lida). Um
-//    perfil recém-migrado nunca é protegido (senha não existia antes).
-// 3) Instalação nova, sem perfil nem dado legado: tela de seleção,
-//    convidando a criar o primeiro perfil.
-function inicializarAppInicial() {
+// ABRIR o app (depois de fechado) cai na tela de perfis; ATUALIZAR a página
+// (F5) mantém o titular que estava aberto. Pedido da usuária em 21/08/2026,
+// nessas duas metades: com mais de um titular cadastrado, entrar sozinho no
+// último usado ao abrir o app é convite a lançar dado na pessoa errada, e o
+// preço de errar isso é alto (o app existe para montar declaração). Mas
+// recarregar a página no meio do trabalho é outra coisa, e voltar para a
+// lista ali só atrapalha.
+//
+// Quem separa os dois casos é o ARMAZENAMENTO: PERFIL_SESSAO_KEY vive em
+// sessionStorage, que sobrevive ao F5 e morre com a janela (ou com o
+// fechamento do app no Electron). Nada disso passa por localStorage, senão a
+// retomada voltaria a atravessar o fechamento do app.
+//
+// Perfil protegido por senha é caso à parte: a chave derivada da senha só
+// existe em memória (ver sessaoProtegida/crypto.js) e se perde no F5. Aí a
+// sessão leva à TELA DE SENHA daquele perfil, e não ao Dashboard: mantém a
+// intenção da usuária sem furar a proteção.
+//
+// Esta função também faz a MIGRAÇÃO de quem usava o app antes de perfis
+// existirem: os dados ficavam soltos numa chave antiga, e viram o primeiro
+// perfil automaticamente (a chave antiga não é apagada, fica inerte). Aí
+// ninguém entra direto: o perfil é criado e a tela de perfis aparece com ele
+// na lista, pronto para ser escolhido.
+const APP_SEM_PERFIL = Object.freeze({ perfilAtivo: null, perfilPendente: null });
+
+export function inicializarAppInicial() {
+  let perfisRaw = null;
   try {
-    const perfisSalvosRaw = localStorage.getItem(PERFIS_STORAGE_KEY);
-    if (perfisSalvosRaw) {
-      const perfis = JSON.parse(perfisSalvosRaw);
-      const idResumir = perfilParaResumir(perfis, localStorage.getItem(PERFIL_ATIVO_STORAGE_KEY));
-      if (idResumir) {
-        const perfil = perfis.find(p => p.id === idResumir);
-        if (perfil?.protegido) return { perfilAtivo: null, perfilPendente: perfil };
-        return { perfilAtivo: idResumir, perfilPendente: null };
+    perfisRaw = localStorage.getItem(PERFIS_STORAGE_KEY);
+    if (!perfisRaw) {
+      const dadosLegadoRaw = localStorage.getItem(LEGADO_STORAGE_KEY);
+      if (dadosLegadoRaw) {
+        const dadosLegado = JSON.parse(dadosLegadoRaw);
+        if (snapshotHasData(dadosLegado)) {
+          const perfil = perfilAPartirDeDadosLegados(dadosLegado);
+          localStorage.setItem(dataStorageKeyFor(perfil.id), dadosLegadoRaw);
+          localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify([perfil]));
+        }
       }
-      return { perfilAtivo: null, perfilPendente: null };
+      // Perfil recém-migrado nunca tem sessão aberta: cai na tela de perfis.
+      return APP_SEM_PERFIL;
     }
-    const dadosLegadoRaw = localStorage.getItem(LEGADO_STORAGE_KEY);
-    if (dadosLegadoRaw) {
-      const dadosLegado = JSON.parse(dadosLegadoRaw);
-      if (snapshotHasData(dadosLegado)) {
-        const perfil = perfilAPartirDeDadosLegados(dadosLegado);
-        localStorage.setItem(dataStorageKeyFor(perfil.id), dadosLegadoRaw);
-        localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify([perfil]));
-        localStorage.setItem(PERFIL_ATIVO_STORAGE_KEY, perfil.id);
-        return { perfilAtivo: perfil.id, perfilPendente: null };
-      }
-    }
+  } catch { return APP_SEM_PERFIL; }
+
+  try {
+    const idSalvo = sessionStorage.getItem(PERFIL_SESSAO_KEY);
+    if (!idSalvo) return APP_SEM_PERFIL;
+    const perfil = perfilDaSessao(JSON.parse(perfisRaw), idSalvo);
+    if (!perfil) return APP_SEM_PERFIL;
+    if (perfil.protegido) return { perfilAtivo: null, perfilPendente: perfil };
+    return { perfilAtivo: perfil.id, perfilPendente: null };
   } catch {}
-  return { perfilAtivo: null, perfilPendente: null };
+  return APP_SEM_PERFIL;
+}
+
+// Escrita/apagamento da sessão. Em try/catch pelo mesmo motivo do resto do
+// arquivo: navegador com armazenamento bloqueado não pode derrubar o app,
+// só perde a retomada no F5.
+function lembrarPerfilDaSessao(perfilId) {
+  try { sessionStorage.setItem(PERFIL_SESSAO_KEY, perfilId); } catch {}
+}
+function esquecerPerfilDaSessao() {
+  try { sessionStorage.removeItem(PERFIL_SESSAO_KEY); } catch {}
 }
 
 function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
   const [activeView, setActiveView] = useState('dashboard');
+  // Preenchido só quando a navegação partiu de um clique de "detalhe" no
+  // Dashboard (ex.: clicar em "Bens e Direitos" na Variação Patrimonial) —
+  // guarda pra onde/qual aba voltar. Navegação normal pela Sidebar limpa
+  // isso, porque aí não faz sentido nenhum botão "Voltar ao Dashboard"
+  // aparecer (a pessoa não veio de lá).
+  const [dashboardRetorno, setDashboardRetorno] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem('controle-patrimonial-sidebar') === 'collapsed'; } catch { return false; }
   });
@@ -95,27 +130,37 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
     });
   };
 
+  const navegarPelaSidebar = (view) => { setDashboardRetorno(null); setActiveView(view); };
+  const navegarDoDashboard = (view, aba) => { setDashboardRetorno({ view, aba }); setActiveView(view); };
+  const voltarAoDashboard = () => { setDashboardRetorno(null); setActiveView('dashboard'); };
+
   const renderPage = () => {
     switch (activeView) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={navegarDoDashboard} />;
       case 'importar': return <ImportPage />;
       case 'titular': return <TitularPage />;
-      case 'bens': return <BensPage />;
-      case 'dividas': return <DividasPage />;
+      case 'bens': return <BensPage onVoltar={dashboardRetorno?.view === 'bens' ? voltarAoDashboard : null} />;
+      case 'dividas': return <DividasPage onVoltar={dashboardRetorno?.view === 'dividas' ? voltarAoDashboard : null} />;
       case 'rendimentos': return <RendimentosPage />;
       case 'pagamentos': return <PagamentosPage />;
       case 'pagamentosDiversos': return <PagamentosDiversosPage />;
-      case 'atividadeRural': return <AtividadeRuralPage />;
+      case 'doacoes': return <DoacoesPage />;
+      case 'atividadeRural': return (
+        <AtividadeRuralPage
+          abaInicial={dashboardRetorno?.view === 'atividadeRural' ? dashboardRetorno.aba : undefined}
+          onVoltar={dashboardRetorno?.view === 'atividadeRural' ? voltarAoDashboard : null}
+        />
+      );
       case 'ganhosCapital': return <GanhosCapitalPage />;
       case 'relatorio': return <RelatorioPage />;
       case 'historico': return <HistoricoPage />;
-      default: return <Dashboard />;
+      default: return <Dashboard onNavigate={navegarDoDashboard} />;
     }
   };
 
   return (
     <div className="app-layout">
-      <Sidebar activeView={activeView} onNavigate={setActiveView} collapsed={sidebarCollapsed} onToggleCollapsed={toggleSidebar} onTrocarPerfil={onTrocarPerfil} />
+      <Sidebar activeView={activeView} onNavigate={navegarPelaSidebar} collapsed={sidebarCollapsed} onToggleCollapsed={toggleSidebar} onTrocarPerfil={onTrocarPerfil} />
       <button
         className="theme-toggle-fixed"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
@@ -174,24 +219,27 @@ export default function App() {
   const [sessaoProtegida, setSessaoProtegida] = useState(null); // { chave, dados } | null
 
   const handleTrocarPerfil = () => {
-    try { localStorage.removeItem(PERFIL_ATIVO_STORAGE_KEY); } catch {}
+    esquecerPerfilDaSessao();
     setPerfilAtivo(null);
     setPerfilPendente(null);
     setSessaoProtegida(null);
   };
 
   const handleSelecionarPerfil = (perfil) => {
+    // A sessão é gravada nos dois ramos: no protegido também, para que um F5
+    // na tela de senha volte para a tela de senha DAQUELE perfil, e não para
+    // a lista.
+    lembrarPerfilDaSessao(perfil.id);
     if (perfil.protegido) {
       setPerfilPendente(perfil);
     } else {
-      try { localStorage.setItem(PERFIL_ATIVO_STORAGE_KEY, perfil.id); } catch {}
       setPerfilAtivo(perfil.id);
     }
   };
 
   const handleDesbloqueado = (chave, dados) => {
-    try { localStorage.setItem(PERFIL_ATIVO_STORAGE_KEY, perfilPendente.id); } catch {}
     setSessaoProtegida({ chave, dados });
+    lembrarPerfilDaSessao(perfilPendente.id);
     setPerfilAtivo(perfilPendente.id);
     setPerfilPendente(null);
   };

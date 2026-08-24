@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { reducer, initialState } from './reducer';
+import { reducer, reducerComHistorico, initialState } from './reducer';
 
 const bemBase = { id: 1, grupo: '01', codigo_bem: '12', discriminacao: 'Casa', situacao_anterior: 100000, situacao_atual: 130000 };
 
@@ -47,6 +47,28 @@ describe('CRUD de bens/dívidas/rendimentos/pagamentos', () => {
     expect(state.rendimentos).toHaveLength(0);
     expect(state.pagamentos).toHaveLength(0);
   });
+
+  it('ADD/UPDATE/DELETE das 3 fichas de Doações (cadastro manual, pedido da usuária: "e se eu precisar incluir?")', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_DOACAO_EFETUADA', payload: { codigo: '40', nome_beneficiario: 'Instituto X', valor: 1000 } });
+    state = reducer(state, { type: 'ADD_DOACAO_PARTIDO', payload: { codigo: '90', nome_beneficiario: 'Partido Y', valor: 500 } });
+    state = reducer(state, { type: 'ADD_DOACAO_ECA_IDOSO', payload: { codigo: '81', nome_beneficiario: 'Fundo Z', valor: 200, categoria: 'eca' } });
+    expect(state.doacoesEfetuadasOficial).toHaveLength(1);
+    expect(state.doacoesPartidosOficial).toHaveLength(1);
+    expect(state.doacoesEcaIdosoOficial).toHaveLength(1);
+    expect(state.doacoesEfetuadasOficial[0].origem).toBe('manual');
+
+    const idEf = state.doacoesEfetuadasOficial[0].id;
+    state = reducer(state, { type: 'UPDATE_DOACAO_EFETUADA', payload: { id: idEf, valor: 1500 } });
+    expect(state.doacoesEfetuadasOficial[0].valor).toBe(1500);
+
+    state = reducer(state, { type: 'DELETE_DOACAO_EFETUADA', payload: idEf });
+    state = reducer(state, { type: 'DELETE_DOACAO_PARTIDO', payload: state.doacoesPartidosOficial[0].id });
+    state = reducer(state, { type: 'DELETE_DOACAO_ECA_IDOSO', payload: state.doacoesEcaIdosoOficial[0].id });
+    expect(state.doacoesEfetuadasOficial).toHaveLength(0);
+    expect(state.doacoesPartidosOficial).toHaveLength(0);
+    expect(state.doacoesEcaIdosoOficial).toHaveLength(0);
+  });
 });
 
 describe('REGISTRAR_MOVIMENTACAO_BEM', () => {
@@ -92,6 +114,131 @@ describe('REGISTRAR_MOVIMENTACAO_BEM', () => {
   });
 });
 
+describe('DELETE_MOVIMENTACAO_BEM (corrigir um lançamento errado sem excluir o bem inteiro)', () => {
+  const registrar = (state, tipo, valor, data = '2026-05-01') =>
+    reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM', payload: { bemId: 1, movimentacao: { tipo, valor, data, descricao: 'teste' } } });
+  const excluir = (state, movId) =>
+    reducer(state, { type: 'DELETE_MOVIMENTACAO_BEM', payload: { bemId: 1, movId } });
+
+  it('excluir a única movimentação recalcula preservando o salto sem data (bemBase já tem 100000->130000 sem nenhuma movimentação)', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }] };
+    state = registrar(state, 'compra', 10000);
+    expect(state.bens[0].situacao_atual).toBe(140000);
+    const movId = state.bens[0].movimentacoes[0].id;
+    state = excluir(state, movId);
+    expect(state.bens[0].movimentacoes).toHaveLength(0);
+    // Bug real que essa correção evita: recalcular do zero a partir de
+    // situacao_anterior (sem o salto) devolveria 100000, apagando de quebra
+    // os 30000 que já vinham do cadastro/import, antes de qualquer
+    // movimentação existir.
+    expect(state.bens[0].situacao_atual).toBe(130000);
+  });
+
+  it('excluir uma entre duas movimentações mantém só o efeito da que ficou', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }] };
+    state = registrar(state, 'compra', 10000, '2026-03-01');
+    state = registrar(state, 'benfeitoria', 5000, '2026-06-01');
+    expect(state.bens[0].situacao_atual).toBe(145000);
+    const idCompra = state.bens[0].movimentacoes.find(m => m.tipo === 'compra').id;
+    state = excluir(state, idCompra);
+    expect(state.bens[0].movimentacoes).toHaveLength(1);
+    expect(state.bens[0].movimentacoes[0].tipo).toBe('benfeitoria');
+    expect(state.bens[0].situacao_atual).toBe(135000); // 130000 (salto) + 5000 (benfeitoria que sobrou)
+  });
+
+  it('excluir não mexe em outro bem', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }, { ...bemBase, id: 2, situacao_atual: 5000 }] };
+    state = registrar(state, 'compra', 10000);
+    const movId = state.bens[0].movimentacoes[0].id;
+    state = excluir(state, movId);
+    expect(state.bens[1].situacao_atual).toBe(5000);
+    expect(state.bens[1].movimentacoes || []).toHaveLength(0);
+  });
+});
+
+describe('DELETE_MOVIMENTACAO_BEM_RURAL e DELETE_MOVIMENTACAO_DIVIDA (mesma mecânica, outras coleções)', () => {
+  it('bem rural: exclui e recalcula preservando o salto sem data', () => {
+    let state = { ...initialState, bensRurais: [{ ...bemBase }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM_RURAL', payload: { bemId: 1, movimentacao: { tipo: 'compra', valor: 20000, data: '2026-04-01' } } });
+    expect(state.bensRurais[0].situacao_atual).toBe(150000);
+    const movId = state.bensRurais[0].movimentacoes[0].id;
+    state = reducer(state, { type: 'DELETE_MOVIMENTACAO_BEM_RURAL', payload: { bemId: 1, movId } });
+    expect(state.bensRurais[0].movimentacoes).toHaveLength(0);
+    expect(state.bensRurais[0].situacao_atual).toBe(130000);
+  });
+
+  it('dívida: exclui uma amortização e o saldo devedor volta a subir', () => {
+    const dividaBase = { id: 1, discriminacao: 'Financiamento', situacao_anterior: 50000, situacao_atual: 50000 };
+    let state = { ...initialState, dividas: [{ ...dividaBase }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_DIVIDA', payload: { bemId: 1, movimentacao: { tipo: 'amortizacao', valor: 15000, data: '2026-07-01' } } });
+    expect(state.dividas[0].situacao_atual).toBe(35000);
+    const movId = state.dividas[0].movimentacoes[0].id;
+    state = reducer(state, { type: 'DELETE_MOVIMENTACAO_DIVIDA', payload: { bemId: 1, movId } });
+    expect(state.dividas[0].movimentacoes).toHaveLength(0);
+    expect(state.dividas[0].situacao_atual).toBe(50000);
+  });
+});
+
+describe('UPDATE_MOVIMENTACAO_BEM/_BEM_RURAL/_DIVIDA (corrige um lançamento errado sem excluir e recriar)', () => {
+  it('corrige o valor de uma movimentação de bem, mantendo o id e recalculando', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM', payload: { bemId: 1, movimentacao: { tipo: 'compra', valor: 10000, data: '2026-05-01', descricao: 'errado' } } });
+    expect(state.bens[0].situacao_atual).toBe(140000);
+    const movId = state.bens[0].movimentacoes[0].id;
+    state = reducer(state, {
+      type: 'UPDATE_MOVIMENTACAO_BEM',
+      payload: { bemId: 1, movId, movimentacao: { tipo: 'compra', valor: 25000, data: '2026-05-02', descricao: 'corrigido' } },
+    });
+    expect(state.bens[0].movimentacoes).toHaveLength(1); // não duplica, edita no lugar
+    expect(state.bens[0].movimentacoes[0].id).toBe(movId); // id não muda
+    expect(state.bens[0].movimentacoes[0].descricao).toBe('corrigido');
+    expect(state.bens[0].situacao_atual).toBe(155000); // 130000 (salto) + 25000 (valor corrigido)
+  });
+
+  it('corrigir o valor de venda de uma movimentação já registrada muda o ganho apurado (reflexo direto em Ganhos de Capital)', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }] };
+    state = reducer(state, {
+      type: 'REGISTRAR_MOVIMENTACAO_BEM',
+      payload: { bemId: 1, movimentacao: { tipo: 'venda_parcial', valor: 50000, valorVenda: 60000, data: '2026-05-01' } },
+    });
+    const movId = state.bens[0].movimentacoes[0].id;
+    // Ganho antes da correção: 60000 - 50000 = 10000.
+    expect(state.bens[0].movimentacoes[0].valorVenda - state.bens[0].movimentacoes[0].valor).toBe(10000);
+    // Usuária digitou o valor de venda errado, corrige pra 90000.
+    state = reducer(state, {
+      type: 'UPDATE_MOVIMENTACAO_BEM',
+      payload: { bemId: 1, movId, movimentacao: { tipo: 'venda_parcial', valor: 50000, valorVenda: 90000, data: '2026-05-01' } },
+    });
+    expect(state.bens[0].movimentacoes[0].valorVenda - state.bens[0].movimentacoes[0].valor).toBe(40000);
+    expect(state.bens[0].situacao_atual).toBe(80000); // 130000 (salto) - 50000 (custo baixado, inalterado)
+  });
+
+  it('bem rural: UPDATE_MOVIMENTACAO_BEM_RURAL recalcula na coleção certa', () => {
+    let state = { ...initialState, bensRurais: [{ ...bemBase }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM_RURAL', payload: { bemId: 1, movimentacao: { tipo: 'compra', valor: 20000, data: '2026-04-01' } } });
+    const movId = state.bensRurais[0].movimentacoes[0].id;
+    state = reducer(state, { type: 'UPDATE_MOVIMENTACAO_BEM_RURAL', payload: { bemId: 1, movId, movimentacao: { tipo: 'compra', valor: 5000, data: '2026-04-01' } } });
+    expect(state.bensRurais[0].situacao_atual).toBe(135000); // 130000 + 5000
+  });
+
+  it('dívida: UPDATE_MOVIMENTACAO_DIVIDA recalcula o saldo devedor', () => {
+    const dividaBase = { id: 1, discriminacao: 'Financiamento', situacao_anterior: 50000, situacao_atual: 50000 };
+    let state = { ...initialState, dividas: [{ ...dividaBase }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_DIVIDA', payload: { bemId: 1, movimentacao: { tipo: 'amortizacao', valor: 15000, data: '2026-07-01' } } });
+    const movId = state.dividas[0].movimentacoes[0].id;
+    state = reducer(state, { type: 'UPDATE_MOVIMENTACAO_DIVIDA', payload: { bemId: 1, movId, movimentacao: { tipo: 'amortizacao', valor: 40000, data: '2026-07-01' } } });
+    expect(state.dividas[0].situacao_atual).toBe(10000); // 50000 - 40000
+  });
+
+  it('não mexe em outro bem', () => {
+    let state = { ...initialState, bens: [{ ...bemBase }, { ...bemBase, id: 2, situacao_atual: 5000 }] };
+    state = reducer(state, { type: 'REGISTRAR_MOVIMENTACAO_BEM', payload: { bemId: 1, movimentacao: { tipo: 'compra', valor: 1000, data: '2026-05-01' } } });
+    const movId = state.bens[0].movimentacoes[0].id;
+    state = reducer(state, { type: 'UPDATE_MOVIMENTACAO_BEM', payload: { bemId: 1, movId, movimentacao: { tipo: 'compra', valor: 9000, data: '2026-05-01' } } });
+    expect(state.bens[1].situacao_atual).toBe(5000);
+  });
+});
+
 describe('ROLLOVER_ANO (virada de ano, é o propósito central do app)', () => {
   it('traz situacao_atual do ano corrente como situacao_anterior do ano novo', () => {
     let state = { ...initialState, anoCalendario: 2025, bens: [{ ...bemBase }], contribuinte: { nome: 'x' } };
@@ -133,6 +280,77 @@ describe('ROLLOVER_ANO (virada de ano, é o propósito central do app)', () => {
 
     state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2025 });
     expect(state.bens[0].situacao_atual).toBe(130000); // 2025 volta intacto do histórico
+  });
+
+  it('bug real: uma venda registrada no ano corrente não pode "reaparecer" no ano novo depois do rollover', () => {
+    // Sem isso, uma venda_parcial com valorVenda de 2025 continuava
+    // pendurada em bem.movimentacoes depois da virada pra 2026 — a aba
+    // Ganhos de Capital (que lê movimentacoes do bem do ano escolhido sem
+    // filtrar por data) mostrava a MESMA venda de novo no ano 2026, como se
+    // o bem tivesse sido vendido outra vez. dívidas já zeravam
+    // movimentacoes no rollover; bens e bensRurais não zeravam.
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      bens: [{ ...bemBase, situacao_atual: 130000, movimentacoes: [
+        { id: 1, tipo: 'venda_parcial', valor: 70000, valorVenda: 90000, data: '2025-06-01' },
+      ] }],
+      bensRurais: [{ id: 1, situacao_anterior: 50000, situacao_atual: 30000, movimentacoes: [
+        { id: 2, tipo: 'venda_parcial', valor: 20000, valorVenda: 25000, data: '2025-07-01' },
+      ] }],
+    };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.bens[0].movimentacoes).toEqual([]);
+    expect(state.bensRurais[0].movimentacoes).toEqual([]);
+    // O ano antigo, arquivado no histórico, continua com a venda de verdade
+    // (não é pra apagar o registro histórico, só não deixar ele vazar pro
+    // ano novo).
+    expect(state.historico[2025].bens[0].movimentacoes).toHaveLength(1);
+    expect(state.historico[2025].bensRurais[0].movimentacoes).toHaveLength(1);
+  });
+
+  it('bug real: campos Oficiais importados (impostoDevido, apuracaoGanhoCapital e os demais demonstrativos/rurais) não podem vazar pro ano novo', () => {
+    // A usuária reparou, ao avançar de 2025 (ano importado, com dado real)
+    // para 2026 (ano ainda não declarado) via "Avançar para {ano+1}" na
+    // sidebar, que cards como "Demonstrativo Lei 14.754/2023" e "Apuração
+    // do Ganho de Capital Oficial" continuavam mostrando os mesmos itens de
+    // 2025 dentro de 2026 — não fazia sentido, 2026 nem foi declarado
+    // ainda. Causa raiz: ROLLOVER_ANO nunca zerava esses campos no branch
+    // onde um ano genuinamente novo nasce (sem `existente` no histórico),
+    // então eles sobreviviam via spread do estado antigo.
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      contribuinte: { nome: 'x' }, // precisa de hasWorkingData(state) pra arquivar 2025 no histórico
+      impostoDevido: { total: 12345 },
+      apuracaoGanhoCapital: [{ bem: '1', ganho: 1000 }],
+      demonstrativoExteriorOficial: [{ bem: 133, ganhoPrejuizo: 1822059.55 }],
+      rendaVariavelMensalOficial: [{ mes: 1 }, { mes: 2 }],
+      receitasDespesasRuraisOficial: [{ mes: 1, receitaBruta: 100, despesaCusteioInvestimento: 50 }],
+      apuracaoResultadoRuralOficial: { resultado: 50 },
+      movimentacaoRebanhoOficial: [{ especieCodigo: '01', estoqueInicial: 125 }],
+      participantesRuraisOficial: [{ cpf: '04176006668', nome: 'OSIRES PEREIRA CAMPOS' }],
+      doacoesEfetuadasOficial: [{ codigo: '1', nome_beneficiario: 'X', valor: 100 }],
+      doacoesPartidosOficial: [{ codigo: '2', nome_beneficiario: 'Y', valor: 200 }],
+      doacoesEcaIdosoOficial: [{ codigo: '3', nome_beneficiario: 'Z', valor: 300, categoria: 'eca' }],
+    };
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+
+    expect(state.impostoDevido).toBeNull();
+    expect(state.apuracaoGanhoCapital).toEqual([]);
+    expect(state.demonstrativoExteriorOficial).toEqual([]);
+    expect(state.rendaVariavelMensalOficial).toEqual([]);
+    expect(state.receitasDespesasRuraisOficial).toEqual([]);
+    expect(state.apuracaoResultadoRuralOficial).toBeNull();
+    expect(state.movimentacaoRebanhoOficial).toEqual([]);
+    expect(state.participantesRuraisOficial).toEqual([]);
+    expect(state.doacoesEfetuadasOficial).toEqual([]);
+    expect(state.doacoesPartidosOficial).toEqual([]);
+    expect(state.doacoesEcaIdosoOficial).toEqual([]);
+
+    // O ano antigo, arquivado no histórico, continua com os dados oficiais
+    // intactos (voltar para 2025 tem que mostrar tudo de novo).
+    expect(state.historico[2025].impostoDevido).toEqual({ total: 12345 });
+    expect(state.historico[2025].apuracaoGanhoCapital).toEqual([{ bem: '1', ganho: 1000 }]);
+    expect(state.historico[2025].demonstrativoExteriorOficial).toEqual([{ bem: 133, ganhoPrejuizo: 1822059.55 }]);
   });
 });
 
@@ -188,6 +406,104 @@ describe('IMPORT_DECLARACAO (import atômico com ano detectado no arquivo)', () 
     expect(state.imoveisRurais).toHaveLength(1);
     expect(state.prejuizoRuralAcompensar).toBe(-500);
   });
+
+  it('Receitas e Despesas / Apuração do Resultado oficiais (registros 51/52) só o .DBK traz; reimportar por PDF por cima preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      receitasDespesasRuraisOficial: [{ mes: 1, receitaBruta: 100, despesaCusteioInvestimento: 50 }],
+      apuracaoResultadoRuralOficial: { resultado: 50 },
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+        receitasDespesasRuraisOficial: [], apuracaoResultadoRuralOficial: undefined,
+      },
+    });
+    expect(state.receitasDespesasRuraisOficial).toHaveLength(1);
+    expect(state.apuracaoResultadoRuralOficial.resultado).toBe(50);
+  });
+
+  it('Movimentação do Rebanho oficial (registro 53) só o .DBK traz; reimportar por PDF por cima preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      movimentacaoRebanhoOficial: [{ especieCodigo: '01', estoqueInicial: 125 }],
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+        movimentacaoRebanhoOficial: [],
+      },
+    });
+    expect(state.movimentacaoRebanhoOficial).toHaveLength(1);
+  });
+
+  it('Participantes dos Imóveis Rurais oficiais (registro 57) só o .DBK traz; reimportar por PDF por cima preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      participantesRuraisOficial: [{ cpf: '04176006668', nome: 'OSIRES PEREIRA CAMPOS' }],
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+        participantesRuraisOficial: [],
+      },
+    });
+    expect(state.participantesRuraisOficial).toHaveLength(1);
+  });
+
+  it('Demonstrativo Lei 14.754/2023 por bem (registro 37) só o .DBK traz; reimportar por PDF por cima preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      demonstrativoExteriorOficial: [{ bem: 133, ganhoPrejuizo: 1822059.55 }],
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+        demonstrativoExteriorOficial: [],
+      },
+    });
+    expect(state.demonstrativoExteriorOficial).toHaveLength(1);
+  });
+
+  it('Renda Variável mensal oficial (registro 76) só o .DBK traz; reimportar por PDF por cima preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      rendaVariavelMensalOficial: [{ mes: 1 }, { mes: 2 }],
+    };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+        rendaVariavelMensalOficial: [],
+      },
+    });
+    expect(state.rendaVariavelMensalOficial).toHaveLength(2);
+  });
+
+  it('Doações (Efetuadas/Partidos/ECA-Pessoa Idosa) só o caminho PDF traz; reimportar via .DBK (que não expõe a chave) preserva o que já tinha', () => {
+    let state = {
+      ...initialState, anoCalendario: 2025,
+      doacoesEfetuadasOficial: [{ codigo: '1', nome_beneficiario: 'X', valor: 100 }],
+      doacoesPartidosOficial: [{ codigo: '2', nome_beneficiario: 'Y', valor: 200 }],
+      doacoesEcaIdosoOficial: [{ codigo: '3', nome_beneficiario: 'Z', valor: 300, categoria: 'eca' }],
+    };
+    // payload simula o caminho .DBK: as 3 chaves nem chegam a existir no
+    // payload (parseDBK nunca as produz) — undefined precisa cair no
+    // "preserva o que já tinha", igual aos demais campos deste bloco.
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: {
+        anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [{ id: 1, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [],
+      },
+    });
+    expect(state.doacoesEfetuadasOficial).toHaveLength(1);
+    expect(state.doacoesPartidosOficial).toHaveLength(1);
+    expect(state.doacoesEcaIdosoOficial).toHaveLength(1);
+  });
 });
 
 describe('origemAnoAtual (declaração importada x ano avançado manualmente)', () => {
@@ -234,6 +550,23 @@ describe('DELETE_HISTORICO_ANO (excluir declaração importada/salva)', () => {
     let state = { ...initialState, anoCalendario: 2026, bens: [{ ...bemBase }], historico: {} };
     state = reducer(state, { type: 'DELETE_HISTORICO_ANO', payload: 2026 });
     expect(state.bens).toHaveLength(0);
+  });
+
+  it('excluir o único ano também zera Imóveis Explorados e o prejuízo da atividade rural a compensar', () => {
+    // Bug real: blankYear de propósito NÃO zera imoveisRurais/
+    // prejuizoRuralAcompensar (persistem de ano pra ano no ROLLOVER_ANO
+    // normal), mas excluir o ÚLTIMO ano do histórico reaproveitava o mesmo
+    // blankYear — as fazendas cadastradas e o saldo de prejuízo
+    // sobreviviam à exclusão, mesmo sem nenhum ano restando.
+    let state = {
+      ...initialState, anoCalendario: 2026,
+      imoveisRurais: [{ id: 1, nomeLocalizacao: 'Fazenda Teste' }],
+      prejuizoRuralAcompensar: -5000,
+      historico: {},
+    };
+    state = reducer(state, { type: 'DELETE_HISTORICO_ANO', payload: 2026 });
+    expect(state.imoveisRurais).toHaveLength(0);
+    expect(state.prejuizoRuralAcompensar).toBe(0);
   });
 });
 
@@ -500,5 +833,152 @@ describe('titular e dependentes (cadastro manual)', () => {
       dividas: [], rendimentos: [], pagamentos: [],
     }});
     expect(state.dependentes).toEqual([{ id: 1, nome: 'Filho' }]);
+  });
+});
+
+// Regressão do achado A1 da auditoria de 21/08/2026: importando só o PDF, o
+// Dashboard fechava com "Total Geral dos Rendimentos R$ 0,00" e um Saldo de
+// Caixa muito negativo, sem nenhum sinal de que faltava metade da declaração.
+// O formato do arquivo passou a ficar guardado no ano para as telas de resumo
+// poderem avisar.
+describe('importFormato: o ano guarda de qual arquivo veio a importação', () => {
+  const payloadPdf = {
+    anoCalendario: 2025,
+    formato: 'pdf',
+    contribuinte: { nome: 'FULANO', cpf: '11111111111' },
+    bens: [{ ...bemBase }],
+    dividas: [],
+    rendimentos: [],
+    pagamentos: [],
+  };
+
+  it('grava o formato na importação', () => {
+    const s = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
+    expect(s.importFormato).toBe('pdf');
+    expect(s.origemAnoAtual).toBe('importacao');
+  });
+
+  it('reimportar o .DBK por cima do PDF atualiza o formato', () => {
+    const comPdf = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
+    const comDbk = reducer(comPdf, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { ...payloadPdf, formato: 'dbk', rendimentos: [{ id: 9, tipo: 'tributavel_pj', valor: 1000 }] },
+    });
+    expect(comDbk.importFormato).toBe('dbk');
+    expect(comDbk.rendimentos).toHaveLength(1);
+  });
+
+  it('payload sem a chave formato preserva o que já estava', () => {
+    const comPdf = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
+    const { formato, ...semFormato } = payloadPdf;
+    const depois = reducer(comPdf, { type: 'IMPORT_DECLARACAO', payload: semFormato });
+    expect(depois.importFormato).toBe('pdf');
+  });
+
+  it('avançar o ano zera o formato: ano novo não tem declaração por trás', () => {
+    const comPdf = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
+    const proximo = reducer(comPdf, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(proximo.anoCalendario).toBe(2026);
+    expect(proximo.origemAnoAtual).toBe('manual');
+    expect(proximo.importFormato).toBeNull();
+    // e o ano arquivado mantém o formato dele
+    expect(proximo.historico[2025].importFormato).toBe('pdf');
+  });
+
+  it('voltar para o ano arquivado traz o formato de volta', () => {
+    const comPdf = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
+    const proximo = reducer(comPdf, { type: 'ROLLOVER_ANO', payload: 2026 });
+    const voltou = reducer(proximo, { type: 'LOAD_HISTORICO', payload: 2025 });
+    expect(voltou.importFormato).toBe('pdf');
+  });
+});
+
+// Regressão do achado A5: importar pela tela de criação de perfil não deixava
+// rastro no Histórico de Alterações, porque aquele caminho chamava `reducer`
+// direto em vez de `reducerComHistorico`.
+describe('importação registrada no Histórico de Alterações', () => {
+  it('IMPORT_DECLARACAO gera entrada no histórico', () => {
+    const s = reducerComHistorico(initialState, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, formato: 'dbk', contribuinte: { nome: 'FULANO', cpf: '11111111111' }, bens: [{ ...bemBase }], dividas: [], rendimentos: [], pagamentos: [] },
+    });
+    expect(s.alteracoes).toHaveLength(1);
+    expect(s.alteracoes[0].descricao).toContain('Importou declaração');
+    expect(s.alteracoes[0].anoCalendario).toBe(2025);
+  });
+});
+
+// Regressão do mesmo achado, do lado do fechamento do ano: com a apuração da
+// Atividade Rural vindo só da declaração importada, fechar um ano com
+// prejuízo rural não acumulava nada para compensar nos anos seguintes, apesar
+// de a Lei 8.023/1990, art. 14, permitir a compensação nos anos-base
+// posteriores.
+describe('prejuízo rural a compensar acumula também com a apuração importada', () => {
+  const anoImportado = (extras = {}) => ({
+    ...initialState,
+    anoCalendario: 2025,
+    origemAnoAtual: 'importacao',
+    contribuinte: { nome: 'FULANO', cpf: '11111111111' },
+    bens: [{ ...bemBase }],
+    receitasDespesasRuraisOficial: [
+      { mes: 1, receitaBruta: 100000, despesaCusteioInvestimento: 400000 },
+      { mes: 2, receitaBruta: 200000, despesaCusteioInvestimento: 300000 },
+    ],
+    ...extras,
+  });
+
+  it('ano importado com prejuízo acumula o prejuízo ao virar o ano', () => {
+    const s = reducer(anoImportado(), { type: 'ROLLOVER_ANO', payload: 2026 });
+    // (100.000 - 400.000) + (200.000 - 300.000) = -400.000
+    expect(s.prejuizoRuralAcompensar).toBe(-400000);
+  });
+
+  it('ano importado com lucro não muda o saldo a compensar sozinho', () => {
+    const comLucro = anoImportado({
+      receitasDespesasRuraisOficial: [{ mes: 1, receitaBruta: 900000, despesaCusteioInvestimento: 100000 }],
+    });
+    const s = reducer(comLucro, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(s.prejuizoRuralAcompensar).toBe(0);
+  });
+
+  it('lançamento manual tem precedência: a apuração importada não soma junto', () => {
+    const comManual = anoImportado({
+      lancamentosRurais: [{ id: 1, tipo: 'despesa', valor: 50000, data: '2025-05-01' }],
+    });
+    const s = reducer(comManual, { type: 'ROLLOVER_ANO', payload: 2026 });
+    // Só os -50.000 do lançamento manual, não os -400.000 da apuração.
+    expect(s.prejuizoRuralAcompensar).toBe(-50000);
+  });
+});
+
+// Aviso de ficha não importada: diferente dos demais campos "Oficial", este
+// substitui SEMPRE, inclusive por lista vazia. Manter o aviso de uma
+// importação anterior seria mentir sobre o arquivo novo.
+describe('fichasNaoLidasComConteudo', () => {
+  const importar = (estado, fichas) => reducer(estado, {
+    type: 'IMPORT_DECLARACAO',
+    payload: { anoCalendario: 2025, contribuinte: { cpf: '1', nome: 'X' }, bens: [], dividas: [], rendimentos: [], pagamentos: [], fichasNaoLidasComConteudo: fichas },
+  });
+
+  it('guarda as fichas reportadas pela importação', () => {
+    const s = importar(initialState, ['MOVIMENTAÇÃO DO REBANHO - EXTERIOR']);
+    expect(s.fichasNaoLidasComConteudo).toEqual(['MOVIMENTAÇÃO DO REBANHO - EXTERIOR']);
+  });
+
+  it('uma importação nova sem fichas pendentes APAGA o aviso da anterior', () => {
+    const comAviso = importar(initialState, ['BENS DA ATIVIDADE RURAL - EXTERIOR']);
+    expect(comAviso.fichasNaoLidasComConteudo).toHaveLength(1);
+    // Reimportar a declaração corrigida (ou o .DBK, que não reporta nada) tem
+    // que limpar o alerta, senão ele fica na tela para sempre.
+    const semAviso = importar(comAviso, []);
+    expect(semAviso.fichasNaoLidasComConteudo).toEqual([]);
+  });
+
+  it('payload sem o campo não quebra e resulta em lista vazia', () => {
+    const s = reducer(initialState, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, contribuinte: { cpf: '1', nome: 'X' }, bens: [], dividas: [], rendimentos: [], pagamentos: [] },
+    });
+    expect(s.fichasNaoLidasComConteudo).toEqual([]);
   });
 });

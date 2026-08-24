@@ -6,10 +6,11 @@ import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
 import MoneyInput from '../components/MoneyInput';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
+import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
-export default function DividasPage() {
+export default function DividasPage({ onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
   const { dividas, anoCalendario } = state;
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,6 +45,8 @@ export default function DividasPage() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    const falta = primeiroCampoVazio([['Código', form.codigo], ['Discriminação', form.discriminacao]]);
+    if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, situacao_anterior: parseFloat(form.situacao_anterior) || 0, situacao_atual: parseFloat(form.situacao_atual) || 0, valor_pago: parseFloat(form.valor_pago) || 0 };
     if (editingId) {
       // Em edição, saldo atual e movimentações vêm do estado vivo: mudança de
@@ -88,6 +91,7 @@ export default function DividasPage() {
     <>
       <div className="page-header">
         <div className="page-header-left">
+          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
           <h2>Dívidas e Ônus Reais</h2>
           <p>{dividas.length} itens{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totalAtual)}</p>
         </div>
@@ -164,7 +168,7 @@ export default function DividasPage() {
                       actionType="REGISTRAR_MOVIMENTACAO_DIVIDA"
                       tipos={MOVIMENTACAO_DIVIDA_TIPOS}
                       tipoInicial="amortizacao"
-                      textoIntro="Contratou, amortizou, quitou? Registre aqui com a data: o saldo devedor é recalculado a partir da movimentação, e o demonstrativo consegue reconstruir quanto se devia em qualquer data do ano."
+                      anoCalendario={anoCalendario}
                     />
                   </>
                 ) : (
@@ -175,7 +179,11 @@ export default function DividasPage() {
                 </div>
                 )}
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
+              {/* Mesmo raciocínio de BemModal.jsx: editando, "Registrar
+                  movimentação" já é uma ação independente que grava na
+                  hora, então "Salvar" sozinho aqui embaixo confundia com
+                  aquele. */}
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">{editingId ? 'Salvar Dados da Dívida' : 'Salvar'}</button></div>
             </form>
       </Modal>
       <AnoCalendarioModal
