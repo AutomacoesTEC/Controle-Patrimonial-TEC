@@ -314,13 +314,12 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                         </span>
                         <button type="button" className="perfil-link-btn" onClick={limparDeclaracaoImportada}>✕ Limpar</button>
                       </div>
-                      {declaracaoImportada.result?.formato === 'pdf' && (
-                        <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--accent-warning, #f59e0b)' }}>
-                          Dos Rendimentos, o PDF não traz os recebidos de pessoa física e do exterior
-                          (carnê-leão), que vêm só pelo .DBK. Para a declaração completa, importe o arquivo
-                          .DBK em Importar Declaração depois de entrar no perfil.
-                        </p>
-                      )}
+                      {/* Sem aviso fixo de carnê-leão aqui: ele aparecia em TODA
+                          importação por PDF, mesmo quando a ficha vem "Sem
+                          Informações" (as declarações reais), virando alarme falso.
+                          Quando o PDF de fato traz carnê-leão, ou qualquer outra
+                          ficha não lida COM conteúdo, o item nomeado aparece na
+                          lista `avisos` abaixo. */}
                       {(declaracaoImportada.avisos || []).length > 0 && (
                         <ul style={{ margin: '8px 0 0', paddingLeft: '18px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                           {declaracaoImportada.avisos.map((aviso, i) => <li key={i}>{aviso}</li>)}

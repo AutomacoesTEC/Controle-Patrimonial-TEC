@@ -3307,16 +3307,22 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   for (const d of rieDivergencias) {
     log(`Conferência da ficha de rendimentos: "${d.descricao}" soma R$ ${d.somaDetalhe.toFixed(2)} no detalhe, mas a própria declaração informa R$ ${d.valorAgregado.toFixed(2)} no total do código. Confira esse item na declaração original.`, 'warning');
   }
-  log('Rendimentos recebidos de pessoa física e do exterior ainda não são lidos do PDF. Importe pelo arquivo .DBK se a declaração tiver esses rendimentos.', 'warning');
+  // NÃO avisar aqui, incondicionalmente, que o carnê-leão não é lido do PDF:
+  // esse aviso disparava em TODA importação por PDF, inclusive quando a ficha
+  // vem "Sem Informações" (o caso das duas declarações reais), virando alarme
+  // falso na tela de criação de perfil e no Dashboard. O loop de
+  // `fichasNaoLidasComConteudo` acima já avisa, NOMEANDO a ficha, só quando o
+  // carnê-leão vem preenchido — a única vez em que há algo a conferir.
   if (imoveisRurais.length > 0 || bensRurais.length > 0 || dividasRurais.length > 0) {
     log(`Atividade Rural: ${imoveisRurais.length} imóvel(is) explorado(s), ${bensRurais.length} bem(ns), ${dividasRurais.length} dívida(s) vinculada(s), ${participantesRuraisOficial.length} participante(s) e ${movimentacaoRebanhoOficial.length} espécie(s) no rebanho`, 'success');
   }
-  // Este aviso já foi corrigido duas vezes por ficar desatualizado (auditoria
-  // de 21/08/2026 e agora), sempre pelo mesmo motivo: ele aparece também na
-  // tela de criação de perfil, então errar aqui manda a pessoa cadastrar à mão
-  // o que o arquivo já traz. Desde 23/08/2026 a Atividade Rural é lida INTEIRA
-  // por este caminho; o que sobrou de fora está no aviso abaixo.
-  log('Rendimentos lançados manualmente na Atividade Rural (livro-caixa do app) não vêm de arquivo nenhum; a ficha traz os totais mensais, que são importados.', 'warning');
+  // Não há aviso de Atividade Rural aqui: desde 23/08/2026 ela é lida INTEIRA
+  // por este caminho (imóveis, bens, dívidas, receitas/despesas mensais,
+  // apuração, rebanho e participantes). O texto antigo dizia que o livro-caixa
+  // manual "não vem de arquivo nenhum" e caía como 'warning' na tela de criação
+  // de perfil, sem nada acionável — já tinha sido corrigido duas vezes por ficar
+  // desatualizado. Removido: o que de fato ficar de fora vira aviso pelo loop de
+  // `fichasNaoLidasComConteudo`.
   // O .DBK de referência não tem NENHUM registro para as 4 fichas de
   // Doações (nem "sem informação" — o tipo de registro simplesmente não
   // aparece), então esse caminho fica de fora de propósito (ver
