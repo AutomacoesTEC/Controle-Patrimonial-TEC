@@ -16,6 +16,26 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
+# ==> 0/4 De onde este build está saindo
+#
+# Existe (ou existiu) uma cópia antiga do projeto em
+# C:\Users\<usuario>\controle-patrimonial, de quando o .exe era compilado de
+# lá. Ela ficou parada em 18/08/2026, versão 0.0.0, ANTES de toda a auditoria
+# do importador. Compilar daquela pasta gera um instalador com o app velho e
+# sem nenhum aviso. Este bloco recusa o build nesse caso.
+#
+# A pasta correta é a do repositório, esta mesma, mesmo quando ela está no WSL
+# (caminho UNC): a etapa 1 abaixo trata esse caso.
+$pacote = Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json
+if ($pacote.version -eq '0.0.0') {
+    throw "Esta pasta é a cópia ANTIGA do projeto (package.json na versão 0.0.0). Rode o build a partir do repositório atual."
+}
+$versaoSetup = (Select-String -Path (Join-Path $root 'setup.iss') -Pattern '#define AppVersion "([^"]+)"').Matches[0].Groups[1].Value
+if ($versaoSetup -ne $pacote.version) {
+    throw "Versão divergente: package.json diz $($pacote.version) e setup.iss diz $versaoSetup. Alinhe as duas antes de gerar o instalador."
+}
+Write-Host "==> 0/4 Projeto $($pacote.name) versão $($pacote.version)" -ForegroundColor Cyan
+
 Write-Host "==> 1/4 Build do frontend (Vite)" -ForegroundColor Cyan
 if ($root.StartsWith('\\')) {
     # Projeto dentro do WSL: o cmd.exe do Windows não aceita pasta UNC como
