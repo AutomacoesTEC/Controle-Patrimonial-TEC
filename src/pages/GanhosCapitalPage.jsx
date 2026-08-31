@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, Fragment } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCpfCnpj } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
@@ -7,6 +7,7 @@ import { ganhosApuradosPeriodo } from '../store/demonstrativos';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
   conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
+  linhasApuracaoGanhoCapital, resultadoDaOperacao,
 } from '../store/ganhoCapitalDetalhe';
 
 // Ganhos de Capital não tem cadastro próprio: é calculado a partir das
@@ -42,6 +43,126 @@ function ValorDaLinha({ linha }) {
   return <>{formatCurrency(linha.valor)}</>;
 }
 
+// O demonstrativo de UMA operação, o que abre dentro da linha da tabela.
+//
+// Zero aparece, porque a declaração impressa também o imprime e o valor desta
+// tela é casar com o papel. Mas aparece em cinza: num declarante que vendeu com
+// prejuízo quase tudo é zero, e sem essa distinção os poucos números que
+// importam ficam afogados no meio deles.
+function DetalheOperacaoGc({ op }) {
+  const blocos = blocosOperacaoGanhoCapital(op);
+  const parcelas = parcelasDaOperacao(op);
+  const faixas = faixasDaOperacao(op);
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '16px' }}>
+        {blocos.map(bl => (
+          <div key={bl.id} style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', padding: '14px 16px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              {bl.titulo}
+            </div>
+            <table style={{ width: '100%', fontSize: '13px' }}>
+              <tbody>
+                {bl.linhas.map((l, i) => (
+                  <tr key={i}>
+                    <td style={{ padding: '3px 12px 3px 0', color: 'var(--text-secondary)' }}>{l.rotulo}</td>
+                    <td
+                      style={{ padding: '3px 0', textAlign: 'right', whiteSpace: 'nowrap', color: l.valor === 0 ? 'var(--text-muted)' : undefined }}
+                      className={l.formato === 'moeda' ? 'currency' : undefined}
+                    >
+                      <ValorDaLinha linha={l} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+
+      {(op.adquirentes || []).length > 0 && (
+        <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+          Adquirente(s): {op.adquirentes.map(a => `${a.nome} (${formatCpfCnpj(a.cpfCnpj)})`).join(', ')}
+        </div>
+      )}
+
+      {(op.custosAquisicao || []).length > 0 && (
+        <div className="table-container" style={{ marginTop: '16px' }}>
+          <table>
+            <thead><tr><th>Espécie</th><th style={{ textAlign: 'right' }}>Quantidade</th><th style={{ textAlign: 'right' }}>Custo médio</th><th style={{ textAlign: 'right' }}>Custo total</th></tr></thead>
+            <tbody>
+              {op.custosAquisicao.map((c, i) => (
+                <tr key={i}>
+                  <td>{c.especie}</td>
+                  <td style={{ textAlign: 'right' }}>{c.quantidade}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatarPercentualGc(c.custoMedio).replace('%', '')}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(c.custoTotal)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {parcelas.length > 0 && (
+        <div className="table-container" style={{ marginTop: '16px' }}>
+          {/* No parcelado o imposto é devido conforme o recebimento, e não de
+              uma vez na data da alienação. */}
+          <table>
+            <thead>
+              <tr>
+                <th>Parcela</th><th>Data</th>
+                <th style={{ textAlign: 'right' }}>Recebido</th>
+                <th style={{ textAlign: 'right' }}>Custo proporcional</th>
+                <th style={{ textAlign: 'right' }}>Ganho proporcional</th>
+                <th style={{ textAlign: 'right' }}>Imposto devido</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parcelas.map(p => (
+                <tr key={p.numero}>
+                  <td>{p.numero}</td>
+                  <td>{formatDate(p.data)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valorRecebido)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.custoAquisicaoProporcional)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.ganhoCapitalProporcional)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.impostoDevido)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {faixas.length > 0 && (
+        <div className="table-container" style={{ marginTop: '16px' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Faixa de ganho de capital</th><th>Alíquota</th>
+                <th style={{ textAlign: 'right' }}>Total</th>
+                <th style={{ textAlign: 'right' }}>Anterior</th>
+                <th style={{ textAlign: 'right' }}>Atual</th>
+              </tr>
+            </thead>
+            <tbody>
+              {faixas.map((f, i) => (
+                <tr key={i} style={f.ehTotal ? { fontWeight: 700 } : undefined}>
+                  <td>{f.rotulo}</td>
+                  <td>{f.aliquota}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.total)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.anterior)}</td>
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.atual)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function GanhosCapitalPage() {
   const { state } = useData();
   const anosDisponiveis = anosComDado(state);
@@ -75,6 +196,20 @@ export default function GanhosCapitalPage() {
   const gcOficial = dados?.ganhosCapitalOficial || null;
   const moedaEspecie = gcOficial?.moedaEspecie || { operacoes: [], mensal: [] };
   const operacoesDetalhadas = gcOficial?.operacoes || [];
+
+  // Uma linha por operação, unindo a tabela oficial ao demonstrativo pelo `id`.
+  // Nunca pelo nome do bem: dois veículos iguais só se distinguem pela placa, e
+  // participação societária vem sem nome nenhum.
+  const linhasGc = useMemo(
+    () => linhasApuracaoGanhoCapital(apuracaoOficial, operacoesDetalhadas),
+    [apuracaoOficial, operacoesDetalhadas]
+  );
+  const [operacoesAbertas, setOperacoesAbertas] = useState(() => new Set());
+  const alternarOperacao = (chave) => setOperacoesAbertas(atual => {
+    const proximo = new Set(atual);
+    if (proximo.has(chave)) proximo.delete(chave); else proximo.add(chave);
+    return proximo;
+  });
   const avisosGc = [
     ...conferenciasGanhoCapital(operacoesDetalhadas),
     // Conferência ENTRE FICHAS: o que estas operações transferem para a
@@ -237,50 +372,24 @@ export default function GanhosCapitalPage() {
         </div>
       </div>
       <div className="page-body animate-in">
-        {apuracaoOficial.length > 0 && (
+        {/* Uma tela só, não duas. Antes a mesma operação aparecia na tabela
+            "Apuração do Ganho de Capital Oficial" e de novo, inteira, no card
+            "Demonstrativo por Operação": quem confere lia tudo duas vezes, e
+            num declarante sem ganho a tela virava uma parede de R$ 0,00. Agora
+            a tabela é o índice e o demonstrativo abre na linha, fechado por
+            padrão. A junção é por `id` (ver linhasApuracaoGanhoCapital). */}
+        {linhasGc.length > 0 && (
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
-              <h3 className="card-title">Apuração do Ganho de Capital Oficial</h3>
-              <span className="badge badge-blue" title="Lida do arquivo .DBK importado, não depende de movimentação nenhuma lançada no app">Da declaração original</span>
-            </div>
-            <div className="table-container">
-              <table>
-                <thead><tr><th>Ficha</th><th>Bem</th><th>Aquisição</th><th>Alienação</th><th style={{ textAlign: 'right' }}>Custo</th><th style={{ textAlign: 'right' }}>Valor Alienação</th><th style={{ textAlign: 'right' }}>Ganho</th><th style={{ textAlign: 'right' }}>Imposto devido</th><th style={{ textAlign: 'right' }}>Imposto pago</th><th>Adquirente</th></tr></thead>
-                <tbody>
-                  {apuracaoOficial.map(op => (
-                    <tr key={op.id}>
-                      <td>{FICHA_GC[op.tipo] || FICHA_GC.movel}</td>
-                      <td style={{ maxWidth: '260px' }}>{(op.bem || '').substring(0, 80)}</td>
-                      <td>{formatDate(op.dataAquisicao)}</td>
-                      <td>{formatDate(op.dataAlienacao)}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(op.custoAquisicao)}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(op.valorAlienacao)}</td>
-                      <td style={{ textAlign: 'right' }} className={`currency ${op.ganhoCapital > 0 ? 'positive' : ''}`}>{formatCurrency(op.ganhoCapital)}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(op.impostoDevido || 0)}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(op.impostoPago || 0)}</td>
-                      <td>{op.adquirenteNome}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        {/* Demonstrativo completo, operação por operação. O card acima é o
-            resumo de uma linha; aqui fica o que EXPLICA cada número, a começar
-            pela cadeia de reduções do imóvel. Montagem em
-            src/store/ganhoCapitalDetalhe.js, testada contra o retorno real. */}
-        {operacoesDetalhadas.length > 0 && (
-          <div className="card" style={{ marginBottom: '20px' }}>
-            <div className="card-header">
-              <h3 className="card-title">Demonstrativo por Operação</h3>
-              <span className="badge badge-blue" title="Lido do arquivo importado, não é calculado pelo app">Da declaração original</span>
+              <h3 className="card-title">Apuração do Ganho de Capital</h3>
+              <span className="badge badge-blue" title="Lida do arquivo importado, não é calculada pelo app nem depende de movimentação lançada">Da declaração original</span>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
-              Os rótulos e a ordem são os do demonstrativo impresso. No ganho de capital de imóvel, o
-              valor tributável não é a alienação menos o custo: entre um e outro entram a redução da
-              Lei nº 7.713/1988 e os fatores da Lei nº 11.196/2005, que aparecem abaixo mesmo quando
-              são zero, porque a declaração também os imprime.
+              Clique na operação para abrir o demonstrativo completo, com os rótulos e a ordem do
+              impresso. No ganho de capital de imóvel, o valor tributável não é a alienação menos o
+              custo: entre um e outro entram a redução da Lei nº 7.713/1988 e os fatores da Lei
+              nº 11.196/2005, que aparecem lá mesmo quando são zero, porque a declaração também os
+              imprime.
             </p>
 
             {avisosGc.length > 0 && (
@@ -292,125 +401,83 @@ export default function GanhosCapitalPage() {
               </div>
             )}
 
-            {operacoesDetalhadas.map((op, idx) => {
-              const blocos = blocosOperacaoGanhoCapital(op);
-              const parcelas = parcelasDaOperacao(op);
-              const faixas = faixasDaOperacao(op);
-              return (
-                <div key={op.id ?? idx} style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: idx < operacoesDetalhadas.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                    <span className="badge badge-blue">{NOME_FICHA_GC[op.tipo] || op.tipo}</span>
-                    <strong>{op.especificacao || op.sociedade?.nome || 'Operação'}</strong>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                      Aquisição {formatDate(op.dataAquisicao) || 'não informada'}, alienação {formatDate(op.dataAlienacao) || 'não informada'}
-                    </span>
-                    {op.alienacaoAPrazo && <span className="badge badge-orange">Alienação a prazo</span>}
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '16px' }}>
-                    {blocos.map(bl => (
-                      <div key={bl.id} style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '14px 16px' }}>
-                        <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                          {bl.titulo}
-                        </div>
-                        <table style={{ width: '100%', fontSize: '13px' }}>
-                          <tbody>
-                            {bl.linhas.map((l, i) => (
-                              <tr key={i}>
-                                <td style={{ padding: '3px 12px 3px 0', color: 'var(--text-secondary)' }}>{l.rotulo}</td>
-                                <td style={{ padding: '3px 0', textAlign: 'right', whiteSpace: 'nowrap' }} className={l.formato === 'moeda' ? 'currency' : undefined}>
-                                  <ValorDaLinha linha={l} />
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
-                  </div>
-
-                  {(op.adquirentes || []).length > 0 && (
-                    <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      Adquirente(s): {op.adquirentes.map(a => `${a.nome} (${formatCpfCnpj(a.cpfCnpj)})`).join(', ')}
-                    </div>
-                  )}
-
-                  {(op.custosAquisicao || []).length > 0 && (
-                    <div className="table-container" style={{ marginTop: '16px' }}>
-                      <table>
-                        <thead><tr><th>Espécie</th><th style={{ textAlign: 'right' }}>Quantidade</th><th style={{ textAlign: 'right' }}>Custo médio</th><th style={{ textAlign: 'right' }}>Custo total</th></tr></thead>
-                        <tbody>
-                          {op.custosAquisicao.map((c, i) => (
-                            <tr key={i}>
-                              <td>{c.especie}</td>
-                              <td style={{ textAlign: 'right' }}>{c.quantidade}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatarPercentualGc(c.custoMedio).replace('%', '')}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(c.custoTotal)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {parcelas.length > 0 && (
-                    <div className="table-container" style={{ marginTop: '16px' }}>
-                      {/* No parcelado o imposto é devido conforme o recebimento,
-                          e não de uma vez na data da alienação. */}
-                      <table>
-                        <thead>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '30px' }}></th>
+                    <th>Bem</th><th>Ficha</th><th>Aquisição</th><th>Alienação</th>
+                    <th style={{ textAlign: 'right' }}>Custo</th>
+                    <th style={{ textAlign: 'right' }}>Valor alienação</th>
+                    <th style={{ textAlign: 'right' }}>Ganho</th>
+                    <th style={{ textAlign: 'right' }}>Imposto devido</th>
+                    <th style={{ textAlign: 'right' }}>Imposto pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {linhasGc.map(l => {
+                    const r = l.resumo || {};
+                    const d = l.detalhe;
+                    const aberta = operacoesAbertas.has(l.chave);
+                    const resultado = resultadoDaOperacao(l.resumo);
+                    const bem = r.bem || d?.especificacao || d?.sociedade?.nome || 'Operação sem identificação';
+                    const tipo = r.tipo || d?.tipo;
+                    const numero = (v) => (typeof v === 'number'
+                      ? <span className="currency">{formatCurrency(v)}</span>
+                      : <span style={{ color: 'var(--text-muted)' }}>não informado</span>);
+                    return (
+                      <Fragment key={l.chave}>
+                        <tr
+                          onClick={() => alternarOperacao(l.chave)}
+                          style={{ cursor: 'pointer', background: aberta ? 'var(--bg-input)' : undefined }}
+                        >
+                          <td>
+                            <button
+                              type="button"
+                              aria-expanded={aberta}
+                              aria-label={`${aberta ? 'Fechar' : 'Abrir'} o demonstrativo de ${bem}`}
+                              onClick={(e) => { e.stopPropagation(); alternarOperacao(l.chave); }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '11px', padding: '2px 4px' }}
+                            >
+                              {aberta ? '▼' : '▶'}
+                            </button>
+                          </td>
+                          <td style={{ maxWidth: '280px' }}>
+                            {bem}
+                            {d?.alienacaoAPrazo && <span className="badge badge-orange" style={{ marginLeft: '8px' }}>A prazo</span>}
+                            {resultado && resultado.tipo !== 'ganho' && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{resultado.texto}</div>
+                            )}
+                          </td>
+                          <td>{FICHA_GC[tipo] || FICHA_GC.movel}</td>
+                          <td>{formatDate(r.dataAquisicao || d?.dataAquisicao)}</td>
+                          <td>{formatDate(r.dataAlienacao || d?.dataAlienacao)}</td>
+                          <td style={{ textAlign: 'right' }}>{numero(r.custoAquisicao)}</td>
+                          <td style={{ textAlign: 'right' }}>{numero(r.valorAlienacao)}</td>
+                          <td style={{ textAlign: 'right' }} className={r.ganhoCapital > 0 ? 'positive' : undefined}>{numero(r.ganhoCapital)}</td>
+                          <td style={{ textAlign: 'right' }}>{numero(r.impostoDevido)}</td>
+                          <td style={{ textAlign: 'right' }}>{numero(r.impostoPago)}</td>
+                        </tr>
+                        {aberta && (
                           <tr>
-                            <th>Parcela</th><th>Data</th>
-                            <th style={{ textAlign: 'right' }}>Recebido</th>
-                            <th style={{ textAlign: 'right' }}>Custo proporcional</th>
-                            <th style={{ textAlign: 'right' }}>Ganho proporcional</th>
-                            <th style={{ textAlign: 'right' }}>Imposto devido</th>
+                            <td colSpan={10} style={{ background: 'var(--bg-input)', padding: '16px 18px 20px' }}>
+                              {!d ? (
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                  Esta operação aparece na apuração, mas o arquivo importado não traz o
+                                  demonstrativo detalhado dela.
+                                </div>
+                              ) : (
+                                <DetalheOperacaoGc op={d} />
+                              )}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {parcelas.map(p => (
-                            <tr key={p.numero}>
-                              <td>{p.numero}</td>
-                              <td>{formatDate(p.data)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valorRecebido)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.custoAquisicaoProporcional)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.ganhoCapitalProporcional)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.impostoDevido)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {faixas.length > 0 && (
-                    <div className="table-container" style={{ marginTop: '16px' }}>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Faixa de ganho de capital</th><th>Alíquota</th>
-                            <th style={{ textAlign: 'right' }}>Total</th>
-                            <th style={{ textAlign: 'right' }}>Anterior</th>
-                            <th style={{ textAlign: 'right' }}>Atual</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {faixas.map((f, i) => (
-                            <tr key={i} style={f.ehTotal ? { fontWeight: 700 } : undefined}>
-                              <td>{f.rotulo}</td>
-                              <td>{f.aliquota}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.total)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.anterior)}</td>
-                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.atual)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

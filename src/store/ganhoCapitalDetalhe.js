@@ -211,3 +211,57 @@ export function conferenciasGanhoCapital(operacoes = []) {
   }
   return avisos;
 }
+
+// Junta a tabela oficial (`apuracaoGanhoCapital`, uma linha por operação) com o
+// demonstrativo completo (`ganhosCapitalOficial.operacoes`). São duas listas
+// separadas no retorno do parser, e a tela mostrava as duas empilhadas: a mesma
+// operação aparecia duas vezes, em formatos diferentes.
+//
+// A CHAVE É O `id`, NUNCA O NOME DO BEM. Dois veículos da mesma marca e modelo
+// se distinguem só pela placa, e há operação sem nome nenhum (participação
+// societária vem com `bem` vazio). Casar por nome fundiria dois bens diferentes
+// numa linha só, ou deixaria a operação sem nome fora da tela.
+// Conferido nas duas declarações reais: ids únicos nas duas listas e iguais
+// entre elas, inclusive nos dois FIAT UNO de placas diferentes.
+//
+// A união é pelos dois lados de propósito: uma operação que exista só numa das
+// listas continua aparecendo, marcada, em vez de sumir em silêncio.
+export function linhasApuracaoGanhoCapital(apuracao, operacoes) {
+  const resumos = Array.isArray(apuracao) ? apuracao : [];
+  const detalhes = Array.isArray(operacoes) ? operacoes : [];
+  const porId = new Map();
+  for (const d of detalhes) if (d && d.id != null) porId.set(d.id, d);
+
+  const linhas = [];
+  const usados = new Set();
+  resumos.forEach((r, i) => {
+    if (!r) return;
+    const detalhe = r.id != null ? porId.get(r.id) : undefined;
+    if (detalhe) usados.add(r.id);
+    linhas.push({ chave: r.id != null ? `r${r.id}` : `r-idx${i}`, resumo: r, detalhe: detalhe || null });
+  });
+  detalhes.forEach((d, i) => {
+    if (!d || (d.id != null && usados.has(d.id))) return;
+    linhas.push({ chave: d.id != null ? `d${d.id}` : `d-idx${i}`, resumo: null, detalhe: d });
+  });
+  return linhas;
+}
+
+// Como a operação terminou, dito a partir dos números da própria declaração e
+// não de suposição. A distinção importa: no imóvel o ganho pode ser zero mesmo
+// com alienação acima do custo, porque a redução da Lei nº 7.713/1988 e os
+// fatores da Lei nº 11.196/2005 entram entre um e outro. Chamar isso de
+// prejuízo seria erro de classificação fiscal.
+export function resultadoDaOperacao(resumo) {
+  if (!resumo) return null;
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const ganho = num(resumo.ganhoCapital);
+  const alienacao = num(resumo.valorAlienacao);
+  const custo = num(resumo.custoAquisicao);
+  if (ganho == null) return null;
+  if (ganho > 0) return { tipo: 'ganho', texto: 'Ganho de capital apurado' };
+  if (alienacao != null && custo != null && alienacao < custo) {
+    return { tipo: 'prejuizo', texto: 'Prejuízo na alienação, sem ganho tributável' };
+  }
+  return { tipo: 'semGanho', texto: 'Sem ganho tributável' };
+}

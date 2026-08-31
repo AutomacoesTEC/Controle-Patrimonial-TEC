@@ -87,6 +87,11 @@ export function blocosResumoDeclaracao(imposto) {
     linha('Imposto devido I', imposto.impostoDevidoI),
     linha('Imposto devido RRA', imposto.impostoDevidoRRA),
     linha('Imposto Lei 14.754/2023', imposto.lei14754Imposto),
+    // O programa da Receita imprime este rótulo SEM acento ("Aliquota efetiva
+    // (%)", AUDITORIA/rows-pdfjs/AJU-01.rows.txt:208, p7 r35, e :1458, p40 r36).
+    // Aqui ele vai acentuado de propósito: a regra de casar com o papel é sobre
+    // QUAL rótulo e em que ordem, não sobre reproduzir erro de ortografia numa
+    // tela nossa. Não "corrija" isto de volta.
     linha('Alíquota efetiva (%)', imposto.aliquotaEfetiva, 'percentual'),
   ], { rotulo: 'Total do imposto devido', valor: imposto.impostoDevidoTotal });
 
