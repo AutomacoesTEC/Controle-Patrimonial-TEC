@@ -2,10 +2,15 @@ import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store/reducer';
 import ConfirmarDependentesModal from './ConfirmarDependentesModal';
+import { MODALIDADES, NOME_CURTO_MODALIDADE, modalidadeDaDeclaracao } from '../store/modalidadeDeclaracao';
 
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
   { id: 'dashboard', label: 'Dashboard', short: 'DB', section: 'VISÃO GERAL' },
+  // Só aparece quando a declaração importada NÃO é de ajuste anual. O rótulo
+  // vira o nome da modalidade, para a pessoa ver de imediato que este ano tem
+  // regra própria (partilha no espólio, condição de não residente na saída).
+  { id: 'modalidade', label: 'Modalidade', short: 'MO', section: 'VISÃO GERAL', somenteModalidade: true },
   { id: 'titular', label: 'Titular e Dependentes', short: 'TD', section: 'CADASTROS' },
   { id: 'bens', label: 'Bens e Direitos', short: 'BE', section: 'CADASTROS' },
   { id: 'dividas', label: 'Dívidas e Ônus', short: 'DV', section: 'CADASTROS' },
@@ -22,6 +27,10 @@ const navItems = [
 
 export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed, onTrocarPerfil }) {
   const { state, dispatch, addToast } = useData();
+  const modalidade = modalidadeDaDeclaracao(state);
+  const itensVisiveis = navItems
+    .filter(item => !item.somenteModalidade || modalidade !== MODALIDADES.AJUSTE)
+    .map(item => (item.somenteModalidade ? { ...item, label: NOME_CURTO_MODALIDADE[modalidade] } : item));
   let lastSection = '';
   const [confirmarDependentesOpen, setConfirmarDependentesOpen] = useState(false);
 
@@ -70,7 +79,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       </div>
 
       <nav className="sidebar-nav">
-        {navItems.map(item => {
+        {itensVisiveis.map(item => {
           const showSection = !collapsed && item.section !== lastSection;
           lastSection = item.section;
           return (
