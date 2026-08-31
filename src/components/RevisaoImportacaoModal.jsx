@@ -57,12 +57,12 @@ export default function RevisaoImportacaoModal({
             <div>
               <span className="import-review-eyebrow">Arquivo</span>
               <strong title={nomeArquivo}>{nomeArquivo || fonte.nomeArquivo || 'Declaração'}</strong>
-              <small>{String(resultado.formato || '').toUpperCase()} · {formatarBytes(fonte.tamanhoBytes)}</small>
+              <small>{String(resultado.formato || '').toUpperCase()}, {formatarBytes(fonte.tamanhoBytes)}</small>
             </div>
             <div>
               <span className="import-review-eyebrow">Titular e período</span>
               <strong>{resultado.contribuinte?.nome || 'Titular não identificado'}</strong>
-              <small>{cpf ? `CPF ${formatCpfCnpj(cpf)} · ` : ''}Ano-calendário {resultado.anoCalendario || 'não identificado'}</small>
+              <small>{cpf ? `CPF ${formatCpfCnpj(cpf)}, ` : ''}Ano-calendário {resultado.anoCalendario || 'não identificado'}</small>
             </div>
           </section>
 
@@ -85,7 +85,7 @@ export default function RevisaoImportacaoModal({
               <h4>Dados estruturados encontrados</h4>
               <span>
                 {resumo.colecoes.reduce((soma, item) => soma + item.quantidade, 0)} itens
-                {resumo.quadros.length > 0 ? ` · ${resumo.quadros.length} quadro(s)` : ''}
+                {resumo.quadros.length > 0 ? `, ${resumo.quadros.length} quadro(s)` : ''}
               </span>
             </div>
             {resumo.colecoes.length > 0 ? (

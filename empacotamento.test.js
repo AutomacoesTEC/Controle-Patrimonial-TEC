@@ -80,3 +80,36 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     expect(mainPy).toContain('storage_path=get_storage_path()');
   });
 });
+
+// Regra de escrita da interface, que já vazou duas vezes: sem emoji, sem
+// travessão conector e sem "·" decorativo. Um teste vale mais que a lembrança
+// de quem escreve a próxima string.
+describe('escrita da interface', () => {
+  const arquivosDeTela = () => {
+    const { globSync } = require('node:fs');
+    return [...globSync(`${RAIZ}src/pages/*.jsx`), ...globSync(`${RAIZ}src/components/*.jsx`)];
+  };
+
+  it('nenhum texto de tela usa "·" como separador decorativo', () => {
+    const comSeparador = arquivosDeTela().filter(f => readFileSync(f, 'utf8').includes('·'));
+    expect(comSeparador.map(f => f.replace(RAIZ, ''))).toEqual([]);
+  });
+
+  it('nenhum texto de tela usa travessão conector', () => {
+    // O travessão aparece legitimamente em COMENTÁRIO de código, que não é
+    // interface, e o projeto usa muito comentário longo. Os comentários saem
+    // ANTES da varredura, inclusive os de bloco, que atravessam várias linhas:
+    // olhar linha a linha acusaria o meio de um /* */ como se fosse tela.
+    const semComentarios = (fonte) => fonte
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '')
+      .replace(/([^:])\/\/.*$/gm, '$1');
+    const ofensores = [];
+    for (const arquivo of arquivosDeTela()) {
+      semComentarios(readFileSync(arquivo, 'utf8')).split('\n').forEach((linha, i) => {
+        if (/—/.test(linha)) ofensores.push(`${arquivo.replace(RAIZ, '')}:${i + 1}`);
+      });
+    }
+    expect(ofensores).toEqual([]);
+  });
+});
