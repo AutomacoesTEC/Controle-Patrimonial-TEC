@@ -4064,8 +4064,18 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
     }
   };
 
+  // `lendoHerdeiros` é estado de RASCUNHO do leitor do bloco de herdeiros do
+  // bem partilhado, não é dado da declaração. Ele ficava no bem emitido quando
+  // o bloco ia até o fim do bem, e daí seguia para o estado, para o
+  // localStorage, para o snapshot do ano e para a comparação da retificadora.
+  // Achado na varredura campo a campo de 31/08/2026.
+  const emitirBem = (bem) => {
+    delete bem.lendoHerdeiros;
+    bens.push(bem);
+  };
+
   const flushAllCurrent = () => {
-    if (currentBem) { bens.push(currentBem); currentBem = null; }
+    if (currentBem) { emitirBem(currentBem); currentBem = null; }
     if (currentDivida) { dividas.push(currentDivida); currentDivida = null; }
     if (currentPag) { pagamentos.push(currentPag); currentPag = null; }
     flushRv();
@@ -4182,7 +4192,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         continue;
       }
       if (!pastRuralAnnex && rowHasCell(row, 'DECLARAÇÃO DE BENS E DIREITOS')) {
-        if (currentBem) { bens.push(currentBem); currentBem = null; }
+        if (currentBem) { emitirBem(currentBem); currentBem = null; }
         section = 'bens';
         continue;
       }
@@ -4554,13 +4564,13 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         }
         if (!bensAnchors) continue;
         if (rowHasCell(row, 'TOTAL')) {
-          if (currentBem) { bens.push(currentBem); currentBem = null; }
+          if (currentBem) { emitirBem(currentBem); currentBem = null; }
           continue;
         }
         const pick = makeColumnPicker(bensAnchors);
         const grupoTxt = textInColumn(row, pick, 'grupo');
         if (/^\d{2}$/.test(grupoTxt)) {
-          if (currentBem) bens.push(currentBem);
+          if (currentBem) emitirBem(currentBem);
           const numeroItemTxt = bensAnchors.bem != null ? textInColumn(row, pick, 'bem') : '';
           currentBem = {
             id: bemId++,
@@ -5968,7 +5978,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
   }
   const documentoFonte = await criarDocumentoFonte({ formato: 'pdf', textoIntegral, paginas: paginasTexto });
 
-  if (currentBem) bens.push(currentBem);
+  if (currentBem) emitirBem(currentBem);
   if (currentDivida) dividas.push(currentDivida);
   if (currentPag) pagamentos.push(currentPag);
   if (doacoesEfetuadasState.current) doacoesEfetuadas.push(doacoesEfetuadasState.current);

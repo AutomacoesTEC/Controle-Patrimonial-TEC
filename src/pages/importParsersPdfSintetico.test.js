@@ -1046,6 +1046,19 @@ describe.skipIf(!temPdfs)('faixas de tributação do ganho de capital', () => {
     ]);
   });
 
+  it('o bem partilhado não carrega estado de rascunho do parser', async () => {
+    // `lendoHerdeiros` é a marca interna do leitor do bloco de herdeiros. Ela
+    // ficava no bem emitido e seguia para o estado, o localStorage, o snapshot
+    // do ano e a comparação da retificadora, como se fosse dado da declaração.
+    // Achado na varredura campo a campo de 31/08/2026.
+    const espolio = await extrair('ESP');
+    for (const bem of espolio.bens) {
+      expect('lendoHerdeiros' in bem).toBe(false);
+    }
+    // E os herdeiros, que é o dado de verdade, continuam lá.
+    expect(espolio.bens[0].herdeiros).toHaveLength(2);
+  });
+
   it('ampliações e reformas seguem vazias no caminho PDF, e isso não é perda', () => {
     // Só o caminho .DBK popula ampliacoesReformas. O PDF do AJU-01 não imprime
     // o quadro, então lista vazia aqui é a verdade do documento, não campo
