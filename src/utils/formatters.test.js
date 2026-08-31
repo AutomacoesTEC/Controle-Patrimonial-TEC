@@ -9,7 +9,7 @@ describe('formatCpfCnpj', () => {
     expect(formatCpfCnpj('22908713000190')).toBe('22.908.713/0001-90');
   });
   it('já formatado (com pontuação) continua reconhecendo pela contagem de dígitos', () => {
-    expect(formatCpfCnpj('CPF-DO-DECLARANTE-1')).toBe('CPF-DO-DECLARANTE-1');
+    expect(formatCpfCnpj('123.456.789-09')).toBe('123.456.789-09');
   });
   it('tamanho que não é nem CPF nem CNPJ devolve como veio, sem tentar adivinhar', () => {
     expect(formatCpfCnpj('123')).toBe('123');

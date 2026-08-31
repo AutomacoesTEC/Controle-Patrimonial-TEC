@@ -1319,7 +1319,7 @@ describe('isBensMetadataRow (bug real: campos do formulário — endereço, cart
   it('NÃO descarta texto do bem que termina num rótulo, com o valor na linha seguinte', () => {
     expect(isBensMetadataRow(linha('EMPREENDIMENTOS IMOBILIARIOS SPE LTDA CNPJ:'))).toBe(false);
     expect(isBensMetadataRow(linha('9 QUANTIDADE: 330.158,62550000'))).toBe(false);
-    expect(isBensMetadataRow(linha('RECEBIDA EM DOACAO DE DECLARANTE 1 DE CASTRO CPF:'))).toBe(false);
+    expect(isBensMetadataRow(linha('RECEBIDA EM DOACAO DE FULANO DE TAL CPF:'))).toBe(false);
   });
 
   it('reconhece a pergunta fixa sobre perdas a compensar', () => {
@@ -1730,7 +1730,7 @@ describe.skipIf(!temArquivos)('parsePDF: imóveis rurais, participantes e rebanh
     expect(rp.imoveisRurais).toHaveLength(24);
     // Casados por POSIÇÃO, e não por CIB: nesta declaração dois imóveis
     // diferentes compartilham o CIB 2639188-0 (duas partes da Fazenda
-    // fazenda V, 147 ha e 105,3 ha, com condições de exploração
+    // duas partes da mesma fazenda, 147 ha e 105,3 ha, com condições de exploração
     // diferentes). O CIB identifica o imóvel no cadastro da Receita, não a
     // linha da ficha, e os dois caminhos entregam na mesma ordem.
     rp.imoveisRurais.forEach((doPdf, i) => {

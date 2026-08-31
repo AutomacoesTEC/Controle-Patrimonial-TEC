@@ -270,7 +270,7 @@ describe('ROLLOVER_ANO (virada de ano, é o propósito central do app)', () => {
   });
 
   it('ciclo completo ida e volta não perde nem contamina dado (2025 -> 2026 -> edição -> 2027 -> volta a 2025)', () => {
-    let state = { ...initialState, anoCalendario: 2025, bens: [{ ...bemBase }], contribuinte: { nome: 'declarante 1' } };
+    let state = { ...initialState, anoCalendario: 2025, bens: [{ ...bemBase }], contribuinte: { nome: 'Fulano' } };
     state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
     // durante 2026, vende o bem inteiro
     state = { ...state, bens: state.bens.map(b => ({ ...b, situacao_atual: 0 })) };
@@ -362,7 +362,7 @@ describe('IMPORT_DECLARACAO (import atômico com ano detectado no arquivo)', () 
     let state = { ...initialState, anoCalendario: 2024, bens: [{ ...bemBase, id: 1 }] };
     state = reducer(state, {
       type: 'IMPORT_DECLARACAO',
-      payload: { anoCalendario: 2025, contribuinte: { nome: 'declarante 1' }, bens: [{ id: 9, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [] },
+      payload: { anoCalendario: 2025, contribuinte: { nome: 'Fulano' }, bens: [{ id: 9, situacao_atual: 1 }], dividas: [], rendimentos: [], pagamentos: [] },
     });
     expect(state.anoCalendario).toBe(2025);
     expect(state.bens[0].id).toBe(9);
