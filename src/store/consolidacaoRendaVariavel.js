@@ -18,7 +18,17 @@
 // anteriores e o que continua a compensar depois deste mês. Sem elas, a pessoa
 // vê "devido 545,56" e "a pagar 377,29" sem nada que explique a diferença.
 
-const ehNumero = (v) => typeof v === 'number' && Number.isFinite(v);
+// Valor do quadro. Aceita número e também texto que seja um número inteiro,
+// porque descartar uma linha que TEM valor deixa o quadro exibido menor que o
+// da declaração, e nada avisa. Texto que não é número continua fora: exibi-lo
+// como moeda produziria "R$ NaN" na tela. Ver o mesmo helper em
+// resumoDeclaracao.js, achado no ataque de 31/08/2026.
+const comoNumero = (v) => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v))) return Number(v);
+  return null;
+};
+const ehNumero = (v) => comoNumero(v) !== null;
 
 // Rótulos IMPRESSOS, na ordem impressa. Não trocar por versões mais curtas: o
 // valor desta tela é casar com o papel.
@@ -37,8 +47,8 @@ const LINHAS = [
 export function linhasConsolidacaoMes(consolidacao) {
   if (!consolidacao) return [];
   return LINHAS
-    .filter(([campo]) => ehNumero(consolidacao[campo]))
-    .map(([campo, rotulo]) => ({ campo, rotulo, valor: consolidacao[campo] }));
+    .map(([campo, rotulo]) => ({ campo, rotulo, valor: comoNumero(consolidacao[campo]) }))
+    .filter(l => l.valor !== null);
 }
 
 // Conferência que a própria ficha permite: o imposto a pagar do mês é o devido

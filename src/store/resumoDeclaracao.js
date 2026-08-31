@@ -17,14 +17,27 @@
 // dois, nunca os dois: ou há SALDO DE IMPOSTO A PAGAR, ou há IMPOSTO A
 // RESTITUIR. Somar, subtrair ou fundir esses blocos troca o sentido do quadro.
 
-const ehNumero = (v) => typeof v === 'number' && Number.isFinite(v);
+// Valor do quadro. Aceita número e também texto que seja um número inteiro,
+// porque descartar uma linha que TEM valor deixa o quadro exibido menor que o
+// da declaração, e nada avisa. Texto que não é número continua fora: exibi-lo
+// como moeda produziria "R$ NaN" na tela.
+//
+// Hoje nenhum caminho produz texto aqui (o parser devolve número), então isto é
+// defesa, não correção de bug observado. Achado no ataque de 31/08/2026.
+const comoNumero = (v) => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v))) return Number(v);
+  return null;
+};
+const ehNumero = (v) => comoNumero(v) !== null;
 
 // Campo ausente (null/undefined) significa "este modelo de declaração não
 // informa", e é diferente de zero, que é "informou e é zero". O primeiro sai
 // da lista; o segundo aparece, porque a declaração impressa também o imprime.
-const linha = (rotulo, valor, formato = 'moeda') => (
-  ehNumero(valor) ? { rotulo, valor, formato } : null
-);
+const linha = (rotulo, valor, formato = 'moeda') => {
+  const n = comoNumero(valor);
+  return n === null ? null : { rotulo, valor: n, formato };
+};
 
 const bloco = (id, titulo, linhas, total = null) => {
   const presentes = linhas.filter(Boolean);
@@ -91,10 +104,16 @@ export function blocosResumoDeclaracao(imposto) {
   // Ou paga, ou restitui. A declaração imprime os dois rótulos, cada um com o
   // seu valor, e um deles é zero. Mostrar os dois lado a lado sem essa
   // distinção faria a tela sugerir que existem duas obrigações ao mesmo tempo.
-  const aRestituir = ehNumero(imposto.impostoRestituir) ? imposto.impostoRestituir : 0;
-  const aPagar = ehNumero(imposto.saldoPagar) ? imposto.saldoPagar : 0;
+  const aRestituir = comoNumero(imposto.impostoRestituir) ?? 0;
+  const aPagar = comoNumero(imposto.saldoPagar) ?? 0;
+  // Se a declaração não informa NENHUM dos dois, não há resultado a mostrar. A
+  // versão anterior caía no ramo "aPagar === 0 e aRestituir === 0" e produzia
+  // um "Saldo de imposto a pagar R$ 0,00" para um quadro que não traz nada,
+  // afirmando um resultado que a declaração não tem. Achado no ataque de
+  // 31/08/2026.
+  const informouResultado = ehNumero(imposto.saldoPagar) || ehNumero(imposto.impostoRestituir);
   const linhasResultado = [];
-  if (aPagar > 0 || (aPagar === 0 && aRestituir === 0)) {
+  if (informouResultado && (aPagar > 0 || (aPagar === 0 && aRestituir === 0))) {
     linhasResultado.push(linha('Saldo de imposto a pagar', aPagar));
   }
   if (aRestituir > 0) linhasResultado.push(linha('Imposto a restituir', aRestituir));

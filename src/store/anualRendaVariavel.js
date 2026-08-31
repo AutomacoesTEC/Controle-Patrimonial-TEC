@@ -12,8 +12,20 @@
 // faria a pessoa procurar no papel um quadro que não existe, ou pior, tratar
 // uma conta nossa como valor declarado.
 
-const ehNumero = (v) => typeof v === 'number' && Number.isFinite(v);
-const linha = (rotulo, valor) => (ehNumero(valor) ? { rotulo, valor } : null);
+// Valor do quadro. Aceita número e também texto que seja um número inteiro,
+// porque descartar uma linha que TEM valor deixa o quadro exibido menor que o
+// da declaração, e nada avisa. Texto que não é número continua fora: exibi-lo
+// como moeda produziria "R$ NaN" na tela. Ver o mesmo helper em
+// resumoDeclaracao.js, achado no ataque de 31/08/2026.
+const comoNumero = (v) => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v))) return Number(v);
+  return null;
+};
+const linha = (rotulo, valor) => {
+  const n = comoNumero(valor);
+  return n === null ? null : { rotulo, valor: n };
+};
 
 export const AVISO_DERIVADO = 'Estes totais não vêm de um quadro anual da declaração: a ficha impressa é mensal, e o app somou os doze meses. Confira mês a mês acima.';
 
