@@ -1,7 +1,7 @@
 ; setup.iss — instalador do Controle de Variação Patrimonial (Inno Setup 6)
 ; Gera installer\ControlePatrimonial_Setup.exe a partir de dist-app\ControlePatrimonial\
 
-#define AppName "CP-TEC — Controle de Variação Patrimonial"
+#define AppName "CP-TEC - Controle de Variação Patrimonial"
 #define AppVersion "1.2.0"
 #define AppExe "ControlePatrimonial.exe"
 
