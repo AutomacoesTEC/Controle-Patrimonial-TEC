@@ -1037,6 +1037,24 @@ describe.skipIf(!temPdfs)('faixas de tributação do ganho de capital', () => {
     expect(f.total).toEqual({ total: 54397.58, anterior: 0, atual: 54397.58 });
   });
 
+  it('o quadro CUSTO DE AQUISIÇÃO da participação também voltou (AJU-01 p20 r21)', () => {
+    // Segundo campo recuperado pela mesma correção: custosAquisicao vinha
+    // cravado em [] na montagem final, e o gc-09 já o lia.
+    const part = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'participacao');
+    expect(part.custosAquisicao).toEqual([
+      { especie: 'Quota', quantidade: 1234, custoMedio: 32.918534, custoTotal: 40621.47 },
+    ]);
+  });
+
+  it('ampliações e reformas seguem vazias no caminho PDF, e isso não é perda', () => {
+    // Só o caminho .DBK popula ampliacoesReformas. O PDF do AJU-01 não imprime
+    // o quadro, então lista vazia aqui é a verdade do documento, não campo
+    // perdido. Verificado no parser: não existe handler de PDF para ele.
+    for (const op of aju.ganhosCapitalOficial.operacoes) {
+      expect(op.ampliacoesReformas).toEqual([]);
+    }
+  });
+
   it('as três operações trazem a tabela, e o total dela fecha com o ganho apurado', () => {
     for (const op of aju.ganhosCapitalOficial.operacoes) {
       expect(op.faixasTributacao).toHaveLength(1);
