@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
-import { formatCurrency, formatCpfCnpj, GRUPOS_BENS } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem} from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -137,6 +137,10 @@ export default function BensPage({ onVoltar } = {}) {
           <table>
             <thead>
               <tr>
+                {/* Número do item impresso na ficha de Bens e Direitos. É por
+                    ele que se acha o bem no papel e no Demonstrativo da Lei
+                    14.754/2023, que identifica o bem só pelo número. */}
+                <th>Item</th>
                 <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('grupo')}>Grupo{sortField === 'grupo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
                 <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('codigo')}>Cód.{sortField === 'codigo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
                 <th style={{ minWidth: '300px', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('discriminacao')}>Discriminação{sortField === 'discriminacao' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
@@ -148,13 +152,14 @@ export default function BensPage({ onVoltar } = {}) {
             </thead>
             <tbody>
               {sorted.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                   Nenhum bem cadastrado. Clique em "Novo Bem" ou importe uma declaração.
                 </td></tr>
               ) : sorted.map(bem => {
                 const vari = (parseFloat(bem.situacao_atual) || 0) - (parseFloat(bem.situacao_anterior) || 0);
                 return (
                   <tr key={bem.id}>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{bem.numeroItem || ''}</td>
                     <td><span className={`badge badge-${GRUPOS_BENS.find(g => g.codigo === bem.grupo)?.cor || 'blue'}`}>{bem.grupo}</span></td>
                     <td>{bem.codigo_bem}</td>
                     <td style={{ maxWidth: '400px' }}>
@@ -163,6 +168,18 @@ export default function BensPage({ onVoltar } = {}) {
                       </div>
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
+                      {/* De quem o bem é e onde ele está: bem do dependente não é
+                          patrimônio do titular, e bem no exterior tem regra
+                          própria. Ver marcadoresDoBem. */}
+                      {marcadoresDoBem(bem).map(marca => (
+                        <span
+                          key={marca.tipo}
+                          className={`badge ${marca.tipo === 'exterior' ? 'badge-orange' : 'badge-blue'}`}
+                          style={{ marginTop: '4px', marginRight: '4px' }}
+                        >
+                          {marca.texto}
+                        </span>
+                      ))}
                     </td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_anterior)}</td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_atual)}</td>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -169,5 +169,36 @@ describe('descreverTitularidade', () => {
 
   it('titularidade conhecida sem nome mostra só o tipo', () => {
     expect(descreverTitularidade({ titularidade: 'dependente', titularidadeNome: '  ' })).toBe('Dependente');
+  });
+});
+
+describe('marcadoresDoBem', () => {
+  it('marca bem do dependente com o CPF de quem é o dono', () => {
+    // AJU-01, item 6: bem do dependente, CPF 333.444.555-08.
+    expect(marcadoresDoBem({ beneficiario: 'Dependente', cpf_beneficiario: '33344455508', localizacao: '105' }))
+      .toEqual([{ tipo: 'dependente', texto: 'Dependente: 333.444.555-08' }]);
+  });
+
+  it('marca bem no exterior pelo código do país', () => {
+    // AJU-01, item 7: aplicação nos Estados Unidos, país 249.
+    expect(marcadoresDoBem({ beneficiario: 'Titular', localizacao: '249', paisNome: 'ESTADOS UNIDOS DA AMÉRICA' }))
+      .toEqual([{ tipo: 'exterior', texto: 'Exterior: ESTADOS UNIDOS DA AMÉRICA' }]);
+  });
+
+  it('bem do titular no Brasil não recebe marcador nenhum', () => {
+    expect(marcadoresDoBem({ beneficiario: 'Titular', localizacao: '105', paisNome: 'BRASIL' })).toEqual([]);
+  });
+
+  it('bem sem país informado não é tratado como exterior', () => {
+    // Bem cadastrado à mão, ou vindo de declaração antiga, não tem o campo.
+    // Marcar tudo como exterior seria pior que não marcar.
+    expect(bemNoExterior({})).toBe(false);
+    expect(bemNoExterior({ localizacao: '', paisNome: '' })).toBe(false);
+    expect(marcadoresDoBem({ beneficiario: 'Titular' })).toEqual([]);
+  });
+
+  it('acumula os dois marcadores quando o bem é do dependente e fica no exterior', () => {
+    const marcas = marcadoresDoBem({ beneficiario: 'Dependente', cpf_beneficiario: '33344455508', localizacao: '249', paisNome: 'PORTUGAL' });
+    expect(marcas.map(m => m.tipo)).toEqual(['dependente', 'exterior']);
   });
 });

@@ -128,23 +128,31 @@ export { resumoMovimentacoes };
 export function exportBensToXlsx(bens, anoCalendario) {
   const wb = XLSX.utils.book_new();
   const bensData = bens.map(b => ({
+    // Número do item impresso na ficha, que é como se acha o bem no papel e
+    // no Demonstrativo da Lei 14.754/2023.
+    'Item': b.numeroItem || '',
     'Grupo': b.grupo || '',
     'Cód. Bem': b.codigo_bem || '',
     'Discriminação': b.discriminacao || '',
     'Situação 31/12 Anterior': b.situacao_anterior || 0,
     'Situação 31/12 Atual': b.situacao_atual || 0,
     'Variação R$': (b.situacao_atual || 0) - (b.situacao_anterior || 0),
-    'Localização': b.localizacao || '',
+    // Nome do país quando a declaração o traz; o código sozinho ("105") não
+    // diz nada para quem confere.
+    'País': b.paisNome || b.localizacao || '',
     'CNPJ': formatCpfCnpj(b.cnpj),
     'Inscrição Municipal': b.inscricao_municipal || '',
     'Matrícula': b.matricula || '',
     'RENAVAM': b.renavam || '',
-    'Beneficiário': b.beneficiario || 'Titular',
+    // Sem beneficiário informado a coluna fica VAZIA. Assumir "Titular" é
+    // afirmar de quem é o bem sem ter o dado, e bem de dependente não é
+    // patrimônio do titular.
+    'Beneficiário': b.beneficiario || '',
     'CPF do Beneficiário': formatCpfCnpj(b.cpf_beneficiario),
     'Movimentações no Ano': resumoMovimentacoes(b),
   }));
   const ws = XLSX.utils.json_to_sheet(bensData);
-  ws['!cols'] = [{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:10},{wch:20},{wch:18},{wch:12},{wch:16},{wch:12},{wch:50}];
+  ws['!cols'] = [{wch:6},{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:24},{wch:20},{wch:18},{wch:12},{wch:16},{wch:14},{wch:18},{wch:50}];
   XLSX.utils.book_append_sheet(wb, ws, 'Bens e Direitos');
   const today = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `bens_direitos_${anoCalendario || ''}_${today}.xlsx`);

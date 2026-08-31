@@ -232,6 +232,40 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// Marcadores de um bem que mudam a leitura fiscal dele e que a tabela não
+// mostrava: de quem o bem é, e onde ele está.
+//
+// - Bem do DEPENDENTE é declarado na declaração do titular, mas não é
+//   patrimônio do titular. Confundir os dois erra a atribuição do bem.
+// - Bem NO EXTERIOR tem regra própria (a começar pela Lei 14.754/2023) e
+//   precisa ser visível sem abrir o bem um por um.
+//
+// O código 105 é o Brasil na tabela oficial de países do programa da Receita.
+export const CODIGO_PAIS_BRASIL = '105';
+
+export function bemNoExterior(bem) {
+  const codigo = String(bem?.localizacao || '').trim();
+  if (codigo) return codigo !== CODIGO_PAIS_BRASIL;
+  const nome = String(bem?.paisNome || '').trim().toUpperCase();
+  // Sem código e sem nome, não se afirma nada: a maioria das declarações
+  // antigas do app não tem esses campos, e marcar tudo como exterior seria
+  // pior que não marcar.
+  return nome !== '' && nome !== 'BRASIL';
+}
+
+export function marcadoresDoBem(bem) {
+  const marcas = [];
+  if (String(bem?.beneficiario || '').toLowerCase() === 'dependente') {
+    const cpf = (bem?.cpf_beneficiario || '').trim();
+    marcas.push({ tipo: 'dependente', texto: cpf ? `Dependente: ${formatCpfCnpj(cpf)}` : 'Dependente' });
+  }
+  if (bemNoExterior(bem)) {
+    const pais = (bem?.paisNome || '').trim();
+    marcas.push({ tipo: 'exterior', texto: pais ? `Exterior: ${pais}` : 'Exterior' });
+  }
+  return marcas;
+}
+
 // Tipo de movimentação de um bem: como a situação atual dele muda quando a
 // usuária registra uma compra, venda, benfeitoria etc (ver BemModal e
 // RelatorioPage). Fica aqui para os dois usarem o mesmo rótulo.
