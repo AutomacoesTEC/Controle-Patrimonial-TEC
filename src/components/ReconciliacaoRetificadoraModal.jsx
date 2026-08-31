@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Modal from './Modal';
 import { formatCurrency } from '../utils/formatters';
 import { sugerirVinculos } from '../utils/reconciliacaoRetificadora';
+import { payloadRetificadoraCompleto } from '../utils/importacaoDeclaracao';
 
 // Tela de conciliação de uma declaração retificadora: a usuária já
 // confirmou que quer reimportar por cima de um ano já importado antes, com
@@ -12,27 +13,37 @@ import { sugerirVinculos } from '../utils/reconciliacaoRetificadora';
 // Conciliação".
 export default function ReconciliacaoRetificadoraModal({
   open, anoDestino, contribuinte, formato,
+  resultadoCompleto,
   bensAntigos, bensNovos, dividasAntigas, dividasNovas,
+  imoveisRuraisAntigos, imoveisRuraisNovos,
+  bensRuraisAntigos, bensRuraisNovos, dividasRuraisAntigas, dividasRuraisNovas,
   rendimentosNovos, pagamentosNovos,
   onConfirm, onCancel,
 }) {
   const [resultadoBens, setResultadoBens] = useState(null);
   const [resultadoDividas, setResultadoDividas] = useState(null);
+  const [resultadoImoveisRurais, setResultadoImoveisRurais] = useState(null);
+  const [resultadoBensRurais, setResultadoBensRurais] = useState(null);
+  const [resultadoDividasRurais, setResultadoDividasRurais] = useState(null);
 
   if (!open) return null;
 
-  const podeConfirmar = resultadoBens != null && resultadoDividas != null;
+  const podeConfirmar = resultadoBens != null && resultadoDividas != null
+    && resultadoImoveisRurais != null && resultadoBensRurais != null && resultadoDividasRurais != null;
 
   const handleConfirmar = () => {
-    onConfirm({
+    onConfirm(payloadRetificadoraCompleto(resultadoCompleto, {
       anoCalendario: anoDestino,
       contribuinte,
       formato,
       bens: resultadoBens,
       dividas: resultadoDividas,
+      imoveisRurais: resultadoImoveisRurais,
+      bensRurais: resultadoBensRurais,
+      dividasRurais: resultadoDividasRurais,
       rendimentos: rendimentosNovos,
       pagamentos: pagamentosNovos,
-    });
+    }));
   };
 
   return (
@@ -64,6 +75,28 @@ export default function ReconciliacaoRetificadoraModal({
           novos={dividasNovas}
           onChange={setResultadoDividas}
         />
+        <SecaoConciliacao
+          titulo="Imóveis explorados na atividade rural"
+          campoCodigo="cib"
+          campoDescricao="nomeLocalizacao"
+          antigos={imoveisRuraisAntigos}
+          novos={imoveisRuraisNovos}
+          onChange={setResultadoImoveisRurais}
+        />
+        <SecaoConciliacao
+          titulo="Bens da atividade rural"
+          campoCodigo="codigo"
+          antigos={bensRuraisAntigos}
+          novos={bensRuraisNovos}
+          onChange={setResultadoBensRurais}
+        />
+        <SecaoConciliacao
+          titulo="Dívidas da atividade rural"
+          campoCodigo="codigo"
+          antigos={dividasRuraisAntigas}
+          novos={dividasRuraisNovas}
+          onChange={setResultadoDividasRurais}
+        />
 
         {(rendimentosNovos?.length > 0 || pagamentosNovos?.length > 0) && (
           <div className="card" style={{ marginTop: '8px' }}>
@@ -90,8 +123,12 @@ export default function ReconciliacaoRetificadoraModal({
 // editável de cada vínculo e de cada órfão antigo, e devolve pro pai (via
 // onChange) o formato pronto pro payload de RECONCILIAR_IMPORTACAO sempre
 // que algo muda.
-function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
-  const sugestao = useMemo(() => sugerirVinculos(antigos, novos, campoCodigo), [antigos, novos, campoCodigo]);
+function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao', antigos, novos, onChange }) {
+  const sugestao = useMemo(
+    () => sugerirVinculos(antigos, novos, campoCodigo, campoDescricao),
+    [antigos, novos, campoCodigo, campoDescricao],
+  );
+  const descricao = item => item?.[campoDescricao] || '';
 
   // vinculoPorNovo: índice do item novo -> id do antigo vinculado (ou null =
   // "é item novo mesmo"). Inicializa com a sugestão automática.
@@ -121,7 +158,11 @@ function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
     (novos || []).forEach((novo, i) => {
       const idAntigo = vinculoPorNovo[i];
       if (idAntigo == null) return;
-      vinculados.push({ idAntigo, dados: { [campoCodigo]: novo[campoCodigo], discriminacao: novo.discriminacao, situacao_anterior: novo.situacao_anterior } });
+      // O reducer precisa do registro declarado completo, especialmente da
+      // situação atual, para reaplicar sobre ela as movimentações manuais já
+      // existentes. Enviar só a situação anterior produzia saldo incorreto.
+      const { id: _idDescartado, movimentacoes: _movimentosDoParser, ...dadosDeclarados } = novo;
+      vinculados.push({ idAntigo, dados: dadosDeclarados });
     });
     const idsVinculados = new Set(vinculados.map(v => v.idAntigo));
     const novosSemVinculo = (novos || []).filter((_, i) => vinculoPorNovo[i] == null);
@@ -155,7 +196,7 @@ function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
                 return (
                   <tr key={i}>
                     <td>
-                      <span className="badge badge-blue">{novo[campoCodigo]}</span> {(novo.discriminacao || '').substring(0, 80)}
+                      <span className="badge badge-blue">{novo[campoCodigo]}</span> {descricao(novo).substring(0, 80)}
                     </td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(novo.situacao_anterior)}</td>
                     <td>
@@ -170,7 +211,7 @@ function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
                         <option value="">Item novo (sem vínculo)</option>
                         {opcoesDisponiveis.map(a => (
                           <option key={a.id} value={a.id}>
-                            {a[campoCodigo]} - {(a.discriminacao || '').substring(0, 60)}
+                            {a[campoCodigo]} - {descricao(a).substring(0, 60)}
                           </option>
                         ))}
                       </select>
@@ -204,7 +245,7 @@ function SecaoConciliacao({ titulo, campoCodigo, antigos, novos, onChange }) {
                   const temMovimentacao = (a.movimentacoes || []).length > 0;
                   return (
                     <tr key={a.id}>
-                      <td><span className="badge badge-blue">{a[campoCodigo]}</span> {(a.discriminacao || '').substring(0, 80)}</td>
+                      <td><span className="badge badge-blue">{a[campoCodigo]}</span> {descricao(a).substring(0, 80)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(a.situacao_atual)}</td>
                       <td>
                         {temMovimentacao

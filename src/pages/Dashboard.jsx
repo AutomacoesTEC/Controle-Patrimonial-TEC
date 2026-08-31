@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
@@ -205,6 +205,23 @@ export default function Dashboard({ onNavigate } = {}) {
     return acc;
   }, [demo, state]);
 
+  const coberturaFichas = useMemo(() => {
+    if (!demo) return null;
+    const entradas = demo.anosCobertos.flatMap(ano =>
+      Object.values(dadosDoAno(state, ano)?.estadoFichas || {})
+    ).filter(ficha => ficha?.presenca === 'preenchida' || ficha?.estado === 'erro');
+    if (entradas.length === 0) return null;
+    return {
+      parciais: entradas.filter(ficha => ficha.estado === 'parcial').length,
+      naoSuportadas: entradas.filter(ficha => ficha.estado === 'nao_suportada').length,
+      erros: entradas.filter(ficha => ficha.estado === 'erro').length,
+      derivadas: entradas.filter(ficha => ficha.derivado === true).length,
+      completas: entradas.filter(ficha =>
+        ficha.estado === 'completa' && ficha.completudeAuditada === true
+      ).length,
+    };
+  }, [demo, state]);
+
   const anosImportadosSemRendimento = useMemo(() => {
     if (!demo) return [];
     return demo.anosCobertos.filter(ano => {
@@ -388,9 +405,32 @@ export default function Dashboard({ onNavigate } = {}) {
               Os valores dessas fichas não entram em nenhum número desta tela. Confira-os na declaração
               original, ou cadastre-os à mão, antes de usar o demonstrativo abaixo.
             </p>
+            {/* Carnê-leão e RRA são lidos pelo .DBK e não pelo PDF (achado 06
+                da auditoria de 24/08/2026). Quando a ficha que ficou de fora é
+                uma dessas E a importação foi por PDF, existe um caminho melhor
+                do que cadastrar à mão, e a pessoa precisa saber disso. */}
+            {fichasNaoLidas.some(f => /ACUMULADAMENTE|PESSOA FÍSICA E DO EXTERIOR/.test(f)) && (
+              <p style={{ margin: '8px 0 0', fontSize: '13px', fontWeight: 600 }}>
+                Estas fichas o arquivo .DEC/.DBK importa: se você tiver o arquivo eletrônico desta mesma
+                declaração, importe por ele em Importar Declaração e os valores entram sozinhos.
+              </p>
+            )}
           </div>
         )}
 
+
+        {coberturaFichas && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0) && (
+          <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
+            <div className="card-header"><h3 className="card-title">Cobertura das fichas ainda em auditoria</h3></div>
+            <p style={{ margin: 0, fontSize: '13px' }}>
+              Dados encontrados não significam ficha integralmente conferida. No período há {coberturaFichas.parciais} ficha(s)
+              com suporte parcial, {coberturaFichas.naoSuportadas} não suportada(s) e {coberturaFichas.erros} com erro de extração.
+              {coberturaFichas.derivadas > 0
+                ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.`
+                : ''}
+            </p>
+          </div>
+        )}
 
         {demo && (
         <>
@@ -469,7 +509,33 @@ export default function Dashboard({ onNavigate } = {}) {
           <div className="card-header"><h3 className="card-title">Rendimentos</h3></div>
           <table className="demonstrativo-table">
             <tbody>
-              <tr><td>Tributáveis Recebidos de P.J.</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPJ)}</td></tr>
+              {/* Mesmo desenho da Tributação Exclusiva logo abaixo: bruto,
+                  as retenções em linha própria e o líquido, que é o valor que
+                  soma no Total Geral. As duas linhas de desconto só aparecem
+                  quando existem, para não poluir a tela de quem só tem
+                  rendimento sem retenção nenhuma. */}
+              <tr><td>Tributáveis Recebidos de P.J., bruto</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPjBruto)}</td></tr>
+              {demo.rendimentos.tributavelPjPrevidencia > 0 && (
+                <tr>
+                  <td>
+                    P.J., contribuição previdenciária oficial
+                    <Ajuda texto="INSS descontado na folha pela fonte pagadora. Sai daqui porque este demonstrativo mede caixa, e esse valor nunca chegou à conta de quem declara." />
+                  </td>
+                  <td className="currency negative">{formatCurrency(-demo.rendimentos.tributavelPjPrevidencia)}</td>
+                </tr>
+              )}
+              {demo.rendimentos.tributavelPjIrrf > 0 && (
+                <tr>
+                  <td>
+                    P.J., IRRF retido
+                    <Ajuda texto="Imposto retido na fonte sobre o rendimento. Também não entra no caixa: a fonte pagadora reteve e recolheu. O acerto no ajuste anual aparece depois, em imposto a pagar ou a restituir. Não confundir com as quotas do IRPF em Pagamentos Diversos, que são o imposto do ano anterior." />
+                  </td>
+                  <td className="currency negative">{formatCurrency(-demo.rendimentos.tributavelPjIrrf)}</td>
+                </tr>
+              )}
+              {(demo.rendimentos.tributavelPjPrevidencia > 0 || demo.rendimentos.tributavelPjIrrf > 0) && (
+                <tr><td>Tributáveis Recebidos de P.J., líquido</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPJ)}</td></tr>
+              )}
               <tr>
                 {/* O rótulo dizia "Demais Rend. Tributáveis", e isso era
                     incorreto quando o resultado é NEGATIVO: prejuízo na
@@ -485,7 +551,7 @@ export default function Dashboard({ onNavigate } = {}) {
                   Resultado da Atividade Rural
                   <Ajuda texto={
                     demo.rendimentos.demaisTributaveis < 0
-                      ? 'Receita bruta menos despesa de custeio e investimento da atividade rural, no período. Entra aqui porque este demonstrativo confronta a variação do patrimônio com o dinheiro que entrou e saiu, e o prejuízo rural saiu do caixa de verdade. Atenção: para o imposto, prejuízo na atividade rural NÃO reduz os outros rendimentos, e a declaração informa resultado tributável zero — ele é compensado dentro da própria atividade, em anos seguintes.'
+                      ? 'Receita bruta menos despesa de custeio e investimento da atividade rural, no período. Entra aqui porque este demonstrativo confronta a variação do patrimônio com o dinheiro que entrou e saiu, e o prejuízo rural saiu do caixa de verdade. Atenção: para o imposto, prejuízo na atividade rural NÃO reduz os outros rendimentos, e a declaração informa resultado tributável zero. Ele é compensado dentro da própria atividade, em anos seguintes.'
                       : `Receita bruta menos despesa de custeio e investimento da atividade rural, no período.${anosComRuralImportado.length > 0 ? ` Vem da apuração da declaração importada de ${anosComRuralImportado.join(', ')}, mês a mês; assim que houver lançamento no livro-caixa em Atividade Rural, aba Receitas e Despesas, passa a valer o lançamento.` : ''}`
                   } />
                 </td><td className={`currency ${demo.rendimentos.demaisTributaveis >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.rendimentos.demaisTributaveis)}</td></tr>
@@ -515,15 +581,17 @@ export default function Dashboard({ onNavigate } = {}) {
               {/* Renda Variável vira uma LINHA da tabela, e não um parágrafo,
                   para que a coluna de valores possa dizer o que se sabe sobre
                   ela. O detalhe fica no "?" (ver Ajuda). */}
-              {/* Duas leituras possíveis nesta linha, e a diferença importa:
-                  importando por PDF o ganho ou a perda de cada mês é lido de
-                  verdade e aparece aqui; importando por .DBK só os meses são
-                  conhecidos (o campo de valor do registro 76 nunca pôde ser
-                  decifrado), e aí a coluna continua dizendo isso em vez de
-                  mostrar um zero que seria mentira. Em nenhum dos dois casos o
-                  valor entra em total desta tela: ganho líquido em renda
-                  variável é tributação exclusiva, apurada e recolhida mês a
-                  mês fora do ajuste anual. */}
+              {/* Desde 24/08/2026 os DOIS caminhos de importação trazem o valor
+                  de cada mês: o .DBK pelo registro 40 (a ficha mensal de
+                  operações comuns/day-trade) e o PDF pela página "GANHOS
+                  LÍQUIDOS OU PERDAS". A leitura sem valor continua possível em
+                  declaração importada por uma versão anterior do app, e é o
+                  que o ramo "ficha registrada em" atende — mostrar zero ali
+                  seria mentira. Em nenhum dos casos o ganho entra em total
+                  desta tela: ganho líquido em renda variável é tributação
+                  exclusiva, apurada e recolhida mês a mês fora do ajuste
+                  anual. A ficha de FII/Fiagro é exibida na tela Renda
+                  Variável e, por ora, não entra neste demonstrativo. */}
               {demo.rendaVariavelMeses.length > 0 && (
                 <tr>
                   <td>
@@ -531,7 +599,7 @@ export default function Dashboard({ onNavigate } = {}) {
                       ? `Renda Variável, ficha mensal: ${resumirMeses(demo.rendaVariavelMeses)}`
                       : `Renda Variável, ficha registrada em: ${resumirMeses(demo.rendaVariavelMeses)}`}
                     {demo.rendaVariavelComValor ? (
-                      <Ajuda texto="Ganho líquido ou perda somando as fichas do titular e dos dependentes nos meses do período, lido da declaração importada. Não entra em nenhum total desta tela porque a renda variável é de tributação exclusiva, apurada e paga mês a mês, fora do ajuste anual. Perda de um mês não some: fica como prejuízo a compensar em meses seguintes." />
+                      <Ajuda texto="Ganho líquido ou perda somando as fichas do titular e dos dependentes nos meses do período, lido da declaração importada. Só a PARTE NEGATIVA entra no Saldo de Caixa, na linha logo abaixo: o ganho, quando existe, o contribuinte informa na ficha de tributação exclusiva (código 05) e ele já está contado ali. Somá-lo aqui contaria a mesma entrada duas vezes. A perda não vai para ficha nenhuma e é dinheiro que saiu de verdade." />
                     ) : (
                       <Ajuda texto="Os meses em que a declaração tem ficha de Renda Variável, sem o valor do ganho ou da perda. Não entra em nenhum total desta tela." />
                     )}
@@ -577,6 +645,81 @@ export default function Dashboard({ onNavigate } = {}) {
                 </td>
                 <td className={`currency ${demo.ganhos.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.ganhos.total)}</td>
               </tr>
+              {/* Perda em renda variável: dinheiro que saiu e não aparece em
+                  ficha nenhuma da declaração. Ver a Ajuda da linha de Renda
+                  Variável no card de Rendimentos, e o achado 12. */}
+              {demo.rendaVariavelPerda < 0 && (
+                <tr>
+                  <td>
+                    Perda líquida em Renda Variável no período
+                    <Ajuda texto="Soma dos meses que fecharam negativos nas fichas de Renda Variável. Entra no caixa porque é dinheiro que saiu; o ganho dos meses positivos não entra aqui, já vem pela ficha de tributação exclusiva." />
+                  </td>
+                  <td className="currency negative">{formatCurrency(demo.rendaVariavelPerda)}</td>
+                </tr>
+              )}
+              {/* ACHADO 04: bens que encolheram no período sem preço de venda
+                  conhecido. A Variação Patrimonial trata a saída como se todo
+                  o custo tivesse virado dinheiro; quando o bem foi vendido por
+                  menos, a diferença é caixa que não entrou e ninguém tem como
+                  adivinhar. O app NÃO inventa o valor: pede. */}
+              {demo.pendenciasAlienacao?.length > 0 && (
+                <tr>
+                  <td colSpan={2} style={{ padding: '10px 0 0' }}>
+                    <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid var(--accent-warning, #f59e0b)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12.5px' }}>
+                      <b>{demo.pendenciasAlienacao.length} bem(ns) diminuíram no período sem valor de venda informado.</b>{' '}
+                      O Saldo de Caixa está contando que todo o custo virou dinheiro, o que costuma ser otimista:
+                      veículo vendido com prejuízo não aparece na ficha de Ganhos de Capital porque prejuízo não gera
+                      imposto, e a diferença que não voltou fica de fora. Abra cada bem em Bens e Direitos, registre a
+                      venda e preencha o "Valor de venda" para o número fechar. Quando a própria discriminação do bem
+                      traz a venda por escrito ("VENDIDO EM ... POR R$ ..."), o app já lê dali e o bem não aparece
+                      nesta lista.
+                      <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
+                        {demo.pendenciasAlienacao.slice(0, 6).map((p, i) => (
+                          <div key={i}>
+                            {(p.discriminacao || 'Bem sem descrição').substring(0, 70)}: baixou {formatCurrency(p.reducao)}
+                            {p.vendaForaDoPeriodo && ` (a discriminação diz que a venda foi em ${formatDate(p.vendaForaDoPeriodo)}, fora deste período: o ganho pertence ao ano da alienação)`}
+                          </div>
+                        ))}
+                        {demo.pendenciasAlienacao.length > 6 && <div>e mais {demo.pendenciasAlienacao.length - 6}.</div>}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {/* Aplicação de renda fixa ou poupança que sumiu do patrimônio
+                  sem o rendimento correspondente na ficha que lhe cabe. Não é
+                  acusação de erro: é o cruzamento que ninguém faz à mão, e que
+                  na declaração de referência apontou 97.706,33 de rendimento
+                  de LCI declarado como lucros e dividendos. Ver
+                  aplicacoesResgatadasSemRendimento em demonstrativos.js. */}
+              {demo.aplicacoesSemRendimento?.length > 0 && (
+                <tr>
+                  <td colSpan={2} style={{ padding: '10px 0 0' }}>
+                    <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid var(--accent-warning, #f59e0b)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12.5px' }}>
+                      <b>{demo.aplicacoesSemRendimento.length} aplicação(ões) foram resgatadas no período sem o rendimento correspondente na ficha.</b>{' '}
+                      Poupança, CDB, RDB, Tesouro Direto, LCI, LCA, CRI e CRA rendem juros, e o resgate credita esse
+                      rendimento. Quando a mesma instituição não aparece na ficha de rendimentos que lhe cabe, ou o
+                      valor não foi declarado, ou foi lançado em outro código. Confira no informe de rendimentos da
+                      instituição.
+                      <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
+                        {demo.aplicacoesSemRendimento.slice(0, 6).map((a, i) => (
+                          <div key={i} style={{ marginBottom: '6px' }}>
+                            {(a.discriminacao || 'Bem sem descrição').substring(0, 70)} (CNPJ {formatCpfCnpj(a.cnpj)}): resgatado {formatCurrency(a.valorResgatado)}.
+                            {' '}Esperado em: {a.onde}.
+                            {a.outrosDaMesmaFonte.length > 0 && (
+                              <div>
+                                Da mesma fonte, a declaração informa: {a.outrosDaMesmaFonte
+                                  .map(o => `${describeRendimentoTipo(o.tipo)} ${formatCurrency(o.valor)}`).join('; ')}.
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {demo.aplicacoesSemRendimento.length > 6 && <div>e mais {demo.aplicacoesSemRendimento.length - 6}.</div>}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa Geral</td><td className={`currency ${demo.saldoDeCaixaGeral >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
             </tbody>
@@ -644,8 +787,17 @@ export default function Dashboard({ onNavigate } = {}) {
             <div className="stat-icon orange"><IconQuedaVermelha /></div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim?.totalDividas || 0)}</h3>
-              <p>Dívidas em {formatDate(ate)}</p>
-              <span className="stat-change negative">{totFim?.qtdDividas || 0} itens</span>
+              {/* O rótulo diz que a Dívida Rural está somada aqui. Antes o
+                  card dizia só "Dívidas", com R$ 2.652.738,92 e 7 itens,
+                  enquanto a página Dívidas e Ônus Reais mostrava R$ 36.000,00
+                  e 1 item — os mesmos dados, dois nomes iguais e R$ 2,6
+                  milhões de diferença. Achado 15. */}
+              <p>{(totFim?.qtdDividasRurais || 0) > 0 ? 'Dívidas e Ônus + Dívida Rural' : 'Dívidas e Ônus Reais'} em {formatDate(ate)}</p>
+              <span className="stat-change negative">
+                {(totFim?.qtdDividasRurais || 0) > 0
+                  ? `${totFim.qtdDividasComuns} + ${totFim.qtdDividasRurais} rurais`
+                  : `${totFim?.qtdDividas || 0} itens`}
+              </span>
             </div>
           </div>
           <div className="stat-card green">

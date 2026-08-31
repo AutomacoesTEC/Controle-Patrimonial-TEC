@@ -9,14 +9,6 @@ import {
   PERFIS_STORAGE_KEY, LEGADO_STORAGE_KEY, PERFIL_SESSAO_KEY,
   perfilAPartirDeDadosLegados, perfilDaSessao, dataStorageKeyFor,
 } from './store/perfis';
-import { iniciarBuscaIp } from './utils/ipTracker';
-
-// Dispara uma vez, no carregamento do módulo (não a cada render de
-// componente): busca o IP público em segundo plano para já estar disponível
-// quando a primeira alteração for registrada no Histórico (ver
-// reducer.js/reducerComHistorico e ipTracker.js).
-iniciarBuscaIp();
-
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ImportPage = lazy(() => import('./pages/ImportPage'));
 const TitularPage = lazy(() => import('./pages/TitularPage'));
@@ -28,6 +20,7 @@ const PagamentosDiversosPage = lazy(() => import('./pages/PagamentosDiversosPage
 const DoacoesPage = lazy(() => import('./pages/DoacoesPage'));
 const AtividadeRuralPage = lazy(() => import('./pages/AtividadeRuralPage'));
 const GanhosCapitalPage = lazy(() => import('./pages/GanhosCapitalPage'));
+const RendaVariavelPage = lazy(() => import('./pages/RendaVariavelPage'));
 const RelatorioPage = lazy(() => import('./pages/RelatorioPage'));
 const HistoricoPage = lazy(() => import('./pages/HistoricoPage'));
 
@@ -152,6 +145,7 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
         />
       );
       case 'ganhosCapital': return <GanhosCapitalPage />;
+      case 'rendaVariavel': return <RendaVariavelPage />;
       case 'relatorio': return <RelatorioPage />;
       case 'historico': return <HistoricoPage />;
       default: return <Dashboard onNavigate={navegarDoDashboard} />;

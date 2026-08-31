@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
+import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
 import { formatCurrency, formatCpfCnpj, GRUPOS_BENS } from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
@@ -13,11 +14,6 @@ import AnoCalendarioModal from '../components/AnoCalendarioModal';
 // baixado justamente NESTE ano: se há uma movimentação registrada neste ano (ex.: "Venda total
 // (zera o valor)"), o bem continua aparecendo -- a movimentação é a prova de que a baixa aconteceu
 // neste ano, e a usuária ainda precisa conferir isso na declaração corrente.
-function bemZeradoSemMovimentacaoNoAno(bem) {
-  const anterior = parseFloat(bem.situacao_anterior) || 0;
-  const atual = parseFloat(bem.situacao_atual) || 0;
-  return anterior === 0 && atual === 0 && (bem.movimentacoes || []).length === 0;
-}
 
 export default function BensPage({ onVoltar } = {}) {
   const { state, dispatch, addToast } = useData();

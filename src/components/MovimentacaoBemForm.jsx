@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../store/DataContext';
+import { situacaoBemAteData, situacaoDividaAteData } from '../store/demonstrativos';
 import { formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
 import MoneyInput from './MoneyInput';
 import Ajuda from './Ajuda';
@@ -69,6 +70,41 @@ export default function MovimentacaoBemForm({
   // card de Ganho de Capital dá lugar a um aviso: pedir "valor de venda"
   // aqui só levaria a pessoa a esperar um ganho que a tela nunca vai mostrar.
   const isBemRural = actionType === 'REGISTRAR_MOVIMENTACAO_BEM_RURAL';
+  const isDivida = actionType.includes('DIVIDA');
+
+  // Quanto o bem/dívida VALIA na véspera desta movimentação.
+  //
+  // É o número que uma baixa total precisa registrar como custo que sai, e o
+  // teto de uma venda parcial. Vem reconstruído por data (situacao_anterior
+  // mais as movimentações anteriores à data escolhida), e não da
+  // `situacao_atual`.
+  //
+  // ACHADO 01 da auditoria de 24/08/2026, o mais grave da tela. A versão
+  // anterior usava `bem.situacao_atual` como custo baixado numa venda total.
+  // Num bem que a declaração já trouxe zerado — anterior 21.000,00, atual
+  // 0,00, o caso normal de veículo vendido no ano — isso gravava custo ZERO,
+  // e o Demonstrativo calculava `ganho = valorVenda − 0`. Reproduzido
+  // clicando na tela: registrar a venda real por R$ 18.000,00 virava um
+  // GANHO de R$ 18.000,00 onde o certo é PERDA de R$ 3.000,00, inflando o
+  // Saldo de Caixa em R$ 21.000,00.
+  //
+  // Sem data escolhida ainda, cai na situação atual e, se ela for zero, na
+  // anterior — é só o valor exibido no campo antes de a pessoa escolher a
+  // data; o que vale no registro é sempre a reconstrução pela data.
+  const situacaoNaVespera = useMemo(() => {
+    if (movData) {
+      return isDivida ? situacaoDividaAteData(bem, movData, 'de') : situacaoBemAteData(bem, movData, 'de');
+    }
+    const atual = parseFloat(bem.situacao_atual) || 0;
+    return atual > 0 ? atual : (parseFloat(bem.situacao_anterior) || 0);
+  }, [bem, movData, isDivida]);
+
+  // Tipos que zeram o saldo (venda total, baixa, quitação) numa movimentação
+  // NOVA: o valor não é digitado, vem da situação na véspera.
+  const zeraOSaldo = !editingId && tipos[movTipo]?.sinal === '0';
+  // O custo efetivo desta operação, usado no aviso de ganho sem IRRF.
+  const custoDaVenda = zeraOSaldo ? situacaoNaVespera : (parseFloat(movValor) || 0);
+
   const limparFormulario = () => {
     setMovValor(''); setMovValorVenda(''); setMovIrrfVenda(''); setMovDescricao('');
     setEditingId(null);
@@ -84,15 +120,31 @@ export default function MovimentacaoBemForm({
     // existente, o valor é o que a pessoa digitar (é uma correção de
     // histórico, não uma baixa em cima do saldo atual, que já reflete essa
     // mesma movimentação).
-    const zeraTudo = !editingId && tipos[movTipo]?.sinal === '0';
-    const valor = zeraTudo ? bem.situacao_atual : (parseFloat(movValor) || 0);
+    const zeraTudo = zeraOSaldo;
+    if (!movData) {
+      alert('Informe a data da movimentação.');
+      return;
+    }
+    // `situacaoNaVespera` (reconstruída pela data) no lugar de
+    // `bem.situacao_atual` — ver o comentário da definição, achado 01.
+    const valor = zeraTudo ? situacaoNaVespera : (parseFloat(movValor) || 0);
     if (!zeraTudo && valor <= 0) {
       alert('Informe um valor maior que zero para essa movimentação.');
       return;
     }
-    if (!movData) {
-      alert('Informe a data da movimentação.');
-      return;
+    // ACHADO 11 da auditoria de 24/08/2026: uma venda parcial de R$ 1.000,00
+    // num bem que valia R$ 0,01 era aceita sem nenhum aviso. O saldo aplicava
+    // o piso em zero e caía um centavo, enquanto o ganho de capital usava o
+    // valor cheio da movimentação como custo — as duas contas passavam a
+    // olhar custos diferentes para a mesma operação. Confirmação, não
+    // bloqueio: pode ser um valor anterior cadastrado errado, e quem decide
+    // é a usuária.
+    if (movTipo === 'venda_parcial' && valor > situacaoNaVespera + 0.005) {
+      const confirmaExcesso = confirm(
+        `O valor da venda (${formatCurrency(valor)}) é maior do que o bem valia em ${formatDate(movData)} (${formatCurrency(situacaoNaVespera)}).\n\n` +
+        `O saldo não fica negativo, mas o ganho de capital será calculado sobre o valor que você informou. Confirma mesmo assim?`
+      );
+      if (!confirmaExcesso) return;
     }
     // Confirmação, não bloqueio: pode ser uma movimentação legítima de
     // virada de ano (ex.: venda em janeiro do ano seguinte lançada aqui
@@ -165,11 +217,20 @@ export default function MovimentacaoBemForm({
           <input className="form-control" type="date" value={movData} onChange={e => setMovData(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>{movTipo === 'ajuste' ? 'Novo valor' : 'Valor da movimentação'}</label>
+          <label>
+            {movTipo === 'ajuste' ? 'Novo valor' : 'Valor da movimentação'}
+            {zeraOSaldo && (
+              <Ajuda texto="Numa baixa total o valor não é digitado: é o que o bem valia na véspera desta data, e é ele que sai do patrimônio e serve de custo no cálculo do ganho de capital. Mude a data para ver o valor mudar." />
+            )}
+          </label>
+          {/* Campo desabilitado, mas agora MOSTRANDO o valor que vai ser
+              baixado, em vez de ficar em branco. Ficar vazio escondia
+              justamente o número errado do achado 01, e ainda fazia o aviso
+              de ganho comparar o preço de venda contra zero (achado 16). */}
           <MoneyInput
-            value={movValor}
+            value={zeraOSaldo ? situacaoNaVespera : movValor}
             onChange={setMovValor}
-            disabled={!editingId && tipos[movTipo]?.sinal === '0'}
+            disabled={zeraOSaldo}
           />
         </div>
       </div>
@@ -221,7 +282,12 @@ export default function MovimentacaoBemForm({
             num app de desktop, caso a legislação mude). Só avisa quando há
             ganho de fato (valor de venda maior que o valor da movimentação)
             e o IRRF ainda não foi preenchido. */}
-        {parseFloat(movValorVenda || 0) > parseFloat(movValor || 0) && movIrrfVenda === '' && (
+        {/* Compara com o CUSTO REAL da operação, que numa baixa total é a
+            situação na véspera e não o campo digitado (que fica desabilitado).
+            Antes comparava com o campo vazio, isto é, com zero, e o aviso
+            disparava em toda venda total — inclusive nas de prejuízo, onde
+            não há ganho nenhum a conferir. Achado 16. */}
+        {parseFloat(movValorVenda || 0) > custoDaVenda && movIrrfVenda === '' && (
           <p style={{ fontSize: '12px', color: 'var(--accent-warning, #f59e0b)', marginTop: '8px', marginBottom: 0 }}>
             Há ganho nesta venda mas o IRRF não foi informado, confira se houve retenção antes de salvar.
           </p>

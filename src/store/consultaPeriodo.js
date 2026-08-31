@@ -24,6 +24,12 @@ import {
   ganhosApuradosPeriodo,
   totalPagamentos,
   totalPagamentosDiversos,
+  fecharDemonstrativo,
+  totalDoacoesPeriodo,
+  rendaVariavelDoPeriodo,
+  bensAlienadosSemValorDeVenda,
+  aplicacoesResgatadasSemRendimento,
+  bemZeradoSemMovimentacaoNoAno,
 } from './demonstrativos';
 import { snapshotHasData } from './reducer';
 
@@ -59,14 +65,17 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
       dividaRuralDe: 0, dividaRuralAte: 0, deltaDividaRural: 0,
       dividaDe: 0, dividaAte: 0, deltaDivida: 0, total: 0,
     },
-    rendimentos: { tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 },
-    ganhos: { vendas: [], total: 0, semIrrfCount: 0, daDeclaracao: false },
+    rendimentos: { tributavelPjBruto: 0, tributavelPjPrevidencia: 0, tributavelPjIrrf: 0, tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 },
+    ganhos: { vendas: [], total: 0, semIrrfCount: 0, daDeclaracao: false, possiveisDuplicidades: [] },
     saldoDeCaixaGeral: 0,
     pagamentosEfetuados: 0,
     pagamentosDiversos: 0,
     totalDoacoes: 0,
     temDoacaoImportada: false,
     saldoDeCaixa: 0,
+    rendaVariavelPerda: 0,
+    pendenciasAlienacao: [],
+    aplicacoesSemRendimento: [],
     rendaVariavelMeses: [],
     rendaVariavelResultado: 0,
     rendaVariavelImposto: 0,
@@ -115,9 +124,13 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   };
 
   // Fluxos: cada ano do intervalo contribui com o trecho que lhe cabe.
-  const rend = { tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 };
+  const rend = { tributavelPjBruto: 0, tributavelPjPrevidencia: 0, tributavelPjIrrf: 0, tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 };
   const vendas = [];
+  const possiveisDuplicidades = [];
+  const pendenciasAlienacao = [];
+  const aplicacoesSemRendimento = [];
   let semIrrfCount = 0;
+  let rendaVariavelPerda = 0;
   let pagamentosEfetuados = 0;
   let pagamentosDiversos = 0;
   let totalDoacoes = 0;
@@ -155,6 +168,11 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     const g = ganhosApuradosPeriodo(dados, trechoDe, trechoAte);
     vendas.push(...g.vendas);
     semIrrfCount += g.semIrrfCount;
+    possiveisDuplicidades.push(...(g.possiveisDuplicidades || []));
+    // Bens que encolheram no período sem preço de venda conhecido (achado 04):
+    // a lista atravessa os anos junto com o resto do fluxo.
+    pendenciasAlienacao.push(...bensAlienadosSemValorDeVenda(dados, trechoDe, trechoAte));
+    aplicacoesSemRendimento.push(...aplicacoesResgatadasSemRendimento(dados, trechoDe, trechoAte));
 
     pagamentosEfetuados += totalPagamentos(dados.pagamentos, trechoDe, trechoAte);
     pagamentosDiversos += totalPagamentosDiversos(dados.pagamentosDiversos, trechoDe, trechoAte);
@@ -166,8 +184,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // pessoa física, então reduz o Saldo de Caixa igual Pagamentos —
     // ficaria de fora da reconciliação (e o Saldo de Caixa pareceria
     // "sobrando" dinheiro que na verdade virou doação).
-    const somaDoacoes = (lista) => (lista || []).reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
-    totalDoacoes += somaDoacoes(dados.doacoesEfetuadasOficial) + somaDoacoes(dados.doacoesPartidosOficial) + somaDoacoes(dados.doacoesEcaIdosoOficial);
+    totalDoacoes += totalDoacoesPeriodo(dados);
     // Importada = sem a marca 'manual' (o import grava a lista direto, sem
     // carimbar origem, então "não é manual" é o teste que também vale para
     // dado gravado antes desta distinção existir).
@@ -189,16 +206,16 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // fichas separadas na declaração — daí a deduplicação por ano+mês para a
     // linha de meses, enquanto o resultado SOMA as duas (é o ganho líquido do
     // conjunto declarado, que é como a própria declaração consolida).
-    for (const m of (dados.rendaVariavelMensalOficial || [])) {
-      if (!rendaVariavelMeses.some(x => x.ano === ano && x.mes === m.mes)) {
-        rendaVariavelMeses.push({ ano, mes: m.mes });
-      }
-      if (m.comuns || m.daytrade) {
-        rendaVariavelResultado += (m.comuns?.resultadoLiquidoMes || 0) + (m.daytrade?.resultadoLiquidoMes || 0);
-        rendaVariavelImposto += m.consolidacao?.totalImpostoDevido || 0;
-        rendaVariavelComValor = true;
-      }
+    const rv = rendaVariavelDoPeriodo(dados.rendaVariavelMensalOficial, ano, trechoDe, trechoAte);
+    for (const m of rv.meses) {
+      if (!rendaVariavelMeses.some(x => x.ano === m.ano && x.mes === m.mes)) rendaVariavelMeses.push(m);
     }
+    rendaVariavelResultado += rv.resultado;
+    rendaVariavelImposto += rv.imposto;
+    // Só a perda entra no caixa; o ganho já vem pela ficha de exclusivos.
+    // Ver o comentário de rendaVariavelDoPeriodo em demonstrativos.js.
+    rendaVariavelPerda += rv.perda;
+    rendaVariavelComValor = rendaVariavelComValor || rv.comValor;
   }
 
   const rendimentos = rend;
@@ -210,27 +227,25 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0),
     semIrrfCount,
     daDeclaracao: vendas.length > 0 && vendas.every(v => v.daDeclaracao),
+    possiveisDuplicidades,
   };
-  const saldoDeCaixaGeral = varPatrimonial.total + rendimentos.totalGeral + ganhos.total;
-  const saldoDeCaixa = saldoDeCaixaGeral - pagamentosEfetuados - pagamentosDiversos - totalDoacoes;
-
-  return {
-    varPatrimonial,
-    rendimentos,
-    ganhos,
-    saldoDeCaixaGeral,
-    pagamentosEfetuados,
-    pagamentosDiversos,
-    totalDoacoes,
-    temDoacaoImportada,
-    saldoDeCaixa,
-    rendaVariavelMeses,
-    rendaVariavelResultado,
-    rendaVariavelImposto,
-    rendaVariavelComValor,
-    anosSemDado: anosSemDado.sort((a, b) => a - b),
-    anosCobertos,
-  };
+  // Fórmula final vem de demonstrativos.js — uma cópia só, ver
+  // `fecharDemonstrativo` (achado 09 da auditoria de 24/08/2026).
+  return fecharDemonstrativo({
+    varPatrimonial, rendimentos, ganhos,
+    rendaVariavelPerda, pagamentosEfetuados, pagamentosDiversos, totalDoacoes,
+    extras: {
+      temDoacaoImportada,
+      rendaVariavelMeses,
+      rendaVariavelResultado,
+      rendaVariavelImposto,
+      rendaVariavelComValor,
+      pendenciasAlienacao,
+      aplicacoesSemRendimento,
+      anosSemDado: anosSemDado.sort((a, b) => a - b),
+      anosCobertos,
+    },
+  });
 }
 
 // Fim de cada mês entre duas datas (inclusive), em ISO. Usado só dentro de
@@ -306,15 +321,32 @@ export function totaisNaData(state, dataCorte, lado = 'ate') {
   // logo acima (ver o comentário lá): "Bens" precisa significar a mesma
   // coisa em toda tela do Dashboard, e igual à BensPage.
   const totalBens = totalBensAteData(dados.bens, dataCorte, lado);
-  const totalDividas_ = totalDividas(dados.dividas, lado, dataCorte) + totalDividas(dados.dividasRurais, lado, dataCorte);
+  const totalDividasComuns = totalDividas(dados.dividas, lado, dataCorte);
+  const totalDividasRurais = totalDividas(dados.dividasRurais, lado, dataCorte);
+  const totalDividas_ = totalDividasComuns + totalDividasRurais;
+  // ACHADO 15 da auditoria de 24/08/2026: os cards contavam itens por um
+  // critério e as páginas de cadastro por outro, com o MESMO rótulo.
+  //   - Bens: o card dizia 74 e a página Bens e Direitos dizia 73, porque só
+  //     a página esconde bem zerado sem movimentação (não existe no ano).
+  //   - Dívidas: o card dizia "7 itens, R$ 2.652.738,92" somando a dívida
+  //     rural, e a página Dívidas e Ônus Reais dizia "1 item, R$ 36.000,00".
+  //     Dois lugares com o mesmo nome e R$ 2,6 milhões de diferença.
+  // A contagem de bens agora usa o mesmo critério da página, e a de dívidas
+  // vem separada para o card poder nomear as duas origens.
+  const bensVisiveis = (dados.bens || []).filter(b => !bemZeradoSemMovimentacaoNoAno(b));
   return {
     totalBens,
     totalDividas: totalDividas_,
+    totalDividasComuns,
+    totalDividasRurais,
     liquido: totalBens - totalDividas_,
-    qtdBens: (dados.bens || []).length,
+    qtdBens: bensVisiveis.length,
     qtdDividas: (dados.dividas || []).length + (dados.dividasRurais || []).length,
+    qtdDividasComuns: (dados.dividas || []).length,
+    qtdDividasRurais: (dados.dividasRurais || []).length,
   };
 }
+
 
 // Lista as movimentações (de bens ou de dívidas) de UMA coleção
 // (`categoria`: 'bens' | 'dividas' | 'dividasRurais') com data dentro do

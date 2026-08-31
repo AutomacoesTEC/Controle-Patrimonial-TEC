@@ -3,7 +3,7 @@ import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, for
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
-    expect(formatCpfCnpj('CPF-DO-DECLARANTE-1')).toBe('CPF-DO-DECLARANTE-1');
+    expect(formatCpfCnpj('11144477735')).toBe('111.444.777-35');
   });
   it('formata 14 dígitos como CNPJ', () => {
     expect(formatCpfCnpj('22908713000190')).toBe('22.908.713/0001-90');

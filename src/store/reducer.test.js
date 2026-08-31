@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { reducer, reducerComHistorico, initialState } from './reducer';
+import { describe, it, expect, vi } from 'vitest';
+import { reducer, reducerComHistorico, initialState, blankYear, hasWorkingData, snapshotHasData, novoId } from './reducer';
 
 const bemBase = { id: 1, grupo: '01', codigo_bem: '12', discriminacao: 'Casa', situacao_anterior: 100000, situacao_atual: 130000 };
 
@@ -320,6 +320,7 @@ describe('ROLLOVER_ANO (virada de ano, é o propósito central do app)', () => {
     let state = {
       ...initialState, anoCalendario: 2025,
       contribuinte: { nome: 'x' }, // precisa de hasWorkingData(state) pra arquivar 2025 no histórico
+      documentoFonte: { formato: 'pdf', textoIntegral: 'declaração 2025' },
       impostoDevido: { total: 12345 },
       apuracaoGanhoCapital: [{ bem: '1', ganho: 1000 }],
       demonstrativoExteriorOficial: [{ bem: 133, ganhoPrejuizo: 1822059.55 }],
@@ -345,12 +346,14 @@ describe('ROLLOVER_ANO (virada de ano, é o propósito central do app)', () => {
     expect(state.doacoesEfetuadasOficial).toEqual([]);
     expect(state.doacoesPartidosOficial).toEqual([]);
     expect(state.doacoesEcaIdosoOficial).toEqual([]);
+    expect(state.documentoFonte).toBeNull();
 
     // O ano antigo, arquivado no histórico, continua com os dados oficiais
     // intactos (voltar para 2025 tem que mostrar tudo de novo).
     expect(state.historico[2025].impostoDevido).toEqual({ total: 12345 });
     expect(state.historico[2025].apuracaoGanhoCapital).toEqual([{ bem: '1', ganho: 1000 }]);
     expect(state.historico[2025].demonstrativoExteriorOficial).toEqual([{ bem: 133, ganhoPrejuizo: 1822059.55 }]);
+    expect(state.historico[2025].documentoFonte.textoIntegral).toBe('declaração 2025');
   });
 });
 
@@ -700,6 +703,20 @@ describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retifi
     expect(state.pagamentos[0].origem).toBe('manual');
   });
 
+  it('cadastros rurais também marcam origem manual e a edição preserva essa origem', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_BEM_RURAL', payload: { codigo: '01', discriminacao: 'Trator' } });
+    state = reducer(state, { type: 'ADD_DIVIDA_RURAL', payload: { discriminacao: 'Financiamento' } });
+    state = reducer(state, { type: 'ADD_IMOVEL_RURAL', payload: { nomeLocalizacao: 'Fazenda' } });
+    const bemId = state.bensRurais[0].id;
+    const imovelId = state.imoveisRurais[0].id;
+    state = reducer(state, { type: 'UPDATE_BEM_RURAL', payload: { id: bemId, discriminacao: 'Trator corrigido' } });
+    state = reducer(state, { type: 'UPDATE_IMOVEL_RURAL', payload: { id: imovelId, area: 10 } });
+    expect(state.bensRurais[0].origem).toBe('manual');
+    expect(state.dividasRurais[0].origem).toBe('manual');
+    expect(state.imoveisRurais[0].origem).toBe('manual');
+  });
+
   it('IMPORT_DECLARACAO marca origem: importacao em cada bem/dívida/rendimento/pagamento importado', () => {
     let state = { ...initialState };
     state = reducer(state, { type: 'IMPORT_DECLARACAO', payload: {
@@ -731,7 +748,7 @@ describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retifi
     state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
       anoCalendario: 2025,
       contribuinte: { cpf: '11111111111', nome: 'Fulano' },
-      bens: { vinculados: [{ idAntigo: 42, dados: { codigo_bem: '21', discriminacao: 'Apartamento (corrigido)', situacao_anterior: 90000 } }], novos: [], removerAntigos: [] },
+      bens: { vinculados: [{ idAntigo: 42, dados: { codigo_bem: '21', discriminacao: 'Apartamento (corrigido)', situacao_anterior: 90000, situacao_atual: 90000 } }], novos: [], removerAntigos: [] },
       dividas: { vinculados: [], novos: [], removerAntigos: [] },
       rendimentos: [], pagamentos: [],
     }});
@@ -783,6 +800,483 @@ describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retifi
     const novo = state.rendimentos.find(r => r.origem === 'importacao');
     expect(novo.valor).toBe(1200);
   });
+
+  it('bug real: retificadora atualiza todos os quadros oficiais e limpa os removidos no mesmo formato', () => {
+    let state = {
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'pdf',
+      impostoDevido: { saldoImpostoPagar: 999 },
+      ganhosCapitalOficial: { operacoes: [{ bem: 'antigo' }] },
+      fiiFiagroMensalOficial: [{ mes: 1 }],
+      rendaVariavelMensalOficial: [{ mes: 2 }],
+      fichasNaoLidasComConteudo: ['RRA antigo'],
+      dependentes: [{ id: 1, nome: 'Dependente antigo' }],
+    };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      formato: 'pdf',
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      dependentes: [{ id: 2, nome: 'Dependente corrigido' }],
+      impostoDevido: { saldoImpostoPagar: 123 },
+      ganhosCapitalOficial: { operacoes: [{ bem: 'novo' }] },
+      fiiFiagroMensalOficial: [],
+      rendaVariavelMensalOficial: [],
+      fichasNaoLidasComConteudo: [],
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.impostoDevido.saldoImpostoPagar).toBe(123);
+    expect(state.ganhosCapitalOficial.operacoes[0].bem).toBe('novo');
+    expect(state.fiiFiagroMensalOficial).toEqual([]);
+    expect(state.rendaVariavelMensalOficial).toEqual([]);
+    expect(state.fichasNaoLidasComConteudo).toEqual([]);
+    expect(state.dependentes).toEqual([{ id: 2, nome: 'Dependente corrigido' }]);
+  });
+
+  it('retificadora em outro formato não apaga quadro que o parser novo não cobre', () => {
+    let state = {
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'dbk',
+      fiiFiagroAnualOficial: { resultadoLiquido: 456 },
+    };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      formato: 'pdf',
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      fiiFiagroAnualOficial: null,
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.fiiFiagroAnualOficial).toEqual({ resultadoLiquido: 456 });
+  });
+
+  it('retificadora rural inclui, altera e remove importados sem tocar cadastros manuais', () => {
+    const manualBem = { id: 1, codigo: '99', discriminacao: 'Implemento manual', situacao_atual: 500, origem: 'manual' };
+    const manualDivida = { id: 2, discriminacao: 'Crédito manual', situacao_atual: 300, origem: 'manual' };
+    const manualImovel = { id: 3, cib: '9999999-9', nomeLocalizacao: 'Sítio manual', origem: 'manual' };
+    let state = {
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'dbk',
+      bensRurais: [
+        manualBem,
+        { id: 10, controle: '0000000001', codigo: '01', discriminacao: 'Trator', situacao_anterior: 100, situacao_atual: 130, origem: 'importacao', movimentacoes: [{ id: 101, tipo: 'compra', valor: 30 }] },
+        { id: 11, codigo: '02', discriminacao: 'Bem removido', situacao_anterior: 50, situacao_atual: 50, origem: 'importacao', movimentacoes: [] },
+      ],
+      dividasRurais: [
+        manualDivida,
+        { id: 20, controle: '0000000020', discriminacao: 'Financiamento rural', situacao_anterior: 100, situacao_atual: 90, origem: 'importacao', movimentacoes: [{ id: 201, tipo: 'amortizacao', valor: 10 }] },
+        { id: 21, discriminacao: 'Dívida removida', situacao_anterior: 20, situacao_atual: 20, origem: 'importacao', movimentacoes: [] },
+      ],
+      imoveisRurais: [
+        manualImovel,
+        { id: 30, chaveAssociacao: '00001', cib: '1234567-8', nomeLocalizacao: 'Fazenda A', area: 10, origem: 'importacao' },
+        { id: 31, chaveAssociacao: '00002', cib: '1234567-8', nomeLocalizacao: 'Fazenda removida', area: 5, origem: 'importacao' },
+      ],
+    };
+
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      formato: 'dbk',
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+      bensRurais: [
+        { controle: '0000000001', codigo: '01', discriminacao: 'Trator com descrição retificada', situacao_anterior: 80, situacao_atual: 90, movimentacoes: [] },
+        { codigo: '03', discriminacao: 'Colheitadeira nova', situacao_anterior: 0, situacao_atual: 200, movimentacoes: [] },
+      ],
+      dividasRurais: [
+        { controle: '0000000020', discriminacao: 'Financiamento rural corrigido', situacao_anterior: 90, situacao_atual: 80, valor_pago: 20, movimentacoes: [] },
+        { discriminacao: 'Custeio novo', situacao_anterior: 0, situacao_atual: 70, valor_pago: 0, movimentacoes: [] },
+      ],
+      imoveisRurais: [
+        { chaveAssociacao: '00001', cib: '1234567-8', nomeLocalizacao: 'Fazenda A', area: 12 },
+        { chaveAssociacao: '00003', cib: '7654321-0', nomeLocalizacao: 'Fazenda nova', area: 8 },
+      ],
+    }});
+
+    expect(state.bensRurais.find(x => x.id === 1)).toEqual(manualBem);
+    expect(state.bensRurais.find(x => x.id === 10)).toMatchObject({ situacao_anterior: 80, situacao_atual: 120, origem: 'importacao' });
+    expect(state.bensRurais.find(x => x.id === 10).movimentacoes).toHaveLength(1);
+    expect(state.bensRurais.find(x => x.id === 11)).toBeUndefined();
+    expect(state.bensRurais.find(x => x.discriminacao === 'Colheitadeira nova').origem).toBe('importacao');
+
+    expect(state.dividasRurais.find(x => x.id === 2)).toEqual(manualDivida);
+    expect(state.dividasRurais.find(x => x.id === 20)).toMatchObject({ situacao_anterior: 90, situacao_atual: 70, origem: 'importacao' });
+    expect(state.dividasRurais.find(x => x.id === 21)).toBeUndefined();
+    expect(state.dividasRurais.find(x => x.discriminacao === 'Custeio novo').origem).toBe('importacao');
+
+    expect(state.imoveisRurais.find(x => x.id === 3)).toEqual(manualImovel);
+    expect(state.imoveisRurais.find(x => x.id === 30)).toMatchObject({ area: 12, origem: 'importacao' });
+    expect(state.imoveisRurais.find(x => x.id === 31)).toBeUndefined();
+    expect(state.imoveisRurais.find(x => x.nomeLocalizacao === 'Fazenda nova').origem).toBe('importacao');
+  });
+
+  it('retificadora substitui apenas doações importadas e preserva as manuais, inclusive ao limpar a ficha', () => {
+    const manual = { id: 1, nome_beneficiario: 'Doação manual', valor: 100, origem: 'manual' };
+    let state = {
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'pdf',
+      doacoesEfetuadasOficial: [manual, { id: 2, nome_beneficiario: 'Importada antiga', valor: 200, origem: 'importacao' }],
+    };
+    const basePayload = {
+      anoCalendario: 2025, formato: 'pdf', contribuinte: { cpf: '11111111111' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    };
+
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      ...basePayload,
+      doacoesEfetuadasOficial: [{ nome_beneficiario: 'Importada nova', valor: 300 }],
+    }});
+    expect(state.doacoesEfetuadasOficial).toHaveLength(2);
+    expect(state.doacoesEfetuadasOficial.find(x => x.id === 1)).toEqual(manual);
+    expect(state.doacoesEfetuadasOficial.find(x => x.origem === 'importacao')).toMatchObject({ nome_beneficiario: 'Importada nova', valor: 300 });
+
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      ...basePayload,
+      doacoesEfetuadasOficial: [],
+    }});
+    expect(state.doacoesEfetuadasOficial).toEqual([manual]);
+  });
+
+  it('replay parte da situação atual retificada e respeita venda total, baixa, quitação e ajuste', () => {
+    const payloadBase = {
+      anoCalendario: 2025, formato: 'dbk', contribuinte: { cpf: '11111111111' },
+      rendimentos: [], pagamentos: [],
+    };
+    const casosBem = [
+      [[{ tipo: 'compra', valor: 20 }, { tipo: 'venda_parcial', valor: 5 }], 115],
+      [[{ tipo: 'venda_total', valor: 0 }], 0],
+      [[{ tipo: 'baixa', valor: 0 }], 0],
+      [[{ tipo: 'ajuste', valor: 77 }], 77],
+    ];
+    for (const [movimentacoes, esperado] of casosBem) {
+      const state = reducer({
+        ...initialState, anoCalendario: 2025, importFormato: 'dbk',
+        bens: [{ id: 10, origem: 'importacao', situacao_anterior: 80, situacao_atual: 999, movimentacoes }],
+      }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+        ...payloadBase,
+        bens: { vinculados: [{ idAntigo: 10, dados: { situacao_anterior: 90, situacao_atual: 100 } }], novos: [], removerAntigos: [] },
+        dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      }});
+      expect(state.bens[0].situacao_atual).toBe(esperado);
+    }
+
+    const casosDivida = [
+      [[{ tipo: 'contratacao', valor: 20 }, { tipo: 'amortizacao', valor: 5 }], 115],
+      [[{ tipo: 'quitacao', valor: 0 }], 0],
+      [[{ tipo: 'ajuste', valor: 44 }], 44],
+    ];
+    for (const [movimentacoes, esperado] of casosDivida) {
+      const state = reducer({
+        ...initialState, anoCalendario: 2025, importFormato: 'dbk',
+        dividas: [{ id: 20, origem: 'importacao', situacao_anterior: 80, situacao_atual: 999, movimentacoes }],
+      }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+        ...payloadBase,
+        bens: { vinculados: [], novos: [], removerAntigos: [] },
+        dividas: { vinculados: [{ idAntigo: 20, dados: { situacao_anterior: 90, situacao_atual: 100 } }], novos: [], removerAntigos: [] },
+      }});
+      expect(state.dividas[0].situacao_atual).toBe(esperado);
+    }
+  });
+
+  it('ignora tentativa de payload forjado para remover ou sobrescrever item manual', () => {
+    const manual = { id: 7, origem: 'manual', discriminacao: 'Bem manual', situacao_anterior: 10, situacao_atual: 10, movimentacoes: [] };
+    const state = reducer({ ...initialState, anoCalendario: 2025, bens: [manual] }, {
+      type: 'RECONCILIAR_IMPORTACAO',
+      payload: {
+        anoCalendario: 2025, formato: 'dbk', contribuinte: { cpf: '1' },
+        bens: {
+          vinculados: [{ idAntigo: 7, dados: { discriminacao: 'Injetado', situacao_anterior: 0, situacao_atual: 999 } }],
+          novos: [], removerAntigos: [7],
+        },
+        dividas: { vinculados: [], novos: [], removerAntigos: [] },
+        rendimentos: [], pagamentos: [],
+      },
+    });
+    expect(state.bens).toEqual([manual]);
+  });
+
+  it('consome legado correspondente sem duplicar rendimentos, pagamentos e doações', () => {
+    const state = reducer({
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'pdf',
+      rendimentos: [{ id: 1, origem: 'origem_legacy', tipo: 'tributavel_pj', cnpj_fonte: '12345678000199', beneficiario: 'Titular', valor: 100 }],
+      pagamentos: [{ id: 2, origem: 'origem_legacy', codigo: '21', cpf_cnpj: '11122233344', nome_beneficiario: 'Médico', valor_pago: 50 }],
+      doacoesEfetuadasOficial: [{ id: 3, origem: 'origem_legacy', codigo: '40', cpf_cnpj: '99888777000166', nome_beneficiario: 'Instituto', valor: 20 }],
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025, formato: 'pdf', contribuinte: { cpf: '1' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [{ tipo: 'tributavel_pj', cnpj_fonte: '12345678000199', beneficiario: 'Titular', valor: 120 }],
+      pagamentos: [{ codigo: '21', cpf_cnpj: '11122233344', nome_beneficiario: 'Médico corrigido', valor_pago: 60 }],
+      doacoesEfetuadasOficial: [{ codigo: '40', cpf_cnpj: '99888777000166', nome_beneficiario: 'Instituto corrigido', valor: 30 }],
+    }});
+    expect(state.rendimentos).toHaveLength(1);
+    expect(state.pagamentos).toHaveLength(1);
+    expect(state.doacoesEfetuadasOficial).toHaveLength(1);
+    expect(state.rendimentos[0]).toMatchObject({ id: 1, origem: 'importacao', valor: 120 });
+    expect(state.pagamentos[0]).toMatchObject({ id: 2, origem: 'importacao', valor_pago: 60 });
+    expect(state.doacoesEfetuadasOficial[0]).toMatchObject({ id: 3, origem: 'importacao', valor: 30 });
+  });
+
+  it('preserva legado sem correspondência em vez de apagá-lo silenciosamente', () => {
+    const legado = { id: 1, origem: 'origem_legacy', tipo: 'isento', codigo: '99', nome_fonte: 'Fonte antiga', valor: 10 };
+    const state = reducer({ ...initialState, anoCalendario: 2025, importFormato: 'dbk', rendimentos: [legado] }, {
+      type: 'RECONCILIAR_IMPORTACAO', payload: {
+        anoCalendario: 2025, formato: 'dbk', contribuinte: { cpf: '1' },
+        bens: { vinculados: [], novos: [], removerAntigos: [] },
+        dividas: { vinculados: [], novos: [], removerAntigos: [] },
+        rendimentos: [], pagamentos: [],
+      },
+    });
+    expect(state.rendimentos).toEqual([legado]);
+  });
+  it('mantém vínculo rural do PDF quando a descrição é corrigida', () => {
+    const antigo = {
+      id: 10, origem: 'importacao', chaveImportacao: 'pdf:bem-rural:1',
+      codigo: '01', discriminacao: 'Descrição antiga', situacao_atual: 100,
+      movimentacoes: [{ id: 1, tipo: 'venda_parcial', valor: 20 }],
+    };
+    const state = reducer({
+      ...initialState, anoCalendario: 2025, importFormato: 'pdf', bensRurais: [antigo],
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025, formato: 'pdf', contribuinte: { cpf: '1' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+      bensRurais: [{
+        chaveImportacao: 'pdf:bem-rural:1', codigo: '01',
+        discriminacao: 'Descrição corrigida', situacao_atual: 100,
+      }],
+    }});
+    expect(state.bensRurais).toHaveLength(1);
+    expect(state.bensRurais[0]).toMatchObject({
+      id: 10, discriminacao: 'Descrição corrigida', situacao_atual: 80,
+    });
+    expect(state.bensRurais[0].movimentacoes).toEqual(antigo.movimentacoes);
+  });
+
+  it('usa o vínculo revisado para preservar movimento rural mesmo quando texto e chave mudam', () => {
+    const antigo = {
+      id: 10,
+      origem: 'importacao',
+      chaveImportacao: 'pdf:bem-rural:chave-antiga',
+      codigo: '01',
+      discriminacao: 'Trator descrição antiga',
+      situacao_atual: 100,
+      movimentacoes: [{ id: 1, tipo: 'benfeitoria', valor: 25 }],
+    };
+    const state = reducer({
+      ...initialState, anoCalendario: 2025, importFormato: 'pdf', bensRurais: [antigo],
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      formato: 'pdf',
+      contribuinte: { cpf: '1' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [],
+      pagamentos: [],
+      bensRurais: {
+        vinculados: [{ idAntigo: 10, dados: {
+          chaveImportacao: 'pdf:bem-rural:chave-nova',
+          codigo: '01',
+          discriminacao: 'Trator com descrição corrigida',
+          situacao_atual: 120,
+        }}],
+        novos: [],
+        removerAntigos: [],
+      },
+    }});
+
+    expect(state.bensRurais).toHaveLength(1);
+    expect(state.bensRurais[0]).toMatchObject({
+      id: 10,
+      chaveImportacao: 'pdf:bem-rural:chave-nova',
+      discriminacao: 'Trator com descrição corrigida',
+      situacao_atual: 145,
+      origem: 'importacao',
+    });
+    expect(state.bensRurais[0].movimentacoes).toEqual(antigo.movimentacoes);
+  });
+
+  it('não colide bens rurais do PDF com o mesmo código', () => {
+    const antigos = [
+      { id: 10, origem: 'importacao', chaveImportacao: 'pdf:bem-rural:1:01:100.00', codigo: '01', situacao_atual: 100, movimentacoes: [{ id: 1, tipo: 'venda_parcial', valor: 10 }] },
+      { id: 20, origem: 'importacao', chaveImportacao: 'pdf:bem-rural:2:01:200.00', codigo: '01', situacao_atual: 200, movimentacoes: [{ id: 2, tipo: 'benfeitoria', valor: 15 }] },
+    ];
+    const state = reducer({
+      ...initialState, anoCalendario: 2025, importFormato: 'pdf', bensRurais: antigos,
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025, formato: 'pdf', contribuinte: { cpf: '1' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+      bensRurais: [
+        { chaveImportacao: 'pdf:bem-rural:2:01:200.00', codigo: '01', discriminacao: 'Segundo corrigido', situacao_atual: 200 },
+        { chaveImportacao: 'pdf:bem-rural:1:01:100.00', codigo: '01', discriminacao: 'Primeiro corrigido', situacao_atual: 100 },
+      ],
+    }});
+    expect(state.bensRurais.map(item => [item.id, item.discriminacao, item.situacao_atual])).toEqual([
+      [20, 'Segundo corrigido', 215],
+      [10, 'Primeiro corrigido', 90],
+    ]);
+  });
+
+  it('refaz o vínculo dos participantes rurais para o id definitivo do imóvel', () => {
+    const state = reducer({
+      ...initialState,
+      anoCalendario: 2025,
+      importFormato: 'pdf',
+      imoveisRurais: [{
+        id: 900,
+        origem: 'importacao',
+        chaveImportacao: 'pdf:imovel-rural:chave-antiga',
+        cib: '123',
+      }],
+      participantesRuraisOficial: [{ cpf: '11122233344', imovelId: 900 }],
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      formato: 'pdf',
+      contribuinte: { cpf: '1' },
+      bens: { vinculados: [], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [],
+      pagamentos: [],
+      imoveisRurais: {
+        vinculados: [{ idAntigo: 900, dados: {
+          chaveImportacao: 'pdf:imovel-rural:chave-nova',
+          cib: '123',
+          nomeLocalizacao: 'Nome corrigido',
+        }}],
+        novos: [],
+        removerAntigos: [],
+      },
+      participantesRuraisOficial: [{
+        cpf: '11122233344',
+        imovelId: 1,
+        imovelChaveImportacao: 'pdf:imovel-rural:chave-nova',
+      }],
+    }});
+
+    expect(state.imoveisRurais[0].id).toBe(900);
+    expect(state.participantesRuraisOficial[0]).toMatchObject({
+      cpf: '11122233344',
+      imovelId: 900,
+      imovelChaveImportacao: 'pdf:imovel-rural:chave-nova',
+    });
+  });
+
+  it('reaplica movimentações com piso zero sobre a situação atual retificada', () => {
+    const state = reducer({
+      ...initialState, anoCalendario: 2025, importFormato: 'dbk',
+      bens: [{ id: 1, origem: 'importacao', situacao_atual: 10, movimentacoes: [{ tipo: 'venda_parcial', valor: 50 }] }],
+      dividas: [{ id: 2, origem: 'importacao', situacao_atual: 10, movimentacoes: [{ tipo: 'amortizacao', valor: 50 }] }],
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025, formato: 'dbk', contribuinte: { cpf: '1' },
+      bens: { vinculados: [{ idAntigo: 1, dados: { situacao_atual: 10 } }], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [{ idAntigo: 2, dados: { situacao_atual: 10 } }], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.bens[0].situacao_atual).toBe(0);
+    expect(state.dividas[0].situacao_atual).toBe(0);
+  });
+
+  it('aplica retificadora a ano histórico e substitui o documento-fonte', () => {
+    const fonteAntiga = { formato: 'dbk', textoIntegral: 'antigo' };
+    const fonteNova = { formato: 'dbk', textoIntegral: 'retificado' };
+    const state = reducer({
+      ...initialState,
+      anoCalendario: 2026,
+      contribuinte: { cpf: '1' },
+      bens: [{ id: 99, origem: 'manual', situacao_atual: 1 }],
+      historico: {
+        2025: {
+          ...blankYear,
+          origem: 'importacao',
+          importFormato: 'dbk',
+          documentoFonte: fonteAntiga,
+          contribuinte: { cpf: '1' },
+          bens: [{ id: 5, origem: 'importacao', situacao_atual: 100, movimentacoes: [] }],
+        },
+      },
+    }, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025, formato: 'dbk', documentoFonte: fonteNova,
+      contribuinte: { cpf: '1' },
+      bens: { vinculados: [{ idAntigo: 5, dados: { situacao_atual: 120 } }], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.anoCalendario).toBe(2025);
+    expect(state.bens[0]).toMatchObject({ id: 5, situacao_atual: 120 });
+    expect(state.documentoFonte).toEqual(fonteNova);
+    expect(state.historico[2026].bens[0].id).toBe(99);
+  });
+
+});
+
+describe('metadados auditáveis da importação', () => {
+  it('persiste estados e avisos compactos no ano e no histórico', () => {
+    const estadoFichas = {
+      'dbk:IR': { estado: 'parcial', formato: 'dbk', presenca: 'preenchida', suporte: 'parcial', derivado: false, completudeAuditada: false },
+    };
+    let state = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: {
+      anoCalendario: 2025, formato: 'dbk', contribuinte: { cpf: '1' },
+      bens: [], dividas: [], rendimentos: [], pagamentos: [],
+      estadoFichas,
+      avisosImportacao: [{ codigo: 'DBK_FICHA_NAO_SUPORTADA', tipoRegistro: '58' }],
+      registrosDbkNaoModelados: [{ tipoRegistro: '58', ocorrencias: 1 }],
+    }});
+    expect(state.estadoFichas).toEqual(estadoFichas);
+    expect(state.avisosImportacao).toHaveLength(1);
+    expect(state.registrosDbkNaoModelados).toHaveLength(1);
+
+    state = reducer(state, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(state.estadoFichas).toEqual({});
+    expect(state.historico[2025].estadoFichas).toEqual(estadoFichas);
+    expect(state.historico[2025].registrosDbkNaoModelados).toHaveLength(1);
+  });
+});
+
+describe('novoId sem colisão', () => {
+  it('continua monotônico com mais de mil ids no mesmo milissegundo', () => {
+    const spy = vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    const ids = Array.from({ length: 2500 }, () => novoId());
+    spy.mockRestore();
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.every((id, i) => i === 0 || id > ids[i - 1])).toBe(true);
+  });
+});
+
+describe('detecção de ano com quadros oficiais', () => {
+  it.each([
+    ['imposto devido', { impostoDevido: { saldoImpostoPagar: 0 } }],
+    ['ganhos de capital', { ganhosCapitalOficial: { operacoes: [] } }],
+    ['renda variável anual', { rendaVariavelAnualOficial: { resultadoLiquido: 0 } }],
+    ['FII/Fiagro anual', { fiiFiagroAnualOficial: { resultadoLiquido: 0 } }],
+    ['apuração rural', { apuracaoResultadoRuralOficial: { resultadoTributavel: 0 } }],
+    ['imóveis rurais', { imoveisRurais: [{ id: 1 }] }],
+    ['dívidas rurais', { dividasRurais: [{ id: 1 }] }],
+    ['doações', { doacoesEfetuadasOficial: [{ id: 1 }] }],
+    ['fichas não modeladas', { fichasNaoLidasComConteudo: ['Registro 99'] }],
+  ])('reconhece ano composto somente por %s', (_nome, dados) => {
+    const estado = { ...initialState, ...dados };
+    expect(hasWorkingData(estado)).toBe(true);
+    expect(snapshotHasData(dados)).toBe(true);
+  });
+
+  it('não considera objetos oficiais vazios como dado', () => {
+    expect(hasWorkingData({ ...initialState, impostoDevido: {}, ganhosCapitalOficial: {} })).toBe(false);
+  });
 });
 
 describe('titular e dependentes (cadastro manual)', () => {
@@ -790,6 +1284,12 @@ describe('titular e dependentes (cadastro manual)', () => {
     let state = { ...initialState };
     state = reducer(state, { type: 'SET_CONTRIBUINTE', payload: { nome: 'Fulano', cpf: '11111111111' } });
     expect(state.contribuinte).toEqual({ nome: 'Fulano', cpf: '11111111111' });
+  });
+
+  it('SET_CONTRIBUINTE preserva dados cadastrais importados ao editar nome e CPF', () => {
+    let state = { ...initialState, contribuinte: { nome: 'Fulano', cpf: '1', municipio: 'Cidade Exemplo', ocupacaoCodigo: '120' } };
+    state = reducer(state, { type: 'SET_CONTRIBUINTE', payload: { nome: 'Fulano Corrigido', cpf: '2' } });
+    expect(state.contribuinte).toEqual({ nome: 'Fulano Corrigido', cpf: '2', municipio: 'Cidade Exemplo', ocupacaoCodigo: '120' });
   });
 
   it('ADD/UPDATE/DELETE_DEPENDENTE seguem o mesmo padrão de bens/dívidas', () => {
@@ -850,12 +1350,14 @@ describe('importFormato: o ano guarda de qual arquivo veio a importação', () =
     dividas: [],
     rendimentos: [],
     pagamentos: [],
+    documentoFonte: { formato: 'pdf', textoIntegral: 'fonte integral', sha256TextoExtraido: 'abc' },
   };
 
   it('grava o formato na importação', () => {
     const s = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadPdf });
     expect(s.importFormato).toBe('pdf');
     expect(s.origemAnoAtual).toBe('importacao');
+    expect(s.documentoFonte.textoIntegral).toBe('fonte integral');
   });
 
   it('reimportar o .DBK por cima do PDF atualiza o formato', () => {
@@ -980,5 +1482,62 @@ describe('fichasNaoLidasComConteudo', () => {
       payload: { anoCalendario: 2025, contribuinte: { cpf: '1', nome: 'X' }, bens: [], dividas: [], rendimentos: [], pagamentos: [] },
     });
     expect(s.fichasNaoLidasComConteudo).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Ganhos de Capital detalhado e Renda Variável (FII/Fiagro e fechamentos
+// anuais) precisam sobreviver ao ciclo completo do estado: entrar na
+// importação, ir para o snapshot ao trocar de ano e NÃO vazar para o ano novo
+// (o ganho de capital de 2025 não é ganho de 2026).
+describe('IMPORT_DECLARACAO: Ganhos de Capital e Renda Variável', () => {
+  const payloadBase = {
+    anoCalendario: 2025,
+    contribuinte: { cpf: '11144477735', nome: 'FULANO' },
+    bens: [{ id: 1, discriminacao: 'CASA', situacao_anterior: 100, situacao_atual: 100 }],
+    dividas: [], rendimentos: [], pagamentos: [],
+    ganhosCapitalOficial: {
+      consolidacao: { periodoInicio: '2025-01-01', periodoFim: '2025-12-31', pais: 'BRASIL' },
+      operacoes: [{ id: 1, tipo: 'imovel', especificacao: 'APARTAMENTO', valorAlienacao: 800000 }],
+      moedaEspecie: { operacoes: [], mensal: [{ mes: 1, ganhoCapital: 0 }] },
+      origem: 'dbk',
+    },
+    apuracaoGanhoCapital: [{ id: 1, tipo: 'imovel', bem: 'APARTAMENTO', ganhoCapital: 476000 }],
+    rendaVariavelAnualOficial: { resultadoLiquido: 9000 },
+    fiiFiagroMensalOficial: [{ mes: 3, titular: true, resultadoLiquidoMes: 2500 }],
+    fiiFiagroAnualOficial: { resultadoLiquido: 30000 },
+  };
+
+  it('guarda as quatro fichas de Ganhos de Capital e as duas de Renda Variável', () => {
+    const s = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadBase });
+    expect(s.ganhosCapitalOficial.operacoes[0].tipo).toBe('imovel');
+    expect(s.ganhosCapitalOficial.moedaEspecie.mensal).toHaveLength(1);
+    expect(s.fiiFiagroMensalOficial[0].resultadoLiquidoMes).toBe(2500);
+    expect(s.rendaVariavelAnualOficial.resultadoLiquido).toBe(9000);
+    expect(s.fiiFiagroAnualOficial.resultadoLiquido).toBe(30000);
+  });
+
+  it('reimportar por um caminho que não leu a ficha NÃO apaga o que já estava', () => {
+    const comGc = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadBase });
+    // Mesmo ano, payload sem nenhuma das fichas novas (o caminho PDF de uma
+    // declaração sem ganho de capital, por exemplo).
+    const semGc = reducer(comGc, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { ...payloadBase, ganhosCapitalOficial: null, fiiFiagroMensalOficial: [], rendaVariavelAnualOficial: null, fiiFiagroAnualOficial: null },
+    });
+    expect(semGc.ganhosCapitalOficial).not.toBeNull();
+    expect(semGc.fiiFiagroMensalOficial).toHaveLength(1);
+    expect(semGc.rendaVariavelAnualOficial).not.toBeNull();
+  });
+
+  it('ao avançar o ano, vai para o histórico e o ano novo nasce sem elas', () => {
+    const s2025 = reducer(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadBase });
+    const s2026 = reducer(s2025, { type: 'ROLLOVER_ANO', payload: 2026 });
+    expect(s2026.anoCalendario).toBe(2026);
+    expect(s2026.ganhosCapitalOficial).toBeNull();
+    expect(s2026.fiiFiagroMensalOficial).toEqual([]);
+    expect(s2026.rendaVariavelAnualOficial).toBeNull();
+    expect(s2026.historico[2025].ganhosCapitalOficial.operacoes[0].especificacao).toBe('APARTAMENTO');
+    expect(s2026.historico[2025].fiiFiagroMensalOficial).toHaveLength(1);
   });
 });

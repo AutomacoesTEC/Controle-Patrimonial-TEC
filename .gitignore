@@ -53,3 +53,8 @@ output/pdf/*-PRE-*.pdf
 output/pdf/*-33pag-*.pdf
 output/pdf/*-41pag-*.pdf
 output/pdf/*.microsoft-print-image-only-*.pdf
+
+# Manifesto local das declarações reais (nomes de arquivo e valores pessoais
+# esperados pelos testes). Mora fora do repositório; a regra existe para o caso
+# de alguém copiá-lo para dentro por engano.
+*.local.json

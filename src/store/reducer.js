@@ -6,8 +6,28 @@
 // recálculo de situação após excluir uma movimentação (mesma técnica do
 // "salto sem data" usada nas consultas por período), em vez de duplicar a
 // lógica de dobra das movimentações.
-import { situacaoBemAposExclusao, situacaoDividaAposExclusao } from './demonstrativos';
-import { getIpAtual } from '../utils/ipTracker';
+import {
+  situacaoBemAposExclusao,
+  situacaoDividaAposExclusao,
+  reaplicarMovimentacoesBem,
+  reaplicarMovimentacoesDivida,
+} from './demonstrativos';
+
+// Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
+// milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
+// porque todo UPDATE/DELETE casa por id. Improvável clicando, certo em teste
+// automatizado e possível em importação seguida de cadastro. Achado 20 da
+// auditoria de 24/08/2026.
+//
+// O relógio continua na frente do número (os ids seguem crescentes, o que
+// mantém a ordenação por id usada em várias telas), com um contador que
+// garante unicidade dentro do mesmo milissegundo.
+let ultimoId = 0;
+export const novoId = () => {
+  const baseRelogio = Date.now() * 1000;
+  ultimoId = Math.max(baseRelogio, ultimoId + 1);
+  return ultimoId;
+};
 
 export const initialState = {
   // null até a primeira importação/cadastro: o app é genérico, não nasce
@@ -29,11 +49,26 @@ export const initialState = {
   // declaração importada ainda pra este ano, ou importou por PDF (que não
   // lê essa ficha).
   impostoDevido: null,
-  // Apuração do Ganho de Capital OFICIAL (bens móveis vendidos, já apurada
+  // Apuração do Ganho de Capital OFICIAL (resumo por operação, de qualquer
+  // uma das quatro fichas: imóvel, móvel, participação societária e moeda em
+  // espécie — já apurada
   // na própria declaração importada) — puramente informativa, igual
   // impostoDevido; diferente da aba Ganhos de Capital, que CALCULA a
   // partir de movimentações lançadas manualmente depois da importação.
   apuracaoGanhoCapital: [],
+  // Demonstrativo COMPLETO de Ganhos de Capital, como a declaração o traz:
+  // as quatro fichas do menu do programa da Receita (Bens Imóveis,
+  // Direitos/Bens Móveis, Participações Societárias e Moedas em Espécie),
+  // com apuração, cálculo do imposto, consolidação, faixas de tributação e
+  // parcelas. `apuracaoGanhoCapital` acima continua sendo o RESUMO por
+  // operação que as telas já consomem; este é o detalhe por trás dele.
+  ganhosCapitalOficial: null,
+  // Renda Variável: fechamento anual das operações comuns/day-trade e a ficha
+  // de Operações em FII ou Fiagro (mês a mês e totais do ano). O mês a mês das
+  // operações comuns continua em `rendaVariavelMensalOficial`.
+  rendaVariavelAnualOficial: null,
+  fiiFiagroMensalOficial: [],
+  fiiFiagroAnualOficial: null,
   dependentes: [],
   bens: [],
   dividas: [],
@@ -94,12 +129,29 @@ export const initialState = {
   // (não faz parte de snapshotYear/blankYear de propósito, ver
   // reducerComHistorico mais abaixo).
   importFormato: null,
+  // Cópia textual integral do arquivo importado, com hash SHA-256 do texto.
+  // Permite auditar e reprocessar fichas ainda não modeladas sem perda
+  // silenciosa. Fica somente no armazenamento local do perfil.
+  documentoFonte: null,
+  estadoFichas: {},
+  fichasPdfObservadas: {},
+  totalFichasPdfCatalogadas: 0,
+  versaoCatalogoFichasPdf: null,
+  avisosImportacao: [],
+  registrosDbkNaoModelados: [],
   alteracoes: [],
   toasts: [],
 };
 
 export const snapshotYear = (state) => ({
   importFormato: state.importFormato ?? null,
+  documentoFonte: state.documentoFonte ?? null,
+  estadoFichas: state.estadoFichas ?? {},
+  fichasPdfObservadas: state.fichasPdfObservadas ?? {},
+  totalFichasPdfCatalogadas: state.totalFichasPdfCatalogadas ?? 0,
+  versaoCatalogoFichasPdf: state.versaoCatalogoFichasPdf ?? null,
+  avisosImportacao: state.avisosImportacao ?? [],
+  registrosDbkNaoModelados: state.registrosDbkNaoModelados ?? [],
   bens: state.bens,
   dividas: state.dividas,
   rendimentos: state.rendimentos,
@@ -107,6 +159,10 @@ export const snapshotYear = (state) => ({
   contribuinte: state.contribuinte,
   impostoDevido: state.impostoDevido,
   apuracaoGanhoCapital: state.apuracaoGanhoCapital,
+  ganhosCapitalOficial: state.ganhosCapitalOficial,
+  rendaVariavelAnualOficial: state.rendaVariavelAnualOficial,
+  fiiFiagroMensalOficial: state.fiiFiagroMensalOficial,
+  fiiFiagroAnualOficial: state.fiiFiagroAnualOficial,
   // dependentes é por ano (como contribuinte) — a declaração de um ano tem
   // sua própria lista de dependentes; faltava aqui (bug real: trocar de ano
   // e voltar perdia os dependentes cadastrados, porque nunca eram
@@ -131,21 +187,37 @@ export const snapshotYear = (state) => ({
   origem: state.origemAnoAtual,
   savedAt: new Date().toISOString(),
 });
-export const hasWorkingData = (state) =>
-  state.bens.length > 0 || state.dividas.length > 0 ||
-  state.rendimentos.length > 0 || state.pagamentos.length > 0 ||
-  (state.bensRurais || []).length > 0 || (state.pagamentosDiversos || []).length > 0 ||
-  (state.dependentes || []).length > 0 ||
+const temItens = (valor) => Array.isArray(valor) && valor.length > 0;
+const temQuadro = (valor) => valor != null && (
+  typeof valor !== 'object' || Array.isArray(valor) || Object.keys(valor).length > 0
+);
+
+// Um ano deve ser reconhecido mesmo quando contém somente uma ficha oficial
+// informativa. O critério anterior olhava apenas as coleções mais antigas e
+// fazia anos com, por exemplo, resumo do imposto, renda variável, doações ou
+// atividade rural desaparecerem do seletor e do histórico.
+export const hasWorkingData = (state = {}) =>
+  [
+    'bens', 'dividas', 'rendimentos', 'pagamentos', 'dependentes',
+    'imoveisRurais', 'bensRurais', 'dividasRurais', 'lancamentosRurais',
+    'receitasDespesasRuraisOficial', 'movimentacaoRebanhoOficial',
+    'participantesRuraisOficial', 'demonstrativoExteriorOficial',
+    'apuracaoGanhoCapital', 'rendaVariavelMensalOficial',
+    'fiiFiagroMensalOficial', 'doacoesEfetuadasOficial',
+    'doacoesPartidosOficial', 'doacoesEcaIdosoOficial',
+    'pagamentosDiversos', 'fichasNaoLidasComConteudo',
+  ].some(campo => temItens(state[campo])) ||
+  [
+    'impostoDevido', 'ganhosCapitalOficial', 'rendaVariavelAnualOficial',
+    'fiiFiagroAnualOficial', 'apuracaoResultadoRuralOficial',
+  ].some(campo => temQuadro(state[campo])) ||
+  Number(state.prejuizoRuralAcompensar || 0) !== 0 ||
   !!state.contribuinte;
 // Mesmo critério para um snapshot do histórico: ano "avançado" por engano
 // ou herdado de versão antiga pode existir no histórico completamente vazio
 // — e ano vazio NÃO é "ano com dado" (não entra no seletor nem nos gráficos).
 export const snapshotHasData = (h) =>
-  !!h && hasWorkingData({
-    bens: h.bens || [], dividas: h.dividas || [], rendimentos: h.rendimentos || [],
-    pagamentos: h.pagamentos || [], bensRurais: h.bensRurais || [],
-    pagamentosDiversos: h.pagamentosDiversos || [], dependentes: h.dependentes || [], contribuinte: h.contribuinte || null,
-  });
+  !!h && hasWorkingData(h);
 export const blankYear = {
   // 'pdf' | 'dbk' | null — de qual arquivo veio a importação deste ano. É o
   // que permite ao Dashboard avisar que uma importação por PDF é PARCIAL
@@ -154,11 +226,16 @@ export const blankYear = {
   // zero como se fosse a realidade da pessoa. Ano em branco não tem arquivo
   // por trás, então nasce null.
   importFormato: null,
+  documentoFonte: null,
+  estadoFichas: {}, fichasPdfObservadas: {}, totalFichasPdfCatalogadas: 0,
+  versaoCatalogoFichasPdf: null, avisosImportacao: [], registrosDbkNaoModelados: [],
   bens: [], dividas: [], rendimentos: [], pagamentos: [], contribuinte: null, impostoDevido: null, apuracaoGanhoCapital: [], dependentes: [],
   bensRurais: [], dividasRurais: [], lancamentosRurais: [], pagamentosDiversos: [],
   receitasDespesasRuraisOficial: [], apuracaoResultadoRuralOficial: null,
   movimentacaoRebanhoOficial: [], participantesRuraisOficial: [], demonstrativoExteriorOficial: [],
   rendaVariavelMensalOficial: [],
+  ganhosCapitalOficial: null, rendaVariavelAnualOficial: null,
+  fiiFiagroMensalOficial: [], fiiFiagroAnualOficial: null,
   // Fichas que a declaração importada TEM preenchidas e que o app não lê. Fica
   // no ano, e não só no log da importação, porque é informação que a pessoa
   // precisa ter à vista sempre que olhar os números — o log some quando ela sai
@@ -173,14 +250,21 @@ export const blankYear = {
 
 export function reducer(state, action) {
   switch (action.type) {
+    // Estado já calculado e gravado com sucesso pelo DataContext. Esta ação
+    // não recalcula ids nem histórico: persistência e memória recebem o mesmo
+    // objeto produzido uma única vez por reducerComHistorico.
+    case 'SUBSTITUIR_ESTADO_PERSISTIDO':
+      return action.payload;
     // Titular e dependentes cadastrados/corrigidos à mão (nem sempre vêm de
     // uma importação — ver TitularPage). São por ano, como o resto da
     // declaração: mudar de ano-calendário troca de titular/dependentes
     // junto (ver snapshotYear/blankYear).
     case 'SET_CONTRIBUINTE':
-      return { ...state, contribuinte: action.payload };
+      // Editar nome/CPF na tela não pode apagar endereço, ocupação e demais
+      // dados cadastrais que vieram da declaração.
+      return { ...state, contribuinte: { ...(state.contribuinte || {}), ...action.payload } };
     case 'ADD_DEPENDENTE':
-      return { ...state, dependentes: [...state.dependentes, { ...action.payload, id: Date.now() }] };
+      return { ...state, dependentes: [...state.dependentes, { ...action.payload, id: novoId() }] };
     case 'UPDATE_DEPENDENTE':
       return { ...state, dependentes: state.dependentes.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DEPENDENTE':
@@ -190,25 +274,25 @@ export function reducer(state, action) {
     // retificadora, distinguir o que é seguro sobrescrever do que tem que
     // ficar intocado (ver RECONCILIAR_IMPORTACAO mais abaixo).
     case 'ADD_BEM':
-      return { ...state, bens: [...state.bens, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, bens: [...state.bens, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_BEM':
       return { ...state, bens: state.bens.map(b => b.id === action.payload.id ? { ...b, ...action.payload } : b) };
     case 'DELETE_BEM':
       return { ...state, bens: state.bens.filter(b => b.id !== action.payload) };
     case 'ADD_DIVIDA':
-      return { ...state, dividas: [...state.dividas, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, dividas: [...state.dividas, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DIVIDA':
       return { ...state, dividas: state.dividas.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DIVIDA':
       return { ...state, dividas: state.dividas.filter(d => d.id !== action.payload) };
     case 'ADD_RENDIMENTO':
-      return { ...state, rendimentos: [...state.rendimentos, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, rendimentos: [...state.rendimentos, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_RENDIMENTO':
       return { ...state, rendimentos: state.rendimentos.map(r => r.id === action.payload.id ? { ...r, ...action.payload } : r) };
     case 'DELETE_RENDIMENTO':
       return { ...state, rendimentos: state.rendimentos.filter(r => r.id !== action.payload) };
     case 'ADD_PAGAMENTO':
-      return { ...state, pagamentos: [...state.pagamentos, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, pagamentos: [...state.pagamentos, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_PAGAMENTO':
       return { ...state, pagamentos: state.pagamentos.map(p => p.id === action.payload.id ? { ...p, ...action.payload } : p) };
     case 'DELETE_PAGAMENTO':
@@ -221,19 +305,19 @@ export function reducer(state, action) {
     // `bens`/`rendimentos` também misturam item importado com manual, via
     // `origem`).
     case 'ADD_DOACAO_EFETUADA':
-      return { ...state, doacoesEfetuadasOficial: [...state.doacoesEfetuadasOficial, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, doacoesEfetuadasOficial: [...state.doacoesEfetuadasOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_EFETUADA':
       return { ...state, doacoesEfetuadasOficial: state.doacoesEfetuadasOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DOACAO_EFETUADA':
       return { ...state, doacoesEfetuadasOficial: state.doacoesEfetuadasOficial.filter(d => d.id !== action.payload) };
     case 'ADD_DOACAO_PARTIDO':
-      return { ...state, doacoesPartidosOficial: [...state.doacoesPartidosOficial, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, doacoesPartidosOficial: [...state.doacoesPartidosOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_PARTIDO':
       return { ...state, doacoesPartidosOficial: state.doacoesPartidosOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DOACAO_PARTIDO':
       return { ...state, doacoesPartidosOficial: state.doacoesPartidosOficial.filter(d => d.id !== action.payload) };
     case 'ADD_DOACAO_ECA_IDOSO':
-      return { ...state, doacoesEcaIdosoOficial: [...state.doacoesEcaIdosoOficial, { ...action.payload, id: Date.now(), origem: 'manual' }] };
+      return { ...state, doacoesEcaIdosoOficial: [...state.doacoesEcaIdosoOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_ECA_IDOSO':
       return { ...state, doacoesEcaIdosoOficial: state.doacoesEcaIdosoOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DOACAO_ECA_IDOSO':
@@ -287,7 +371,6 @@ export function reducer(state, action) {
       }
       const existente = historico[novoAno];
       if (existente) return { ...state, ...existente, historico, anoCalendario: novoAno, origemAnoAtual: existente.origem ?? null };
-      let seq = Date.now();
       // Se a atividade rural deu prejuízo no ano que está fechando, esse
       // prejuízo se soma ao saldo a compensar (regra real: prejuízo de
       // atividade rural pode ser compensado nos anos seguintes). Se deu
@@ -318,6 +401,13 @@ export function reducer(state, action) {
         // senão o aviso de importação parcial reapareceria num ano que nunca
         // foi importado (mesmo raciocínio dos campos Oficiais logo abaixo).
         importFormato: null,
+        documentoFonte: null,
+        estadoFichas: blankYear.estadoFichas,
+        fichasPdfObservadas: blankYear.fichasPdfObservadas,
+        totalFichasPdfCatalogadas: blankYear.totalFichasPdfCatalogadas,
+        versaoCatalogoFichasPdf: blankYear.versaoCatalogoFichasPdf,
+        avisosImportacao: blankYear.avisosImportacao,
+        registrosDbkNaoModelados: blankYear.registrosDbkNaoModelados,
         // Campos "Oficiais" importados da declaração (impostoDevido,
         // apuracaoGanhoCapital e os 9 outros de demonstrativos/rurais
         // detalhados) só fazem sentido PRO ANO em que a declaração foi
@@ -336,6 +426,10 @@ export function reducer(state, action) {
         // estava salvo naquele ano.
         impostoDevido: blankYear.impostoDevido,
         apuracaoGanhoCapital: blankYear.apuracaoGanhoCapital,
+        ganhosCapitalOficial: blankYear.ganhosCapitalOficial,
+        rendaVariavelAnualOficial: blankYear.rendaVariavelAnualOficial,
+        fiiFiagroMensalOficial: blankYear.fiiFiagroMensalOficial,
+        fiiFiagroAnualOficial: blankYear.fiiFiagroAnualOficial,
         demonstrativoExteriorOficial: blankYear.demonstrativoExteriorOficial,
         rendaVariavelMensalOficial: blankYear.rendaVariavelMensalOficial,
         fichasNaoLidasComConteudo: blankYear.fichasNaoLidasComConteudo,
@@ -355,10 +449,10 @@ export function reducer(state, action) {
         // filtrar por data (bug real, achado auditando o motor de Ganhos de
         // Capital; confirmado rodando o reducer de verdade, ver
         // reducer.test.js).
-        bens: state.bens.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual, movimentacoes: [] })),
-        dividas: state.dividas.map(d => ({ ...d, id: seq++, situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
-        bensRurais: state.bensRurais.map(b => ({ ...b, id: seq++, situacao_anterior: b.situacao_atual, movimentacoes: [] })),
-        dividasRurais: state.dividasRurais.map(d => ({ ...d, id: seq++, situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
+        bens: state.bens.map(b => ({ ...b, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
+        dividas: state.dividas.map(d => ({ ...d, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
+        bensRurais: state.bensRurais.map(b => ({ ...b, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
+        dividasRurais: state.dividasRurais.map(d => ({ ...d, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
         rendimentos: [],
         pagamentos: [],
         lancamentosRurais: [],
@@ -389,6 +483,10 @@ export function reducer(state, action) {
       // arquivo e quais foram incluídos à mão por cima — ver
       // RECONCILIAR_IMPORTACAO.
       const marcarImportacao = (lista) => (lista || []).map(item => ({ ...item, origem: 'importacao' }));
+      const mesclarImportados = (listaBase, novaLista) => [
+        ...(listaBase || []).filter(item => item.origem !== 'importacao'),
+        ...marcarImportacao(novaLista),
+      ];
       return {
         ...state,
         historico,
@@ -401,6 +499,17 @@ export function reducer(state, action) {
         // (payload de uma versão anterior a este campo) preserva o que já
         // estava, mesmo critério dos campos Oficiais logo abaixo.
         importFormato: action.payload.formato !== undefined ? action.payload.formato : base.importFormato,
+        documentoFonte: action.payload.documentoFonte !== undefined ? action.payload.documentoFonte : base.documentoFonte,
+        estadoFichas: action.payload.estadoFichas !== undefined ? action.payload.estadoFichas : base.estadoFichas,
+        fichasPdfObservadas: action.payload.fichasPdfObservadas !== undefined
+          ? action.payload.fichasPdfObservadas : base.fichasPdfObservadas,
+        totalFichasPdfCatalogadas: action.payload.totalFichasPdfCatalogadas !== undefined
+          ? action.payload.totalFichasPdfCatalogadas : base.totalFichasPdfCatalogadas,
+        versaoCatalogoFichasPdf: action.payload.versaoCatalogoFichasPdf !== undefined
+          ? action.payload.versaoCatalogoFichasPdf : base.versaoCatalogoFichasPdf,
+        avisosImportacao: action.payload.avisosImportacao !== undefined ? action.payload.avisosImportacao : base.avisosImportacao,
+        registrosDbkNaoModelados: action.payload.registrosDbkNaoModelados !== undefined
+          ? action.payload.registrosDbkNaoModelados : base.registrosDbkNaoModelados,
         contribuinte: contribuinte || base.contribuinte,
         // impostoDevido: só o .DBK traz (o PDF não lê essa ficha) — sem
         // isso, reimportar pelo caminho PDF por cima de um .DBK já
@@ -408,6 +517,18 @@ export function reducer(state, action) {
         impostoDevido: action.payload.impostoDevido !== undefined ? action.payload.impostoDevido : base.impostoDevido,
         apuracaoGanhoCapital: (action.payload.apuracaoGanhoCapital && action.payload.apuracaoGanhoCapital.length > 0)
           ? action.payload.apuracaoGanhoCapital : base.apuracaoGanhoCapital,
+        // Ganhos de Capital detalhado e as duas fichas de Renda Variável:
+        // mesmo critério dos demais campos Oficiais — resultado vazio não
+        // apaga o que já estava, para reimportar por um caminho que não leu a
+        // ficha não zerar em silêncio o que o outro tinha trazido.
+        ganhosCapitalOficial: action.payload.ganhosCapitalOficial
+          ? action.payload.ganhosCapitalOficial : base.ganhosCapitalOficial,
+        rendaVariavelAnualOficial: action.payload.rendaVariavelAnualOficial
+          ? action.payload.rendaVariavelAnualOficial : base.rendaVariavelAnualOficial,
+        fiiFiagroMensalOficial: (action.payload.fiiFiagroMensalOficial && action.payload.fiiFiagroMensalOficial.length > 0)
+          ? action.payload.fiiFiagroMensalOficial : base.fiiFiagroMensalOficial,
+        fiiFiagroAnualOficial: action.payload.fiiFiagroAnualOficial
+          ? action.payload.fiiFiagroAnualOficial : base.fiiFiagroAnualOficial,
         // Receitas/Despesas mensais e Apuração do Resultado da Atividade
         // Rural (registros 51/52): mesmo critério de impostoDevido/
         // apuracaoGanhoCapital — só o .DBK traz, então reimportar por PDF
@@ -434,11 +555,11 @@ export function reducer(state, action) {
         // informativo dos campos acima, `undefined` (import .DBK, que nunca
         // preenche esta chave) cai no `base` e preserva o que já existia.
         doacoesEfetuadasOficial: (action.payload.doacoesEfetuadasOficial && action.payload.doacoesEfetuadasOficial.length > 0)
-          ? action.payload.doacoesEfetuadasOficial : base.doacoesEfetuadasOficial,
+          ? mesclarImportados(base.doacoesEfetuadasOficial, action.payload.doacoesEfetuadasOficial) : base.doacoesEfetuadasOficial,
         doacoesPartidosOficial: (action.payload.doacoesPartidosOficial && action.payload.doacoesPartidosOficial.length > 0)
-          ? action.payload.doacoesPartidosOficial : base.doacoesPartidosOficial,
+          ? mesclarImportados(base.doacoesPartidosOficial, action.payload.doacoesPartidosOficial) : base.doacoesPartidosOficial,
         doacoesEcaIdosoOficial: (action.payload.doacoesEcaIdosoOficial && action.payload.doacoesEcaIdosoOficial.length > 0)
-          ? action.payload.doacoesEcaIdosoOficial : base.doacoesEcaIdosoOficial,
+          ? mesclarImportados(base.doacoesEcaIdosoOficial, action.payload.doacoesEcaIdosoOficial) : base.doacoesEcaIdosoOficial,
         bens: (bens && bens.length > 0) ? marcarImportacao(bens) : base.bens,
         dividas: (dividas && dividas.length > 0) ? marcarImportacao(dividas) : base.dividas,
         rendimentos: (rendimentos && rendimentos.length > 0) ? marcarImportacao(rendimentos) : base.rendimentos,
@@ -465,7 +586,7 @@ export function reducer(state, action) {
         // atravessam anos, igual prejuizoRuralAcompensar — blankYear nem
         // tem essa chave de propósito (achado real: usar base aqui zerava
         // os imóveis ao importar uma declaração de OUTRO ano-calendário).
-        imoveisRurais: (imoveisRurais && imoveisRurais.length > 0) ? imoveisRurais : state.imoveisRurais,
+        imoveisRurais: (imoveisRurais && imoveisRurais.length > 0) ? marcarImportacao(imoveisRurais) : state.imoveisRurais,
         bensRurais: (bensRurais && bensRurais.length > 0) ? marcarImportacao(bensRurais) : base.bensRurais,
         dividasRurais: (dividasRurais && dividasRurais.length > 0) ? marcarImportacao(dividasRurais) : base.dividasRurais,
         lancamentosRurais: base.lancamentosRurais,
@@ -491,34 +612,32 @@ export function reducer(state, action) {
         : state.historico;
       const base = mesmoAno ? state : (historico[anoAlvo] || blankYear);
 
-      const reconciliarColecao = (listaBase, decisao) => {
+      const reconciliarColecao = (listaBase, decisao, ehDivida = false) => {
         if (!decisao) return listaBase;
         const { vinculados = [], novos = [], removerAntigos = [] } = decisao;
         const vinculoPorId = new Map(vinculados.map(v => [v.idAntigo, v.dados]));
         const removerSet = new Set(removerAntigos);
-        let seq = Date.now();
         const atualizados = (listaBase || [])
-          .filter(item => !removerSet.has(item.id))
+          // Defesa em profundidade: a tela já não oferece itens manuais, mas
+          // um payload forjado também não pode removê-los.
+          .filter(item => item.origem === 'manual' || !removerSet.has(item.id))
           .map(item => {
             const dados = vinculoPorId.get(item.id);
-            if (!dados) return item;
-            // A correção troca o valor declarado; se já havia movimentação
-            // (delta entre situacao_atual e situacao_anterior originais),
-            // esse delta é preservado por cima do novo valor de partida —
-            // senão uma venda parcial já lançada seria apagada em silêncio.
-            const deltaMovimentado = (item.situacao_atual ?? 0) - (item.situacao_anterior ?? 0);
-            // `dados` é espalhado por cima em vez de campo a campo: bens
-            // guardam o código em codigo_bem e dívidas em codigo, então quem
-            // monta `dados` (a tela de conciliação) já sabe o nome certo —
-            // o reducer não precisa (nem deve) supor qual é.
+            if (!dados || item.origem === 'manual') return item;
+            const movimentacoes = item.movimentacoes || [];
+            const saldoDeclarado = dados.situacao_atual ?? dados.situacao_anterior ?? 0;
             return {
               ...item,
               ...dados,
-              situacao_atual: dados.situacao_anterior + deltaMovimentado,
+              id: item.id,
+              movimentacoes,
+              situacao_atual: ehDivida
+                ? reaplicarMovimentacoesDivida(saldoDeclarado, movimentacoes)
+                : reaplicarMovimentacoesBem(saldoDeclarado, movimentacoes),
               origem: 'importacao',
             };
           });
-        const novosComId = novos.map(n => ({ ...n, id: seq++, origem: 'importacao' }));
+        const novosComId = novos.map(n => ({ ...n, id: novoId(), origem: 'importacao' }));
         return [...atualizados, ...novosComId];
       };
 
@@ -528,10 +647,172 @@ export function reducer(state, action) {
       // marcados como tal, entra a lista nova por cima, e o que foi
       // cadastrado à mão (origem 'manual', ou sem marca por ser de uma
       // versão anterior a essa distinção) não é tocado.
-      const substituirImportados = (listaBase, novaLista) => [
-        ...(listaBase || []).filter(item => item.origem !== 'importacao'),
-        ...(novaLista || []).map(item => ({ ...item, id: Date.now() + Math.random(), origem: 'importacao' })),
-      ];
+      const textoChave = (valor) => String(valor || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const documentoChave = (item) => String(
+        item.cpf_cnpj || item.cpfCnpj || item.cnpj_fonte || item.cnpj ||
+        item.cpf_beneficiario || item.cpf_dependente || '',
+      ).replace(/\D/g, '');
+      const chaveLancamento = (campo, item) => {
+        if (item.controle) return `controle:${item.controle}`;
+        const documento = documentoChave(item);
+        if (campo === 'rendimentos') {
+          return [item.tipo, item.codigo, item.beneficiario, item.cpf_dependente, documento || textoChave(item.nome_fonte), item.mes].join('|');
+        }
+        return [item.codigo, item.beneficiario, item.cpf_beneficiario, documento || textoChave(item.nome_beneficiario)].join('|');
+      };
+      const substituirImportados = (listaBase, novaLista, campo) => {
+        const preservados = (listaBase || []).filter(item => item.origem === 'manual');
+        const legados = (listaBase || []).filter(item => item.origem === 'origem_legacy');
+        const legadosPorChave = new Map();
+        for (const item of legados) {
+          const chave = chaveLancamento(campo, item);
+          if (!legadosPorChave.has(chave)) legadosPorChave.set(chave, []);
+          legadosPorChave.get(chave).push(item);
+        }
+        const consumidos = new Set();
+        const importados = (novaLista || []).map(item => {
+          const candidatos = legadosPorChave.get(chaveLancamento(campo, item)) || [];
+          const legado = candidatos.shift();
+          if (legado) consumidos.add(legado);
+          return { ...item, id: legado?.id ?? novoId(), origem: 'importacao' };
+        });
+        return [...preservados, ...legados.filter(item => !consumidos.has(item)), ...importados];
+      };
+
+      // Coleções rurais antigas ainda podem chegar no formato automático de
+      // versões anteriores. O fluxo atual usa a decisão item a item logo
+      // abaixo; este caminho permanece apenas para compatibilidade de dados e
+      // payloads legados.
+      const chaveRural = (campo, item) => {
+        if (item.controle) return `controle:${item.controle}`;
+        if (item.chaveImportacao) return `importacao:${item.chaveImportacao}`;
+        if (campo === 'bensRurais') return `${item.codigo || item.codigo_bem || ''}|${textoChave(item.discriminacao)}`;
+        if (campo === 'dividasRurais') return textoChave(item.discriminacao);
+        if (item.chaveAssociacao) return `chave:${item.chaveAssociacao}`;
+        return `${String(item.cib || '').replace(/\D/g, '')}|${textoChave(item.nomeLocalizacao || `${item.nomeImovel || ''} ${item.localizacao || ''}`)}`;
+      };
+      const reconciliarRural = (campo) => {
+        if (!Object.prototype.hasOwnProperty.call(action.payload, campo)) return base[campo];
+        const recebido = action.payload[campo] || [];
+
+        // Caminho auditável da tela de retificadora: o vínculo foi revisado
+        // item a item. A identidade não depende de descrição, saldo ou ordem
+        // do PDF; a decisão explícita aponta para o id importado anterior.
+        if (!Array.isArray(recebido)) {
+          const antigos = base[campo] || [];
+          const antigosImportadosPorId = new Map(
+            antigos
+              .filter(item => item.origem === 'importacao' || item.origem === 'origem_legacy')
+              .map(item => [item.id, item]),
+          );
+          const idsConsumidos = new Set();
+          const idsRemovidos = new Set(
+            (recebido.removerAntigos || []).filter(id => antigosImportadosPorId.has(id)),
+          );
+          const vinculados = (recebido.vinculados || []).flatMap(vinculo => {
+            const antigo = antigosImportadosPorId.get(vinculo.idAntigo);
+            if (!antigo || idsConsumidos.has(antigo.id)) return [];
+            idsConsumidos.add(antigo.id);
+            const movimentos = antigo.movimentacoes || [];
+            const atualizado = { ...antigo, ...vinculo.dados, id: antigo.id, origem: 'importacao' };
+            if (campo === 'bensRurais') {
+              atualizado.movimentacoes = movimentos;
+              atualizado.situacao_atual = reaplicarMovimentacoesBem(vinculo.dados.situacao_atual, movimentos);
+            } else if (campo === 'dividasRurais') {
+              atualizado.movimentacoes = movimentos;
+              atualizado.situacao_atual = reaplicarMovimentacoesDivida(vinculo.dados.situacao_atual, movimentos);
+            }
+            return [atualizado];
+          });
+          const preservados = antigos.filter(item => {
+            if (item.origem === 'manual') return true;
+            return !idsConsumidos.has(item.id) && !idsRemovidos.has(item.id);
+          });
+          const novos = (recebido.novos || []).map(item => ({ ...item, id: novoId(), origem: 'importacao' }));
+          return [...preservados, ...vinculados, ...novos];
+        }
+
+        const novaLista = recebido;
+        if (!mesmoFormato && novaLista.length === 0) return base[campo];
+
+        const antigosPorChave = new Map();
+        for (const item of (base[campo] || []).filter(x => x.origem === 'importacao' || x.origem === 'origem_legacy')) {
+          const chave = chaveRural(campo, item);
+          if (!antigosPorChave.has(chave)) antigosPorChave.set(chave, []);
+          antigosPorChave.get(chave).push(item);
+        }
+        const manuais = (base[campo] || []).filter(item => item.origem === 'manual');
+        const legadosConsumidos = new Set();
+        const importados = novaLista.map(novo => {
+          const correspondentes = antigosPorChave.get(chaveRural(campo, novo)) || [];
+          const antigo = correspondentes.shift();
+          if (!antigo) return { ...novo, id: novoId(), origem: 'importacao' };
+          if (antigo.origem === 'origem_legacy') legadosConsumidos.add(antigo);
+          const movimentos = antigo.movimentacoes || [];
+          const atualizado = { ...antigo, ...novo, id: antigo.id, origem: 'importacao' };
+          if (campo === 'bensRurais') {
+            atualizado.movimentacoes = movimentos;
+            atualizado.situacao_atual = reaplicarMovimentacoesBem(novo.situacao_atual, movimentos);
+          } else if (campo === 'dividasRurais') {
+            atualizado.movimentacoes = movimentos;
+            atualizado.situacao_atual = reaplicarMovimentacoesDivida(novo.situacao_atual, movimentos);
+          }
+          return atualizado;
+        });
+        const legadosSemCorrespondencia = (base[campo] || []).filter(
+          item => item.origem === 'origem_legacy' && !legadosConsumidos.has(item),
+        );
+        return [...manuais, ...legadosSemCorrespondencia, ...importados];
+      };
+
+      // Uma retificadora precisa atualizar também os quadros anuais que não
+      // passam pela conciliação item a item. Se a origem é a mesma, até um
+      // valor vazio é autoritativo (a ficha pode ter sido removida na
+      // retificadora). Ao trocar de formato, vazio pode significar apenas que
+      // aquele parser não cobre a ficha; nesse caso preservamos o dado já
+      // confirmado pelo outro formato.
+      const mesmoFormato = action.payload.formato !== undefined && action.payload.formato === base.importFormato;
+      const quadroRetificado = (campo) => {
+        if (!Object.prototype.hasOwnProperty.call(action.payload, campo)) return base[campo];
+        const valor = action.payload[campo];
+        const temConteudo = Array.isArray(valor) ? valor.length > 0 : valor != null;
+        return (mesmoFormato || temConteudo) ? valor : base[campo];
+      };
+
+      const imoveisRuraisReconciliados = reconciliarRural('imoveisRurais') || [];
+      const bensRuraisReconciliados = reconciliarRural('bensRurais') || [];
+      const dividasRuraisReconciliadas = reconciliarRural('dividasRurais') || [];
+      const participantesRuraisRecebidos = quadroRetificado('participantesRuraisOficial');
+      const imoveisRecebidos = Array.isArray(action.payload.imoveisRurais)
+        ? (action.payload.imoveisRurais || [])
+        : [
+          ...(action.payload.imoveisRurais?.vinculados || []).map(item => item.dados),
+          ...(action.payload.imoveisRurais?.novos || []),
+        ];
+      const chaveImovelPorIdTemporario = new Map(
+        imoveisRecebidos
+          .filter(item => item?.id != null && item?.chaveImportacao)
+          .map(item => [item.id, item.chaveImportacao]),
+      );
+      const idFinalPorChaveImovel = new Map(
+        imoveisRuraisReconciliados
+          .filter(item => item?.chaveImportacao)
+          .map(item => [item.chaveImportacao, item.id]),
+      );
+      const participantesRuraisReconciliados = Array.isArray(participantesRuraisRecebidos)
+        ? participantesRuraisRecebidos.map(participante => {
+          const chaveImovel = participante.imovelChaveImportacao
+            || chaveImovelPorIdTemporario.get(participante.imovelId);
+          if (!chaveImovel || !idFinalPorChaveImovel.has(chaveImovel)) return participante;
+          return {
+            ...participante,
+            imovelChaveImportacao: chaveImovel,
+            imovelId: idFinalPorChaveImovel.get(chaveImovel),
+          };
+        })
+        : participantesRuraisRecebidos;
 
       return {
         ...state,
@@ -541,14 +822,49 @@ export function reducer(state, action) {
         // A retificadora também é uma importação de verdade: o formato dela
         // é que passa a valer para os avisos de importação parcial.
         importFormato: action.payload.formato !== undefined ? action.payload.formato : state.importFormato,
+        documentoFonte: quadroRetificado('documentoFonte'),
+        estadoFichas: quadroRetificado('estadoFichas'),
+        fichasPdfObservadas: quadroRetificado('fichasPdfObservadas'),
+        totalFichasPdfCatalogadas: quadroRetificado('totalFichasPdfCatalogadas'),
+        versaoCatalogoFichasPdf: quadroRetificado('versaoCatalogoFichasPdf'),
+        avisosImportacao: quadroRetificado('avisosImportacao'),
+        registrosDbkNaoModelados: quadroRetificado('registrosDbkNaoModelados'),
         contribuinte: contribuinte || base.contribuinte,
-        dependentes: base.dependentes,
+        dependentes: action.payload.dependentes !== undefined ? action.payload.dependentes : base.dependentes,
+        impostoDevido: quadroRetificado('impostoDevido'),
+        apuracaoGanhoCapital: quadroRetificado('apuracaoGanhoCapital'),
+        ganhosCapitalOficial: quadroRetificado('ganhosCapitalOficial'),
+        rendaVariavelAnualOficial: quadroRetificado('rendaVariavelAnualOficial'),
+        fiiFiagroMensalOficial: quadroRetificado('fiiFiagroMensalOficial'),
+        fiiFiagroAnualOficial: quadroRetificado('fiiFiagroAnualOficial'),
+        receitasDespesasRuraisOficial: quadroRetificado('receitasDespesasRuraisOficial'),
+        apuracaoResultadoRuralOficial: quadroRetificado('apuracaoResultadoRuralOficial'),
+        movimentacaoRebanhoOficial: quadroRetificado('movimentacaoRebanhoOficial'),
+        participantesRuraisOficial: participantesRuraisReconciliados,
+        demonstrativoExteriorOficial: quadroRetificado('demonstrativoExteriorOficial'),
+        rendaVariavelMensalOficial: quadroRetificado('rendaVariavelMensalOficial'),
+        doacoesEfetuadasOficial: Object.prototype.hasOwnProperty.call(action.payload, 'doacoesEfetuadasOficial')
+          && (mesmoFormato || action.payload.doacoesEfetuadasOficial?.length > 0)
+          ? substituirImportados(base.doacoesEfetuadasOficial, action.payload.doacoesEfetuadasOficial, 'doacoesEfetuadasOficial')
+          : base.doacoesEfetuadasOficial,
+        doacoesPartidosOficial: Object.prototype.hasOwnProperty.call(action.payload, 'doacoesPartidosOficial')
+          && (mesmoFormato || action.payload.doacoesPartidosOficial?.length > 0)
+          ? substituirImportados(base.doacoesPartidosOficial, action.payload.doacoesPartidosOficial, 'doacoesPartidosOficial')
+          : base.doacoesPartidosOficial,
+        doacoesEcaIdosoOficial: Object.prototype.hasOwnProperty.call(action.payload, 'doacoesEcaIdosoOficial')
+          && (mesmoFormato || action.payload.doacoesEcaIdosoOficial?.length > 0)
+          ? substituirImportados(base.doacoesEcaIdosoOficial, action.payload.doacoesEcaIdosoOficial, 'doacoesEcaIdosoOficial')
+          : base.doacoesEcaIdosoOficial,
+        // Este campo é uma conclusão da varredura do arquivo, não uma ficha
+        // parcial: a lista nova sempre substitui a antiga, inclusive vazia.
+        fichasNaoLidasComConteudo: action.payload.fichasNaoLidasComConteudo || [],
         bens: reconciliarColecao(base.bens, bens),
-        dividas: reconciliarColecao(base.dividas, dividas),
-        rendimentos: substituirImportados(base.rendimentos, rendimentos),
-        pagamentos: substituirImportados(base.pagamentos, pagamentos),
-        bensRurais: base.bensRurais,
-        imoveisRurais: base.imoveisRurais,
+        dividas: reconciliarColecao(base.dividas, dividas, true),
+        rendimentos: substituirImportados(base.rendimentos, rendimentos, 'rendimentos'),
+        pagamentos: substituirImportados(base.pagamentos, pagamentos, 'pagamentos'),
+        bensRurais: bensRuraisReconciliados,
+        dividasRurais: dividasRuraisReconciliadas,
+        imoveisRurais: imoveisRuraisReconciliados,
         lancamentosRurais: base.lancamentosRurais,
         prejuizoRuralAcompensar: base.prejuizoRuralAcompensar,
         pagamentosDiversos: base.pagamentosDiversos,
@@ -575,7 +891,7 @@ export function reducer(state, action) {
           // duas movimentações registradas no mesmo milissegundo colidiam e
           // excluir uma apagava as duas de uma vez (achado real, testando
           // duas REGISTRAR_MOVIMENTACAO_BEM em sequência sem esperar).
-          const mov = { ...movimentacao, id: Date.now() + Math.random() };
+          const mov = { ...movimentacao, id: novoId() };
           let situacao_atual = b.situacao_atual;
           if (mov.tipo === 'compra' || mov.tipo === 'benfeitoria') situacao_atual += mov.valor;
           else if (mov.tipo === 'venda_parcial') situacao_atual = Math.max(0, situacao_atual - mov.valor);
@@ -602,7 +918,7 @@ export function reducer(state, action) {
           // duas movimentações registradas no mesmo milissegundo colidiam e
           // excluir uma apagava as duas de uma vez (achado real, testando
           // duas REGISTRAR_MOVIMENTACAO_BEM em sequência sem esperar).
-          const mov = { ...movimentacao, id: Date.now() + Math.random() };
+          const mov = { ...movimentacao, id: novoId() };
           let situacao_atual = d.situacao_atual;
           if (mov.tipo === 'contratacao') situacao_atual += mov.valor;
           else if (mov.tipo === 'amortizacao') situacao_atual = Math.max(0, situacao_atual - mov.valor);
@@ -678,14 +994,14 @@ export function reducer(state, action) {
       };
     }
     case 'ADD_BEM_RURAL':
-      return { ...state, bensRurais: [...state.bensRurais, { ...action.payload, id: Date.now() }] };
+      return { ...state, bensRurais: [...state.bensRurais, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_BEM_RURAL':
-      return { ...state, bensRurais: state.bensRurais.map(b => b.id === action.payload.id ? action.payload : b) };
+      return { ...state, bensRurais: state.bensRurais.map(b => b.id === action.payload.id ? { ...b, ...action.payload } : b) };
     case 'DELETE_BEM_RURAL':
       return { ...state, bensRurais: state.bensRurais.filter(b => b.id !== action.payload) };
 
     case 'ADD_DIVIDA_RURAL':
-      return { ...state, dividasRurais: [...state.dividasRurais, { ...action.payload, id: Date.now(), movimentacoes: [] }] };
+      return { ...state, dividasRurais: [...state.dividasRurais, { ...action.payload, id: novoId(), movimentacoes: [], origem: 'manual' }] };
     case 'UPDATE_DIVIDA_RURAL':
       return { ...state, dividasRurais: state.dividasRurais.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
     case 'DELETE_DIVIDA_RURAL':
@@ -698,7 +1014,7 @@ export function reducer(state, action) {
         ...state,
         dividasRurais: state.dividasRurais.map(d => {
           if (d.id !== dividaId) return d;
-          const mov = { ...movimentacao, id: Date.now() + Math.random() };
+          const mov = { ...movimentacao, id: novoId() };
           let situacao_atual = d.situacao_atual;
           if (mov.tipo === 'contratacao') situacao_atual += mov.valor;
           else if (mov.tipo === 'amortizacao') situacao_atual = Math.max(0, situacao_atual - mov.valor);
@@ -732,16 +1048,16 @@ export function reducer(state, action) {
     }
 
     case 'ADD_IMOVEL_RURAL':
-      return { ...state, imoveisRurais: [...state.imoveisRurais, { ...action.payload, id: Date.now() }] };
+      return { ...state, imoveisRurais: [...state.imoveisRurais, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_IMOVEL_RURAL':
-      return { ...state, imoveisRurais: state.imoveisRurais.map(i => i.id === action.payload.id ? action.payload : i) };
+      return { ...state, imoveisRurais: state.imoveisRurais.map(i => i.id === action.payload.id ? { ...i, ...action.payload } : i) };
     case 'DELETE_IMOVEL_RURAL':
       return { ...state, imoveisRurais: state.imoveisRurais.filter(i => i.id !== action.payload) };
 
     // Receita/despesa da atividade rural, lançada conforme acontece (como
     // o resto do app) em vez de preencher um formulário anual de uma vez.
     case 'ADD_LANCAMENTO_RURAL':
-      return { ...state, lancamentosRurais: [...state.lancamentosRurais, { ...action.payload, id: Date.now() }] };
+      return { ...state, lancamentosRurais: [...state.lancamentosRurais, { ...action.payload, id: novoId() }] };
     case 'UPDATE_LANCAMENTO_RURAL':
       return { ...state, lancamentosRurais: state.lancamentosRurais.map(l => l.id === action.payload.id ? action.payload : l) };
     case 'DELETE_LANCAMENTO_RURAL':
@@ -756,7 +1072,7 @@ export function reducer(state, action) {
       return { ...state, prejuizoRuralAcompensar: state.prejuizoRuralAcompensar + action.payload };
 
     case 'ADD_PAGAMENTO_DIVERSO':
-      return { ...state, pagamentosDiversos: [...state.pagamentosDiversos, { ...action.payload, id: Date.now() }] };
+      return { ...state, pagamentosDiversos: [...state.pagamentosDiversos, { ...action.payload, id: novoId() }] };
     case 'UPDATE_PAGAMENTO_DIVERSO':
       return { ...state, pagamentosDiversos: state.pagamentosDiversos.map(p => p.id === action.payload.id ? action.payload : p) };
     case 'DELETE_PAGAMENTO_DIVERSO':
@@ -899,16 +1215,10 @@ export function reducerComHistorico(state, action) {
   const descricao = descreverAcao(state, action);
   if (!descricao) return novoEstado;
   const entrada = {
-    id: Date.now() + Math.random(),
+    id: novoId(),
     data: new Date().toISOString(),
     anoCalendario: novoEstado.anoCalendario,
     descricao,
-    // IP público de quem fez a alteração (ver utils/ipTracker.js) — só
-    // funciona com internet, e só é o IP público (não identifica a máquina
-    // do Windows), limitação já aceita pela usuária. getIpAtual() nunca
-    // espera a busca assíncrona: se ainda não resolveu (ou não há rede),
-    // fica null aqui mesmo, sem travar nem atrasar a ação.
-    ip: getIpAtual(),
   };
   return { ...novoEstado, alteracoes: [entrada, ...(novoEstado.alteracoes || [])].slice(0, 300) };
 }

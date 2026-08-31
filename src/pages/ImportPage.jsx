@@ -6,6 +6,9 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { parseDBK, parsePDF } from './importParsers';
 import ReconciliacaoRetificadoraModal from '../components/ReconciliacaoRetificadoraModal';
+import RevisaoImportacaoModal from '../components/RevisaoImportacaoModal';
+import { identificarArquivoFonte, payloadImportacaoCompleto } from '../utils/importacaoDeclaracao';
+import { validarIntegridadeArquivoIrpf } from '../irpf/leitorRegistrosDbk';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -22,12 +25,13 @@ function mesmoTitular(a, b) {
 }
 
 export default function ImportPage() {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, dispatchPersistido, addToast, perfilProtegido, persistencia } = useData();
   const [importing, setImporting] = useState(false);
   const [importType, setImportType] = useState(null);
   const [importLog, setImportLog] = useState([]);
   const [progress, setProgress] = useState(null); // { current, total } | null
   const [reconciliacao, setReconciliacao] = useState(null); // props do modal de retificadora, ou null
+  const [previsualizacao, setPrevisualizacao] = useState(null);
   const fileRef = useRef();
 
   const log = (msg, level = 'info') => setImportLog(prev => [...prev, { msg, level }]);
@@ -46,6 +50,18 @@ export default function ImportPage() {
     if (!confirmado) return;
     dispatch({ type: 'DELETE_HISTORICO_ANO', payload: ano });
     addToast(`Ano-calendário ${ano} excluído do histórico.`, 'info');
+  };
+
+  const exportarFonteAuditoria = (e, ano, documentoFonte) => {
+    e.stopPropagation();
+    if (!documentoFonte?.textoIntegral) return;
+    const blob = new Blob([documentoFonte.textoIntegral], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `auditoria-declaracao-irpf-${ano}-${documentoFonte.formato || 'arquivo'}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // "Histórico de Declarações" é o arquivo de documentos importados — algo
@@ -75,6 +91,7 @@ export default function ImportPage() {
     try {
       let result;
       const ext = file.name.toLowerCase().split('.').pop();
+      const arrayBufferFonte = await file.arrayBuffer();
 
       // Extensões OFICIAIS do programa da Receita, conferidas na classe
       // `ConstantesGlobais` do próprio IRPF 2026 em 24/08/2026:
@@ -96,12 +113,16 @@ export default function ImportPage() {
       if (ext === 'dbk' || ext === 'dec' || ext === 'f2b') {
         log(`Arquivo selecionado: ${file.name} (${ext.toUpperCase()})`);
         const text = await file.text();
+        const integridade = validarIntegridadeArquivoIrpf(text, ext);
+        log(`Integridade eletrônica validada: ${integridade.registros.length} registros, trailer e contagens conferidos.`, 'success');
         result = await parseDBK(text, log);
       } else if (ext === 'pdf') {
         log(`Arquivo selecionado: ${file.name} (PDF)`);
         log('Lendo arquivo PDF...');
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        // pdf.js pode transferir/destacar o ArrayBuffer recebido. O original
+        // precisa permanecer intacto para o SHA-256 que identifica exatamente
+        // o arquivo escolhido pela pessoa.
+        const pdf = await pdfjsLib.getDocument({ data: arrayBufferFonte.slice(0) }).promise;
         setProgress({ current: 0, total: pdf.numPages });
         result = await parsePDF(pdf, log, (current, total) => setProgress({ current, total }));
       } else {
@@ -111,6 +132,25 @@ export default function ImportPage() {
       }
 
       if (result) {
+        result = await identificarArquivoFonte(result, file, arrayBufferFonte);
+        if (result.documentoFonte) {
+          const d = result.documentoFonte;
+          const quantidade = d.totalPaginas ? `${d.totalPaginas} página(s)` : `${d.totalRegistros} registro(s)`;
+          log(`Integridade: conteúdo textual integral preservado localmente (${quantidade}, ${d.caracteresExtraidos.toLocaleString('pt-BR')} caracteres).`, 'success');
+          if (d.sha256TextoExtraido) log(`Hash SHA-256 do texto: ${d.sha256TextoExtraido}`);
+          if (d.sha256ArquivoOriginal) log(`Hash SHA-256 do arquivo original: ${d.sha256ArquivoOriginal}`, 'success');
+        }
+        setImporting(false);
+        setProgress(null);
+        const aprovado = await new Promise(resolve => {
+          setPrevisualizacao({ resultado: result, nomeArquivo: file.name, resolve });
+        });
+        setPrevisualizacao(null);
+        if (!aprovado) {
+          log('Importação cancelada na etapa de revisão. Nenhum dado foi alterado.', 'info');
+          return;
+        }
+        setImporting(true);
         const anoDestino = result.anoCalendario || state.anoCalendario;
         // Antes da 1ª importação não há ano definido: nada de "troca de ano",
         // a declaração simplesmente define o ano-calendário inicial. Isso é
@@ -122,8 +162,14 @@ export default function ImportPage() {
         // ano — sem isso, importar por engano sobrescreveria em silêncio
         // lançamentos manuais já feitos (compra/venda/baixa do ano).
         const existenteNoDestino = trocaAno ? (state.historico[anoDestino] || {}) : state;
-        const temDadosNoDestino = (existenteNoDestino.bens?.length > 0) || (existenteNoDestino.dividas?.length > 0) ||
-          (existenteNoDestino.rendimentos?.length > 0) || (existenteNoDestino.pagamentos?.length > 0);
+        const colecoesQueCaracterizamDados = [
+          'bens', 'dividas', 'rendimentos', 'pagamentos',
+          'imoveisRurais', 'bensRurais', 'dividasRurais',
+          'receitasDespesasRuraisOficial', 'participantesRuraisOficial', 'movimentacaoRebanhoOficial',
+        ];
+        const temDadosNoDestino = colecoesQueCaracterizamDados.some(
+          campo => (existenteNoDestino[campo] || []).length > 0,
+        ) || Boolean(existenteNoDestino.apuracaoResultadoRuralOficial);
 
         // Titular diferente do já cadastrado nesse ano: isso NÃO é um erro
         // (o app não impede), mas merece um aviso específico em vez do
@@ -149,39 +195,16 @@ export default function ImportPage() {
             setImporting(false);
             return;
           }
-          dispatch({ type: 'IMPORT_DECLARACAO', payload: {
-            anoCalendario: result.anoCalendario,
-            formato: result.formato,
-            contribuinte: result.contribuinte,
+          await dispatchPersistido({ type: 'IMPORT_DECLARACAO', payload: payloadImportacaoCompleto(result, {
             // Titular novo: os dependentes do titular anterior não são dele,
             // não seguem junto (evita misturar as duas famílias no mesmo
             // ano-calendário).
             dependentes: [],
-            bens: result.bens,
-            dividas: result.dividas,
-            rendimentos: result.rendimentos,
-            pagamentos: result.pagamentos,
-            impostoDevido: result.impostoDevido,
-            apuracaoGanhoCapital: result.apuracaoGanhoCapital,
-            imoveisRurais: result.imoveisRurais,
-            bensRurais: result.bensRurais,
-            dividasRurais: result.dividasRurais,
-            receitasDespesasRuraisOficial: result.receitasDespesasRuraisOficial,
-            apuracaoResultadoRuralOficial: result.apuracaoResultadoRuralOficial,
-            movimentacaoRebanhoOficial: result.movimentacaoRebanhoOficial,
-            participantesRuraisOficial: result.participantesRuraisOficial,
-            demonstrativoExteriorOficial: result.demonstrativoExteriorOficial,
-            rendaVariavelMensalOficial: result.rendaVariavelMensalOficial,
-          fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
-            fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
-            doacoesEfetuadasOficial: result.doacoesEfetuadasOficial,
-            doacoesPartidosOficial: result.doacoesPartidosOficial,
-            doacoesEcaIdosoOficial: result.doacoesEcaIdosoOficial,
-          }});
+          }) });
           log('');
-          log('Importação concluída com sucesso (titular trocado).', 'success');
+          log('Importação concluída e salva localmente (titular trocado).', 'success');
           log('Revise os dados importados nas abas de cadastro.');
-          addToast('Declaração importada com sucesso!', 'success');
+          addToast('Declaração importada e salva com sucesso!', 'success');
           setImporting(false);
           setProgress(null);
           return;
@@ -193,11 +216,14 @@ export default function ImportPage() {
         // de uma versão antes dessa marca existir não permite separar
         // importado de manual com segurança, então cai no fluxo antigo (que
         // pelo menos avisa antes de substituir tudo).
-        const origemConfiavelPorItem = ['bens', 'dividas'].every(campo =>
-          (existenteNoDestino[campo] || []).every(item => item.origem === 'importacao' || item.origem === 'manual')
+        const origemConfiavelPorItem = ['bens', 'dividas', 'imoveisRurais', 'bensRurais', 'dividasRurais'].every(campo =>
+          (existenteNoDestino[campo] || []).every(item => ['importacao', 'manual', 'origem_legacy'].includes(item.origem))
         );
-        const temImportacaoAnterior = (existenteNoDestino.bens || []).some(b => b.origem === 'importacao') ||
-          (existenteNoDestino.dividas || []).some(d => d.origem === 'importacao');
+        const temImportacaoAnterior = ['bens', 'dividas', 'imoveisRurais', 'bensRurais', 'dividasRurais'].some(
+          campo => (existenteNoDestino[campo] || []).some(
+            item => item.origem === 'importacao' || item.origem === 'origem_legacy',
+          ),
+        ) || existenteNoDestino.origemAnoAtual === 'importacao';
         const ehRetificadora = temDadosNoDestino && temImportacaoAnterior && origemConfiavelPorItem &&
           mesmoTitular(result.contribuinte, existenteNoDestino.contribuinte);
 
@@ -214,13 +240,26 @@ export default function ImportPage() {
             return;
           }
           setReconciliacao({
+            resultadoCompleto: result,
             anoDestino,
             contribuinte: result.contribuinte,
             formato: result.formato,
-            bensAntigos: (existenteNoDestino.bens || []).filter(b => b.origem === 'importacao'),
+            bensAntigos: (existenteNoDestino.bens || []).filter(b => b.origem === 'importacao' || b.origem === 'origem_legacy'),
             bensNovos: result.bens || [],
-            dividasAntigas: (existenteNoDestino.dividas || []).filter(d => d.origem === 'importacao'),
+            dividasAntigas: (existenteNoDestino.dividas || []).filter(d => d.origem === 'importacao' || d.origem === 'origem_legacy'),
             dividasNovas: result.dividas || [],
+            imoveisRuraisAntigos: (existenteNoDestino.imoveisRurais || []).filter(
+              item => item.origem === 'importacao' || item.origem === 'origem_legacy',
+            ),
+            imoveisRuraisNovos: result.imoveisRurais || [],
+            bensRuraisAntigos: (existenteNoDestino.bensRurais || []).filter(
+              item => item.origem === 'importacao' || item.origem === 'origem_legacy',
+            ),
+            bensRuraisNovos: result.bensRurais || [],
+            dividasRuraisAntigas: (existenteNoDestino.dividasRurais || []).filter(
+              item => item.origem === 'importacao' || item.origem === 'origem_legacy',
+            ),
+            dividasRuraisNovas: result.dividasRurais || [],
             rendimentosNovos: result.rendimentos || [],
             pagamentosNovos: result.pagamentos || [],
           });
@@ -251,35 +290,11 @@ export default function ImportPage() {
           return;
         }
 
-        dispatch({ type: 'IMPORT_DECLARACAO', payload: {
-          anoCalendario: result.anoCalendario,
-          formato: result.formato,
-          contribuinte: result.contribuinte,
-          bens: result.bens,
-          dividas: result.dividas,
-          rendimentos: result.rendimentos,
-          pagamentos: result.pagamentos,
-          dependentes: result.dependentes,
-          impostoDevido: result.impostoDevido,
-          apuracaoGanhoCapital: result.apuracaoGanhoCapital,
-          imoveisRurais: result.imoveisRurais,
-          bensRurais: result.bensRurais,
-          dividasRurais: result.dividasRurais,
-          receitasDespesasRuraisOficial: result.receitasDespesasRuraisOficial,
-          apuracaoResultadoRuralOficial: result.apuracaoResultadoRuralOficial,
-          movimentacaoRebanhoOficial: result.movimentacaoRebanhoOficial,
-          participantesRuraisOficial: result.participantesRuraisOficial,
-          demonstrativoExteriorOficial: result.demonstrativoExteriorOficial,
-          rendaVariavelMensalOficial: result.rendaVariavelMensalOficial,
-          fichasNaoLidasComConteudo: result.fichasNaoLidasComConteudo,
-          doacoesEfetuadasOficial: result.doacoesEfetuadasOficial,
-          doacoesPartidosOficial: result.doacoesPartidosOficial,
-          doacoesEcaIdosoOficial: result.doacoesEcaIdosoOficial,
-        }});
+        await dispatchPersistido({ type: 'IMPORT_DECLARACAO', payload: payloadImportacaoCompleto(result) });
         log('');
-        log('Importação concluída com sucesso.', 'success');
+        log('Importação concluída e salva localmente.', 'success');
         log('Revise os dados importados nas abas de cadastro.');
-        addToast('Declaração importada com sucesso!', 'success');
+        addToast('Declaração importada e salva com sucesso!', 'success');
       }
     } catch (err) {
       log(`Erro na importação: ${err.message}`, 'error');
@@ -290,12 +305,17 @@ export default function ImportPage() {
     setProgress(null);
   };
 
-  const handleConfirmarReconciliacao = (payload) => {
-    dispatch({ type: 'RECONCILIAR_IMPORTACAO', payload });
-    setReconciliacao(null);
-    log('');
-    log('Conciliação da retificadora concluída.', 'success');
-    addToast('Retificadora conciliada e importada com sucesso!', 'success');
+  const handleConfirmarReconciliacao = async (payload) => {
+    try {
+      await dispatchPersistido({ type: 'RECONCILIAR_IMPORTACAO', payload });
+      setReconciliacao(null);
+      log('');
+      log('Conciliação da retificadora concluída e salva localmente.', 'success');
+      addToast('Retificadora conciliada, importada e salva!', 'success');
+    } catch (err) {
+      log(`A retificadora não foi aplicada: ${err.message}`, 'error');
+      addToast(err.message, 'error');
+    }
   };
 
   return (
@@ -307,6 +327,26 @@ export default function ImportPage() {
         </div>
       </div>
       <div className="page-body animate-in">
+        <div
+          className="card"
+          style={{
+            marginBottom: '20px',
+            borderColor: perfilProtegido ? 'var(--accent-success)' : 'var(--accent-warning, #f59e0b)',
+          }}
+        >
+          <p style={{ margin: 0, fontSize: '13px' }}>
+            {perfilProtegido
+              ? 'Perfil protegido por senha. A declaração e sua cópia textual integral são salvas localmente com criptografia.'
+              : 'Atenção: este perfil não tem senha. A declaração e sua cópia textual integral ficam somente neste computador, mas sem criptografia. Para dados reais, volte à tela de perfis e use “Proteger com senha”.'}
+          </p>
+        </div>
+        {persistencia.estado === 'erro' && (
+          <div className="card" style={{ marginBottom: '20px', borderColor: 'var(--accent-danger)' }}>
+            <p style={{ margin: 0, color: 'var(--accent-danger)', fontSize: '13px' }}>
+              Falha de salvamento local: {persistencia.erro}. Os dados não devem ser considerados gravados até uma nova tentativa bem-sucedida.
+            </p>
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
           <div
             className={`import-zone ${importType === 'pdf' ? 'active' : ''}`}
@@ -397,11 +437,27 @@ export default function ImportPage() {
                           Salvo em {new Date(h.savedAt).toLocaleDateString('pt-BR')}
                         </p>
                       )}
+                      {h.documentoFonte && (
+                        <p style={{ fontSize: '12px', color: 'var(--accent-success)', marginTop: '4px' }}>
+                          Fonte integral preservada: {h.documentoFonte.totalPaginas
+                            ? `${h.documentoFonte.totalPaginas} páginas`
+                            : `${h.documentoFonte.totalRegistros || 0} registros`}
+                        </p>
+                      )}
                     </div>
                     <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
                       {ehAtivo
                         ? <span className="badge badge-green">Ano ativo</span>
                         : <span className="badge badge-blue">Carregar</span>}
+                      {h.documentoFonte?.textoIntegral && (
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          title="Exportar uma cópia textual integral para auditoria"
+                          onClick={(e) => exportarFonteAuditoria(e, ano, h.documentoFonte)}
+                        >
+                          Exportar fonte
+                        </button>
+                      )}
                       <button
                         className="btn btn-sm btn-danger"
                         title={`Excluir o ano-calendário ${ano} do histórico`}
@@ -423,6 +479,15 @@ export default function ImportPage() {
           {...reconciliacao}
           onConfirm={handleConfirmarReconciliacao}
           onCancel={() => { setReconciliacao(null); log('Conciliação cancelada. Dados existentes preservados.', 'error'); }}
+        />
+      )}
+      {previsualizacao && (
+        <RevisaoImportacaoModal
+          open
+          resultado={previsualizacao.resultado}
+          nomeArquivo={previsualizacao.nomeArquivo}
+          onConfirm={() => previsualizacao.resolve(true)}
+          onCancel={() => previsualizacao.resolve(false)}
         />
       )}
     </>

@@ -251,7 +251,7 @@ describe('demonstrativoPeriodo — Renda Variável importada por PDF, com valore
   const ficha = (mes, titular, resultadoComuns, resultadoDay = 0, imposto = 0) => ({
     mes,
     titular,
-    cpfDependente: titular ? null : '65578791620',
+    cpfDependente: titular ? null : '33344455508',
     comuns: { resultadoLiquidoMes: resultadoComuns, prejuizoCompensar: 0, aliquota: '15%' },
     daytrade: { resultadoLiquidoMes: resultadoDay, prejuizoCompensar: 0, aliquota: '20%' },
     consolidacao: { totalImpostoDevido: imposto },
@@ -281,12 +281,37 @@ describe('demonstrativoPeriodo — Renda Variável importada por PDF, com valore
     expect(d.rendaVariavelMeses).toEqual([{ ano: 2025, mes: 7 }, { ano: 2025, mes: 8 }]);
   });
 
-  test('nada disso entra no Saldo de Caixa nem na Variação Patrimonial (tributação exclusiva)', () => {
+  // ACHADO 12 da auditoria de 24/08/2026. Este teste afirmava o contrário:
+  // que nada da renda variável entrava no Saldo de Caixa, "porque é tributação
+  // exclusiva". Isso confunde regime de tributação com movimento de caixa —
+  // pelo mesmo critério, todos os OUTROS rendimentos de tributação exclusiva
+  // já entram no demonstrativo. O que impede somar o resultado inteiro é
+  // outra coisa: o GANHO já entra pela ficha de exclusivos (código 05) e
+  // somá-lo aqui contaria duas vezes. A PERDA não vai para ficha nenhuma, e
+  // era a única parte que sumia do fluxo.
+  test('só a PERDA da renda variável entra no Saldo de Caixa; o ganho não, para não duplicar a ficha de exclusivos', () => {
     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
     const com = demonstrativoPeriodo(estadoComPdf(), '2025-01-01', '2025-12-31');
-    expect(com.saldoDeCaixa).toBe(sem.saldoDeCaixa);
+    // A única perda das três fichas é a do dependente em julho: -245,40.
+    expect(com.rendaVariavelPerda).toBeCloseTo(-245.4, 2);
+    expect(com.saldoDeCaixa).toBeCloseTo(sem.saldoDeCaixa - 245.4, 2);
+    expect(com.saldoDeCaixaGeral).toBeCloseTo(sem.saldoDeCaixaGeral - 245.4, 2);
+    // Os 1.500,00 de ganho do titular continuam FORA: quem os traz é a ficha
+    // de exclusivos, não esta.
+    expect(com.rendaVariavelResultado).toBeCloseTo(1254.6, 2);
+    // Variação Patrimonial e Rendimentos seguem intocados: renda variável não
+    // é estoque nem rendimento declarado aqui.
     expect(com.varPatrimonial.total).toBe(sem.varPatrimonial.total);
     expect(com.rendimentos.totalGeral).toBe(sem.rendimentos.totalGeral);
+  });
+
+  test('mês de renda variável com ganho puro não mexe no Saldo de Caixa', () => {
+    const s = estadoDoisAnos();
+    s.rendaVariavelMensalOficial = [ficha(7, true, 1000, 500, 275)];
+    const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
+    const com = demonstrativoPeriodo(s, '2025-01-01', '2025-12-31');
+    expect(com.rendaVariavelPerda).toBe(0);
+    expect(com.saldoDeCaixa).toBe(sem.saldoDeCaixa);
   });
 });
 

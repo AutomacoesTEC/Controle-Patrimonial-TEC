@@ -7,6 +7,9 @@ import {
 import { gerarSaltBase64, derivarChave, criptografarObjeto } from '../utils/crypto';
 import { parseDBK, parsePDF } from './importParsers';
 import { reducerComHistorico, initialState } from '../store/reducer';
+import { validarIntegridadeArquivoIrpf } from '../irpf/leitorRegistrosDbk';
+import { identificarArquivoFonte, payloadImportacaoCompleto, resumirImportacao } from '../utils/importacaoDeclaracao';
+import RevisaoImportacaoModal from '../components/RevisaoImportacaoModal';
 
 // pdfjs-dist é uma biblioteca pesada (é o motivo do bundle de Importar
 // Declaração ser o maior do app) — PerfilLauncherPage é a ÚNICA tela que
@@ -71,6 +74,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   // mesmo arquivo de novo em Importar Declaração assim que entrar. null =
   // ninguém importou nada, segue o fluxo manual de sempre.
   const [declaracaoImportada, setDeclaracaoImportada] = useState(null);
+  const [previsualizacao, setPrevisualizacao] = useState(null);
   const [importando, setImportando] = useState(false);
   const [erroImportacao, setErroImportacao] = useState('');
   const fileRef = useRef();
@@ -93,6 +97,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     setErroImportacao('');
     try {
       const ext = file.name.toLowerCase().split('.').pop();
+      const arrayBufferFonte = await file.arrayBuffer();
       let result;
       // Os avisos do parser (quais fichas o arquivo NÃO traz) eram jogados
       // fora aqui, com uma função de log vazia — a tela Importar Declaração
@@ -108,6 +113,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       // consegue reimportar depois (ou o contrário).
       if (ext === 'dbk' || ext === 'dec' || ext === 'f2b') {
         const text = await file.text();
+        validarIntegridadeArquivoIrpf(text, ext);
         result = await parseDBK(text, coletar);
       } else if (ext === 'pdf') {
         const [pdfjsLib, { default: pdfjsWorker }] = await Promise.all([
@@ -115,8 +121,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
         ]);
         pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        // Preserva os bytes originais para o hash. O leitor PDF pode destacar
+        // o buffer que recebe ao enviá-lo para o worker.
+        const pdf = await pdfjsLib.getDocument({ data: arrayBufferFonte.slice(0) }).promise;
         result = await parsePDF(pdf, coletar, () => {});
       } else {
         setErroImportacao('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC, .DBK ou .F2B gerado pelo programa da Receita.');
@@ -128,10 +135,15 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         setImportando(false);
         return;
       }
-      setDeclaracaoImportada({ nomeArquivo: file.name, result, avisos });
-      setForm(p => ({ ...p, nome: result.contribuinte.nome || p.nome, cpf: result.contribuinte.cpf || p.cpf }));
-    } catch {
-      setErroImportacao('Não consegui ler este arquivo. Confira se é uma declaração .DBK/.DEC ou o PDF da declaração, ou preencha manualmente.');
+      result = await identificarArquivoFonte(result, file, arrayBufferFonte);
+      setPrevisualizacao({
+        nomeArquivo: file.name,
+        result,
+        avisos: [...new Set([...avisos, ...(result.avisosImportacao || [])])],
+        primeiraRevisao: true,
+      });
+    } catch (err) {
+      setErroImportacao(err?.message || 'Não consegui ler este arquivo. Confira se é uma declaração .DBK/.DEC ou o PDF da declaração, ou preencha manualmente.');
     }
     setImportando(false);
   };
@@ -141,12 +153,30 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     setErroImportacao('');
   };
 
-  const handleCriarPerfil = (e) => {
+  const confirmarPrevisualizacao = () => {
+    const selecionada = previsualizacao;
+    if (!selecionada) return;
+    if (selecionada.primeiraRevisao) {
+      setDeclaracaoImportada({
+        nomeArquivo: selecionada.nomeArquivo,
+        result: selecionada.result,
+        avisos: selecionada.avisos,
+      });
+      setForm(p => ({
+        ...p,
+        nome: selecionada.result.contribuinte?.nome || p.nome,
+        cpf: selecionada.result.contribuinte?.cpf || p.cpf,
+      }));
+    }
+    setPrevisualizacao(null);
+  };
+
+  const handleCriarPerfil = async (e) => {
     e.preventDefault();
     if (!form.nome.trim()) return;
     const perfil = novoPerfil(form);
-    persistir(adicionarPerfil(perfis, perfil));
     try {
+      let dados;
       if (declaracaoImportada) {
         // Roda o mesmo reducer/ação que "Importar Declaração" usa, só que
         // sobre um estado em branco (perfil recém-criado) — sem duplicar a
@@ -158,16 +188,22 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         // Importar Declaração deixava (a ação IMPORT_DECLARACAO já tem
         // descrição registrada em descreverAcao). Achado na auditoria de
         // 21/08/2026.
-        const { toasts, ...dados } = reducerComHistorico(initialState, { type: 'IMPORT_DECLARACAO', payload: declaracaoImportada.result });
-        localStorage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify(dados));
+        const { toasts, ...estadoImportado } = reducerComHistorico(initialState, { type: 'IMPORT_DECLARACAO', payload: payloadImportacaoCompleto(declaracaoImportada.result) });
+        dados = estadoImportado;
       } else {
         // O nome/CPF digitados aqui já são o titular — sem isso, a pessoa
         // acabava de digitar o nome e teria que digitar de novo na tela
         // Titular e Dependentes assim que entrasse no perfil.
-        localStorage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify({ contribuinte: { nome: perfil.nome, cpf: perfil.cpf } }));
+        dados = { contribuinte: { nome: perfil.nome, cpf: perfil.cpf } };
       }
-    } catch {}
-    onSelecionarPerfil(perfil);
+      localStorage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify(dados));
+      const novaLista = adicionarPerfil(perfis, perfil);
+      localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(novaLista));
+      setPerfis(novaLista);
+      onSelecionarPerfil(perfil);
+    } catch (err) {
+      setErroImportacao(`Não foi possível salvar o novo perfil neste computador. ${err?.message || 'Verifique o espaço disponível e tente novamente.'}`);
+    }
   };
 
   const handleExcluirPerfil = (e, perfil) => {
@@ -254,8 +290,16 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                       {p.apelido && <span className="perfil-apelido-badge">{p.apelido}</span>}
                       {p.protegido && <span title="Protegido por senha" style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><LockIcon /></span>}
                     </div>
+                    {/* Perfil protegido não guarda o CPF completo fora do
+                        envelope cifrado (ver protegerPerfil em perfis.js,
+                        achado 21): o card mostra só os três últimos dígitos,
+                        que bastam para desempatar homônimos. */}
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '3px' }}>
-                      {p.cpf ? formatCpfCnpj(p.cpf) : 'CPF não informado'}
+                      {p.cpf
+                        ? formatCpfCnpj(p.cpf)
+                        : p.cpfFinal
+                          ? `CPF •••.•••.${p.cpfFinal}-••`
+                          : 'CPF não informado'}
                     </div>
                     {editandoApelidoId === p.id ? (
                       <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }} onClick={e => e.stopPropagation()}>
@@ -308,9 +352,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                             o que entra, por formato. */}
                         <span style={{ flex: 1 }}>
                           Preenchido a partir de <strong>{declaracaoImportada.nomeArquivo}</strong>.
-                          {declaracaoImportada.result?.formato === 'pdf'
-                            ? ' Entram junto: bens e direitos, dívidas e ônus reais, pagamentos efetuados, doações, dependentes, o resumo com o imposto devido, a apuração do ganho de capital, a atividade rural completa, as fichas mensais de Renda Variável e os rendimentos tributáveis, isentos e de tributação exclusiva.'
-                            : ' Entram junto os dados de todas as fichas que o arquivo traz.'}
+                          {' O resumo abaixo mostra somente o que foi estruturado e a situação de auditoria de cada ficha.'}
                         </span>
                         <button type="button" className="perfil-link-btn" onClick={limparDeclaracaoImportada}>✕ Limpar</button>
                       </div>
@@ -325,6 +367,24 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                           {declaracaoImportada.avisos.map((aviso, i) => <li key={i}>{aviso}</li>)}
                         </ul>
                       )}
+                      {(() => {
+                        const resumo = resumirImportacao(declaracaoImportada.result);
+                        return (
+                          <div className="import-review-state-summary" style={{ marginTop: '10px', marginBottom: 0 }}>
+                            {resumo.porEstado.completa ? <span className="badge badge-green">{resumo.porEstado.completa} completas</span> : null}
+                            {resumo.porEstado.parcial ? <span className="badge badge-orange">{resumo.porEstado.parcial} em auditoria</span> : null}
+                            {resumo.porEstado.vazia ? <span className="badge badge-blue">{resumo.porEstado.vazia} vazias</span> : null}
+                            {resumo.porEstado.ausente ? <span className="badge badge-blue">{resumo.porEstado.ausente} não impressas</span> : null}
+                            {resumo.porEstado.nao_suportada ? <span className="badge badge-orange">{resumo.porEstado.nao_suportada} não estruturadas</span> : null}
+                            {resumo.porEstado.erro ? <span className="badge badge-red">{resumo.porEstado.erro} com erro</span> : null}
+                            <button
+                              type="button"
+                              className="perfil-link-btn"
+                              onClick={() => setPrevisualizacao({ ...declaracaoImportada, primeiraRevisao: false })}
+                            >Rever detalhes</button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ) : (
                     <div className="form-group">
@@ -356,6 +416,16 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           )}
         </div>
       </main>
+      {previsualizacao && (
+        <RevisaoImportacaoModal
+          open
+          resultado={previsualizacao.result}
+          nomeArquivo={previsualizacao.nomeArquivo}
+          confirmLabel={previsualizacao.primeiraRevisao ? 'Usar esta declaração' : 'Fechar revisão'}
+          onConfirm={confirmarPrevisualizacao}
+          onCancel={() => setPrevisualizacao(null)}
+        />
+      )}
     </div>
   );
 }

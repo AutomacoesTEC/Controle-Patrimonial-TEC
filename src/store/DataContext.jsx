@@ -1,9 +1,51 @@
-import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { reducerComHistorico, initialState, snapshotHasData, hasWorkingData } from './reducer';
 import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte } from './perfis';
 import { criptografarObjeto } from '../utils/crypto';
 
 const DataContext = createContext(null);
+
+const COLECOES_COM_ORIGEM = [
+  'bens', 'dividas', 'rendimentos', 'pagamentos',
+  'imoveisRurais', 'bensRurais', 'dividasRurais',
+  'doacoesEfetuadasOficial', 'doacoesPartidosOficial', 'doacoesEcaIdosoOficial',
+];
+
+function migrarItensSemOrigem(dados) {
+  let mudou = false;
+  const next = { ...dados };
+  for (const campo of COLECOES_COM_ORIGEM) {
+    if (!Array.isArray(dados?.[campo])) continue;
+    const lista = dados[campo].map((item, index) => {
+      if (!item) return item;
+      const prefixoRural = {
+        bensRurais: 'bem-rural',
+        dividasRurais: 'divida-rural',
+        imoveisRurais: 'imovel-rural',
+      }[campo];
+      const precisaOrigem = item.origem === undefined;
+      const precisaChave = prefixoRural && !item.controle && !item.chaveAssociacao && !item.chaveImportacao;
+      if (!precisaOrigem && !precisaChave) return item;
+      mudou = true;
+      return {
+        ...item,
+        ...(precisaOrigem ? { origem: 'origem_legacy' } : {}),
+        ...(precisaChave ? { chaveImportacao: (() => {
+          const ordem = item.ordemDeclaracao || index + 1;
+          if (campo === 'bensRurais') {
+            return `pdf:${prefixoRural}:${ordem}:${item.codigo || item.codigo_bem || ''}:${Number(item.situacao_anterior || 0).toFixed(2)}`;
+          }
+          if (campo === 'dividasRurais') {
+            return `pdf:${prefixoRural}:${ordem}:${Number(item.situacao_anterior || 0).toFixed(2)}`;
+          }
+          return `pdf:${prefixoRural}:${ordem}:${String(item.cib || '').replace(/\D/g, '')}:${item.codigoAtividade || ''}`;
+        })() } : {}),
+      };
+    });
+    if (mudou) next[campo] = lista;
+  }
+  return mudou ? next : dados;
+}
 
 // Dados salvos por uma versão do app anterior à existência de
 // origemAnoAtual/origem não têm essa chave no JSON bruto (distinto de tê-la
@@ -16,7 +58,7 @@ const DataContext = createContext(null);
 // tratado como 'importacao'; ano sem dado nenhum não vira declaração (segue
 // null, mesmo critério de sempre).
 export function migrarOrigemLegado(merged, raw) {
-  let next = merged;
+  let next = migrarItensSemOrigem(merged);
   if (raw.origemAnoAtual === undefined && hasWorkingData(merged)) {
     next = { ...next, origemAnoAtual: 'importacao' };
   }
@@ -25,14 +67,49 @@ export function migrarOrigemLegado(merged, raw) {
     const historico = { ...next.historico };
     for (const ano of Object.keys(raw.historico)) {
       const h = raw.historico[ano];
-      if (h && h.origem === undefined && snapshotHasData(h)) {
-        historico[ano] = { ...h, origem: 'importacao' };
+      const hComItensMigrados = h ? migrarItensSemOrigem(h) : h;
+      if (hComItensMigrados !== h) {
+        historico[ano] = hComItensMigrados;
+        mudou = true;
+      }
+      if (hComItensMigrados && hComItensMigrados.origem === undefined && snapshotHasData(hComItensMigrados)) {
+        historico[ano] = { ...hComItensMigrados, origem: 'importacao' };
         mudou = true;
       }
     }
     if (mudou) next = { ...next, historico };
   }
   return next;
+}
+
+export async function persistirDadosPerfil({ storage, perfilId, chave, estado, criptografar = criptografarObjeto }) {
+  let perfisSalvos = JSON.parse(storage.getItem(PERFIS_STORAGE_KEY) || '[]');
+  if (!perfisSalvos.some(p => p.id === perfilId)) return { salvo: false, motivo: 'perfil_removido' };
+
+  const { toasts, ...dados } = estado;
+  const conteudo = chave ? await criptografar(chave, dados) : dados;
+  // A criptografia é assíncrona. O perfil pode ter sido excluído enquanto ela
+  // estava em andamento; reconferir evita que um autosave atrasado o recrie.
+  perfisSalvos = JSON.parse(storage.getItem(PERFIS_STORAGE_KEY) || '[]');
+  if (!perfisSalvos.some(p => p.id === perfilId)) return { salvo: false, motivo: 'perfil_removido' };
+  storage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(conteudo));
+
+  if (estado.contribuinte) {
+    const perfisAtualizados = sincronizarPerfilComContribuinte(perfisSalvos, perfilId, estado.contribuinte);
+    if (perfisAtualizados !== perfisSalvos) {
+      storage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(perfisAtualizados));
+    }
+  }
+  return { salvo: true };
+}
+
+// Serializa gravações, inclusive quando a criptografia é assíncrona. Sem a
+// fila, um autosave antigo podia terminar depois da importação confirmada e
+// sobrescrever o estado mais novo no armazenamento.
+export function enfileirarPersistencia(filaRef, tarefa) {
+  const execucao = filaRef.current.then(tarefa, tarefa);
+  filaRef.current = execucao.then(() => undefined, () => undefined);
+  return execucao;
 }
 
 // perfilId identifica QUAL titular está sendo editado — cada perfil grava
@@ -61,56 +138,39 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
     } catch {}
     return initialState;
   });
+  const [persistencia, setPersistencia] = useState({ estado: 'ociosa', erro: null });
+  const filaPersistencia = useRef(Promise.resolve());
+  const numeroPersistencia = useRef(0);
 
-  const saveToStorage = useCallback(() => {
-    try {
-      // Achado real: excluir um perfil (PerfilLauncherPage remove a chave
-      // de dados e tira o perfil da lista) e o dado "voltar" sozinho —
-      // causa era um autosave em voo escrevendo por cima DEPOIS da
-      // exclusão, sobretudo pelo caminho assíncrono do Web Crypto abaixo
-      // (a criptografia pode resolver alguns milissegundos depois do clique
-      // em "Excluir"). Reconferir aqui, e de novo dentro do `.then()`
-      // assíncrono, é o que fecha a corrida: se o perfil já não existe mais
-      // na lista, não há o que salvar.
-      // Em caso de falha ao ler/parsear a lista (não deveria acontecer),
-      // assume que o perfil existe: o objetivo aqui é só barrar a escrita
-      // quando dá pra CONFIRMAR a exclusão, nunca arriscar perder um
-      // autosave legítimo por causa de uma leitura que deu errado.
-      const perfilAindaExiste = () => {
-        try {
-          const perfisSalvos = JSON.parse(localStorage.getItem(PERFIS_STORAGE_KEY) || '[]');
-          return perfisSalvos.some(p => p.id === perfilId);
-        } catch {
-          return true;
+  const saveToStorage = useCallback((estadoParaSalvar = state) => {
+    const numero = ++numeroPersistencia.current;
+    setPersistencia({ estado: 'salvando', erro: null });
+    return enfileirarPersistencia(filaPersistencia, async () => {
+      try {
+        // A função de persistência reconfere a existência do perfil antes e
+        // depois da criptografia e propaga falhas de quota/gravação.
+        const resultado = await persistirDadosPerfil({ storage: localStorage, perfilId, chave, estado: estadoParaSalvar });
+        if (!resultado.salvo) return false;
+        if (numero === numeroPersistencia.current) setPersistencia({ estado: 'salva', erro: null });
+        return true;
+      } catch (erro) {
+        if (numero === numeroPersistencia.current) {
+          setPersistencia({ estado: 'erro', erro: erro?.message || 'Falha ao salvar os dados localmente' });
         }
-      };
-      if (!perfilAindaExiste()) return;
-      const { toasts, ...data } = state;
-      if (chave) {
-        // Assíncrono de propósito (Web Crypto): dispara e não espera — o
-        // autosave já roda a cada mudança de estado, então um atraso de
-        // poucos milissegundos na escrita não é perceptível, e nunca é o
-        // caminho crítico de nenhuma ação da usuária.
-        criptografarObjeto(chave, data)
-          .then(envelope => {
-            if (!perfilAindaExiste()) return;
-            localStorage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(envelope));
-          })
-          .catch(() => {});
-      } else {
-        localStorage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(data));
+        return false;
       }
-      // Mantém o card do perfil (tela de seleção) mostrando o titular atual,
-      // não o nome/CPF de quando o perfil foi criado.
-      if (state.contribuinte) {
-        const perfisSalvos = JSON.parse(localStorage.getItem(PERFIS_STORAGE_KEY) || '[]');
-        const perfisAtualizados = sincronizarPerfilComContribuinte(perfisSalvos, perfilId, state.contribuinte);
-        if (perfisAtualizados !== perfisSalvos) {
-          localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(perfisAtualizados));
-        }
-      }
-    } catch {}
+    });
   }, [state, perfilId, chave]);
+
+  const dispatchPersistido = useCallback(async (action) => {
+    const proximoEstado = reducerComHistorico(state, action);
+    const salvo = await saveToStorage(proximoEstado);
+    if (!salvo) {
+      throw new Error('A declaração foi analisada, mas não pôde ser salva neste computador. Libere espaço ou verifique o armazenamento do navegador e tente novamente.');
+    }
+    dispatch({ type: 'SUBSTITUIR_ESTADO_PERSISTIDO', payload: proximoEstado });
+    return proximoEstado;
+  }, [state, saveToStorage]);
 
   // Autosave: evita perder dados de quem esquecer de clicar em "Salvar Dados".
   const isFirstRender = useRef(true);
@@ -155,7 +215,16 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
   }, [state]);
 
   return (
-    <DataContext.Provider value={{ state, dispatch, saveToStorage, addToast, garantirAnoCadastro }}>
+    <DataContext.Provider value={{
+      state,
+      dispatch,
+      dispatchPersistido,
+      saveToStorage,
+      persistencia,
+      addToast,
+      garantirAnoCadastro,
+      perfilProtegido: !!chave,
+    }}>
       {children}
     </DataContext.Provider>
   );

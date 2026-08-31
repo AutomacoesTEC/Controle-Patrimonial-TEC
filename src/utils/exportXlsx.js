@@ -20,6 +20,9 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
       'Localização': b.localizacao || '',
       'CNPJ/CPF': formatCpfCnpj(b.cnpj),
       'Beneficiário': b.beneficiario || 'Titular',
+      // CPF de quem recebeu, quando o bem é do dependente: sem ele, a coluna
+      // Beneficiário não diz DE QUAL dependente se trata (achado 14).
+      'CPF do Beneficiário': formatCpfCnpj(b.cpf_beneficiario),
       'Movimentações no Ano': resumoMovimentacoes(b),
     }));
     const ws1 = XLSX.utils.json_to_sheet(bensData);
@@ -78,6 +81,13 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
   }
 
   // Aba 5: Resumo / Variação Patrimonial
+  // "Evolução Patrimonial", e não "Variação Patrimonial": esta linha é o
+  // crescimento do patrimônio LÍQUIDO, e o Demonstrativo do Dashboard chama de
+  // "Variação Patrimonial Total" o impacto no CAIXA, que é o negativo disso. A
+  // auditoria de 24/08/2026 conferiu que o número exportado bate com o exibido
+  // na tela (a inversão em relação ao valor interno é deliberada, e pedido da
+  // usuária), então o que faltava era só não usar o mesmo nome para as duas
+  // grandezas — é a ficha "Evolução Patrimonial" da própria declaração.
   const resumo = [
     { 'Item': 'Total Bens Ano Anterior', 'Valor': data.totalBensAnterior || 0 },
     { 'Item': 'Total Bens Ano Atual', 'Valor': data.totalBensAtual || 0 },
@@ -85,11 +95,11 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
     { 'Item': 'Total Dívidas Ano Atual', 'Valor': data.totalDividasAtual || 0 },
     { 'Item': 'Patrimônio Líquido Anterior', 'Valor': (data.totalBensAnterior || 0) - (data.totalDividasAnterior || 0) },
     { 'Item': 'Patrimônio Líquido Atual', 'Valor': (data.totalBensAtual || 0) - (data.totalDividasAtual || 0) },
-    { 'Item': 'Variação Patrimonial', 'Valor': ((data.totalBensAtual || 0) - (data.totalDividasAtual || 0)) - ((data.totalBensAnterior || 0) - (data.totalDividasAnterior || 0)) },
+    { 'Item': 'Evolução do Patrimônio Líquido', 'Valor': ((data.totalBensAtual || 0) - (data.totalDividasAtual || 0)) - ((data.totalBensAnterior || 0) - (data.totalDividasAnterior || 0)) },
   ];
   const ws5 = XLSX.utils.json_to_sheet(resumo);
   ws5['!cols'] = [{wch:30},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, ws5, 'Variação Patrimonial');
+  XLSX.utils.book_append_sheet(wb, ws5, 'Evolução Patrimonial');
 
   // Gerar o arquivo
   const today = new Date().toISOString().split('T')[0];
@@ -130,6 +140,7 @@ export function exportBensToXlsx(bens, anoCalendario) {
     'Matrícula': b.matricula || '',
     'RENAVAM': b.renavam || '',
     'Beneficiário': b.beneficiario || 'Titular',
+    'CPF do Beneficiário': formatCpfCnpj(b.cpf_beneficiario),
     'Movimentações no Ano': resumoMovimentacoes(b),
   }));
   const ws = XLSX.utils.json_to_sheet(bensData);

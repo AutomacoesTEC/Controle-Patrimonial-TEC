@@ -41,13 +41,13 @@ const LIMIAR_SUGESTAO = 0.35;
 // `campoCodigo` existe porque bens guardam o código em `codigo_bem`
 // (BemModal/importParsers) e dívidas em `codigo` (DividasPage) — nomes de
 // campo diferentes para o mesmo conceito.
-export function sugerirVinculos(antigos, novos, campoCodigo = 'codigo') {
+export function sugerirVinculos(antigos, novos, campoCodigo = 'codigo', campoDescricao = 'discriminacao') {
   const antigosDisponiveis = new Map((antigos || []).map(a => [a.id, a]));
   const candidatos = [];
   for (const novo of novos || []) {
     for (const antigo of antigos || []) {
       if (normalizar(antigo[campoCodigo]) !== normalizar(novo[campoCodigo])) continue;
-      const score = similaridade(antigo.discriminacao, novo.discriminacao);
+      const score = similaridade(antigo[campoDescricao], novo[campoDescricao]);
       if (score >= LIMIAR_SUGESTAO) candidatos.push({ novo, antigo, score });
     }
   }

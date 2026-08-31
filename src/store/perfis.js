@@ -43,10 +43,28 @@ export function novoPerfil({ nome, cpf, apelido }, agora = new Date()) {
 // dataStorageKeyFor(perfilId) é o chamador (App.jsx/PerfilLauncherPage),
 // que já lida com o Web Crypto assíncrono; aqui só atualiza os metadados.
 export function protegerPerfil(perfis, perfilId, saltBase64) {
-  return atualizarPerfil(perfis, perfilId, { protegido: true, salt: saltBase64 });
+  // ACHADO 21 da auditoria de 24/08/2026. A criptografia protegia os DADOS do
+  // perfil, mas a LISTA continuava em claro no localStorage com nome completo
+  // e CPF de cada titular — quem abrisse o armazenamento via a carteira de
+  // clientes inteira sem digitar senha nenhuma.
+  //
+  // A lista precisa mesmo ser exibida ANTES de qualquer senha (é por ela que a
+  // pessoa escolhe o perfil), então o nome fica. O CPF não: ele não é
+  // necessário para escolher, é o dado mais sensível dos dois, e o número
+  // completo já está lá dentro do envelope cifrado (em `contribuinte`). Aqui
+  // sobram só os três últimos dígitos, o suficiente para desempatar dois
+  // homônimos e insuficiente para identificar alguém.
+  const perfil = perfis.find(p => p.id === perfilId);
+  const cpf = (perfil?.cpf || '').replace(/\D/g, '');
+  return atualizarPerfil(perfis, perfilId, {
+    protegido: true,
+    salt: saltBase64,
+    cpf: '',
+    cpfFinal: cpf ? cpf.slice(-3) : '',
+  });
 }
 export function desprotegerPerfil(perfis, perfilId) {
-  return atualizarPerfil(perfis, perfilId, { protegido: false, salt: null });
+  return atualizarPerfil(perfis, perfilId, { protegido: false, salt: null, cpfFinal: '' });
 }
 
 export function adicionarPerfil(perfis, perfil) {
@@ -71,6 +89,16 @@ export function sincronizarPerfilComContribuinte(perfis, perfilId, contribuinte)
   const perfil = perfis.find(p => p.id === perfilId);
   if (!perfil) return perfis;
   const nome = contribuinte.nome || perfil.nome;
+  // Perfil protegido nunca recebe o CPF completo de volta na lista em claro
+  // (ver protegerPerfil): a sincronização atualiza só os três últimos dígitos.
+  // Sem isso, importar uma declaração num perfil protegido regravava o CPF
+  // inteiro fora do envelope e desfazia a proteção em silêncio.
+  if (perfil.protegido) {
+    const digitos = (contribuinte.cpf || '').replace(/\D/g, '');
+    const cpfFinal = digitos ? digitos.slice(-3) : perfil.cpfFinal || '';
+    if (nome === perfil.nome && cpfFinal === (perfil.cpfFinal || '')) return perfis;
+    return atualizarPerfil(perfis, perfilId, { nome, cpf: '', cpfFinal });
+  }
   const cpf = contribuinte.cpf || perfil.cpf;
   if (nome === perfil.nome && cpf === perfil.cpf) return perfis;
   return atualizarPerfil(perfis, perfilId, { nome, cpf });

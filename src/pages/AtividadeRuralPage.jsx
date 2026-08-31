@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
+import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividadeRuralPeriodo } from '../store/demonstrativos';
 import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
@@ -20,11 +21,6 @@ const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situ
 // a conferir na declaração deste ano -- deixa de aparecer na listagem (pedido da usuária,
 // 21/08/2026). O terceiro critério (sem movimentações) distingue esse caso do bem que está SENDO
 // baixado justamente NESTE ano, que continua aparecendo.
-function bemZeradoSemMovimentacaoNoAno(bem) {
-  const anterior = parseFloat(bem.situacao_anterior) || 0;
-  const atual = parseFloat(bem.situacao_atual) || 0;
-  return anterior === 0 && atual === 0 && (bem.movimentacoes || []).length === 0;
-}
 
 export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
@@ -38,6 +34,15 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
   const receitaTotal = lancamentosRurais.filter(l => l.tipo === 'receita').reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
   const despesaTotal = lancamentosRurais.filter(l => l.tipo === 'despesa').reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
   const resultadoDoAno = receitaTotal - despesaTotal;
+  // De onde vem cada pedaço do resultado que o Demonstrativo usa: quais meses
+  // o livro-caixa manual substituiu e quais continuam vindo da declaração
+  // (ver origemResultadoRural em demonstrativos.js, achado 03).
+  const periodoDoAno = anoCalendario != null
+    ? { de: `${anoCalendario}-01-01`, ate: `${anoCalendario}-12-31` }
+    : { de: null, ate: null };
+  const oficialRural = { meses: receitasDespesasRuraisOficial, ano: anoCalendario };
+  const origemRural = origemResultadoRural(lancamentosRurais, periodoDoAno.de, periodoDoAno.ate, oficialRural);
+  const resultadoConsolidado = resultadoAtividadeRuralPeriodo(lancamentosRurais, periodoDoAno.de, periodoDoAno.ate, oficialRural);
 
   return (
     <>
@@ -77,6 +82,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
             receitaTotal={receitaTotal} despesaTotal={despesaTotal} resultadoDoAno={resultadoDoAno}
             anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro}
             receitasDespesasRuraisOficial={receitasDespesasRuraisOficial}
+            origemRural={origemRural} resultadoConsolidado={resultadoConsolidado}
           />
         )}
         {subView === 'resultado' && (
@@ -511,7 +517,12 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
   );
 }
 
-function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, receitaTotal, despesaTotal, resultadoDoAno, anoCalendario, garantirAnoCadastro, receitasDespesasRuraisOficial = [] }) {
+function LancamentosRuraisSection({
+  lancamentosRurais, dispatch, addToast, receitaTotal, despesaTotal, resultadoDoAno,
+  anoCalendario, garantirAnoCadastro, receitasDespesasRuraisOficial = [],
+  origemRural = { temOficial: false, mesesSubstituidos: [], mesesOficiaisMantidos: [] },
+  resultadoConsolidado = 0,
+}) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_LANCAMENTO_VAZIO);
@@ -600,21 +611,47 @@ function LancamentosRuraisSection({ lancamentosRurais, dispatch, addToast, recei
           </div>
         </div>
       )}
+      {/* ACHADO 03 da auditoria de 24/08/2026. Estes três cards mostram o
+          LIVRO-CAIXA MANUAL, e ficavam logo abaixo da tabela dos doze meses
+          importados, sem dizer isso. O resultado era uma tela que se
+          contradizia: "Resultado do Ano R$ 0,00 / Lucro" impresso embaixo de
+          uma apuração que fecha em prejuízo de meio milhão. E, como qualquer
+          lançamento manual descartava os doze meses inteiros, o número que o
+          Dashboard usava mudava junto, sem aviso.
+          Agora a precedência é por mês (ver resultadoAtividadeRuralPeriodo) e
+          o card diz de onde vem cada pedaço. */}
+      {origemRural.temOficial && (
+        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: '16px', fontSize: '12.5px' }}>
+          {origemRural.mesesSubstituidos.length === 0 ? (
+            <>Os cards abaixo somam só os lançamentos que você cadastrou à mão. Enquanto um mês não tiver lançamento manual, o Demonstrativo usa o mês correspondente da tabela acima, vinda da declaração.</>
+          ) : origemRural.anoInteiroManual ? (
+            <>Há lançamento manual sem data, então o Demonstrativo usa o livro-caixa manual para o ano inteiro e ignora a tabela acima. Informe a data dos lançamentos para voltar à substituição mês a mês.</>
+          ) : (
+            <>O Demonstrativo usa o seu livro-caixa em {origemRural.mesesSubstituidos.length === 1 ? 'um mês' : `${origemRural.mesesSubstituidos.length} meses`} ({origemRural.mesesSubstituidos.map(m => NOMES_MES[m - 1]).join(', ')}) e mantém a apuração da declaração nos outros {origemRural.mesesOficiaisMantidos.length}.</>
+          )}
+        </div>
+      )}
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card blue">
-          <div className="stat-info"><h3>{formatCurrency(receitaTotal)}</h3><p>Receita Bruta Total</p></div>
+          <div className="stat-info"><h3>{formatCurrency(receitaTotal)}</h3><p>Receita Bruta Total {origemRural.temOficial && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(livro-caixa manual)</span>}</p></div>
         </div>
         <div className="stat-card orange">
-          <div className="stat-info"><h3>{formatCurrency(despesaTotal)}</h3><p>Despesa de Custeio/Investimento</p></div>
+          <div className="stat-info"><h3>{formatCurrency(despesaTotal)}</h3><p>Despesa de Custeio/Investimento {origemRural.temOficial && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(livro-caixa manual)</span>}</p></div>
         </div>
         <div className="stat-card green">
           <div className="stat-info">
             <h3>{formatCurrency(resultadoDoAno)}</h3>
-            <p>Resultado do Ano</p>
+            <p>Resultado do Ano {origemRural.temOficial && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(livro-caixa manual)</span>}</p>
             <span className={`stat-change ${resultadoDoAno >= 0 ? 'positive' : 'negative'}`}>{resultadoDoAno >= 0 ? 'Lucro' : 'Prejuízo'}</span>
           </div>
         </div>
       </div>
+      {origemRural.temOficial && (
+        <div style={{ marginBottom: '20px', fontSize: '13px' }}>
+          <b>Resultado que o Demonstrativo usa neste ano: {formatCurrency(resultadoConsolidado)}</b>
+          <span style={{ color: 'var(--text-secondary)' }}> (livro-caixa manual onde existe, apuração da declaração no resto)</span>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '12px' }}>
         <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
         <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Lançamento</button>

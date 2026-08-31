@@ -16,6 +16,7 @@ const navItems = [
   { id: 'atividadeRural', label: 'Atividade Rural', short: 'AR', section: 'ATIVIDADE RURAL' },
   { id: 'relatorio', label: 'Relatório IRPF', short: 'RL', section: 'RELATÓRIOS' },
   { id: 'ganhosCapital', label: 'Ganhos de Capital', short: 'GC', section: 'RELATÓRIOS' },
+  { id: 'rendaVariavel', label: 'Renda Variável', short: 'RV', section: 'RELATÓRIOS' },
   { id: 'historico', label: 'Histórico de Alterações', short: 'HS', section: 'RELATÓRIOS' },
 ];
 

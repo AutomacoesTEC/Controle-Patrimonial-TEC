@@ -1,3 +1,5 @@
+import { CATALOGO_FICHAS_PDF_2026, encontrarFichaPdf2026, ehPrefixoDeFichaPdf2026 } from '../irpf/catalogoFichasPdf2026';
+
 // Parsers puros de .DBK e PDF da declaração de IRPF, extraídos de
 // ImportPage.jsx para poder testar contra arquivos reais (ver
 // importParsers.test.js) sem precisar montar o componente React.
@@ -12,6 +14,34 @@
 // Importar Declaração mostra; nos testes é omitido (vira no-op).
 
 const noop = () => {};
+
+// Além dos campos estruturados, cada importação guarda uma cópia textual
+// integral e auditável do arquivo. Assim uma ficha ainda não modelada não é
+// descartada: ela pode ser reprocessada por uma versão futura sem o usuário
+// precisar digitar ou adivinhar o conteúdo. O limite protege o armazenamento
+// local contra arquivos que não sejam uma declaração válida.
+const MAX_TEXTO_FONTE = 2_000_000;
+const sha256Texto = async (texto) => {
+  if (!globalThis.crypto?.subtle) return null;
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
+  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+};
+const criarDocumentoFonte = async ({ formato, textoIntegral, paginas = null, totalRegistros = null }) => {
+  if (textoIntegral.length > MAX_TEXTO_FONTE) {
+    throw new Error('A declaração excede o limite seguro de 2 milhões de caracteres para conferência integral.');
+  }
+  return {
+    formato,
+    versaoArquivoAuditoria: 1,
+    textoIntegral,
+    paginas,
+    totalPaginas: paginas?.length ?? null,
+    totalRegistros,
+    caracteresExtraidos: textoIntegral.length,
+    sha256TextoExtraido: await sha256Texto(textoIntegral),
+    somenteLocal: true,
+  };
+};
 
 // Layout de colunas (1-based) do .DBK do exercício 2026, conferido contra
 // arquivo real e batido com o registro 20 de resumo (total de bens).
@@ -34,6 +64,39 @@ const parseValorN13Signed = (str) => {
   const valor = parseValorN13(raw);
   return negativo ? -valor : valor;
 };
+// Nem todo campo numérico do arquivo tem DUAS decimais implícitas. Os
+// registros de Ganho de Capital usam três outras escalas, todas declaradas no
+// layout oficial (`mapeamentoTxt.xml`, atributo `Decimais`):
+//   N9.6  → alíquota média e percentuais de redução (6 decimais)
+//   N13.4 → cotação do dólar da operação (4 decimais)
+//   N17.6 → custo médio ponderado de moeda estrangeira (6 decimais)
+// Ler qualquer um deles com parseValorN13 dividiria por 100 e devolveria um
+// número 10.000 vezes maior (ou menor) que o real. Daí um leitor único
+// parametrizado pela quantidade de decimais, em vez de três variações soltas.
+const parseDecimais = (str, casas) => {
+  const digits = (str || '').replace(/\D/g, '');
+  if (!digits) return 0;
+  return parseInt(digits, 10) / Math.pow(10, casas);
+};
+// Quantidade inteira (N11 do registro 73, quantidade de cotas alienadas).
+const parseInteiro = (str) => {
+  const digits = (str || '').replace(/\D/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+};
+// Indicadores de Sim/Não do Ganho de Capital. O arquivo grava "1"/"0", e a
+// ficha impressa mostra "Sim"/"Não"; campo em branco (pergunta que não se
+// aplica àquela operação) vira null, para a tela poder omitir a linha em vez
+// de afirmar "Não" onde a declaração não afirmou nada.
+const simNaoOuNulo = (raw) => {
+  const v = (raw || '').trim();
+  if (v === '1') return true;
+  if (v === '0') return false;
+  return null;
+};
+const RACA_COR_POR_CODIGO = {
+  '0': 'Não informada', '1': 'Amarela', '2': 'Branca',
+  '3': 'Indígena', '4': 'Parda', '5': 'Preta',
+};
 
 // O campo de CPF/CNPJ do beneficiário (registro 26) tem largura fixa de 19
 // caracteres, com um prefixo de preenchimento de exatamente 5 caracteres
@@ -44,11 +107,27 @@ const parseValorN13Signed = (str) => {
 // um CNPJ real), então tirar "zeros à esquerda" na unha cortava um dígito
 // de verdade — o certo é sempre pegar os últimos 11 ou 14 caracteres,
 // nunca inferir o tamanho do preenchimento pelo conteúdo dele.
+//
+// ACHADO 19 da auditoria de 24/08/2026: a decisão entre 11 e 14 dígitos era
+// tomada DEPOIS do `trim()`, e o campo já chega aparado de `field()`. Um CNPJ
+// cujo preenchimento de 5 posições fosse feito de espaços chegaria aqui com 14
+// caracteres, cairia no ramo do CPF e perderia os três primeiros dígitos. No
+// arquivo de referência o preenchimento é numérico e o caso não aparece — mas
+// a decisão passa a ser pelo CONTEÚDO (quantos dígitos existem de fato), que
+// não depende de quantos espaços vieram junto.
 export const normalizarCpfCnpj = (raw) => {
   const campo = (raw || '').trim();
   if (!campo) return '';
-  const alvo = campo.length <= 16 ? 11 : 14;
-  return campo.slice(-alvo).padStart(alvo, '0');
+  const digitos = campo.replace(/\D/g, '');
+  if (!digitos) return '';
+  // A regra principal continua sendo o COMPRIMENTO DO CAMPO aparado, porque é
+  // ela que distingue "5 de preenchimento + 11 do CPF" (16) de "5 + 14 do
+  // CNPJ" (19) quando o preenchimento é numérico — e é numérico no arquivo de
+  // referência. O caso novo é o preenchimento em BRANCO: aí o trim come as 5
+  // posições e sobra um campo de exatamente 14 dígitos, que a regra antiga
+  // classificava como CPF e cortava em 11, perdendo três dígitos do CNPJ.
+  const alvo = (campo.length > 16 || digitos.length === 14) ? 14 : 11;
+  return digitos.slice(-alvo).padStart(alvo, '0');
 };
 
 // Datas nos registros de Ganho de Capital (62) vêm em DDMMAAAA corrido, sem
@@ -73,6 +152,39 @@ const DETALHE_RENDIMENTO = {
   88: { categoria: 'exclusivo', beneficiario: 14, cpf: 15, codigo: 26, fonte: true, valor: 104 },
   89: { categoria: 'exclusivo', beneficiario: 14, cpf: 15, codigo: 26, fonte: true, valor: 104, descricao: 117 },
 };
+
+// ACHADO 07 da auditoria de 24/08/2026, compartilhado pelos DOIS caminhos de
+// importação (era o tipo de correção que, feita só de um lado, reintroduz a
+// divergência que a auditoria cruzada existe para pegar).
+//
+// O Demonstrativo soma o rendimento de tributação exclusiva LÍQUIDO de IRRF,
+// porque o imposto retido não sobra para gastar. Só que nenhum rendimento
+// exclusivo importado carregava IRRF: o líquido saía igual ao bruto e a linha
+// "Tributação Exclusiva, IRRF retido" mostrava R$ 0,00 em toda declaração.
+//
+// O 13º salário é o caso com conserto. A Ajuda oficial do IRPF 2026 (ficha
+// Rendimentos Sujeitos à Tributação Exclusiva/Definitiva, aba Totais) diz que
+// a linha 01 recebe "o valor do campo 13º salário" da ficha de Rendimentos
+// Tributáveis Recebidos de PJ, isto é, o BRUTO — diferente da linha 07 (RRA),
+// que já vem subtraída do imposto retido. E o IRRF sobre o 13º está em campo
+// próprio da mesma ficha de PJ, que os dois parsers já leem e descartavam.
+//
+// Códigos internos: 0001 é o 13º do titular, 0008 o dos dependentes.
+const CODIGO_DECIMO_TERCEIRO = { Titular: '0001', Dependente: '0008' };
+export function aplicarIrrfDecimoTerceiro(rendimentos) {
+  for (const [quem, codigo] of Object.entries(CODIGO_DECIMO_TERCEIRO)) {
+    const irrf = rendimentos
+      .filter(r => r.tipo === 'tributavel_pj' && (r.beneficiario || 'Titular') === quem)
+      .reduce((s, r) => s + (r.irrfDecimoTerceiro || 0), 0);
+    if (!irrf) continue;
+    // O IRRF do 13º é um total anual: cabe numa linha só. Esses códigos hoje
+    // sempre entram pelo agregado (não têm detalhe por fonte pagadora), mas se
+    // um dia tiverem, o total não pode ser repetido em cada linha.
+    const alvo = rendimentos.find(r => r.tipo === `exclusivo_${codigo}` && !r.irrf);
+    if (alvo) alvo.irrf = irrf;
+  }
+  return rendimentos;
+}
 
 // Fichas que a declaração pode ter e que este app NÃO modela. O nome vem do
 // mapa oficial de registros (`ConstantesRepositorio`, ver LAYOUT-DBK-OFICIAL.md)
@@ -106,6 +218,37 @@ const FICHAS_NAO_MODELADAS = {
   77: 'Ganho de capital em moeda estrangeira: espécie',
   78: 'Ganho de capital em moeda estrangeira: consolidado',
 };
+
+const ESTADOS_FICHA = new Set(['completa', 'parcial', 'vazia', 'ausente', 'nao_suportada', 'erro']);
+const entradaEstadoFicha = (estado, formato, motivo = undefined, detalhes = {}) => {
+  if (!ESTADOS_FICHA.has(estado)) throw new Error(`Estado de ficha inválido: ${estado}`);
+  const presenca = detalhes.presenca || (
+    estado === 'vazia' ? 'vazia' : estado === 'erro' ? 'indeterminada' : 'preenchida'
+  );
+  const suporte = detalhes.suporte || (
+    estado === 'completa' ? 'integral' : estado === 'nao_suportada' ? 'nao_suportada' : 'parcial'
+  );
+  const derivado = detalhes.derivado === true;
+  const completudeAuditada = estado === 'completa' && detalhes.completudeAuditada === true && !derivado;
+
+  if (estado === 'completa' && !completudeAuditada) {
+    throw new Error('Ficha não pode ser completa sem auditoria aprovada e sem derivação');
+  }
+
+  return {
+    estado, formato, presenca, suporte, derivado, completudeAuditada,
+    ...(motivo ? { motivo } : {}),
+    ...(detalhes.erro ? { erro: String(detalhes.erro) } : {}),
+    ...(detalhes.titulo ? { titulo: detalhes.titulo } : {}),
+    ...(Number.isInteger(detalhes.paginaInicio) ? { paginaInicio: detalhes.paginaInicio } : {}),
+    ...(Number.isInteger(detalhes.linhaInicio) ? { linhaInicio: detalhes.linhaInicio } : {}),
+  };
+};
+
+// O identificador técnico é estável e independente do nome exibido. O catálogo
+// central pode associá-lo à ficha oficial sem obrigar os consumidores atuais a
+// trocar de contrato durante a migração.
+const idFichaDbk = (tipo) => `dbk:${tipo}`;
 
 export async function parseDBK(text, log = noop) {
   log('Lendo arquivo .DBK...');
@@ -142,19 +285,65 @@ export async function parseDBK(text, log = noop) {
   // registro, seguindo a mesma convenção anterior-antes-de-atual já
   // confirmada nos outros campos deste registro.
   let impostoDevido = null;
-  // Apuração do Ganho de Capital oficial (bens móveis vendidos, já
-  // apurados NA PRÓPRIA declaração original — diferente da aba Ganhos de
-  // Capital do app, que calcula a partir de movimentações lançadas depois
-  // da importação). Vem espalhado em 3 registros por operação (62=bem+
-  // datas+custo, 65=adquirente, 69=valores de alienação), sempre na MESMA
-  // ordem/quantidade nesta declaração de exemplo (3 registros de cada
-  // tipo, 1 por operação) — junta por posição no array, não por um campo
-  // de vínculo explícito (não achado com confiança). Registro 60 (âncora
-  // da seção, 1 só) e 75 (resultado por operação) não são lidos: o ganho
-  // já sai certo calculando alienação − custo (mesma conta que a própria
-  // declaração mostra em "Apuração do Ganho de Capital"), sem depender de
-  // decifrar mais um registro sem exemplo não-zero pra conferir.
-  const gcBens = [], gcAdquirentes = [], gcValores = [];
+  // ---------------------------------------------------------------------
+  // GANHOS DE CAPITAL (demonstrativo inteiro) e RENDA VARIÁVEL.
+  //
+  // Até 24/08/2026 este parser lia só três registros (62 = bem móvel,
+  // 65 = adquirente, 69 = apuração do móvel) e os casava POR POSIÇÃO no
+  // array, porque o campo de vínculo não tinha sido identificado. As quatro
+  // fichas do menu "Ganhos de Capital" do programa da Receita (Bens Imóveis,
+  // Direitos/Bens Móveis, Participações Societárias e Moedas em Espécie) e as
+  // duas de "Renda Variável" (Operações Comuns/Day-Trade e Operações em FII
+  // ou Fiagro) passam a ser lidas por inteiro, com o layout oficial extraído
+  // do `mapeamentoTxt.xml` do próprio IRPF2026 e conferido campo a campo
+  // contra a declaração real de referência.
+  //
+  // O VÍNCULO ENTRE OS REGISTROS, que faltava: cada operação tem uma chave
+  // NR_OPERACAO nas posições 33-36, e os registros satélites repetem essa
+  // chave. O registro 65 (adquirentes) ainda traz, na posição 37, o TIPO do
+  // bem (1 = imóvel, 2 = móvel, 3 = participação societária) — o dígito que o
+  // comentário anterior descrevia como "fixo, não indica CPF x CNPJ". Ele é
+  // fixo no arquivo de referência porque as três operações de lá são todas de
+  // bem móvel. Com tipo + número de operação a junção deixa de depender da
+  // ordem das linhas, que numa declaração com imóvel E móvel colidiria (as
+  // duas fichas numeram a partir de 0001).
+  //
+  // Estrutura de saída: uma lista única `operacoes`, cada item com `tipo`
+  // ('imovel' | 'movel' | 'participacao') e os blocos que a ficha impressa
+  // mostra (dados do bem, aquisição, operação, perguntas, adquirentes,
+  // apuração, cálculo do imposto, consolidação, faixas de tributação e
+  // parcelas). Moeda estrangeira em espécie é ficha à parte, com operações
+  // (74) e totalização mensal (76).
+  const gcOperacoes = new Map();   // chave: `${tipo}#${numeroOperacao}`
+  let gcConsolidacao = null;       // registro 60
+  const gcMoedaOperacoes = [];     // registro 74
+  const gcMoedaMensal = [];        // registro 76
+  // Chave estável para os registros satélites. Sem número de operação (campo
+  // em branco em arquivo antigo) cai numa chave sequencial própria, para o
+  // dado não sumir nem contaminar a operação 0000 de outro tipo.
+  const gcChave = (tipo, numero) => `${tipo}#${(numero || '').trim() || '0000'}`;
+  // Cria a operação na primeira vez que qualquer registro dela aparece. Os
+  // satélites (65, 68 a 73, 75) podem, em tese, vir antes do registro-mãe.
+  const gcOperacao = (tipo, numero) => {
+    const chave = gcChave(tipo, numero);
+    if (!gcOperacoes.has(chave)) {
+      gcOperacoes.set(chave, {
+        id: gcOperacoes.size + 1,
+        tipo,
+        numeroOperacao: (numero || '').trim(),
+        adquirentes: [],
+        ampliacoesReformas: [],
+        parcelas: [],
+        custosAquisicao: [],
+        faixasTributacao: [],
+      });
+    }
+    return gcOperacoes.get(chave);
+  };
+  const GC_TIPO_POR_INDICADOR = { 1: 'imovel', 2: 'movel', 3: 'participacao' };
+  // Natureza da operação (CD_OPERACAO). O arquivo grava o código e também a
+  // descrição por extenso, que é o que a ficha imprime — guardamos os dois.
+  const gcNatureza = (codigo, descricao) => ({ codigo: (codigo || '').trim(), descricao: (descricao || '').trim() });
   // Atividade Rural: registro 50 = imóveis explorados, registro 54 = bens
   // da atividade rural. Posições conferidas contra uma declaração real com
   // 24 imóveis e 60 bens (área, participação, condição, código atividade e
@@ -264,6 +453,14 @@ export async function parseDBK(text, log = noop) {
   // imposto de renda de verdade. Decifrar o campo de valor exige uma
   // declaração de referência com ganho REAL (não-zero) em algum mês.
   const rendaVariavelMensalOficial = [];
+  // Consolidação ANUAL da Renda Variável (registro 41) e a ficha irmã de
+  // Fundos de Investimento Imobiliário / Fiagro (42 = mês a mês, 43 = totais
+  // do ano). Nenhuma das duas era lida: a ficha "Operações em FII ou Fiagro"
+  // do menu Renda Variável simplesmente não existia neste app, e o
+  // fechamento anual das operações comuns/day-trade também não.
+  let rendaVariavelAnualOficial = null;
+  const fiiFiagroMensalOficial = [];
+  let fiiFiagroAnualOficial = null;
 
   let bemId = 1, dividaId = 1, rendId = 1, pagId = 1, depId = 1;
 
@@ -274,7 +471,7 @@ export async function parseDBK(text, log = noop) {
   // procurando qualquer sequência de 13 dígitos não-zero na linha. Não funciona
   // e o teste provou na hora: sem conhecer o layout do registro, o regex
   // desliza sobre a linha inteira e casa pedaços de CPF, de tipo e de data
-  // ("19CPF-DO-DECLARANTE-1", "0131120101202"), acusando valor nos três tipos que estão
+  // (pedaços de CPF, de tipo e de data), acusando valor nos três tipos que estão
   // comprovadamente zerados. Detectar valor em layout desconhecido é adivinhar.
   //
   // O critério honesto é outro: avisar quando aparece um TIPO DE REGISTRO que
@@ -287,15 +484,28 @@ export async function parseDBK(text, log = noop) {
   // aconteceu com o registro 22, e só não passou porque o teste dele falhou na
   // hora.
   const TIPOS_TRATADOS = new Set(['IR', '16', '18', '20', '21', '22', '23', '24', '25', '26', '27', '28', '32',
-    '34', '37', '40', '50', '51', '52', '53', '54', '55', '57', '62', '65', '69', '84', '88',
-    '45', '47', '80', '81', '83', '85', '86', '87', '89', '90', '91', '92']);
+    '34', '37', '40', '50', '51', '52', '53', '54', '55', '57', '84', '88',
+    '45', '47', '80', '81', '83', '85', '86', '87', '89', '90', '91', '92',
+    // Ganhos de Capital (as quatro fichas) e Renda Variável (as duas), lidos
+    // por inteiro desde 24/08/2026: 60 é o cabeçalho do demonstrativo, 61/62/63
+    // são os registros-mãe de imóvel, móvel e participação societária, 65 são
+    // os adquirentes, 66/67 as ampliações e reformas, 68/69/70 as apurações,
+    // 71/72 as parcelas da alienação a prazo, 73 o custo de aquisição da
+    // participação, 74 as moedas em espécie, 75 as faixas de tributação e 76 a
+    // totalização mensal das moedas alienadas. 41/42/43 são o fechamento anual
+    // da renda variável e a ficha de FII/Fiagro.
+    '41', '42', '43',
+    '60', '61', '62', '63', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76']);
   // Tipos JÁ investigados que este parser não lê, e que por isso não geram
   // aviso: nas declarações de referência estão todos zerados ou são estrutura.
   //   19 - traz o CNPJ do INSS e o valor do 13º salário, que já entra pelo
   //        registro 24 (código 01) e não pode ser contado duas vezes.
-  //   60 - período de residência no país e código do país (105 BRASIL).
-  //   75 - três registros de estrutura, sem valor financeiro.
   //   T9 - trailer do arquivo, só contagens de registro.
+  // Os registros 60, 74, 75 e 76 SAÍRAM desta lista em 24/08/2026: eram
+  // descritos aqui como "estrutura sem valor financeiro" porque vêm zerados na
+  // declaração de referência, mas são o cabeçalho do demonstrativo de Ganhos de
+  // Capital, as moedas em espécie, as faixas de tributação e a totalização
+  // mensal das moedas alienadas. Passaram a ser lidos com o layout oficial.
   // ATENÇÃO: 19, 60 e 75 estão zerados NAS DUAS declarações disponíveis. Se
   // alguma vez aparecerem preenchidos, o dado não entra e não há aviso — é uma
   // limitação conhecida, e o caminho para resolver é decifrar o layout deles
@@ -313,10 +523,14 @@ export async function parseDBK(text, log = noop) {
   // código 09). Lê-lo também duplicaria o rendimento. Como a declaração de
   // referência não tem registro 33, não há como confirmar a relação entre os
   // dois — e diante da dúvida, duplicar renda é o pior desfecho possível.
-  const TIPOS_CONHECIDOS_NAO_LIDOS = new Set(['19', '33', '46', '48', '60', '75', '76', 'T9']);
+  const TIPOS_CONHECIDOS_NAO_LIDOS = new Set(['19', '33', '46', '48', 'T9']);
   const TIPOS_RURAIS_COM_FLAG_EXTERIOR = new Set(['50', '51', '52', '53', '54', '55']);
   const rurodoExterior = new Set();
   const tiposDesconhecidos = new Set();
+  const contagemTipos = new Map();
+  const fichasNaoLidasComConteudo = [];
+  const registrosDbkNaoModelados = [];
+  const avisosImportacao = [];
 
   for (const line of lines) {
     const tipo = line.substring(0, 2);
@@ -326,6 +540,7 @@ export async function parseDBK(text, log = noop) {
     // desconhecido dispara em TODA importação, com um tipo de nome vazio — foi
     // o que o teste flagrou assim que passou a existir.
     if (line.trim() === '') continue;
+    contagemTipos.set(tipo, (contagemTipos.get(tipo) || 0) + 1);
 
     if (!TIPOS_TRATADOS.has(tipo) && !TIPOS_CONHECIDOS_NAO_LIDOS.has(tipo)) {
       tiposDesconhecidos.add(tipo);
@@ -344,8 +559,81 @@ export async function parseDBK(text, log = noop) {
       const cpf = field(line, 3, 11);
       const nome = field(line, 14, 60);
       if (/^\d{11}$/.test(cpf)) {
-        contribuinte.cpf = cpf;
-        contribuinte.nome = nome;
+        // O layout XML descreve a variante longa (1.250 posições). O arquivo
+        // real para endereço no Brasil usa uma variante compacta de 930:
+        // omite NM_PAIS (40), NM_OCUP (150) e NM_NAT_OCUP (130). Os campos
+        // seguintes deslocam exatamente 40, 190 e 320 posições. As âncoras
+        // data/CPF do cônjuge/códigos de ocupação foram conferidas no arquivo
+        // real; descrições ausentes ficam vazias, nunca são inferidas.
+        const compacto = line.length < 1100;
+        const pos16 = (oficial) => {
+          if (!compacto) return oficial;
+          if (oficial >= 707) return oficial - 320;
+          if (oficial >= 575) return oficial - 190;
+          if (oficial >= 425) return null;
+          if (oficial >= 276) return oficial - 40;
+          if (oficial >= 236) return null;
+          return oficial;
+        };
+        const f16 = (oficial, tamanho) => {
+          const pos = pos16(oficial);
+          return pos == null ? '' : field(line, pos, tamanho);
+        };
+        Object.assign(contribuinte, {
+          cpf,
+          nome,
+          tipoLogradouro: field(line, 74, 15),
+          logradouro: field(line, 89, 40),
+          numero: field(line, 129, 6),
+          complemento: field(line, 135, 21),
+          bairro: field(line, 156, 19),
+          cep: field(line, 175, 9),
+          codigoMunicipio: field(line, 184, 4),
+          municipio: field(line, 188, 40),
+          uf: field(line, 228, 2),
+          codigoExterior: field(line, 230, 3),
+          codigoPais: field(line, 233, 3),
+          pais: f16(236, 40),
+          email: f16(276, 90),
+          nitPisPasep: f16(366, 11),
+          cpfConjuge: f16(377, 11),
+          dddTelefone: f16(388, 4),
+          dataNascimento: dataDDMMAAAAparaIso(f16(401, 8)),
+          ocupacaoCodigo: f16(422, 3),
+          ocupacaoDescricao: compacto ? '' : f16(425, 150),
+          naturezaOcupacaoCodigo: f16(575, 2),
+          naturezaOcupacaoDescricao: compacto ? '' : f16(577, 130),
+          numeroQuotas: Number(f16(707, 1) || 0),
+          declaracaoCompleta: f16(708, 1) === 'S',
+          retificadora: f16(709, 1) === 'S',
+          mudancaEndereco: f16(711, 1) === 'S',
+          numeroControleOriginal: f16(712, 12),
+          banco: f16(724, 3),
+          agencia: f16(727, 4),
+          doencaDeficiencia: f16(731, 1) === 'S',
+          atualizacaoBemLei14973: f16(745, 1) === '1',
+          digitoConta: f16(746, 2),
+          debitoAutomatico: f16(748, 1) === 'S',
+          debitoPrimeiraQuota: f16(749, 1) === '1',
+          fontePrincipalCpfCnpj: f16(750, 14),
+          reciboUltimaDeclaracao: f16(764, 10),
+          tipoDeclaracaoCodigo: f16(774, 1),
+          cpfProcurador: f16(775, 11),
+          registroProfissional: f16(786, 20),
+          dddCelular: f16(806, 2),
+          celular: f16(808, 9),
+          possuiConjuge: f16(817, 1) === 'S',
+          telefone: f16(818, 11),
+          tipoConta: f16(829, 1),
+          conta: f16(830, 20),
+          numeroProcessoDigital: f16(850, 17),
+          cpfResponsavel: f16(867, 11),
+          retornoPais: f16(1192, 1) === '1',
+          dataRetornoPais: dataDDMMAAAAparaIso(f16(1193, 8)),
+          processoAtualizacaoBem: f16(1201, 17),
+          prejuizoAnteriorLei14754: parseValorN13Signed(f16(1226, 13)),
+          racaCorCodigo: f16(1240, 1),
+        });
       }
       continue;
     }
@@ -356,23 +644,47 @@ export async function parseDBK(text, log = noop) {
       const dataNascimento = dataDDMMAAAAparaIso(field(line, 81, 8));
       const cpf = field(line, 89, 11);
       if (nome) {
+        const racaCorCodigo = field(line, 214, 1);
         dependentes.push({
           id: depId++,
           nome,
           cpf,
           dataNascimento,
           parentesco: codigo,
+          saidaComDeclarante: field(line, 100, 1) === '1',
+          nitPisPasep: field(line, 101, 11),
+          moraComTitular: field(line, 112, 1) === '1',
+          email: field(line, 113, 90),
+          dddCelular: field(line, 203, 2),
+          celular: field(line, 205, 9),
+          racaCorCodigo,
+          racaCor: RACA_COR_POR_CODIGO[racaCorCodigo] || '',
         });
       }
       continue;
     }
 
     if (tipo === '27') {
+      // Mesmo deslocamento derivado do registro 54 (ver achado 18): o layout
+      // oficial tem 1291 posições, com NM_PAIS ocupando 40 delas a partir da
+      // 20; a linha real do Brasil tem 1251 e não traz esse campo.
+      const off27 = line.length >= 1280 ? 0 : -40;
       const codigo = field(line, 14, 2);
-      const discriminacao = field(line, 20, 512);
-      const anterior = parseValorN13(field(line, 532, 13));
-      const atual = parseValorN13(field(line, 545, 13));
-      const grupo = field(line, 1101, 2);
+      const discriminacao = field(line, 60 + off27, 512);
+      const anterior = parseValorN13(field(line, 572 + off27, 13));
+      const atual = parseValorN13(field(line, 585 + off27, 13));
+      const grupo = field(line, 1141 + off27, 2);
+      // IN_TIPO_BENEFIC (oficial 1129) e NR_CPF_BENEFIC (1130): a quem o bem
+      // pertence. ACHADO 14 da auditoria de 24/08/2026 — os dois caminhos de
+      // importação cravavam 'Titular' em todo bem, e na declaração de
+      // referência SEIS dos 172 bens trazem 'D' com o CPF da dependente. O
+      // rótulo errado ia junto para o .xlsx entregue.
+      const tipoBenefic = field(line, 1129 + off27, 1).toUpperCase();
+      const cpfBenefic = field(line, 1130 + off27, 11);
+      // NM_CPFCNPJ (oficial 1042): a instituição ou a empresa a que o bem se
+      // refere. É o que permite cruzar um bem com o rendimento pago pela MESMA
+      // fonte — ver aplicacoesResgatadasSemRendimento em demonstrativos.js.
+      const cnpjBem = normalizarCpfCnpj(field(line, 1082 + off27, 14));
       if (discriminacao || anterior || atual) {
         bens.push({
           id: bemId++,
@@ -388,7 +700,11 @@ export async function parseDBK(text, log = noop) {
           situacao_anterior: anterior,
           situacao_atual: atual,
           localizacao: '105',
-          beneficiario: 'Titular',
+          // 'D' = dependente. Campo em branco (44 dos 172 bens do arquivo de
+          // referência) segue como Titular, que é o padrão da ficha.
+          beneficiario: tipoBenefic === 'D' ? 'Dependente' : 'Titular',
+          cpf_beneficiario: tipoBenefic === 'D' ? cpfBenefic : '',
+          cnpj: cnpjBem,
         });
       }
       continue;
@@ -819,16 +1135,32 @@ export async function parseDBK(text, log = noop) {
     }
 
     if (tipo === '54') {
-      const discriminacao = field(line, 20, 512);
-      // Ordem invertida (ver comentário acima): pos 532 é a ATUAL, pos 545
-      // é a ANTERIOR neste registro — trocado de propósito em relação ao
-      // padrão do registro 27.
-      const situacaoAtual = parseValorN13(field(line, 532, 13));
-      const situacaoAnterior = parseValorN13(field(line, 545, 13));
+      // ACHADO 18 da auditoria de 24/08/2026. As posições deste registro
+      // estavam CRAVADAS 40 caracteres à esquerda das oficiais, e davam certo
+      // porque o programa não grava o campo NM_PAIS (40 posições) quando o bem
+      // é do Brasil: a linha real tem 567 caracteres, e não os 607 do layout.
+      // Se um exercício futuro passar a gravar o campo em branco em vez de
+      // omiti-lo, os valores dos 60 bens rurais deslocariam todos de uma vez,
+      // em silêncio. O deslocamento agora é DERIVADO do comprimento da linha,
+      // então os dois formatos são lidos certo.
+      //
+      // Layout oficial (LAYOUT-DBK-OFICIAL.md): CD_BEMAR 58, TX_BEM 60,
+      // VR_BEM (atual) 572, VR_BEM_ANTERIOR 585, NR_CONTROLE 598, largura 607.
+      const off = line.length >= 600 ? 0 : -40;
+      const discriminacao = field(line, 60 + off, 512);
+      // Ordem invertida (ver comentário acima): o primeiro valor é a ATUAL e o
+      // segundo a ANTERIOR neste registro — trocado de propósito em relação
+      // ao padrão do registro 27, e confirmado no layout oficial.
+      const situacaoAtual = parseValorN13(field(line, 572 + off, 13));
+      const situacaoAnterior = parseValorN13(field(line, 585 + off, 13));
       if (discriminacao) {
         bensRurais.push({
           id: bemRuralId++,
-          codigo: field(line, 18, 2),
+          codigo: field(line, 58 + off, 2),
+          // Chave oficial do registro. Na variante compacta brasileira o
+          // NM_PAIS de 40 posições é omitido, por isso usa o mesmo offset
+          // calculado para os demais campos do registro 54.
+          controle: field(line, 598 + off, 10),
           discriminacao: discriminacao.substring(0, 512), // ver registro 27
           situacao_anterior: situacaoAnterior,
           situacao_atual: situacaoAtual,
@@ -846,6 +1178,7 @@ export async function parseDBK(text, log = noop) {
       if (discriminacao) {
         dividasRurais.push({
           id: dividaRuralId++,
+          controle: field(line, 566, 10),
           discriminacao: discriminacao.substring(0, 512),
           situacao_anterior: parseValorN13(field(line, 527, 13)),
           situacao_atual: parseValorN13(field(line, 540, 13)),
@@ -926,7 +1259,13 @@ export async function parseDBK(text, log = noop) {
         // os dois campos ficavam errados numa declaração que os usasse. O
         // resultado não tributável é o VR_RESNAOTRIBAR, da posição 145.
         adiantamentoAnosAnteriores: parseValorN13(field(line, 132, 13)),
-        resultadoNaoTributavel: parseValorN13(field(line, 145, 13)),
+        // Com SINAL, igual ao Resultado I da posição 41: os dois são resultado
+        // (receita menos despesa) e podem vir negativos pelo mesmo motivo.
+        // Estão zerados no único arquivo de referência, então não há como
+        // confirmar o formato do negativo — mas ler com sinal não muda nada
+        // quando o valor é positivo, e evita exibir um prejuízo como lucro.
+        // Achado 17 da auditoria de 24/08/2026.
+        resultadoNaoTributavel: parseValorN13Signed(field(line, 145, 13)),
         // Campos que o layout oficial revelou e que ninguém lia. O primeiro é
         // a opção de apuração do resultado tributável, guardada CRUA: vem '2'
         // nesta declaração, cujo PDF imprime "Pelo resultado", mas o layout não
@@ -934,7 +1273,9 @@ export async function parseDBK(text, log = noop) {
         // seria chute (mesmo critério já usado no código de parentesco dos
         // dependentes). O segundo só tem valor com atividade rural no exterior.
         opcaoApuracaoResultadoTributavel: field(line, 171, 1),
-        resultadoExteriorDolar: parseValorN13(field(line, 158, 13)),
+        // Mesmo raciocínio do campo acima: VR_RES1DOLAR é o "Resultado I" da
+        // apuração no exterior, e resultado pode ser negativo.
+        resultadoExteriorDolar: parseValorN13Signed(field(line, 158, 13)),
         origem: 'dbk',
       };
       continue;
@@ -1080,33 +1421,545 @@ export async function parseDBK(text, log = noop) {
       continue;
     }
 
-    if (tipo === '62') {
-      gcBens.push({
-        bem: field(line, 38, 83),
-        dataAquisicao: dataDDMMAAAAparaIso(field(line, 191, 8)),
-        custoAquisicao: parseValorN13(field(line, 199, 13)),
-        dataAlienacao: dataDDMMAAAAparaIso(field(line, 286, 8)),
-      });
+    // -----------------------------------------------------------------
+    // GANHOS DE CAPITAL — registro-mãe de cada ficha.
+    //
+    // 61 = BENS IMÓVEIS, 62 = DIREITOS/BENS MÓVEIS, 63 = PARTICIPAÇÕES
+    // SOCIETÁRIAS. Os três têm o mesmo miolo (natureza da operação, datas,
+    // valor, corretagem, cálculo do imposto e consolidação do bem), com
+    // posições diferentes, e cada um tem o que é seu: o imóvel traz endereço
+    // e as perguntas de isenção; a participação traz CNPJ, município e a
+    // apuração embutida no próprio registro.
+    if (tipo === '61') {
+      const op = gcOperacao('imovel', field(line, 33, 4));
+      // IN_BRASIL_EXTERIOR: o layout oficial só diz "indicação de brasil
+      // exterior", sem a tabela de valores. Nas três operações do arquivo de
+      // referência, todas de bem no Brasil (veículos com placa brasileira), o
+      // campo vem "1" — ou seja, 1 NÃO é exterior. Só "2" é tratado como
+      // exterior aqui; qualquer outro conteúdo fica em "brasil", que é a
+      // leitura que o dado real sustenta. Uma declaração com alienação no
+      // exterior confirmaria (ou corrigiria) essa segunda metade.
+      op.brasilExterior = field(line, 37, 1) === '2' ? 'exterior' : 'brasil';
+      op.especificacao = field(line, 38, 152);
+      op.endereco = {
+        tipoLogradouro: field(line, 190, 15),
+        logradouro: field(line, 205, 40),
+        numero: field(line, 245, 6),
+        complemento: field(line, 251, 21),
+        bairro: field(line, 272, 20),
+        cep: field(line, 292, 9),
+        codigoMunicipio: field(line, 301, 4),
+        municipio: field(line, 305, 40),
+        uf: field(line, 345, 2),
+        codigoPais: field(line, 347, 3),
+        pais: field(line, 350, 60),
+      };
+      op.dataAquisicao = dataDDMMAAAAparaIso(field(line, 410, 8));
+      op.custoAquisicao = parseValorN13(field(line, 418, 13));
+      // As seis perguntas da ficha de imóvel, na ordem impressa. `pequenoValor`
+      // é gravado invertido em relação ao texto da pergunta ("O valor do
+      // conjunto ... é superior a R$ 35.000,00?" imprime Sim quando o campo é
+      // "0"), exatamente como o relatório oficial faz — por isso a inversão
+      // explícita aqui, e não um simNaoOuNulo direto.
+      const superiorA35Mil = field(line, 432, 1);
+      op.perguntas = {
+        houveReformaOuAmpliacao: simNaoOuNulo(field(line, 431, 1)),
+        conjuntoSuperiorA35Mil: superiorA35Mil === '0' ? true : (superiorA35Mil === '1' ? false : null),
+        possuiOutroImovel: simNaoOuNulo(field(line, 433, 1)),
+        outraAlienacaoUltimos5Anos: simNaoOuNulo(field(line, 434, 1)),
+        imovelResidencial: simNaoOuNulo(field(line, 435, 1)),
+        // 1 = adquiri / 2 = não adquiri / 3 = pretendia adquirir / 4 = não se
+        // aplica. Guardado cru: a tela mostra a frase inteira que o formulário
+        // imprime, e inventar rótulo para um código sem exemplo real seria
+        // adivinhar.
+        aplicacaoEmOutroImovel: field(line, 436, 1),
+        valorAplicadoEmOutroImovel: parseValorN13(field(line, 437, 13)),
+        isencaoUsadaEmMaisDeUmImovel: field(line, 894, 1),
+        dataPrimeiraAlienacaoComIsencao: dataDDMMAAAAparaIso(field(line, 886, 8)),
+      };
+      op.natureza = gcNatureza(field(line, 450, 2), field(line, 452, 70));
+      op.decisaoJudicial = simNaoOuNulo(field(line, 522, 1));
+      op.dataAlienacao = dataDDMMAAAAparaIso(field(line, 523, 8));
+      op.dataDecisaoJudicial = dataDDMMAAAAparaIso(field(line, 531, 8));
+      op.dataLavratura = dataDDMMAAAAparaIso(field(line, 539, 8));
+      op.dataTransitoJulgado = dataDDMMAAAAparaIso(field(line, 547, 8));
+      op.alienacaoAPrazo = simNaoOuNulo(field(line, 555, 1));
+      op.valorAlienacao = parseValorN13(field(line, 556, 13));
+      op.custoCorretagem = parseValorN13(field(line, 569, 13));
+      op.valorTorna = parseValorN13(field(line, 582, 13));
+      op.houveAlienacaoParcialAnterior = simNaoOuNulo(field(line, 595, 1));
+      op.ganhoAlienacoesAnteriores = parseValorN13(field(line, 596, 13));
+      op.calculoImposto = {
+        valorBrutoAnosAnteriores: parseValorN13(field(line, 609, 13)),
+        corretagemAnosAnteriores: parseValorN13(field(line, 622, 13)),
+        liquidoAnosAnteriores: parseValorN13(field(line, 635, 13)),
+        ganhoCapitalTotal: parseValorN13(field(line, 648, 13)),
+        aliquotaMedia: parseDecimais(field(line, 661, 9), 6),
+        impostoDevido: parseValorN13(field(line, 670, 13)),
+        impostoPago: parseValorN13(field(line, 683, 13)),
+        totalRecebidoParcelas: parseValorN13(field(line, 696, 13)),
+        totalCorretagemParcelas: parseValorN13(field(line, 709, 13)),
+        totalLiquidoParcelas: parseValorN13(field(line, 722, 13)),
+        totalAquisicaoParcelas: parseValorN13(field(line, 735, 13)),
+      };
+      op.consolidacaoBem = {
+        impostoDiferidoAnosAnteriores: parseValorN13(field(line, 748, 13)),
+        impostoDoExercicio: parseValorN13(field(line, 761, 13)),
+        impostoTotal: parseValorN13(field(line, 774, 13)),
+        irFonteLei11033: parseValorN13(field(line, 787, 13)),
+        impostoDevidoNoExercicio: parseValorN13(field(line, 800, 13)),
+        impostoDiferidoAnosPosteriores: parseValorN13(field(line, 813, 13)),
+        impostoPago: parseValorN13(field(line, 826, 13)),
+        rendimentoIsento: parseValorN13(field(line, 839, 13)),
+        rendimentoExclusivo: parseValorN13(field(line, 852, 13)),
+      };
+      op.dataVencimentoDarf = dataDDMMAAAAparaIso(field(line, 865, 8));
+      op.dataUltimaParcela = dataDDMMAAAAparaIso(field(line, 873, 8));
+      op.paraisoFiscal = simNaoOuNulo(field(line, 881, 1));
+      op.codigoPaisParaisoFiscal = field(line, 882, 3);
+      // Lei 15.265/2025 (atualização do valor do bem). O layout ainda nomeia
+      // os campos com a lei anterior, 14.973/2024; o programa da Receita já
+      // imprime a pergunta com a lei nova e mantém a funcionalidade
+      // DESLIGADA nesta versão 1.5 (`LEI_ATUALIZACAO_BEM_ATIVA = false`).
+      // Lido assim mesmo: se a Receita ligar a opção numa versão seguinte, o
+      // dado passa a chegar sem precisar mexer aqui.
+      op.valorAtualizadoLei15265 = simNaoOuNulo(field(line, 895, 1));
+      op.valorAcrescidoAtualizacao = parseValorN13(field(line, 896, 13));
+      op.dataDarfAtualizacao = dataDDMMAAAAparaIso(field(line, 909, 8));
       continue;
     }
 
+    if (tipo === '62') {
+      const op = gcOperacao('movel', field(line, 33, 4));
+      op.brasilExterior = field(line, 37, 1) === '2' ? 'exterior' : 'brasil';
+      op.especificacao = field(line, 38, 152);
+      op.sujeitoRegistroPublico = simNaoOuNulo(field(line, 190, 1));
+      op.dataAquisicao = dataDDMMAAAAparaIso(field(line, 191, 8));
+      op.custoAquisicao = parseValorN13(field(line, 199, 13));
+      const superiorA35MilMovel = field(line, 212, 1);
+      op.perguntas = {
+        conjuntoSuperiorA35Mil: superiorA35MilMovel === '0' ? true : (superiorA35MilMovel === '1' ? false : null),
+      };
+      op.natureza = gcNatureza(field(line, 213, 2), field(line, 215, 70));
+      op.decisaoJudicial = simNaoOuNulo(field(line, 285, 1));
+      op.dataAlienacao = dataDDMMAAAAparaIso(field(line, 286, 8));
+      op.dataDecisaoJudicial = dataDDMMAAAAparaIso(field(line, 294, 8));
+      op.dataLavratura = dataDDMMAAAAparaIso(field(line, 302, 8));
+      op.dataTransitoJulgado = dataDDMMAAAAparaIso(field(line, 310, 8));
+      op.alienacaoAPrazo = simNaoOuNulo(field(line, 318, 1));
+      op.valorAlienacao = parseValorN13(field(line, 319, 13));
+      op.custoCorretagem = parseValorN13(field(line, 332, 13));
+      op.houveAlienacaoParcialAnterior = simNaoOuNulo(field(line, 345, 1));
+      op.ganhoAlienacoesAnteriores = parseValorN13(field(line, 346, 13));
+      op.calculoImposto = {
+        valorBrutoAnosAnteriores: parseValorN13(field(line, 359, 13)),
+        corretagemAnosAnteriores: parseValorN13(field(line, 372, 13)),
+        liquidoAnosAnteriores: parseValorN13(field(line, 385, 13)),
+        ganhoCapitalTotal: parseValorN13(field(line, 398, 13)),
+        aliquotaMedia: parseDecimais(field(line, 411, 9), 6),
+        impostoDevido: parseValorN13(field(line, 420, 13)),
+        impostoPago: parseValorN13(field(line, 433, 13)),
+        totalRecebidoParcelas: parseValorN13(field(line, 446, 13)),
+        totalCorretagemParcelas: parseValorN13(field(line, 459, 13)),
+        totalLiquidoParcelas: parseValorN13(field(line, 472, 13)),
+        totalAquisicaoParcelas: parseValorN13(field(line, 485, 13)),
+      };
+      op.consolidacaoBem = {
+        impostoDiferidoAnosAnteriores: parseValorN13(field(line, 498, 13)),
+        impostoDoExercicio: parseValorN13(field(line, 511, 13)),
+        impostoTotal: parseValorN13(field(line, 524, 13)),
+        irFonteLei11033: parseValorN13(field(line, 537, 13)),
+        impostoDevidoNoExercicio: parseValorN13(field(line, 550, 13)),
+        impostoDiferidoAnosPosteriores: parseValorN13(field(line, 563, 13)),
+        impostoPago: parseValorN13(field(line, 576, 13)),
+        rendimentoIsento: parseValorN13(field(line, 589, 13)),
+        rendimentoExclusivo: parseValorN13(field(line, 602, 13)),
+      };
+      op.dataVencimentoDarf = dataDDMMAAAAparaIso(field(line, 615, 8));
+      op.dataUltimaParcela = dataDDMMAAAAparaIso(field(line, 623, 8));
+      op.paraisoFiscal = simNaoOuNulo(field(line, 631, 1));
+      op.codigoPaisParaisoFiscal = field(line, 632, 3);
+      continue;
+    }
+
+    if (tipo === '63') {
+      const op = gcOperacao('participacao', field(line, 33, 4));
+      op.especificacao = field(line, 37, 152);
+      op.sociedade = {
+        nome: field(line, 37, 152),
+        cnpj: normalizarCpfCnpj(field(line, 189, 14)),
+        codigoMunicipio: field(line, 203, 4),
+        municipio: field(line, 207, 40),
+        uf: field(line, 247, 2),
+      };
+      op.natureza = gcNatureza(field(line, 249, 2), field(line, 251, 70));
+      op.especie = { codigo: field(line, 321, 1), descricao: field(line, 322, 90) };
+      op.decisaoJudicial = simNaoOuNulo(field(line, 412, 1));
+      op.dataAlienacao = dataDDMMAAAAparaIso(field(line, 413, 8));
+      op.dataDecisaoJudicial = dataDDMMAAAAparaIso(field(line, 421, 8));
+      op.dataLavratura = dataDDMMAAAAparaIso(field(line, 429, 8));
+      op.dataTransitoJulgado = dataDDMMAAAAparaIso(field(line, 437, 8));
+      op.alienacaoAPrazo = simNaoOuNulo(field(line, 445, 1));
+      op.valorAlienacao = parseValorN13(field(line, 446, 13));
+      op.custoCorretagem = parseValorN13(field(line, 459, 13));
+      // Aqui o limite da pergunta é R$ 20.000,00 (ações no mercado de balcão),
+      // não os R$ 35.000,00 das outras fichas — Lei 9.250/1995, art. 22, I.
+      const superiorA20Mil = field(line, 472, 1);
+      op.perguntas = {
+        conjuntoSuperiorA20Mil: superiorA20Mil === '0' ? true : (superiorA20Mil === '1' ? false : null),
+      };
+      op.houveAlienacaoParcialAnterior = simNaoOuNulo(field(line, 473, 1));
+      op.ganhoAlienacoesAnteriores = parseValorN13(field(line, 474, 13));
+      // Diferente de imóvel e móvel, a participação societária traz a APURAÇÃO
+      // dentro do próprio registro (não há um 68/69 para ela).
+      op.apuracao = {
+        valorAlienacao: parseValorN13(field(line, 487, 13)),
+        custoCorretagem: parseValorN13(field(line, 500, 13)),
+        valorLiquido: parseValorN13(field(line, 513, 13)),
+        custoAquisicao: parseValorN13(field(line, 526, 13)),
+        ganhoCapital: parseValorN13(field(line, 539, 13)),
+      };
+      op.custoAquisicao = op.apuracao.custoAquisicao;
+      op.calculoImposto = {
+        valorBrutoAnosAnteriores: parseValorN13(field(line, 552, 13)),
+        corretagemAnosAnteriores: parseValorN13(field(line, 565, 13)),
+        liquidoAnosAnteriores: parseValorN13(field(line, 578, 13)),
+        ganhoCapitalTotal: parseValorN13(field(line, 591, 13)),
+        aliquotaMedia: parseDecimais(field(line, 604, 9), 6),
+        impostoDevido: parseValorN13(field(line, 613, 13)),
+        irrf: parseValorN13(field(line, 626, 13)),
+        impostoDevidoAposCompensacao: parseValorN13(field(line, 639, 13)),
+        impostoPago: parseValorN13(field(line, 652, 13)),
+        totalRecebidoParcelas: parseValorN13(field(line, 665, 13)),
+        totalCorretagemParcelas: parseValorN13(field(line, 678, 13)),
+        totalLiquidoParcelas: parseValorN13(field(line, 691, 13)),
+        totalAquisicaoParcelas: parseValorN13(field(line, 704, 13)),
+      };
+      op.consolidacaoBem = {
+        impostoDiferidoAnosAnteriores: parseValorN13(field(line, 717, 13)),
+        impostoDoExercicio: parseValorN13(field(line, 730, 13)),
+        impostoTotal: parseValorN13(field(line, 743, 13)),
+        irFonteLei11033: parseValorN13(field(line, 756, 13)),
+        impostoDevidoNoExercicio: parseValorN13(field(line, 769, 13)),
+        impostoDiferidoAnosPosteriores: parseValorN13(field(line, 782, 13)),
+        impostoPago: parseValorN13(field(line, 795, 13)),
+        rendimentoIsento: parseValorN13(field(line, 808, 13)),
+        rendimentoExclusivo: parseValorN13(field(line, 821, 13)),
+      };
+      op.custoTotalAquisicaoConsolidado = parseValorN13(field(line, 834, 13));
+      op.dataVencimentoDarf = dataDDMMAAAAparaIso(field(line, 847, 8));
+      op.dataUltimaParcela = dataDDMMAAAAparaIso(field(line, 855, 8));
+      op.paraisoFiscal = simNaoOuNulo(field(line, 863, 1));
+      op.codigoPaisParaisoFiscal = field(line, 864, 3);
+      continue;
+    }
+
+    // Adquirente da operação (65). Uma operação pode ter mais de um: a ficha
+    // impressa lista todos no bloco "ADQUIRENTE".
     if (tipo === '65') {
-      // Um dígito fixo ("2", nas 3 operações conferidas) antes do
-      // documento — não indica CPF x CNPJ (as 3 têm o mesmo dígito, uma é
-      // CPF e duas são CNPJ). O que distingue é só o próprio tamanho: CPF
-      // vem com espaço sobrando à direita até completar 14, CNPJ preenche
-      // os 14 inteiros — bastando cortar o espaço (field() já faz isso).
-      gcAdquirentes.push({
-        cpfCnpj: field(line, 38, 14),
+      const tipoBem = GC_TIPO_POR_INDICADOR[field(line, 37, 1)] || 'movel';
+      gcOperacao(tipoBem, field(line, 33, 4)).adquirentes.push({
+        cpfCnpj: normalizarCpfCnpj(field(line, 38, 14)),
         nome: field(line, 52, 60),
       });
       continue;
     }
 
-    if (tipo === '69') {
-      gcValores.push({
-        valorAlienacao: parseValorN13(field(line, 38, 13)),
+    // Edificação, ampliação ou reforma do imóvel alienado (66 no Brasil, 67 no
+    // exterior). Entram como parcelas do custo, cada uma com a data e o
+    // percentual de redução que lhe cabe.
+    if (tipo === '66' || tipo === '67') {
+      gcOperacao('imovel', field(line, 33, 4)).ampliacoesReformas.push({
+        exterior: tipo === '67',
+        data: dataDDMMAAAAparaIso(field(line, 37, 8)),
+        valor: parseValorN13(field(line, 45, 13)),
+        percentualDoCusto: parseDecimais(field(line, 58, 9), 6),
+        valorPassivelReducao: parseValorN13(field(line, 67, 13)),
+        percentualReducaoLei7713: parseDecimais(field(line, 80, 9), 6),
+        percentualReducaoFR1: parseDecimais(field(line, 89, 9), 6),
+        percentualReducaoFR2: parseDecimais(field(line, 98, 9), 6),
       });
+      continue;
+    }
+
+    // Apuração do ganho: 68 para imóvel (com as reduções da Lei 7.713/1988 e
+    // da Lei 11.196/2005) e 69 para móvel (sem reduções). O bloco "APURAÇÃO DO
+    // GANHO DE CAPITAL" da ficha impressa é exatamente isto.
+    if (tipo === '68' || tipo === '69') {
+      const op = gcOperacao(tipo === '68' ? 'imovel' : 'movel', field(line, 33, 4));
+      const base = {
+        tipoApuracao: field(line, 37, 1),
+        valorAlienacao: parseValorN13(field(line, 38, 13)),
+        custoCorretagem: parseValorN13(field(line, 51, 13)),
+        valorLiquido: parseValorN13(field(line, 64, 13)),
+        valorLiquidoDolar: parseValorN13(field(line, 77, 13)),
+        custoAquisicao: parseValorN13(field(line, 90, 13)),
+        ganhoCapital: parseValorN13(field(line, 103, 13)),
+        ganhoCapitalDolar: parseValorN13(field(line, 116, 13)),
+      };
+      if (tipo === '68') {
+        Object.assign(base, {
+          cotacaoDolar: parseDecimais(field(line, 313, 13), 4),
+          reducoes: {
+            percentualLei7713: parseDecimais(field(line, 129, 9), 6),
+            valorLei7713: parseValorN13(field(line, 138, 13)),
+            ganhoApos7713: parseValorN13(field(line, 151, 13)),
+            percentualFR1: parseDecimais(field(line, 164, 9), 6),
+            valorFR1: parseValorN13(field(line, 173, 13)),
+            ganhoAposFR1: parseValorN13(field(line, 186, 13)),
+            percentualFR2: parseDecimais(field(line, 199, 9), 6),
+            valorFR2: parseValorN13(field(line, 208, 13)),
+            ganhoAposFR2: parseValorN13(field(line, 221, 13)),
+            percentualAplicacaoOutroImovel: parseDecimais(field(line, 234, 9), 6),
+            valorAplicacaoOutroImovel: parseValorN13(field(line, 243, 13)),
+            percentualPequenoValor: parseDecimais(field(line, 256, 9), 6),
+            valorPequenoValor: parseValorN13(field(line, 265, 13)),
+            percentualUnicoImovel: parseDecimais(field(line, 278, 9), 6),
+            valorUnicoImovel: parseValorN13(field(line, 287, 13)),
+            ganhoTributavel: parseValorN13(field(line, 300, 13)),
+          },
+        });
+      } else {
+        base.cotacaoDolar = parseDecimais(field(line, 129, 13), 4);
+      }
+      // Uma operação pode ter apuração "normal" e "final" (tipos diferentes no
+      // campo 37). A primeira vira `apuracao`; as demais ficam na lista, sem
+      // sobrescrever a que já estava.
+      if (!op.apuracao) op.apuracao = base;
+      else (op.apuracoesAdicionais = op.apuracoesAdicionais || []).push(base);
+      continue;
+    }
+
+    // Apuração da parcela quando a alienação foi a prazo (70 = comum às duas
+    // moedas, 71 = imóvel, 72 = móvel ou participação societária).
+    if (tipo === '70' || tipo === '71' || tipo === '72') {
+      let tipoBem = 'imovel';
+      if (tipo === '72') tipoBem = field(line, 37, 1) === '3' ? 'participacao' : 'movel';
+      else if (tipo === '70') tipoBem = field(line, 37, 1) === '2' ? 'movel' : 'imovel';
+      const op = gcOperacao(tipoBem, field(line, 33, 4));
+      if (tipo === '70') {
+        op.parcelas.push({
+          origem: 'ambas_moedas',
+          data: dataDDMMAAAAparaIso(field(line, 38, 8)),
+          valorAlienacao: parseValorN13(field(line, 46, 13)),
+          custoCorretagem: parseValorN13(field(line, 59, 13)),
+          valorLiquido: parseValorN13(field(line, 72, 13)),
+          valorReaplicadoOutroImovel: parseValorN13(field(line, 85, 13)),
+          ganhoCapitalTotal: parseValorN13(field(line, 98, 13)),
+          impostoDevido: parseValorN13(field(line, 111, 13)),
+          impostoPagoExterior: parseValorN13(field(line, 124, 13)),
+          impostoDevidoBrasil: parseValorN13(field(line, 137, 13)),
+          impostoPagoBrasil: parseValorN13(field(line, 150, 13)),
+          totalReducoes: parseValorN13(field(line, 163, 13)),
+        });
+      } else if (tipo === '71') {
+        op.parcelas.push({
+          origem: 'imovel',
+          tipoParcela: field(line, 37, 1),
+          ultimaParcela: simNaoOuNulo(field(line, 38, 1)),
+          data: dataDDMMAAAAparaIso(field(line, 39, 8)),
+          valorLiquidoAmbasMoedas: parseValorN13(field(line, 47, 13)),
+          valorAlienacao: parseValorN13(field(line, 60, 13)),
+          custoCorretagem: parseValorN13(field(line, 73, 13)),
+          valorLiquido: parseValorN13(field(line, 86, 13)),
+          custoAquisicao: parseValorN13(field(line, 112, 13)),
+          ganhoCapital: parseValorN13(field(line, 125, 13)),
+          totalReducoes: parseValorN13(field(line, 348, 13)),
+          ganhoTributavel: parseValorN13(field(line, 335, 13)),
+          aliquota: parseDecimais(field(line, 361, 9), 6),
+          impostoDevido: parseValorN13(field(line, 370, 13)),
+          impostoPagoExterior: parseValorN13(field(line, 383, 13)),
+          impostoDevidoBrasil: parseValorN13(field(line, 396, 13)),
+          impostoPagoBrasil: parseValorN13(field(line, 409, 13)),
+          cotacaoDolar: parseDecimais(field(line, 422, 13), 4),
+        });
+      } else {
+        op.parcelas.push({
+          origem: tipoBem,
+          tipoParcela: field(line, 38, 1),
+          ultimaParcela: simNaoOuNulo(field(line, 39, 1)),
+          data: dataDDMMAAAAparaIso(field(line, 40, 8)),
+          valorLiquidoAmbasMoedas: parseValorN13(field(line, 48, 13)),
+          valorAlienacao: parseValorN13(field(line, 61, 13)),
+          custoCorretagem: parseValorN13(field(line, 74, 13)),
+          valorLiquido: parseValorN13(field(line, 87, 13)),
+          custoAquisicao: parseValorN13(field(line, 113, 13)),
+          ganhoCapital: parseValorN13(field(line, 126, 13)),
+          aliquota: parseDecimais(field(line, 152, 9), 6),
+          impostoDevido: parseValorN13(field(line, 161, 13)),
+          impostoPagoExterior: parseValorN13(field(line, 174, 13)),
+          impostoDevidoBrasil: parseValorN13(field(line, 187, 13)),
+          impostoPagoBrasil: parseValorN13(field(line, 200, 13)),
+          cotacaoDolar: parseDecimais(field(line, 213, 13), 4),
+        });
+      }
+      continue;
+    }
+
+    // Apuração do custo de aquisição da participação societária (73): uma
+    // linha por espécie de participação alienada.
+    if (tipo === '73') {
+      gcOperacao('participacao', field(line, 33, 4)).custosAquisicao.push({
+        item: field(line, 37, 4),
+        codigoEspecie: field(line, 41, 1),
+        especie: field(line, 42, 60),
+        quantidadeAlienada: parseInteiro(field(line, 102, 11)),
+        custoMedioPonderado: parseDecimais(field(line, 113, 17), 6),
+        custoTotal: parseValorN13(field(line, 130, 13)),
+      });
+      continue;
+    }
+
+    // MOEDAS EM ESPÉCIE (74): uma linha por movimento de moeda estrangeira
+    // mantida em espécie — saldo inicial, compra ou venda.
+    if (tipo === '74') {
+      gcMoedaOperacoes.push({
+        item: field(line, 33, 4),
+        codigoMoeda: field(line, 37, 7),
+        moeda: field(line, 44, 40),
+        tipoOperacao: field(line, 84, 1),
+        tipoOperacaoDescricao: field(line, 85, 15),
+        adquirenteNome: field(line, 100, 60),
+        adquirenteCpfCnpj: normalizarCpfCnpj(field(line, 160, 14)),
+        data: dataDDMMAAAAparaIso(field(line, 174, 8)),
+        valor: parseValorN13(field(line, 182, 13)),
+        quantidade: parseValorN13(field(line, 195, 13)),
+        custoMedio: parseDecimais(field(line, 208, 17), 6),
+        custoTotal: parseValorN13(field(line, 225, 13)),
+        ganhoCapital: parseValorN13(field(line, 238, 13)),
+        saldoEmReais: parseValorN13(field(line, 251, 13)),
+        saldoEmMoeda: parseValorN13(field(line, 264, 13)),
+        cotacaoMoedaDolar: parseDecimais(field(line, 277, 13), 4),
+      });
+      continue;
+    }
+
+    // Faixas de tributação do ganho (75). É o quadro "Faixa de Ganho de
+    // Capital / Ganho de Capital Distribuído / Alíquota" da ficha impressa,
+    // com as quatro faixas da Lei 13.259/2016 (15%, 17,5%, 20% e 22,5%).
+    if (tipo === '75') {
+      const tipoBem = GC_TIPO_POR_INDICADOR[field(line, 37, 1)] || 'movel';
+      const faixa = (total, anterior, atual) => ({
+        total: parseValorN13(field(line, total, 13)),
+        anterior: parseValorN13(field(line, anterior, 13)),
+        atual: parseValorN13(field(line, atual, 13)),
+      });
+      gcOperacao(tipoBem, field(line, 33, 4)).faixasTributacao.push({
+        baseApuracao: field(line, 38, 1),
+        faixa1: faixa(39, 52, 65),
+        faixa2: faixa(78, 91, 104),
+        faixa3: faixa(117, 130, 143),
+        faixa4: faixa(156, 169, 182),
+        total: faixa(195, 208, 221),
+      });
+      continue;
+    }
+
+    // Totalização mensal das moedas alienadas (76). Uma linha por mês, com a
+    // isenção dos US$ 5.000 controlada pela coluna consolidada.
+    if (tipo === '76') {
+      const mes = parseInt(field(line, 33, 2), 10);
+      if (mes >= 1 && mes <= 12) {
+        gcMoedaMensal.push({
+          mes,
+          alienacaoDolar: parseValorN13(field(line, 35, 13)),
+          alienacaoConsolidadaDolar: parseValorN13(field(line, 48, 13)),
+          ganhoCapital: parseValorN13(field(line, 61, 13)),
+          ganhoCapitalTributavel: parseValorN13(field(line, 74, 13)),
+          aliquota: parseValorN13(field(line, 87, 13)),
+          impostoDevido: parseValorN13(field(line, 100, 13)),
+          impostoPago: parseValorN13(field(line, 113, 13)),
+        });
+      }
+      continue;
+    }
+
+    // Cabeçalho do demonstrativo de Ganhos de Capital (60): o período, o país
+    // de residência e os TRANSPORTES — os valores que a declaração leva
+    // automaticamente para as fichas de rendimentos (isento de pequeno valor,
+    // de único imóvel, da redução, e o rendimento de tributação exclusiva).
+    if (tipo === '60') {
+      gcConsolidacao = {
+        periodoInicio: dataDDMMAAAAparaIso(field(line, 33, 8)),
+        periodoFim: dataDDMMAAAAparaIso(field(line, 41, 8)),
+        codigoPais: field(line, 49, 3),
+        pais: field(line, 52, 60),
+        rendimentoExclusivo: parseValorN13(field(line, 112, 13)),
+        isentoPequenoValor: parseValorN13(field(line, 125, 13)),
+        isentoUnicoImovel: parseValorN13(field(line, 138, 13)),
+        isentoReducao: parseValorN13(field(line, 151, 13)),
+        impostoPago: parseValorN13(field(line, 164, 13)),
+        impostoDevido: parseValorN13(field(line, 177, 13)),
+        isentoTotal: parseValorN13(field(line, 190, 13)),
+        impostoDiferidoAnosPosteriores: parseValorN13(field(line, 203, 13)),
+        moedaEspecieGanho: parseValorN13(field(line, 216, 13)),
+        moedaEspecieImpostoDevido: parseValorN13(field(line, 229, 13)),
+        moedaEspecieAliquotaMedia: parseDecimais(field(line, 242, 9), 6),
+        exteriorRendimentoExclusivo: parseValorN13(field(line, 251, 13)),
+        exteriorImpostoPago: parseValorN13(field(line, 264, 13)),
+        exteriorRendimentoIsento: parseValorN13(field(line, 277, 13)),
+      };
+      continue;
+    }
+
+    // RENDA VARIÁVEL — consolidação anual das operações comuns/day-trade (41).
+    if (tipo === '41') {
+      rendaVariavelAnualOficial = {
+        resultadoLiquido: parseValorN13(field(line, 14, 13)),
+        resultadoNegativoMesesAnteriores: parseValorN13(field(line, 27, 13)),
+        baseCalculo: parseValorN13(field(line, 40, 13)),
+        prejuizoACompensar: parseValorN13(field(line, 53, 13)),
+        impostoDevido: parseValorN13(field(line, 66, 13)),
+        consolidacaoImpostoDevido: parseValorN13(field(line, 79, 13)),
+        consolidacaoIrFonteDayTradeMesesAnteriores: parseValorN13(field(line, 92, 13)),
+        consolidacaoIrFonteDayTradeACompensar: parseValorN13(field(line, 105, 13)),
+        irFonteLei11033Ano: parseValorN13(field(line, 118, 13)),
+        consolidacaoImpostoAPagar: parseValorN13(field(line, 131, 13)),
+        origem: 'dbk',
+      };
+      continue;
+    }
+
+    // RENDA VARIÁVEL — Operações em FII ou Fiagro, mês a mês (42). Mesma ficha
+    // que o menu do programa chama de "Operações em FII ou Fiagro"; a alíquota
+    // vem como inteiro de 3 dígitos (20 = 20%), não como valor monetário.
+    if (tipo === '42') {
+      const mes = parseInt(field(line, 14, 2), 10);
+      if (mes >= 1 && mes <= 12) {
+        const ehDependente = field(line, 149, 1).toUpperCase() === 'S';
+        fiiFiagroMensalOficial.push({
+          mes,
+          titular: !ehDependente,
+          cpfDependente: ehDependente ? field(line, 150, 11) : null,
+          resultadoLiquidoMes: parseValorN13(field(line, 16, 13)),
+          resultadoNegativoMesAnterior: parseValorN13(field(line, 29, 13)),
+          baseCalculoImposto: parseValorN13(field(line, 42, 13)),
+          prejuizoCompensar: parseValorN13(field(line, 55, 13)),
+          aliquota: `${parseInt(field(line, 68, 3), 10) || 0}%`,
+          impostoDevido: parseValorN13(field(line, 71, 13)),
+          impostoRetidoMesesAnteriores: parseValorN13(field(line, 84, 13)),
+          impostoRetidoNoMes: parseValorN13(field(line, 97, 13)),
+          impostoACompensar: parseValorN13(field(line, 110, 13)),
+          impostoAPagar: parseValorN13(field(line, 123, 13)),
+          impostoPago: parseValorN13(field(line, 136, 13)),
+          origem: 'dbk',
+        });
+      }
+      continue;
+    }
+
+    // RENDA VARIÁVEL — totais anuais de FII/Fiagro (43).
+    if (tipo === '43') {
+      fiiFiagroAnualOficial = {
+        resultadoLiquido: parseValorN13(field(line, 14, 13)),
+        resultadoNegativoMesAnterior: parseValorN13(field(line, 27, 13)),
+        baseCalculoImposto: parseValorN13(field(line, 40, 13)),
+        prejuizoCompensar: parseValorN13(field(line, 53, 13)),
+        impostoDevido: parseValorN13(field(line, 66, 13)),
+        impostoAPagar: parseValorN13(field(line, 79, 13)),
+        impostoRetidoLei11033: parseValorN13(field(line, 92, 13)),
+        origem: 'dbk',
+      };
       continue;
     }
 
@@ -1231,12 +2084,61 @@ export async function parseDBK(text, log = noop) {
     const conhecidas = [...tiposDesconhecidos].filter(t => FICHAS_NAO_MODELADAS[t]).sort();
     const novas = [...tiposDesconhecidos].filter(t => !FICHAS_NAO_MODELADAS[t]).sort();
     for (const t of conhecidas) {
-      log(`Esta declaração tem a ficha "${FICHAS_NAO_MODELADAS[t]}", que o app não importa. Confira esses dados na declaração original.`, 'warning');
+      const ficha = FICHAS_NAO_MODELADAS[t];
+      const mensagem = `Esta declaração tem a ficha "${ficha}", que o app não importa. Confira esses dados na declaração original.`;
+      fichasNaoLidasComConteudo.push(ficha);
+      avisosImportacao.push({ codigo: 'DBK_FICHA_NAO_SUPORTADA', tipoRegistro: t, ficha, mensagem });
+      log(mensagem, 'warning');
     }
     if (novas.length > 0) {
-      log(`Este arquivo tem registro(s) de tipo ${novas.join(', ')}, que o app não conhece. Alguma informação da declaração pode não ter sido importada; confira na declaração original.`, 'warning');
+      const mensagem = `Este arquivo tem registro(s) de tipo ${novas.join(', ')}, que o app não conhece. Alguma informação da declaração pode não ter sido importada; confira na declaração original.`;
+      for (const t of novas) {
+        const ficha = `Registro DBK tipo ${t}`;
+        fichasNaoLidasComConteudo.push(ficha);
+        avisosImportacao.push({ codigo: 'DBK_TIPO_DESCONHECIDO', tipoRegistro: t, ficha, mensagem });
+      }
+      log(mensagem, 'warning');
     }
   }
+
+  for (const [tipo, ocorrencias] of [...contagemTipos.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    if (TIPOS_TRATADOS.has(tipo) || tipo === 'T9') continue;
+    registrosDbkNaoModelados.push({
+      tipoRegistro: tipo,
+      ficha: FICHAS_NAO_MODELADAS[tipo] || null,
+      ocorrencias,
+      classificacao: tiposDesconhecidos.has(tipo) ? 'nao_modelado' : 'preservado_sem_modelagem',
+    });
+  }
+
+  const estadoFichas = {};
+  const tiposCatalogadosNesteParser = new Set([
+    ...TIPOS_TRATADOS,
+    ...TIPOS_CONHECIDOS_NAO_LIDOS,
+    ...Object.keys(FICHAS_NAO_MODELADAS),
+    ...contagemTipos.keys(),
+  ]);
+  for (const tipo of [...tiposCatalogadosNesteParser].sort()) {
+    const presente = (contagemTipos.get(tipo) || 0) > 0;
+    if (!presente) {
+      estadoFichas[idFichaDbk(tipo)] = entradaEstadoFicha('vazia', 'dbk');
+    } else if (TIPOS_TRATADOS.has(tipo) || tipo === 'T9') {
+      estadoFichas[idFichaDbk(tipo)] = entradaEstadoFicha(
+        'parcial',
+        'dbk',
+        'Registro estruturado, mas a ficha ainda não concluiu o gate de auditoria independente',
+      );
+    } else if (tiposDesconhecidos.has(tipo) && !FICHAS_NAO_MODELADAS[tipo]) {
+      estadoFichas[idFichaDbk(tipo)] = entradaEstadoFicha('erro', 'dbk', 'Tipo de registro desconhecido');
+    } else {
+      estadoFichas[idFichaDbk(tipo)] = entradaEstadoFicha('nao_suportada', 'dbk', FICHAS_NAO_MODELADAS[tipo] || 'Registro preservado sem modelagem estruturada');
+    }
+  }
+  estadoFichas['dbk:atividade-rural-exterior'] = entradaEstadoFicha(
+    rurodoExterior.size > 0 ? 'nao_suportada' : 'vazia',
+    'dbk',
+    rurodoExterior.size > 0 ? 'Registros rurais com indicador de exterior foram preservados, mas não modelados' : undefined,
+  );
 
   // Concilia agregado (23/24) e detalhe (84/88) dos rendimentos isentos e de
   // tributação exclusiva. Mesma regra do caminho PDF, pelo mesmo motivo: os
@@ -1264,7 +2166,9 @@ export async function parseDBK(text, log = noop) {
         beneficiario: base.beneficiario || 'Titular',
         cpf_dependente: base.beneficiario === 'Dependente' ? (base.cpf || '') : null,
         valor: base.valor,
-        // O IRRF só existe na variante 85 do detalhe; nas demais é zero.
+        // O IRRF só existe na variante 85 do detalhe; nas demais é zero. O do
+        // 13º salário é preenchido depois, por `aplicarIrrfDecimoTerceiro`,
+        // quando toda a lista de rendimentos já existe.
         irrf: base.irrfDetalhe || 0,
         ...(base.decimoTerceiro ? { decimoTerceiro: base.decimoTerceiro } : {}),
         // Campos que só ALGUMAS variantes de detalhe trazem. Sem repassá-los
@@ -1281,7 +2185,7 @@ export async function parseDBK(text, log = noop) {
       if (detalhe && detalhe.length > 0) {
         const soma = detalhe.reduce((acc, d) => acc + d.valor, 0);
         if (Math.abs(soma - ag.valor) > 0.01) {
-          divergenciasRendimento.push({ chave, soma, agregado: ag.valor });
+          divergenciasRendimento.push({ chave, codigo: ag.codigo, categoria: ag.categoria, soma, agregado: ag.valor });
         }
         for (const d of detalhe) emitir(chave, d);
         porCodigo.delete(chave);
@@ -1294,7 +2198,66 @@ export async function parseDBK(text, log = noop) {
     // ainda não entende sobre a estrutura dele.
     for (const [chave, detalhe] of porCodigo) {
       for (const d of detalhe) emitir(chave, d);
-      divergenciasRendimento.push({ chave, soma: detalhe.reduce((a, d) => a + d.valor, 0), agregado: 0 });
+      divergenciasRendimento.push({
+        chave, codigo: detalhe[0]?.codigo || '', categoria: detalhe[0]?.categoria || '',
+        soma: detalhe.reduce((a, d) => a + d.valor, 0), agregado: 0,
+      });
+    }
+  }
+
+  // ACHADO 08 da auditoria de 24/08/2026: até aqui `divergenciasRendimento`
+  // era declarada, preenchida nos dois pontos acima e NUNCA lida — nem
+  // logada, nem devolvida. O caminho PDF tem a rede equivalente funcionando
+  // (`rieDivergencias`); pelo `.DBK` uma divergência entre o detalhe por fonte
+  // pagadora e o total que a própria declaração informa passava em silêncio,
+  // que é exatamente a situação para a qual o aviso existe. Provado adulterando
+  // um registro 84 do arquivo real: o total de isentos mudava R$ 3.439,49 e a
+  // importação não dizia nada.
+  for (const d of divergenciasRendimento) {
+    const rotulo = d.categoria === 'isento' ? 'rendimento isento' : 'rendimento de tributação exclusiva';
+    if (d.agregado === 0) {
+      log(`Conferência da ficha de rendimentos: o ${rotulo} de código ${d.codigo} tem detalhe por fonte somando R$ ${d.soma.toFixed(2)}, mas a declaração não traz o total desse código. Confira esse item na declaração original.`, 'warning');
+    } else {
+      log(`Conferência da ficha de rendimentos: o ${rotulo} de código ${d.codigo} soma R$ ${d.soma.toFixed(2)} no detalhe por fonte, mas a própria declaração informa R$ ${d.agregado.toFixed(2)} no total do código. Confira esse item na declaração original.`, 'warning');
+    }
+  }
+
+  // IRRF do 13º salário no rendimento exclusivo correspondente (achado 07).
+  // Roda aqui, e não na emissão, porque precisa da lista de rendimentos
+  // inteira: a ficha de PJ e a de exclusivos são lidas em momentos diferentes.
+  aplicarIrrfDecimoTerceiro(rendimentos);
+
+  // ACHADO 05 da auditoria de 24/08/2026: RRA contado duas vezes.
+  //
+  // Os registros 45/47 eram importados SEMPRE como rendimento tributável, pelo
+  // valor tributável, sem olhar a opção de tributação que o próprio parser lê e
+  // guarda. Quando o contribuinte optou pela tributação EXCLUSIVA NA FONTE, o
+  // programa da Receita também transporta esse rendimento para a linha 07
+  // (titular) ou 09 (dependentes) da ficha de exclusivos — que vira registro 24
+  // no arquivo e entra aqui como `exclusivo_0007`/`exclusivo_0009`. Os dois
+  // somavam, e o mesmo dinheiro aparecia em dobro no Demonstrativo.
+  //
+  // Não dá para decidir pela opção de tributação: o layout não documenta a
+  // tabela de valores desse campo e nenhuma das declarações de referência tem
+  // RRA, então deduzir o de-para de zero exemplos seria chute. O que dá para
+  // fazer com segurança é comparar os VALORES: quando o tributável do RRA bate
+  // com o total do código correspondente na ficha de exclusivos, é o mesmo
+  // rendimento visto duas vezes. Nesse caso o RRA fica marcado como
+  // `naoSomar` (continua visível na tela de Rendimentos, como detalhe do que
+  // já entrou pelos exclusivos) e a importação avisa.
+  {
+    const codigoExclusivoDoRra = { Titular: '0007', Dependente: '0009' };
+    const totalExclusivoPorCodigo = (codigo) => rendimentos
+      .filter(r => r.tipo === `exclusivo_${codigo}`)
+      .reduce((s, r) => s + (r.valor || 0), 0);
+    for (const r of rendimentos.filter(x => x.tipo === 'tributavel_rra')) {
+      const codigo = codigoExclusivoDoRra[r.beneficiario] || '0007';
+      const totalExclusivo = totalExclusivoPorCodigo(codigo);
+      if (totalExclusivo > 0 && Math.abs(totalExclusivo - r.valor) < 0.01) {
+        r.naoSomar = true;
+        r.motivoNaoSomar = `Já contado na ficha de tributação exclusiva, código ${codigo}`;
+        log(`O RRA de ${r.nome_fonte || 'fonte não identificada'} (R$ ${r.valor.toFixed(2)}) tem o mesmo valor do código ${codigo} da ficha de tributação exclusiva: foi tributado na fonte e já entra por lá. Ele aparece na tela de Rendimentos como detalhe, sem somar de novo no Demonstrativo.`, 'warning');
+      }
     }
   }
 
@@ -1317,28 +2280,62 @@ export async function parseDBK(text, log = noop) {
     log(`Resumo/Imposto Devido identificado: total devido ${impostoDevido.impostoDevidoTotal}, saldo a pagar ${impostoDevido.saldoPagar}`);
   }
 
-  // Ganho de Capital = valor de alienação − custo de aquisição, sem passar
-  // de zero (perda não gera ganho negativo aqui — mesma regra que a
-  // própria declaração aplica: as 3 operações reais conferidas tiveram
-  // prejuízo e a declaração mostrou "Ganho de Capital: 0,00" em vez de um
-  // valor negativo).
-  const apuracaoGanhoCapital = gcBens.map((b, i) => {
-    const adquirente = gcAdquirentes[i] || {};
-    const valorAlienacao = gcValores[i]?.valorAlienacao ?? 0;
+  // Ganhos de Capital: monta a lista final e mantém, além dela, o resumo
+  // simplificado que o resto do app já consumia (`apuracaoGanhoCapital`, uma
+  // linha por operação com bem, datas, valores e adquirente). Assim a tela de
+  // Ganhos de Capital e o Demonstrativo continuam funcionando sem alteração,
+  // e quem quiser o detalhe completo usa `ganhosCapitalOficial`.
+  //
+  // O ganho de cada operação vem da APURAÇÃO da própria declaração quando ela
+  // existe (registros 68/69 ou os campos de apuração do 63) e só cai para a
+  // conta "alienação − custo" quando não veio apuração nenhuma. É diferença
+  // que importa: no imóvel o ganho apurado já está líquido das reduções da Lei
+  // 7.713/1988 e da Lei 11.196/2005, que a subtração simples ignoraria.
+  const ganhosCapitalOperacoes = Array.from(gcOperacoes.values())
+    .sort((a, b) => (a.tipo).localeCompare(b.tipo) || (a.numeroOperacao || '').localeCompare(b.numeroOperacao || ''));
+  const ganhosCapitalOficial = (ganhosCapitalOperacoes.length > 0 || gcConsolidacao
+    || gcMoedaOperacoes.length > 0 || gcMoedaMensal.some(m => m.ganhoCapital || m.alienacaoDolar))
+    ? {
+      consolidacao: gcConsolidacao,
+      operacoes: ganhosCapitalOperacoes,
+      moedaEspecie: {
+        operacoes: gcMoedaOperacoes,
+        mensal: gcMoedaMensal.sort((a, b) => a.mes - b.mes),
+      },
+      origem: 'dbk',
+    }
+    : null;
+
+  const apuracaoGanhoCapital = ganhosCapitalOperacoes.map((op, i) => {
+    const valorAlienacao = op.valorAlienacao ?? op.apuracao?.valorAlienacao ?? 0;
+    const custoAquisicao = op.custoAquisicao ?? op.apuracao?.custoAquisicao ?? 0;
+    const ganhoApurado = op.apuracao?.reducoes?.ganhoTributavel ?? op.apuracao?.ganhoCapital;
+    const adquirente = op.adquirentes[0] || {};
     return {
       id: i + 1,
-      bem: b.bem,
-      dataAquisicao: b.dataAquisicao,
-      custoAquisicao: b.custoAquisicao,
-      dataAlienacao: b.dataAlienacao,
+      tipo: op.tipo,
+      bem: op.especificacao || '',
+      dataAquisicao: op.dataAquisicao || '',
+      custoAquisicao,
+      dataAlienacao: op.dataAlienacao || '',
       valorAlienacao,
-      ganhoCapital: Math.max(0, valorAlienacao - b.custoAquisicao),
+      ganhoCapital: ganhoApurado != null ? ganhoApurado : Math.max(0, valorAlienacao - custoAquisicao),
+      impostoDevido: op.calculoImposto?.impostoDevido ?? 0,
+      impostoPago: op.calculoImposto?.impostoPago ?? 0,
       adquirenteCpfCnpj: adquirente.cpfCnpj || '',
       adquirenteNome: adquirente.nome || '',
     };
   });
   if (apuracaoGanhoCapital.length > 0) {
-    log(`Identificadas ${apuracaoGanhoCapital.length} operações na Apuração do Ganho de Capital oficial`);
+    const porTipo = apuracaoGanhoCapital.reduce((acc, o) => { acc[o.tipo] = (acc[o.tipo] || 0) + 1; return acc; }, {});
+    const partes = [];
+    if (porTipo.imovel) partes.push(`${porTipo.imovel} de bem imóvel`);
+    if (porTipo.movel) partes.push(`${porTipo.movel} de direito/bem móvel`);
+    if (porTipo.participacao) partes.push(`${porTipo.participacao} de participação societária`);
+    log(`Ganhos de Capital: ${apuracaoGanhoCapital.length} operação(ões) importada(s)${partes.length ? ` (${partes.join(', ')})` : ''}`, 'success');
+  }
+  if (gcMoedaOperacoes.length > 0) {
+    log(`Ganhos de Capital: ${gcMoedaOperacoes.length} movimento(s) de moeda estrangeira em espécie importado(s)`, 'success');
   }
   if (imoveisRurais.length > 0 || bensRurais.length > 0 || dividasRurais.length > 0) {
     log(`Atividade Rural: ${imoveisRurais.length} imóveis explorados, ${bensRurais.length} bens, ${dividasRurais.length} dívidas identificadas`);
@@ -1356,10 +2353,25 @@ export async function parseDBK(text, log = noop) {
   if (demonstrativoExteriorOficial.length > 0) {
     log(`Demonstrativo Lei 14.754/2023: ${demonstrativoExteriorOficial.length} bem(ns) com ganho no exterior identificado(s)`);
   }
-  rendaVariavelMensalOficial.sort((a, b) => a.mes - b.mes);
+  // Titular antes dos dependentes e, dentro de cada um, na ordem dos meses —
+  // mesma ordenação do caminho PDF, para as duas origens produzirem a mesma
+  // sequência na tela.
+  rendaVariavelMensalOficial.sort((a, b) => (b.titular - a.titular) || (a.mes - b.mes));
+  fiiFiagroMensalOficial.sort((a, b) => (b.titular - a.titular) || (a.mes - b.mes));
   if (rendaVariavelMensalOficial.length > 0) {
-    log(`Renda Variável: ficha mensal identificada em ${rendaVariavelMensalOficial.length} mês(es) (valor do mês não pôde ser decifrado, ver nota na tela)`, 'warning');
+    const comOperacao = rendaVariavelMensalOficial.filter(r => (r.comuns?.resultadoLiquidoMes || 0) !== 0 || (r.daytrade?.resultadoLiquidoMes || 0) !== 0).length;
+    log(`Renda Variável (operações comuns/day-trade): ${rendaVariavelMensalOficial.length} ficha(s) mensal(is), ${comOperacao} com resultado no mês`, 'success');
   }
+  if (fiiFiagroMensalOficial.length > 0) {
+    const comOperacao = fiiFiagroMensalOficial.filter(r => (r.resultadoLiquidoMes || 0) !== 0).length;
+    log(`Renda Variável (FII/Fiagro): ${fiiFiagroMensalOficial.length} ficha(s) mensal(is), ${comOperacao} com resultado no mês`, 'success');
+  }
+
+  const documentoFonte = await criarDocumentoFonte({
+    formato: 'dbk',
+    textoIntegral: text,
+    totalRegistros: lines.filter(line => line.trim() !== '').length,
+  });
 
   return {
     // Qual arquivo originou estes dados. Guardado no estado do ano (ver
@@ -1371,9 +2383,15 @@ export async function parseDBK(text, log = noop) {
     apuracaoGanhoCapital, imoveisRurais, bensRurais, dividasRurais,
     receitasDespesasRuraisOficial, apuracaoResultadoRuralOficial, movimentacaoRebanhoOficial,
     participantesRuraisOficial, demonstrativoExteriorOficial, rendaVariavelMensalOficial,
+    ganhosCapitalOficial, rendaVariavelAnualOficial, fiiFiagroMensalOficial, fiiFiagroAnualOficial,
     doacoesEfetuadasOficial: doacoesEfetuadas,
     doacoesPartidosOficial: doacoesPartidos,
     doacoesEcaIdosoOficial: doacoesEcaIdoso,
+    fichasNaoLidasComConteudo,
+    registrosDbkNaoModelados,
+    avisosImportacao,
+    estadoFichas,
+    documentoFonte,
   };
 }
 
@@ -1427,7 +2445,10 @@ const nextCellText = (row, labelExact) => {
 // esquerda (fronteiras = ponto médio entre anchors vizinhos).
 const makeColumnPicker = (anchors) => {
   const sorted = Object.entries(anchors)
-    .filter(([, x]) => x != null)
+    // Só âncoras numéricas viram coluna. Um objeto de âncoras pode carregar
+    // metadados de texto (ex.: `tipoLayout` nas doações); incluí-los aqui
+    // corromperia a ordenação por x e o bucketing.
+    .filter(([, x]) => typeof x === 'number')
     .map(([name, x]) => ({ name, x }))
     .sort((a, b) => a.x - b.x);
   const bounds = sorted.map((a, i) => ({
@@ -1505,8 +2526,14 @@ const linhaTemRotuloAEsquerdaDaDisc = (row, pick) =>
 // ANO-CALENDÁRIO/EXERCÍCIO variam a cada declaração (o app é plurianual
 // por natureza) — nunca cravar o ano aqui, senão o filtro só funciona
 // para o ano da declaração de exemplo usada nos testes.
+// NÃO inclui 'CPF:'. O cabeçalho de página ("CPF: <cpf> IMPOSTO SOBRE A RENDA -
+// PESSOA FÍSICA") já é reconhecido pela âncora forte 'IMPOSTO SOBRE A RENDA -
+// PESSOA FÍSICA'. Tratar 'CPF:' como boilerplate por conta própria descartava a
+// linha de titularidade do bem ("Bem ou direito pertencente ao: Dependente
+// CPF: <cpf>"), que também traz uma célula 'CPF:' — e com ela a titularidade e
+// o CPF do dependente do bem (auditoria de 31/08/2026).
 const BOILERPLATE = new Set([
-  'NOME:', 'CPF:', 'DECLARAÇÃO DE AJUSTE ANUAL', 'IMPOSTO SOBRE A RENDA - PESSOA FÍSICA',
+  'NOME:', 'DECLARAÇÃO DE AJUSTE ANUAL', 'IMPOSTO SOBRE A RENDA - PESSOA FÍSICA',
 ]);
 
 // Linhas de continuação de um bem (endereço, texto que estourou a coluna)
@@ -1557,6 +2584,98 @@ const valorDeCampoNaColunaDisc = (texto) => {
   return false;
 };
 
+// Lê de uma linha de metadados do bem os campos que o formulário imprime
+// abaixo dele, e grava no bem corrente. Devolve true quando a linha foi
+// reconhecida como metadado (e portanto NÃO é continuação da discriminação).
+// Todos foram confirmados no AJU-01/ESP-01/SAI-01 (auditoria de 31/08/2026);
+// antes disto o país era cravado '105', a titularidade 'Titular', e
+// matrícula/RENAVAM/IPTU eram jogados fora mesmo o modelo tendo os campos.
+const HERDEIRO_CABECALHO = ['Nome', 'CPF/CNPJ', 'Percentual de participação (%)'];
+const extrairMetadadoDoBem = (bem, row, discX) => {
+  const cells = row.cells.map(c => ({ x: c.x, t: normSpace(c.text) })).filter(c => c.t);
+  if (cells.length === 0) return false;
+  const textoLinha = normSpace(cells.map(c => c.t).join(' '));
+  // Os campos estruturados do bem (país, titularidade, Inscrição Municipal,
+  // Matrícula, RENAVAM) são impressos à ESQUERDA da coluna de discriminação,
+  // na margem do formulário. A discriminação de texto livre — que o
+  // contribuinte digita e PODE conter "CPF:", "RENAVAM:", "Matrícula:" no meio
+  // — vive DENTRO da coluna de discriminação. Sem esta fronteira, uma
+  // declaração real com esses termos no texto do bem perderia parte da
+  // descrição (regressão pega pelos testes contra a declaração de 172 bens).
+  // O bloco de herdeiros e o cabeçalho "(R$)" do exterior têm forma própria e
+  // não dependem dela.
+  const naMargemEsquerda = discX == null || cells[0].x < discX - 10;
+
+  // País: "249 - ESTADOS UNIDOS DA AMÉRICA". A célula pode vir seguida de
+  // "Bem com usufruto: Não" na mesma linha; por isso testa a PRIMEIRA célula.
+  const mPais = naMargemEsquerda ? BEM_PAIS.exec(cells[0].t) : null;
+  if (mPais) {
+    bem.localizacao = mPais[1];
+    bem.paisNome = normSpace(mPais[2]);
+    return true;
+  }
+
+  // "Bem ou direito pertencente ao: Titular|Dependente  CPF: <cpf>"
+  if (naMargemEsquerda && /^Bem ou direito pertencente ao:/.test(textoLinha)) {
+    if (/\bDependente\b/.test(textoLinha)) {
+      bem.beneficiario = 'Dependente';
+      const mCpf = /CPF:\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/.exec(textoLinha);
+      bem.cpf_beneficiario = mCpf ? mCpf[1].replace(/\D/g, '') : '';
+    } else {
+      bem.beneficiario = 'Titular';
+      bem.cpf_beneficiario = '';
+    }
+    return true;
+  }
+
+  // Inscrição Municipal (IPTU), Matrícula, RENAVAM: cada um numa linha própria,
+  // na margem esquerda. O `naMargemEsquerda` separa o campo estruturado do
+  // mesmo termo digitado dentro da descrição.
+  if (naMargemEsquerda) {
+    const mIm = BEM_INSCRICAO_MUNICIPAL.exec(textoLinha);
+    if (mIm) { bem.inscricao_municipal = normSpace(mIm[1]); return true; }
+    const mMat = BEM_MATRICULA.exec(textoLinha);
+    if (mMat) { bem.matricula = normSpace(mMat[1]); return true; }
+    const mRen = BEM_RENAVAM.exec(textoLinha);
+    if (mRen) { bem.renavam = normSpace(mRen[1]); return true; }
+  }
+
+  // Cabeçalho do subquadro financeiro do bem no EXTERIOR ("Aplicação Financeira
+  // (R$)", "Lucros e Dividendos (R$)"): é rótulo de coluna, não texto do bem.
+  // Cai na faixa da coluna de discriminação (x≈187) e grudava no fim da
+  // descrição de todo bem no exterior (auditoria de 31/08/2026). Reconhecido
+  // pela forma: toda célula termina em "(R$)".
+  if (cells.every(c => /\(R\$\)$/.test(c.t))) return true;
+
+  // Bloco de HERDEIROS/MEEIRO do bem partilhado (Declaração Final de Espólio):
+  // um cabeçalho "Nome | CPF/CNPJ | Percentual de participação (%)" seguido de
+  // uma linha por herdeiro. Sem isto, na auditoria de 31/08/2026, os nomes e os
+  // percentuais somiam e os CPFs contaminavam a discriminação do bem.
+  if (HERDEIRO_CABECALHO.every(h => cells.some(c => c.t === h))) {
+    bem.lendoHerdeiros = true;
+    if (!bem.herdeiros) bem.herdeiros = [];
+    return true;
+  }
+  if (bem.lendoHerdeiros) {
+    // Linha de herdeiro: nome à esquerda, CPF/CNPJ no meio, percentual à
+    // direita. Uma linha sem CPF encerra o bloco.
+    const doc = cells.find(c => /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(c.t));
+    if (doc) {
+      const percentualCell = cells.find(c => /^\d{1,3},\d{2}$/.test(c.t));
+      const nome = normSpace(cells.filter(c => c !== doc && c !== percentualCell).map(c => c.t).join(' '));
+      bem.herdeiros.push({
+        nome,
+        cpf_cnpj: doc.t.replace(/\D/g, ''),
+        percentual: percentualCell ? parseMoneyBR(percentualCell.t) : 0,
+      });
+      return true;
+    }
+    bem.lendoHerdeiros = false;
+  }
+
+  return false;
+};
+
 export const isBensMetadataRow = (row) => {
   const texto = normSpace(row.cells.map(c => c.text).join(' '));
   if (texto === 'Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)?') return true;
@@ -1576,6 +2695,53 @@ export const isBensMetadataRow = (row) => {
   // inteira ser metadado, não discriminação de verdade.
   return ROTULO_METADADO_RE.test(texto);
 };
+// As TRÊS colunas de valor da ficha de Dívidas e Ônus Reais, lidas pela ORDEM
+// das células e não pela coordenada de início delas.
+//
+// Por que não dá para bucketar pelo x: os números são impressos alinhados à
+// DIREITA, e as âncoras de coluna vêm dos rótulos do cabeçalho, alinhados à
+// esquerda. Medido no cabeçalho real do AJU-01 (p10 r4/r5): `disc` 114,8,
+// `val1` 300,5, `val2` 384,6 e `pago` 518,8, o que põe a fronteira val2/pago
+// em 451,70. Na mesma ficha, "72.802,72" (9 glifos) sai em x=446,4 e
+// "6.805,75" (8 glifos) em x=450,9 — 4,5 por glifo, borda direita em 486,9.
+// Logo um valor de 6 glifos, "999,99", sai em x=459,9 e cai em `pago`:
+// `situacao_atual` zerava e `valor_pago` recebia a concatenação de dois
+// números, que `parseMoneyBR` converte para um valor plausível e errado, sem
+// sinal nenhum de erro. O mesmo vale para `val1` (borda direita 373,9,
+// fronteira 342,55). Ou seja: todo saldo abaixo de R$ 1.000,00 migrava de
+// coluna (auditoria de 31/08/2026).
+//
+// A ficha tem exatamente três colunas de valor, e a linha imprime as três,
+// inclusive quando zeradas. Quando o número de valores bate, a ordem é a
+// leitura certa e não depende de coordenada nenhuma — a mesma escolha já feita
+// em `separarRotuloEValores` para a ficha de Renda Variável. Fora desse caso,
+// cai no bucket por coluna, que é o comportamento antigo.
+//
+// O corte à esquerda é a fronteira entre DISCRIMINAÇÃO e a primeira coluna de
+// valor, a única deste cabeçalho que não fica dentro do campo de um número: o
+// texto do credor termina bem antes dela e o primeiro valor começa bem depois.
+export const valoresDaLinhaDeDivida = (row, anchors) => {
+  const pick = makeColumnPicker(anchors);
+  const limiteEsquerdo = ((anchors.disc ?? 0) + (anchors.val1 ?? 0)) / 2;
+  const monetarias = row.cells
+    .filter(c => c.x >= limiteEsquerdo && EH_VALOR_MONETARIO.test(normSpace(c.text)))
+    .sort((a, b) => a.x - b.x);
+  if (monetarias.length === 3) {
+    return {
+      situacao_anterior: parseMoneyBR(monetarias[0].text),
+      situacao_atual: parseMoneyBR(monetarias[1].text),
+      valor_pago: parseMoneyBR(monetarias[2].text),
+      lidoPorOrdem: true,
+    };
+  }
+  return {
+    situacao_anterior: parseMoneyBR(textInColumn(row, pick, 'val1', '')),
+    situacao_atual: parseMoneyBR(textInColumn(row, pick, 'val2', '')),
+    valor_pago: parseMoneyBR(textInColumn(row, pick, 'pago', '')),
+    lidoPorOrdem: false,
+  };
+};
+
 const isBoilerplateRow = (row) =>
   row.cells.some(c => BOILERPLATE.has(c.text.trim()) || /^(ANO-CALENDÁRIO|EXERCÍCIO) \d{4}$/.test(c.text.trim())) ||
   /^Página \d+ de \d+$/.test(row.cells.map(c => c.text).join(' ').trim());
@@ -1588,25 +2754,91 @@ const isBoilerplateRow = (row) =>
 // regex tolerante (/^VALOR/, cobre "VALOR PAGO"/"VALOR DOADO" ou variação)
 // em vez do texto exato usado em Pagamentos — cravar um texto nunca visto
 // seria uma posição inventada, não uma leitura confirmada.
-const isDoacaoHeaderRow = (row) => rowHasCell(row, 'CÓD.') && row.cells.some(c => /NOME DO BENEFICIÁRIO/.test(c.text));
-const buildDoacaoAnchors = (row) => ({
-  codigo: findCellX(row, 'CÓD.'),
-  nome: findCellXRegex(row, /NOME DO BENEFICIÁRIO/) ?? 53,
-  cpfcnpj: findCellXRegex(row, /CPF\/CNPJ DO/) ?? 254,
-  valor: findCellXRegex(row, /^VALOR/) ?? 431,
-});
-// Processa uma linha de uma das tabelas de doações, no mesmo padrão de
-// `section === 'pagamentos'` acima. `st` é mutado in-place
-// ({anchors, current, items, nextId, categoria?}) — um objeto por seção
-// (doacoesEfetuadas/doacoesPartidos/doacoesEcaIdoso), pra reaproveitar a
-// mesma lógica sem repetir o bloco 3 vezes.
+// As quatro fichas de Doações NÃO usam o mesmo cabeçalho, ao contrário do que a
+// versão anterior assumia. São três layouts distintos, e assumir só o de
+// Doações Efetuadas fazia as outras três serem detectadas e nunca lidas — uma
+// doação eleitoral e duas doações DEDUTÍVEIS (ECA e Pessoa Idosa) somiam por
+// inteiro (auditoria de 31/08/2026). Os três, confirmados no AJU-01:
+//   Efetuadas   (p8 r15/r16): CÓD. | NOME DO BENEFICIÁRIO | CPF/CNPJ DO | VALOR PAGO | PARC. NÃO DEDUTÍVEL
+//   Partidos    (p10 r11):    NOME | CNPJ | VALOR
+//   ECA/Idoso   (p38 r47):    TIPO DE FUNDO | FUNDO | CNPJ | VALOR
+const isDoacaoHeaderEfetuadas = (row) => rowHasCell(row, 'CÓD.') && row.cells.some(c => /NOME DO BENEFICIÁRIO/.test(c.text));
+const isDoacaoHeaderPartidos = (row) => rowHasCell(row, 'NOME') && rowHasCell(row, 'CNPJ') && rowHasCell(row, 'VALOR')
+  && !row.cells.some(c => /TIPO DE FUNDO/.test(c.text));
+const isDoacaoHeaderFundo = (row) => row.cells.some(c => /TIPO DE FUNDO/.test(c.text)) && rowHasCell(row, 'FUNDO');
+
+// A coluna PARC. NÃO DEDUTÍVEL das Doações Efetuadas fica À DIREITA de VALOR
+// PAGO. Sem uma âncora própria para ela, o balde de VALOR (o último do
+// makeColumnPicker, com hi=+Infinity) engolia as duas células e as concatenava,
+// jogando fora a parcela e, numa declaração com parcela != 0, corrompendo o
+// valor doado (auditoria de 31/08/2026). O rótulo quebra em duas linhas
+// ("PARC. NÃO" / "DEDUTÍVEL"), então a âncora vem do começo, /^PARC/.
+const buildDoacaoAnchors = (row, tipoLayout) => {
+  if (tipoLayout === 'partidos') {
+    return { tipoLayout, nome: findCellX(row, 'NOME') ?? 18, cpfcnpj: findCellX(row, 'CNPJ') ?? 272, valor: findCellX(row, 'VALOR') ?? 538 };
+  }
+  if (tipoLayout === 'fundo') {
+    return {
+      tipoLayout,
+      tipoFundo: findCellXRegex(row, /TIPO DE FUNDO/) ?? 16,
+      fundo: findCellX(row, 'FUNDO') ?? 97,
+      cpfcnpj: findCellX(row, 'CNPJ') ?? 408,
+      valor: findCellX(row, 'VALOR') ?? 535,
+    };
+  }
+  return {
+    tipoLayout: 'efetuadas',
+    codigo: findCellX(row, 'CÓD.'),
+    nome: findCellXRegex(row, /NOME DO BENEFICIÁRIO/) ?? 53,
+    cpfcnpj: findCellXRegex(row, /CPF\/CNPJ DO/) ?? 254,
+    valor: findCellXRegex(row, /^VALOR/) ?? 425,
+    parcNao: findCellXRegex(row, /^PARC/) ?? 505,
+  };
+};
+
+// Processa uma linha de uma das tabelas de doações. `st` é mutado in-place
+// ({anchors, current, items, nextId, categoria?}). `st.layouts` diz quais
+// cabeçalhos essa seção pode encontrar (Efetuadas só o dela; ECA/Idoso o de
+// fundo; Partidos o de partidos).
 const processDoacaoRow = (st, row) => {
-  if (isDoacaoHeaderRow(row)) { st.anchors = buildDoacaoAnchors(row); return; }
+  for (const tipoLayout of st.layouts) {
+    const ehCabecalho = tipoLayout === 'partidos' ? isDoacaoHeaderPartidos(row)
+      : tipoLayout === 'fundo' ? isDoacaoHeaderFundo(row)
+      : isDoacaoHeaderEfetuadas(row);
+    if (ehCabecalho) { st.anchors = buildDoacaoAnchors(row, tipoLayout); return; }
+  }
   if (!st.anchors) return;
   if (rowHasCell(row, 'TOTAL')) {
     if (st.current) { st.items.push(st.current); st.current = null; }
     return;
   }
+  const layout = st.anchors.tipoLayout;
+  const pick = makeColumnPicker(st.anchors);
+
+  if (layout === 'fundo') {
+    // Beneficiário é um FUNDO (esfera + UF/município), não uma pessoa. Uma
+    // linha de fundo tem o CNPJ e o valor; o resto é texto.
+    const cnpj = textInColumn(row, pick, 'cpfcnpj').replace(/\D/g, '');
+    const valorTxt = textInColumn(row, pick, 'valor', '');
+    if (cnpj && valorTxt) {
+      if (st.current) st.items.push(st.current);
+      const esferaFundo = normSpace(textInColumn(row, pick, 'tipoFundo'));
+      const fundo = normSpace(textInColumn(row, pick, 'fundo'));
+      st.current = {
+        id: st.nextId(),
+        codigo: st.categoria === 'idoso' ? '42' : '41',
+        esferaFundo,
+        fundo,
+        nome_beneficiario: normSpace([esferaFundo, fundo].filter(Boolean).join(' - ')),
+        cpf_cnpj: cnpj,
+        valor: parseMoneyBR(valorTxt),
+        descricao: '',
+        ...(st.categoria ? { categoria: st.categoria } : {}),
+      };
+    }
+    return;
+  }
+
   if (rowHasCell(row, 'Descrição:')) {
     if (st.current) {
       const desc = normSpace(row.cells.filter(c => c.text.trim() !== 'Descrição:').map(c => c.text).join(' '));
@@ -1615,7 +2847,29 @@ const processDoacaoRow = (st, row) => {
     return;
   }
   if (row.cells.some(c => /^Dependente:/.test(c.text.trim()))) return;
-  const pick = makeColumnPicker(st.anchors);
+
+  if (layout === 'partidos') {
+    // NOME | CNPJ | VALOR, sem código nem parcela.
+    const cnpj = textInColumn(row, pick, 'cpfcnpj').replace(/\D/g, '');
+    const valorTxt = textInColumn(row, pick, 'valor', '');
+    const nome = textInColumn(row, pick, 'nome');
+    if ((cnpj || nome) && valorTxt) {
+      if (st.current) st.items.push(st.current);
+      st.current = {
+        id: st.nextId(),
+        codigo: '',
+        nome_beneficiario: nome,
+        cpf_cnpj: cnpj,
+        valor: parseMoneyBR(valorTxt),
+        descricao: '',
+      };
+    } else if (st.current && nome) {
+      st.current.nome_beneficiario = normSpace(st.current.nome_beneficiario + ' ' + nome);
+    }
+    return;
+  }
+
+  // Efetuadas: CÓD. | NOME | CPF/CNPJ | VALOR PAGO | PARC. NÃO DEDUTÍVEL.
   const codigoTxt = textInColumn(row, pick, 'codigo');
   const valorTxt = textInColumn(row, pick, 'valor', '');
   if (/^\d{1,3}$/.test(codigoTxt) && valorTxt) {
@@ -1626,6 +2880,7 @@ const processDoacaoRow = (st, row) => {
       nome_beneficiario: textInColumn(row, pick, 'nome'),
       cpf_cnpj: textInColumn(row, pick, 'cpfcnpj').replace(/\D/g, ''),
       valor: parseMoneyBR(valorTxt),
+      parcela_nao_dedutivel: parseMoneyBR(textInColumn(row, pick, 'parcNao', '')),
       descricao: '',
       ...(st.categoria ? { categoria: st.categoria } : {}),
     };
@@ -1706,6 +2961,56 @@ const rvColunaVazia = () => {
   for (const [, chave] of RV_APURACAO) col[chave] = 0;
   col.aliquota = null;
   return col;
+};
+
+const somarCampo = (lista, seletor) => lista.reduce((total, item) => total + (seletor(item) || 0), 0);
+const ultimosPorBeneficiario = (lista) => {
+  const ultimos = new Map();
+  for (const item of lista) {
+    const chave = item.titular ? 'titular' : `dependente:${item.cpfDependente || ''}`;
+    const anterior = ultimos.get(chave);
+    if (!anterior || item.mes > anterior.mes) ultimos.set(chave, item);
+  }
+  return [...ultimos.values()];
+};
+
+// O PDF não traz um registro separado equivalente aos 41 e 43 do DBK. O
+// fechamento anual é reconstruído somente a partir dos quadros mensais que o
+// próprio formulário imprimiu. A marca deixa explícito que se trata de uma
+// reconciliação dos meses, sem fingir que veio de uma linha anual autônoma.
+const consolidarRendaVariavelAnualPdf = (mensal) => {
+  if (mensal.length === 0) return null;
+  const ultimos = ultimosPorBeneficiario(mensal);
+  return {
+    resultadoLiquido: somarCampo(mensal, m => m.comuns?.resultadoLiquidoMes + m.daytrade?.resultadoLiquidoMes),
+    resultadoNegativoMesesAnteriores: somarCampo(ultimos, m => m.comuns?.resultadoNegativoMesAnterior + m.daytrade?.resultadoNegativoMesAnterior),
+    baseCalculo: somarCampo(mensal, m => m.comuns?.baseCalculoImposto + m.daytrade?.baseCalculoImposto),
+    prejuizoACompensar: somarCampo(ultimos, m => m.comuns?.prejuizoCompensar + m.daytrade?.prejuizoCompensar),
+    impostoDevido: somarCampo(mensal, m => m.comuns?.impostoDevido + m.daytrade?.impostoDevido),
+    consolidacaoImpostoDevido: somarCampo(mensal, m => m.consolidacao?.totalImpostoDevido),
+    consolidacaoIrFonteDayTradeMesesAnteriores: somarCampo(ultimos, m => m.consolidacao?.irFonteDayTradeMesesAnteriores),
+    consolidacaoIrFonteDayTradeACompensar: somarCampo(ultimos, m => m.consolidacao?.irFonteDayTradeCompensar),
+    irFonteLei11033Ano: somarCampo(mensal, m => m.consolidacao?.irFonteLei11033Mes),
+    consolidacaoImpostoAPagar: somarCampo(mensal, m => m.consolidacao?.impostoPagar),
+    origem: 'pdf',
+    derivadoDosMeses: true,
+  };
+};
+
+const consolidarFiiFiagroAnualPdf = (mensal) => {
+  if (mensal.length === 0) return null;
+  const ultimos = ultimosPorBeneficiario(mensal);
+  return {
+    resultadoLiquido: somarCampo(mensal, m => m.resultadoLiquidoMes),
+    resultadoNegativoMesAnterior: somarCampo(ultimos, m => m.resultadoNegativoMesAnterior),
+    baseCalculoImposto: somarCampo(mensal, m => m.baseCalculoImposto),
+    prejuizoCompensar: somarCampo(ultimos, m => m.prejuizoCompensar),
+    impostoDevido: somarCampo(mensal, m => m.impostoDevido),
+    impostoAPagar: somarCampo(mensal, m => m.impostoAPagar),
+    impostoRetidoLei11033: somarCampo(mensal, m => m.impostoRetidoNoMes),
+    origem: 'pdf',
+    derivadoDosMeses: true,
+  };
 };
 
 // Divide a linha entre o rótulo (texto à esquerda) e os valores numéricos,
@@ -1871,25 +3176,76 @@ const paresRotuloValor = (row) => {
 // campo sem ambiguidade; "TOTAL", que aparece uma vez em RENDIMENTOS e outra em
 // DEDUÇÕES, é resolvido pelo bloco corrente (ver o handler).
 const RESUMO_CAMPOS = {
+  // Bloco RENDIMENTOS TRIBUTÁVEIS (resumo-03).
+  'Recebidos de Pessoa Jurídica pelo titular': 'rendimentosPjTitular',
+  'Recebidos de Pessoa Jurídica pelos dependentes': 'rendimentosPjDependentes',
   'Recebidos de Pessoa Física/Exterior pelo titular': 'rendimentosPfExteriorTitular',
   'Recebidos de Pessoa Física/Exterior pelos dependentes': 'rendimentosPfExteriorDependentes',
+  'Recebidos acumuladamente pelo titular': 'rendimentosAcumuladosTitular',
+  'Recebidos acumuladamente pelos dependentes': 'rendimentosAcumuladosDependentes',
+  'Resultado tributável da Atividade Rural': 'resultadoTributavelRural',
+  // Bloco DEDUÇÕES (resumo-04).
+  'Contribuição à previdência oficial (Rendimentos recebidos acumuladamente)': 'previdenciaOficialRRA',
   'Dependentes': 'dependentes',
+  'Despesas com instrução': 'despesasInstrucao',
   'Despesas médicas': 'despesasMedicas',
+  'Pensão alimentícia judicial': 'pensaoJudicial',
+  'Pensão alimentícia por escritura pública': 'pensaoEscritura',
+  'Pensão alimentícia judicial (Rendimentos recebidos acumuladamente)': 'pensaoJudicialRRA',
+  'Livro caixa': 'livroCaixa',
+  // Bloco IMPOSTO DEVIDO (resumo-05).
   'Base de cálculo do imposto': 'baseCalculo',
+  'Imposto devido': 'impostoDevidoBruto',
+  'Dedução de incentivo': 'deducaoIncentivo',
+  'Imposto devido I': 'impostoDevidoI',
+  'Imposto devido RRA': 'impostoDevidoRRA',
+  'Aliquota efetiva (%)': 'aliquotaEfetiva',
   'Total do imposto devido': 'impostoDevidoTotal',
-  'Total do imposto pago': 'impostoPagoTotal',
   'SALDO DE IMPOSTO A PAGAR': 'saldoPagar',
   'Imposto Lei 14.754/2023': 'lei14754Imposto',
+  'Valor da quota': 'valorQuota',
+  // Bloco IMPOSTO PAGO (resumo-06).
+  'Imposto retido na fonte do titular': 'irrfTitular',
+  'Imp. retido na fonte dos dependentes': 'irrfDependentes',
+  'Carnê-Leão do titular': 'carneLeaoTitular',
+  'Carnê-Leão dos dependentes': 'carneLeaoDependentes',
+  'Imposto complementar': 'impostoComplementar',
+  'Imposto pago no exterior': 'impostoPagoExterior',
+  'Imposto retido na fonte (Lei nº 11.033/2004)': 'irFonteLei11033Pago',
+  'Imposto retido RRA': 'irrfRRA',
+  'Total do imposto pago': 'impostoPagoTotal',
+  // Bloco OUTRAS INFORMAÇÕES da Evolução Patrimonial (resumo-08).
   'Rendimentos isentos e não tributáveis': 'rendimentosIsentosOficial',
   'Rendimentos sujeitos à tributação exclusiva/definitiva': 'rendimentosExclusivoOficial',
+  'Rendimentos tributáveis - imposto com exigibilidade suspensa': 'rendimentosExigibilidadeSuspensa',
+  'Depósitos judiciais do imposto': 'depositosJudiciais',
+  'Imposto pago sobre Ganhos de Capital': 'impostoPagoGanhosCapital',
+  'Imposto pago sobre Renda Variável': 'impostoPagoRendaVariavel',
+  'Doações a Partidos Políticos e Candidatos a Cargos Eletivos': 'doacoesPartidosOficial',
+  'Imposto diferido dos Ganhos de Capital': 'impostoDiferidoGanhosCapital',
+  'Imposto devido sobre Ganhos de Capital': 'impostoDevidoGanhosCapital',
+  'Imposto devido sobre ganhos líquidos em Renda Variável': 'impostoDevidoRendaVariavel',
 };
-// As quatro linhas da Evolução Patrimonial trazem a data no próprio rótulo, que
-// muda a cada exercício: a PRIMEIRA de cada par é sempre o ano anterior e a
-// segunda o ano da declaração. Nunca cravar o ano aqui (mesma lição da
-// correção do cabeçalho de Bens).
+// Rótulos que quebram em duas linhas visuais e cuja PRIMEIRA linha é o que
+// `paresRotuloValor` entrega. Casados por prefixo. Mantidos fora do mapa exato
+// porque não têm forma canônica curta.
+const RESUMO_CAMPOS_PREFIXO = [
+  ['Contribuições às previdências oficial', 'previdenciaOficialComplementar'],
+  ['Contribuição à prev. complementar', 'previdenciaComplementar'],
+  ['Imposto pago Ganhos de Capital Moeda Estrangeira', 'impostoPagoGanhosCapitalMoeda'],
+  ['Total do imposto retido na fonte (Lei nº11.033/2004)', 'irFonteLei11033Ano'],
+  ['Imposto a pagar sobre o Ganho de Capital - Moeda Estrangeira', 'impostoPagarGanhosCapitalMoeda'],
+  ['Imposto devido sobre Ganhos de Capital Moeda Estrangeira', 'impostoDevidoGanhosCapitalMoeda'],
+];
+// Evolução Patrimonial: cada par é anterior/atual, na ordem impressa. O rótulo
+// muda conforme o tipo de declaração — "em dd/mm/aaaa" no ajuste anual, "na
+// data da partilha"/"valor da transferência" no espólio, "na data da
+// caracterização da condição de não residente" na saída definitiva (resumo-02).
+// Casar pelo início do rótulo e distinguir anterior/atual pela ORDEM cobre os
+// três, sem depender do texto da data.
 const RESUMO_EVOLUCAO = [
-  [/^Bens e direitos em \d{2}\/\d{2}\/\d{4}$/, ['bensAnteriorOficial', 'bensAtualOficial']],
-  [/^Dívidas e ônus reais em \d{2}\/\d{2}\/\d{4}$/, ['dividasAnteriorOficial', 'dividasAtualOficial']],
+  [/^Bens e direitos\b/, ['bensAnteriorOficial', 'bensAtualOficial']],
+  [/^Dívidas e ônus reais\b/, ['dividasAnteriorOficial', 'dividasAtualOficial']],
 ];
 
 // ---------------------------------------------------------------------------
@@ -2003,6 +3359,10 @@ const FICHAS_NAO_LIDAS = [
   // nenhuma delas começa com uma das palavras daquele regex, e é a lista que
   // as segura (provado pelo teste do rebanho do exterior).
   'RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM EXIGIBILIDADE SUSPENSA)',
+  // A irmã dos DEPENDENTES faltava aqui: existia só em FICHAS_NAO_LIDAS_PREFIXO,
+  // e por isso o título completo (que é como SAI-01 imprime a do titular)
+  // nunca casava por igualdade. Achado na auditoria de 31/08/2026.
+  'RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM EXIGIBILIDADE SUSPENSA)',
   'RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELO TITULAR',
   'RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS DEPENDENTES',
   'RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELO TITULAR',
@@ -2025,19 +3385,211 @@ const FICHAS_NAO_LIDAS_SEM_AVISO = ['IMPOSTO PAGO / RETIDO'];
 const FICHAS_NAO_LIDAS_PREFIXO = [
   'RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM EXIGIBILIDADE',
 ];
-const nomeDaFichaNaoLida = (row) => {
+// Quantas linhas visuais adiante procurar o RABO de um título quebrado.
+// Precisa ser 2, não 1: em AJU-01 p6 o "(Valores em Reais)" cai numa row
+// PRÓPRIA entre as duas metades do título ("...(IMPOSTO COM" em r14,
+// "(Valores em Reais)" em r15, "EXIGIBILIDADE SUSPENSA)" em r16), porque o
+// formulário o desenha 3 unidades fora da base do título, acima da tolerância
+// de 2 de buildRows.
+const LINHAS_DE_EMENDA_DE_TITULO = 2;
+// Textos que podem fechar um título começado na linha `ri`, cada um com o
+// índice da linha de onde veio.
+const rabosDeTitulo = (rows, ri) => {
+  const candidatos = [];
+  for (let salto = 1; salto <= LINHAS_DE_EMENDA_DE_TITULO; salto++) {
+    const proxima = rows[ri + salto];
+    if (!proxima) break;
+    for (const c of proxima.cells) candidatos.push({ texto: c.text, linha: ri + salto });
+  }
+  return candidatos;
+};
+
+const nomeDeFichaNaoLidaExata = (t) => {
+  if (FICHAS_NAO_LIDAS.includes(t)) return t;
+  return FICHAS_NAO_LIDAS_PREFIXO.find(p => t.startsWith(p)) || null;
+};
+// `t` é o COMEÇO de um título de ficha não lida que o formulário cortou?
+const ehComecoDeFichaNaoLida = (t) => t.length >= 24 && (
+  FICHAS_NAO_LIDAS.some(f => f.length > t.length && f.startsWith(t))
+  || FICHAS_NAO_LIDAS_PREFIXO.some(p => p.length > t.length && p.startsWith(t))
+);
+// Segundo argumento: a linha visual SEGUINTE. O formulário quebra o título em
+// duas linhas quando ele não cabe, e o ponto do corte muda de declaração para
+// declaração — AJU-01 corta a ficha de exigibilidade suspensa dos dependentes
+// em "(IMPOSTO COM", ESP-01 e SAI-01 cortam a mesma ficha em "(IMPOSTO COM
+// EXIGIBILIDADE". Uma lista de prefixos fixos só cobre um dos cortes; emendar a
+// linha seguinte não depende de onde o corte caiu.
+//
+// Enquanto isto não existia, três fichas de rendimento vinham PREENCHIDAS no
+// AJU-01 e sumiam sem aviso nenhum, porque o fechamento genérico logo abaixo
+// (`/^RENDIMENTOS/`) matava a seção antes de alguém perceber que havia dado ali
+// (auditoria de 31/08/2026).
+const nomeDaFichaNaoLida = (row, rabos = []) => {
   for (const c of row.cells) {
-    const t = c.text.trim();
-    if (FICHAS_NAO_LIDAS.includes(t)) return t;
-    const pref = FICHAS_NAO_LIDAS_PREFIXO.find(p => t.startsWith(p));
-    if (pref) return pref;
+    const t = normSpace(c.text);
+    const direto = nomeDeFichaNaoLidaExata(t);
+    if (direto) return { nome: direto, linhaConsumida: -1 };
+    if (ehComecoDeFichaNaoLida(t)) {
+      for (const rabo of rabos) {
+        const emendado = nomeDeFichaNaoLidaExata(normSpace(`${t} ${rabo.texto}`));
+        if (emendado) return { nome: emendado, linhaConsumida: rabo.linha };
+      }
+    }
   }
   return null;
 };
 
-const GC_TITULO = /^Demonstrativo da Apuração do Ganho de Capital/;
+const GC_TITULO = /^Demonstrativo da Apuração do Ganho de Capital(?:\s*-\s*(.+))?$/;
 const GC_DATA = /^\d{2}\/\d{2}\/\d{4}$/;
 const GC_DOC = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+// As QUATRO fichas do menu "Ganhos de Capital" do programa da Receita. Cada
+// uma imprime o próprio demonstrativo, com o tipo no título; antes desta
+// versão o parser tratava todas como se fossem bem móvel, que é o único caso
+// presente nas declarações de referência.
+const GC_TIPO_POR_TITULO = {
+  'BENS IMÓVEIS': 'imovel',
+  'BENS MÓVEIS': 'movel',
+  'PARTICIPAÇÃO SOCIETÁRIA': 'participacao',
+  'PARTICIPAÇÕES SOCIETÁRIAS': 'participacao',
+  'MOEDAS EM ESPÉCIE': 'moeda',
+};
+// Percentual impresso com 6 casas ("15,000000") — alíquota média e os fatores
+// de redução. Fora deste formato o texto não é percentual.
+const GC_PERCENTUAL = /^-?[\d.]*\d,\d{6}$/;
+// Meses como a totalização de moeda em espécie e a ficha de FII os imprimem.
+// Quadros internos do demonstrativo de Ganho de Capital cujo título colide com
+// o de uma ficha da declaração.
+const GC_QUADROS_INTERNOS = /^(RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS|RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA)$/;
+const GC_MOEDA_MESES = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+// Linhas da ficha de FII/Fiagro, na ordem impressa, com o campo de destino.
+const FII_LINHAS = [
+  ['RESULTADO LÍQUIDO DO MÊS', 'resultadoLiquidoMes'],
+  ['RESULTADO NEGATIVO ATÉ O MÊS ANTERIOR', 'resultadoNegativoMesAnterior'],
+  ['BASE DE CÁLCULO DO IMPOSTO', 'baseCalculoImposto'],
+  ['PREJUÍZO A COMPENSAR', 'prejuizoCompensar'],
+  ['ALÍQUOTA DO IMPOSTO', 'aliquota'],
+  ['IMPOSTO DEVIDO', 'impostoDevido'],
+  ['IMPOSTO RETIDO MESES ANTERIORES', 'impostoRetidoMesesAnteriores'],
+  ['IMPOSTO RETIDO NO MÊS', 'impostoRetidoNoMes'],
+  ['IMPOSTO A COMPENSAR', 'impostoACompensar'],
+  ['IMPOSTO A PAGAR', 'impostoAPagar'],
+  ['IMPOSTO PAGO', 'impostoPago'],
+];
+const FII_LINHAS_MAP = new Map(FII_LINHAS);
+// Cabeçalhos que trocam o bloco corrente dentro da ficha. Sem isso, rótulos
+// repetidos entre blocos (o "Total" aparece quatro vezes: consolidação do bem,
+// imposto pago, rendimentos isentos e rendimentos de tributação definitiva)
+// cairiam todos no mesmo campo, e o último a ser lido venceria.
+const GC_BLOCOS = [
+  [/^DADOS DO (IM[ÓO]VEL|M[ÓO]VEL)$/, 'dadosBem'],
+  [/^DADOS DA PARTICIPAÇÃO SOCIETÁRIA$/, 'dadosBem'],
+  [/^DADOS DA AQUISIÇÃO$/, 'aquisicao'],
+  [/^DADOS DA OPERAÇÃO$/, 'operacao'],
+  [/^PERGUNTAS$/, 'perguntas'],
+  [/^APURAÇÃO DO CUSTO DE AQUISIÇÃO$/, 'custoAquisicao'],
+  [/^APURAÇÃO D[EO] GANHOS? (DE CAPITAL)?$/, 'apuracao'],
+  [/^APURAÇÃO DOS GANHOS DE CAPITAL$/, 'apuracao'],
+  [/^CÁLCULO DO IMPOSTO - ALIENAÇÃO À VISTA$/, 'calculoVista'],
+  [/^CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO$/, 'calculoPrazo'],
+  [/^CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO - DETALHE DAS PARCELAS$/, 'parcelasDetalhe'],
+  [/^CONSOLIDAÇÃO DO BEM$/, 'consolidacao'],
+  [/^CONSOLIDAÇÃO DA PARTICIPAÇÃO SOCIETÁRIA$/, 'consolidacao'],
+  // gc-09: o quadro "CUSTO DE AQUISIÇÃO" da participação (espécie, quantidade,
+  // custo médio, custo total). Distinto de "APURAÇÃO DO CUSTO DE AQUISIÇÃO".
+  [/^CUSTO DE AQUISIÇÃO$/, 'custoAquisicaoParticipacao'],
+  [/^IMPOSTO PAGO$/, 'impostoPagoBloco'],
+  [/^RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS$/, 'isentos'],
+  [/^RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA$/, 'definitiva'],
+  [/^ADQUIRENTE$/, 'adquirente'],
+  [/^Faixa de Ganho de Capital$/, 'faixas'],
+];
+// Rótulo (já normalizado) -> destino, POR BLOCO. Valor na mesma linha visual do
+// rótulo, que é como o formulário imprime estes quadros.
+const GC_ROTULOS = {
+  apuracao: {
+    'Valor de alienação': 'apuracao.valorAlienacao',
+    'Custo de corretagem': 'apuracao.custoCorretagem',
+    'Custo de Corretagem': 'apuracao.custoCorretagem',
+    'Valor líquido de alienação': 'apuracao.valorLiquido',
+    'Valor Líquido de Alienação': 'apuracao.valorLiquido',
+    'Custo de aquisição': 'apuracao.custoAquisicao',
+    'Custo de Aquisição': 'apuracao.custoAquisicao',
+    'Ganho de Capital': 'apuracao.ganhoCapital',
+    'Ganhos de Capital': 'apuracao.ganhoCapital',
+    'Valor de Alienação': 'apuracao.valorAlienacao',
+    // gc-06: o quadro do IMÓVEL usa "da Alienação" (com "da"), não "de".
+    'Valor da Alienação': 'apuracao.valorAlienacao',
+    'Valor Líquido da Alienação': 'apuracao.valorLiquido',
+    // gc-07: os cinco "Resultado" e as reduções da Lei 7.713/1988 e da Lei
+    // 11.196/2005. Antes colidiam num campo só por casamento de prefixo.
+    'Ganho de Capital - Resultado 1': 'apuracao.resultado1',
+    'Ganho de Capital - Resultado 2': 'apuracao.resultado2',
+    'Ganhos de Capital - Resultado 3': 'apuracao.resultado3',
+    'Ganhos de Capital - Resultado 4': 'apuracao.resultado4',
+    'Ganhos de Capital - Resultado 5': 'apuracao.resultado5',
+    'Percentual de Redução (Lei n. 7.713, de 1988)': 'apuracao.percentualReducao7713',
+    'Valor de Redução (Lei n. 7.713, de 1988)': 'apuracao.valorReducao7713',
+    'Percentual de Redução (Lei n. 11.196, de 2005 - FR1)': 'apuracao.percentualReducaoFR1',
+    'Valor de Redução (Lei n. 11.196, de 2005 - FR1)': 'apuracao.valorReducaoFR1',
+    'Percentual de Redução (Lei n. 11.196, de 2005 - FR2)': 'apuracao.percentualReducaoFR2',
+    'Valor de Redução (Lei n. 11.196, de 2005 - FR2)': 'apuracao.valorReducaoFR2',
+    'Percentual de Redução - Aplicação Outro Imóvel': 'apuracao.percentualReducaoOutroImovel',
+    'Valor de Redução - Aplicação Outro Imóvel': 'apuracao.valorReducaoOutroImovel',
+  },
+  calculoVista: {
+    'Ganho de Capital Total': 'calculoImposto.ganhoCapitalTotal',
+    'Ganho de Capital': 'calculoImposto.ganhoCapitalTotal',
+    'Alíquota Média': 'calculoImposto.aliquotaMedia',
+    'Imposto Devido': 'calculoImposto.impostoDevido',
+    'Imposto devido': 'calculoImposto.impostoDevido',
+    'Imposto Pago': 'calculoImposto.impostoPago',
+    'Imposto pago': 'calculoImposto.impostoPago',
+    'Imposto de renda na fonte (Lei nº 11.033, de 2004)': 'calculoImposto.irFonteLei11033',
+    'Imposto devido após compensação': 'calculoImposto.impostoDevidoAposCompensacao',
+  },
+  consolidacao: {
+    'Diferido de anos anteriores': 'consolidacaoBem.impostoDiferidoAnosAnteriores',
+    'Total': 'consolidacaoBem.impostoTotal',
+    'Devido em': 'consolidacaoBem.impostoDevidoNoExercicio',
+    'Referente à alienação em': 'consolidacaoBem.impostoDoExercicio',
+    'Diferido para anos posteriores': 'consolidacaoBem.impostoDiferidoAnosPosteriores',
+    'IR na fonte (Lei 11.033/2004)': 'consolidacaoBem.irFonteLei11033',
+  },
+  impostoPagoBloco: { 'Total': 'consolidacaoBem.impostoPago' },
+  isentos: { 'Total': 'consolidacaoBem.rendimentoIsento' },
+  definitiva: { 'Total': 'consolidacaoBem.rendimentoExclusivo' },
+  // No quadro "ALIENAÇÃO A PRAZO" estes três rótulos aparecem sob o subtítulo
+  // "Anos Anteriores": são o que já foi recebido em exercícios passados, não o
+  // total das parcelas deste ano (esse vem da linha "Total" da tabela).
+  calculoPrazo: {
+    'Valor Recebido': 'calculoImposto.valorBrutoAnosAnteriores',
+    'Custo de Corretagem': 'calculoImposto.corretagemAnosAnteriores',
+    'Valor Líquido Recebido': 'calculoImposto.liquidoAnosAnteriores',
+  },
+};
+// Rótulo -> destino para os pares em que o valor vem na linha DE BAIXO.
+const GC_PARES_LINHA_SEGUINTE = {
+  'Nome da sociedade': 'sociedade.nome',
+  'CNPJ da sociedade': 'sociedade.cnpj',
+  'Município': 'sociedade.municipio',
+  'UF': 'sociedade.uf',
+  'Espécie da participação': 'especie',
+};
+// Escreve num caminho aninhado ('apuracao.valorAlienacao'), criando o que
+// faltar. Mantém o objeto de saída com a MESMA forma da leitura do .DBK, para
+// as duas origens caírem nas mesmas telas sem tradução.
+const gcSet = (obj, caminho, valor) => {
+  const partes = caminho.split('.');
+  let alvo = obj;
+  for (let i = 0; i < partes.length - 1; i++) {
+    if (!alvo[partes[i]]) alvo[partes[i]] = {};
+    alvo = alvo[partes[i]];
+  }
+  alvo[partes[partes.length - 1]] = valor;
+};
+// "Ganho de Capital -  (R$)" e "Alíquota Média - (%)" são um staticText só na
+// ficha de participação societária: tira o sufixo de unidade antes de casar.
+const gcNormalizaRotulo = (t) => normSpace(t).replace(/\s*-?\s*\((R\$|%|US\$)\)\s*$/, '').replace(/:$/, '').trim();
 
 // Ficha "DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023": uma linha por bem, com
 // as colunas Bem | Tipo | Ganho/Prejuízo | Imposto Devido | Imposto Pago
@@ -2051,26 +3603,120 @@ const RIE_AGREGADA = /^(\d{1,2})\s*[.\-]\s*(.*)$/;
 const RIE_BENEFICIARIO = /^(Titular|Dependente)$/;
 const RIE_CPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 const RIE_CNPJ = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+// "CNPJ:  02.335.109/0001-05" na linha de metadados de um bem. Aceita o CPF
+// no mesmo rótulo (bem cuja fonte é pessoa física), porque a ficha usa
+// "CNPJ:" para os dois.
+// "CNPJ:  02.335.109/0001-05" na coluna esquerda do bloco de um bem. O
+// rótulo varia com o tipo: "CNPJ do Fundo:" num fundo de investimento,
+// "CPF/CNPJ:" em outros, e é só "CPF:" quando a fonte é pessoa física. O
+// número sai formatado ou em dígitos crus ("CNPJ:  00000000000", como a ficha
+// imprime o CPF do devedor num empréstimo), por isso a captura é solta e quem
+// valida é o comprimento em dígitos: 11 de CPF ou 14 de CNPJ, nada mais.
+const BEM_CNPJ = /(?:CPF|CNPJ)[^:\d]{0,15}:\s*([\d./-]{11,20})/;
+const BEM_CNPJ_SOLTO = /^([\d./-]{11,20})$/;
+// Linha de país do bem: "105 - BRASIL", "249 - ESTADOS UNIDOS DA AMÉRICA".
+// O código de 3 dígitos é o mesmo `localizacao` do registro 27 do .DBK.
+const BEM_PAIS = /^(\d{3})\s*-\s*(.+)$/;
+// Campos de identificação do bem impressos em linhas de metadados.
+const BEM_INSCRICAO_MUNICIPAL = /^Inscri[çc][ãa]o Municipal(?:\s*\(IPTU\))?:\s*(.+)$/i;
+const BEM_MATRICULA = /^Matr[íi]cula:\s*(.+)$/i;
+const BEM_RENAVAM = /^RENAVAM:\s*(.+)$/i;
+const cnpjDoBem = (bruto) => {
+  const digitos = (bruto || '').replace(/\D/g, '');
+  return (digitos.length === 11 || digitos.length === 14) ? digitos : '';
+};
 
-export async function parsePDF(pdf, log = noop, onProgress = noop) {
+const fingerprintTextoPdf = (texto) => {
+  const normalizado = normSpace(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < normalizado.length; i++) {
+    hash ^= normalizado.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+};
+
+// A primeira página do PDF traz a ficha de Identificação inteira. Até aqui o
+// app guardava apenas nome e CPF, embora endereço, ocupação, cônjuge e dados
+// cadastrais estivessem legíveis. A extração abaixo usa os próprios rótulos do
+// formulário; o texto integral continua arquivado em `documentoFonte` como
+// rede de segurança para qualquer rótulo futuro.
+const simNaoTexto = (valor) => {
+  const v = normSpace(valor).toUpperCase();
+  if (v === 'SIM') return true;
+  if (v === 'NÃO' || v === 'NAO') return false;
+  return null;
+};
+const dataBrParaIso = (valor) => {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(normSpace(valor));
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+};
+const preencherIdentificacaoPdf = (textoPagina, contribuinte) => {
+  const texto = normSpace(textoPagina);
+  const valor = (re) => normSpace((re.exec(texto) || [])[1] || '');
+  const nome = valor(/IDENTIFICAÇÃO DO CONTRIBUINTE\s+Nome:\s*(.*?)\s+CPF:/i);
+  const cpf = valor(/IDENTIFICAÇÃO DO CONTRIBUINTE[\s\S]*?CPF:\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i).replace(/\D/g, '');
+  if (nome) contribuinte.nome = nome;
+  if (cpf) contribuinte.cpf = cpf;
+  contribuinte.dataNascimento = dataBrParaIso(valor(/Data de Nascimento:\s*(\d{2}\/\d{2}\/\d{4})/i));
+  contribuinte.racaCor = valor(/Raça\/Cor:\s*(.*?)\s+Possui cônjuge/i);
+  contribuinte.possuiConjuge = simNaoTexto(valor(/Possui cônjuge ou companheiro\(a\)\?\s*(Sim|Não)/i));
+  contribuinte.cpfConjuge = valor(/CPF do cônjuge ou companheiro\(a\):\s*([\d.-]+)/i).replace(/\D/g, '');
+  contribuinte.retornoPais = simNaoTexto(valor(/Era residente no exterior e passou a ser residente no Brasil em \d{4}\?\s*(Sim|Não)/i));
+  contribuinte.alteracaoDadosCadastrais = simNaoTexto(valor(/Houve alteração de dados cadastrais\?\s*(Sim|Não)/i));
+  contribuinte.doencaDeficiencia = simNaoTexto(valor(/Há declarante ou dependente com doença grave ou deficiência física ou mental\?\s*(Sim|Não)/i));
+  contribuinte.logradouro = valor(/Endereço:\s*(.*?)\s+Número:/i);
+  contribuinte.numero = valor(/Número:\s*(.*?)\s+Complemento:/i);
+  contribuinte.complemento = valor(/Complemento:\s*(.*?)\s+Bairro\/Distrito:/i);
+  contribuinte.bairro = valor(/Bairro\/Distrito:\s*(.*?)\s+Município:/i);
+  contribuinte.municipio = valor(/Município:\s*(.*?)\s+UF:/i);
+  contribuinte.uf = valor(/UF:\s*([A-Z]{2})\s+CEP:/i);
+  contribuinte.cep = valor(/CEP:\s*([\d-]+)/i);
+  contribuinte.telefone = valor(/DDD\/Telefone:\s*(.*?)\s+E-mail:/i);
+  contribuinte.email = valor(/E-mail:\s*(.*?)\s+DDD\/Celular:/i);
+  contribuinte.celular = valor(/DDD\/Celular:\s*(.*?)\s+Natureza da Ocupação:/i);
+  const natureza = /Natureza da Ocupação:\s*(\d{1,3})\s*-\s*(.*?)\s+Ocupação Principal:/i.exec(texto);
+  if (natureza) {
+    contribuinte.naturezaOcupacaoCodigo = natureza[1];
+    contribuinte.naturezaOcupacaoDescricao = normSpace(natureza[2]);
+  }
+  const ocupacao = /Ocupação Principal:\s*(\d{1,3})\s*-\s*(.*?)\s+Tipo de declaração:/i.exec(texto);
+  if (ocupacao) {
+    contribuinte.ocupacaoCodigo = ocupacao[1];
+    contribuinte.ocupacaoDescricao = normSpace(ocupacao[2]);
+  }
+  contribuinte.tipoDeclaracao = valor(/Tipo de declaração:\s*(.*?)\s+N[º°o]\s*do recibo/i);
+  contribuinte.reciboUltimaDeclaracao = valor(/N[º°o]\s*do recibo da última declaração entregue do exercício de \d{4}:\s*([\d.-]+)/i).replace(/\D/g, '');
+};
+
+export async function parsePDF(pdf, log = noop, onProgress = noop, options = {}) {
   log(`PDF aberto, ${pdf.numPages} páginas`, 'success');
 
   const contribuinte = { cpf: '', nome: '' };
+  const paginasTexto = [];
   const bens = [];
   const dividas = [];
   const pagamentos = [];
   const doacoesEfetuadas = [];
   const doacoesPartidos = [];
   const doacoesEcaIdoso = [];
+  const fichasPdfObservadas = {};
+  const avisosImportacao = [];
+  let fichaPdfAtual = null;
   let anoCalendario = null;
   let bemId = 1, dividaId = 1, pagId = 1;
   let doacaoEfId = 1, doacaoPartId = 1, doacaoEcaIdosoId = 1;
-  const doacoesEfetuadasState = { anchors: null, current: null, items: doacoesEfetuadas, nextId: () => doacaoEfId++ };
-  const doacoesPartidosState = { anchors: null, current: null, items: doacoesPartidos, nextId: () => doacaoPartId++ };
+  const doacoesEfetuadasState = { anchors: null, current: null, items: doacoesEfetuadas, nextId: () => doacaoEfId++, layouts: ['efetuadas'] };
+  const doacoesPartidosState = { anchors: null, current: null, items: doacoesPartidos, nextId: () => doacaoPartId++, layouts: ['partidos'] };
   // categoria começa null e é setada ao entrar em cada uma das duas
   // sub-fichas (ECA / Pessoa Idosa) que dividem esta mesma seção — ver os
   // dois gatilhos de título abaixo.
-  const doacoesEcaIdosoState = { anchors: null, current: null, items: doacoesEcaIdoso, nextId: () => doacaoEcaIdosoId++, categoria: null };
+  // ECA/Idoso: o layout REAL do programa da Receita é o de fundo
+  // (TIPO DE FUNDO | FUNDO | CNPJ | VALOR), confirmado no AJU-01. O de código
+  // (CÓD. | NOME DO BENEFICIÁRIO | ...) fica como fallback: os dois cabeçalhos
+  // são disjuntos (um tem TIPO DE FUNDO, o outro tem CÓD.+NOME DO BENEFICIÁRIO),
+  // então nenhum dispara no lugar do outro.
+  const doacoesEcaIdosoState = { anchors: null, current: null, items: doacoesEcaIdoso, nextId: () => doacaoEcaIdosoId++, categoria: null, layouts: ['fundo', 'efetuadas'] };
 
   // 'bens' | 'dividas' | 'pagamentos' | 'doacoesEfetuadas' | 'doacoesPartidos' | 'doacoesEcaIdoso' | null — seção corrente do formulário
   let section = null;
@@ -2109,6 +3755,12 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   let currentBem = null;
   let currentDivida = null;
   let currentPag = null;
+  // Titularidade corrente da ficha Pagamentos Efetuados. O formulário imprime
+  // um marcador de agrupamento ("Titular", "Dependente: <nome>" ou
+  // "Alimentando: <nome>") ANTES do bloco de pagamentos daquela pessoa, e ele
+  // vale até o próximo marcador. Sem guardá-lo, um gasto médico do dependente
+  // vira gasto do titular (auditoria de 31/08/2026).
+  let titularidadePagamentoAtual = null;
 
   // Rendimentos Tributáveis Recebidos de Pessoa Jurídica, das duas fichas
   // (titular e dependentes), no mesmo formato que o .DBK produz pelo registro
@@ -2135,6 +3787,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   // "esta ficha está vazia na sua declaração" e "esta ficha tem dado que o app
   // não importou" é justamente o que a pessoa precisa saber para conferir.
   const fichasNaoLidasComConteudo = [];
+  const fichasNaoLidasVazias = [];
   let fichaNaoLidaAtual = null;
 
   // Bens da Atividade Rural e Dívidas Vinculadas: as duas sub-tabelas que ficam
@@ -2164,6 +3817,37 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   const apuracaoGanhoCapital = [];
   let gcId = 1;
   let currentGc = null;
+  // Bloco corrente dentro do demonstrativo de Ganho de Capital (ver GC_BLOCOS):
+  // é ele que desambigua os rótulos repetidos entre quadros.
+  let gcBloco = null;
+  // Captura multi-linha da "Especificação e endereço" do imóvel: a primeira
+  // linha de conteúdo é o bem, as seguintes são o endereço, até o próximo
+  // bloco. 0 = não capturando; 1 = próxima linha é o bem; 2 = linhas de endereço.
+  let gcEspecEstado = 0;
+  // Ficha de MOEDAS EM ESPÉCIE, que tem layout próprio.
+  let gcMoedaBloco = null;
+  // Operação de moeda estrangeira em espécie em montagem. O formulário imprime
+  // a alienação em blocos rótulo-em-cima / valor-embaixo (adquirente; data,
+  // quantidade, valor; custo médio, custo de aquisição, ganho), fechados quando
+  // chega a TOTALIZAÇÃO ou uma nova moeda.
+  let currentGcMoeda = null;
+  const gcMoedaOperacoesPdf = [];
+  const gcMoedaMensalPdf = [];
+  // Operações em FII ou Fiagro: o formulário imprime uma MATRIZ, com os campos
+  // nas linhas e os meses nas colunas (janeiro a junho num quadro, julho a
+  // dezembro noutro), diferente da ficha de operações comuns/day-trade, que é
+  // uma página por mês. Por isso a leitura aqui é por coluna.
+  let fiiBloco = null;      // 'titular' | 'dependente'
+  let fiiMesesColuna = [];  // meses do quadro corrente, na ordem das colunas
+  // O formulário quebra os rótulos longos desta ficha em TRÊS linhas visuais,
+  // com a linha de valores no MEIO ("RESULTADO LÍQUIDO DO" / valores / "MÊS").
+  // Estes dois guardam os pedaços de rótulo já vistos e a linha de valores que
+  // ficou esperando o rótulo fechar.
+  let fiiRotuloPartes = [];
+  let fiiValoresPendentes = null;
+  // CPF impresso no subtítulo da ficha dos dependentes.
+  let fiiCpfDependente = null;
+  const fiiFiagroMensalOficial = [];
 
   // Demonstrativo da Lei 14.754/2023, detalhado por bem.
   const demonstrativoExteriorOficial = [];
@@ -2176,6 +3860,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   // corrente com seus detalhes por fonte pagadora.
   let rieCategoria = null;
   let rieGrupo = null;
+  // Âncoras de coluna da sub-tabela de isentos/exclusiva, montadas do cabeçalho
+  // (Beneficiário | CPF | doc | Nome | [Descrição] | Valor). Sem elas, o nome
+  // da fonte e a descrição caíam no mesmo campo, e o documento do doador ia
+  // para dentro do nome (auditoria de 31/08/2026).
+  let rieAnchors = null;
+  // true entre o cabeçalho e a primeira linha de detalhe: nesse intervalo, a
+  // linha de CONTINUAÇÃO do cabeçalho ("Pagadora"/"Pagadora") não pode ser
+  // confundida com continuação da descrição do código.
+  let rieAguardandoDetalhe = false;
   const rieDivergencias = [];
 
   // Renda Variável: uma entrada por ficha mensal COM dado. Mês impresso como
@@ -2203,12 +3896,29 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   };
 
   const flushRuralTabelas = () => {
-    if (currentBemRural) { bensRurais.push(currentBemRural); currentBemRural = null; }
-    if (currentDividaRural) { dividasRurais.push(currentDividaRural); currentDividaRural = null; }
+    if (currentBemRural) {
+      currentBemRural.chaveImportacao = `pdf:bem-rural:${currentBemRural.codigo}:${fingerprintTextoPdf(currentBemRural.discriminacao)}`;
+      bensRurais.push(currentBemRural);
+      currentBemRural = null;
+    }
+    if (currentDividaRural) {
+      currentDividaRural.chaveImportacao = `pdf:divida-rural:${fingerprintTextoPdf(currentDividaRural.discriminacao)}`;
+      dividasRurais.push(currentDividaRural);
+      currentDividaRural = null;
+    }
   };
 
   const flushGc = () => {
-    if (currentGc) { apuracaoGanhoCapital.push(currentGc); currentGc = null; }
+    if (!currentGc) return;
+    // Fecha a operação normalizando os campos PLANOS que o resto do app
+    // consome (e que o caminho .DBK também produz): o ganho vem da apuração
+    // impressa, e o imposto do quadro de cálculo. Sem isso os dois caminhos
+    // divergiriam no resumo, mesmo lendo a mesma declaração.
+    if (currentGc.apuracao?.ganhoCapital != null) currentGc.ganhoCapital = currentGc.apuracao.ganhoCapital;
+    currentGc.impostoDevido = currentGc.calculoImposto?.impostoDevido ?? 0;
+    currentGc.impostoPago = currentGc.calculoImposto?.impostoPago ?? 0;
+    apuracaoGanhoCapital.push(currentGc);
+    currentGc = null;
   };
 
   const flushRpj = () => {
@@ -2247,6 +3957,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           id: rendId++,
           cnpj_fonte: d.cnpj,
           nome_fonte: d.nome,
+          // rend-06: a descrição do rendimento (coluna própria no código 99) é
+          // campo separado do nome da fonte, e não mais concatenada nele.
+          ...(d.descricao ? { descricao: d.descricao } : {}),
           beneficiario: d.beneficiario,
           cpf_dependente: d.beneficiario === 'Dependente' ? d.cpf : null,
           valor: d.valor,
@@ -2258,12 +3971,16 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
     // Código só com a linha agregada (ex.: "08. 13º salário recebido pelos
     // dependentes", que não tem sub-tabela nenhuma). Sem isso, o valor sumiria.
     if (g.valorAgregado !== 0) {
+      // rend-08: o código 08 é "13º salário recebido pelos DEPENDENTES". A
+      // própria descrição diz de quem é; cravar 'Titular' somava no titular um
+      // valor do dependente em qualquer separação por beneficiário.
+      const ehDependente = /dependente/i.test(g.descricao || '');
       rendimentos.push({
         ...base,
         id: rendId++,
         cnpj_fonte: '',
         nome_fonte: '',
-        beneficiario: 'Titular',
+        beneficiario: ehDependente ? 'Dependente' : 'Titular',
         cpf_dependente: null,
         valor: g.valorAgregado,
       });
@@ -2284,6 +4001,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
     }
   };
 
+  // Referência compacta para localizar cada registro estruturado no texto
+  // preservado por página. `linha` é a linha visual reconstruída pelo parser,
+  // não uma posição inventada no conteúdo original.
+  const origemPdf = (pagina, linha) => ({ formato: 'pdf', pagina, linha });
+
+  // Índice da linha visual que já foi consumida como continuação de um título
+  // quebrado em duas linhas. Vale só dentro da página corrente.
+  let rowDeTituloContinuado = -1;
+
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const content = await page.getTextContent();
@@ -2291,10 +4017,67 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       .map(it => ({ text: it.str, x: it.transform[4], y: it.transform[5] }))
       .filter(it => it.text.trim() !== '');
     const rows = buildRows(items);
+    rowDeTituloContinuado = -1;
+    const textoPagina = rows.map(row => normSpace(row.cells.map(c => c.text).join(' '))).filter(Boolean).join('\n');
+    paginasTexto.push({ numero: pageNum, texto: textoPagina });
+    if (pageNum === 1) preencherIdentificacaoPdf(textoPagina, contribuinte);
     onProgress(pageNum, pdf.numPages);
 
     for (let ri = 0; ri < rows.length; ri++) {
+      // Linha visual já consumida como continuação do título da linha anterior.
+      if (ri === rowDeTituloContinuado) continue;
       const row = rows[ri];
+      const rabosDoTitulo = rabosDeTitulo(rows, ri);
+
+      // Inventário independente da lógica de extração. Primeiro registramos
+      // quais fichas o próprio PDF imprimiu e onde começam; só depois os
+      // parsers especializados tentam estruturar os dados. Isso impede que
+      // uma coleção vazia por falha de reconhecimento seja confundida com a
+      // expressão oficial "Sem Informações".
+      // Título quebrado em DUAS linhas visuais: tenta emendar com a seguinte
+      // ANTES de aceitar um casamento parcial. Sem isto, a cell truncada
+      // "...PELO TITULAR (IMPOSTO COM" casa por prefixo com a ficha COMUM do
+      // titular, e a row de uma ficha de exigibilidade suspensa é registrada
+      // como se fosse a ficha comum — `fichaPdfAtual` passa a apontar para a
+      // ficha errada no meio da tabela (auditoria de 31/08/2026).
+      let fichaCatalogada = null;
+      for (const c of row.cells) {
+        const direto = encontrarFichaPdf2026(c.text);
+        if (ehPrefixoDeFichaPdf2026(c.text)) {
+          const emenda = rabosDoTitulo
+            .map(rabo => ({ ficha: encontrarFichaPdf2026(`${c.text} ${rabo.texto}`), linha: rabo.linha }))
+            .find(e => e.ficha && e.ficha !== direto);
+          if (emenda) {
+            fichaCatalogada = emenda.ficha;
+            // A linha do rabo é só o fim do título, não tem dado: consumida
+            // aqui, ela não pode ser matched de novo por conta própria. Sem
+            // isto, o "DEPENDENTES" que fecha o título de RRA dos dependentes
+            // casa por igualdade com a ficha DEPENDENTES e desvia
+            // `fichaPdfAtual` no meio da tabela de RRA.
+            rowDeTituloContinuado = emenda.linha;
+            break;
+          }
+        }
+        if (direto) { fichaCatalogada = direto; break; }
+      }
+      if (section === 'ganhoCapital' && ['rendimentos-isentos', 'rendimentos-tributacao-exclusiva'].includes(fichaCatalogada?.id)) {
+        fichaCatalogada = null;
+      }
+      if (fichaCatalogada) {
+        fichaPdfAtual = fichaCatalogada.id;
+        if (!fichasPdfObservadas[fichaCatalogada.id]) {
+          fichasPdfObservadas[fichaCatalogada.id] = {
+            id: fichaCatalogada.id,
+            titulo: fichaCatalogada.titulo,
+            paginaInicio: pageNum,
+            linhaInicio: ri + 1,
+            presenca: 'indeterminada',
+          };
+        }
+      }
+      if (fichaPdfAtual && row.cells.some(c => /^Sem Informações$/i.test(c.text.trim()))) {
+        fichasPdfObservadas[fichaPdfAtual].presenca = 'vazia';
+      }
 
       if (!contribuinte.nome && rowHasCell(row, 'NOME:')) {
         contribuinte.nome = nextCellText(row, 'NOME:');
@@ -2326,6 +4109,11 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       }
       if (!pastRuralAnnex && rowHasCell(row, 'PAGAMENTOS EFETUADOS')) {
         if (currentPag) { pagamentos.push(currentPag); currentPag = null; }
+        // Só zera a titularidade ao ENTRAR na ficha de outra seção. O título se
+        // reimprime no topo de cada página de continuação (p8 r3 no AJU-01), e
+        // zerar ali apagaria o marcador "Dependente:" que veio no fim da página
+        // anterior, jogando os pagamentos do dependente para o titular.
+        if (section !== 'pagamentos') titularidadePagamentoAtual = null;
         section = 'pagamentos';
         continue;
       }
@@ -2389,15 +4177,37 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       if (rowHasCell(row, 'APURAÇÃO DO RESULTADO - BRASIL')) {
         flushAllCurrent();
         section = 'apuracaoRural';
-        if (!apuracaoResultadoRuralOficial) apuracaoResultadoRuralOficial = { origem: 'pdf' };
+        // rural-04: NÃO criar o objeto aqui. Antes, o simples título criava
+        // `{origem:'pdf'}`, e uma declaração SEM atividade rural (ESP/SAI, que
+        // imprimem "Sem Informações") aparecia com a Apuração do Resultado
+        // "preenchida". O objeto passa a nascer só quando um valor é lido.
         continue;
       }
-      // Cada página desta ficha é uma operação nova; o título é o separador.
-      if (row.cells.some(c => GC_TITULO.test(c.text.trim()))) {
-        flushAllCurrent();
-        section = 'ganhoCapital';
-        currentGc = { id: gcId++, bem: '', dataAquisicao: '', custoAquisicao: 0, dataAlienacao: '', valorAlienacao: 0, custoCorretagem: 0, naturezaOperacao: '', ganhoCapital: 0, adquirenteCpfCnpj: '', adquirenteNome: '' };
-        continue;
+      // Cada página desta ficha é uma operação nova; o título é o separador, e
+      // é dele que sai o TIPO (bem imóvel, bem móvel, participação societária
+      // ou moedas em espécie). Moeda em espécie tem layout próprio e vai para
+      // uma seção separada.
+      {
+        const tituloGc = row.cells.map(c => GC_TITULO.exec(c.text.trim())).find(Boolean);
+        if (tituloGc) {
+          flushAllCurrent();
+          const rotuloTipo = normSpace(tituloGc[1] || '').toUpperCase();
+          const tipoGc = GC_TIPO_POR_TITULO[rotuloTipo] || 'movel';
+          if (tipoGc === 'moeda') {
+            section = 'ganhoCapitalMoeda';
+            continue;
+          }
+          section = 'ganhoCapital';
+          gcBloco = null;
+          currentGc = {
+            id: gcId++, tipo: tipoGc, bem: '', dataAquisicao: '', custoAquisicao: 0,
+            dataAlienacao: '', valorAlienacao: 0, custoCorretagem: 0, naturezaOperacao: '',
+            ganhoCapital: 0, adquirenteCpfCnpj: '', adquirenteNome: '',
+            adquirentes: [], perguntasImpressas: [], parcelas: [], origem: 'pdf',
+            origemDocumento: origemPdf(pageNum, ri + 1),
+          };
+          continue;
+        }
       }
       if (rowHasCell(row, 'DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023')) {
         flushAllCurrent();
@@ -2443,13 +4253,23 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         continue;
       }
       // Isentos e Tributação Exclusiva: mesmo layout, categorias diferentes.
-      if (rowHasCell(row, 'RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS')) {
+      //
+      // A guarda `section !== 'ganhoCapital'` é o que impede uma COLISÃO REAL
+      // de títulos, achada em 24/08/2026 ao ler o demonstrativo de Ganho de
+      // Capital: a última página de cada operação tem os quadros
+      // "RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS" e "RENDIMENTOS SUJEITOS À
+      // TRIBUTAÇÃO DEFINITIVA" — que ali são o TRANSPORTE daquela operação
+      // para as fichas de rendimento, não o começo das fichas. Sem a guarda, o
+      // parser abandonava a operação no meio (perdendo consolidação e
+      // transportes) e abria uma ficha de isentos fantasma dentro do
+      // demonstrativo.
+      if (section !== 'ganhoCapital' && rowHasCell(row, 'RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS')) {
         flushAllCurrent();
         section = 'rendimentosIsentosExclusiva';
         rieCategoria = 'isento';
         continue;
       }
-      if (row.cells.some(c => /^RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA\s*\/\s*DEFINITIVA$/.test(c.text.trim()))) {
+      if (section !== 'ganhoCapital' && row.cells.some(c => /^RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA\s*\/\s*DEFINITIVA$/.test(c.text.trim()))) {
         flushAllCurrent();
         section = 'rendimentosIsentosExclusiva';
         rieCategoria = 'exclusivo';
@@ -2490,17 +4310,25 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         continue;
       }
       // "FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS
-      // AGROINDUSTRIAIS" (titular e dependentes) é uma ficha IRMÃ da Renda
-      // Variável, impressa logo depois dela e antes das doações — numa das
-      // declarações de referência as três estão na mesma página. Ela NÃO é
-      // lida hoje: está "Sem Informações" nas duas declarações disponíveis, e
-      // sem um exemplo com dado real não há como confirmar que o layout é o
-      // mesmo da Renda Variável. Fechar a seção aqui é o que impede que, numa
-      // declaração que TENHA dado de FII, essas linhas entrem como se fossem
-      // ganho de Renda Variável do contribuinte.
+      // AGROINDUSTRIAIS" (titular e dependentes) é a segunda ficha do menu
+      // Renda Variável do programa da Receita, impressa logo depois das
+      // operações comuns/day-trade.
+      //
+      // Ela está "Sem Informações" nas duas declarações de referência, então o
+      // layout usado aqui vem do relatório oficial (`relRendaVariavelFundoInvestimentoTitular`,
+      // extraído do irpf-impressao.jar): uma MATRIZ com 11 campos nas linhas e
+      // os meses nas colunas, em dois quadros (janeiro a junho, julho a
+      // dezembro). Por isso a leitura é por coluna, ancorada nos nomes dos
+      // meses do cabeçalho — e, se o cabeçalho não aparecer, nada é lido, em
+      // vez de casar valor com o mês errado.
       if (row.cells.some(c => /^FUNDOS DE INVESTIMENTO IMOBILIÁRIO/.test(c.text.trim()))) {
         flushAllCurrent();
-        section = null;
+        section = 'fiiFiagro';
+        fiiBloco = /DEPENDENTES$/.test(normSpace(row.cells.map(c => c.text.trim()).join(' '))) ? 'dependente' : 'titular';
+        fiiMesesColuna = [];
+        fiiRotuloPartes = [];
+        fiiValoresPendentes = null;
+        fiiCpfDependente = null;
         continue;
       }
       // ANTES do fechamento genérico logo abaixo, de propósito: aquele bloco
@@ -2508,11 +4336,16 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       // e as fichas de rendimento não lidas nunca chegariam aqui para serem
       // observadas. Fechar a seção elas fechariam de qualquer jeito; o que se
       // perderia é o AVISO de que vieram preenchidas.
-      const fichaNaoLida = nomeDaFichaNaoLida(row);
+      // Também protegida contra a colisão de títulos descrita acima:
+      // "RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA" está na lista de fichas
+      // não lidas e, dentro do demonstrativo de Ganho de Capital, é só o
+      // rótulo de um quadro de transporte.
+      const fichaNaoLida = section === 'ganhoCapital' ? null : nomeDaFichaNaoLida(row, rabosDoTitulo);
       if (fichaNaoLida) {
         flushAllCurrent();
         section = 'fichaNaoLida';
-        fichaNaoLidaAtual = { nome: fichaNaoLida, temConteudo: false };
+        fichaNaoLidaAtual = { nome: fichaNaoLida.nome, temConteudo: false };
+        if (fichaNaoLida.linhaConsumida >= 0) rowDeTituloContinuado = fichaNaoLida.linhaConsumida;
         continue;
       }
 
@@ -2522,6 +4355,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       if (section === 'fichaNaoLida') {
         const textos = row.cells.map(c => c.text.trim()).filter(Boolean);
         if (textos.some(t => t === 'Sem Informações')) {
+          if (fichaNaoLidaAtual?.nome && !fichasNaoLidasVazias.includes(fichaNaoLidaAtual.nome)) {
+            fichasNaoLidasVazias.push(fichaNaoLidaAtual.nome);
+          }
           fichaNaoLidaAtual = null;
           section = null;
           continue;
@@ -2555,6 +4391,12 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           // sem ele a seção seguiria aberta por cima da página de resumo.
           row.cells.some(c => /^(RENDIMENTOS|DEMONSTRATIVO|OUTRAS INFORMAÇÕES|EVOLUÇÃO PATRIMONIAL|RESUMO$)/.test(c.text.trim()))
         )
+        // Exceção para os dois quadros de TRANSPORTE que o demonstrativo de
+        // Ganho de Capital imprime no fim de cada operação e que começam com
+        // "RENDIMENTOS": ali eles são parte da operação, não uma ficha nova.
+        // Qualquer outro título continua fechando a seção normalmente, senão o
+        // demonstrativo ficaria aberto por cima da página seguinte.
+        && !(section === 'ganhoCapital' && row.cells.some(c => GC_QUADROS_INTERNOS.test(c.text.trim())))
       ) {
         flushAllCurrent();
         section = null;
@@ -2575,6 +4417,21 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           const nextRow = rows[ri + 1];
           const dateCells = (nextRow ? nextRow.cells.filter(c => /^\d{2}\/\d{2}\/\d{4}$/.test(c.text.trim())) : [])
             .sort((a, b) => a.x - b.x);
+          const discX = findCellX(row, 'DISCRIMINAÇÃO');
+          // Âncoras das colunas de valor. Preferência: as células de data da
+          // linha seguinte (ajuste anual). Quando elas não existem — Declaração
+          // Final de Espólio ("SITUAÇÃO NA DATA DA PARTILHA" / "VALOR DE
+          // TRANSFERÊNCIA") e Saída Definitiva ("SITUAÇÃO EM 31/12/AAAA" /
+          // "SITUAÇÃO NA DATA DA") —, deriva das próprias células de cabeçalho à
+          // direita da discriminação, em vez de cair em x fixos 389/498 que só
+          // funcionavam por coincidência (auditoria de 31/08/2026).
+          const colunasValor = dateCells.length >= 2
+            ? dateCells
+            : row.cells.filter(c => discX != null && c.x > discX + 20).sort((a, b) => a.x - b.x);
+          // A ficha de PARTILHA (espólio) não tem "saldo anterior/atual": as
+          // duas colunas são "situação na data da partilha" e "valor de
+          // transferência". Detecta pelo cabeçalho para poder marcar o bem.
+          const ehPartilha = row.cells.some(c => /DATA DA/.test(c.text)) && !row.cells.some(c => /SITUAÇÃO EM/.test(c.text));
           bensAnchors = {
             // Sem `?? 17`: nem toda declaração imprime a coluna "BEM" no
             // cabeçalho, e o padrão antigo colocava a âncora de `bem` no
@@ -2584,9 +4441,10 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
             bem: findCellX(row, 'BEM'),
             grupo: findCellX(row, 'GRUPO'),
             codigo: findCellX(row, 'CÓDIGO') ?? 95,
-            disc: findCellX(row, 'DISCRIMINAÇÃO'),
-            val1: dateCells[0]?.x ?? 389,
-            val2: dateCells[1]?.x ?? 498,
+            disc: discX,
+            val1: colunasValor[0]?.x ?? 389,
+            val2: colunasValor[1]?.x ?? 498,
+            ehPartilha,
           };
           continue;
         }
@@ -2599,38 +4457,99 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         const grupoTxt = textInColumn(row, pick, 'grupo');
         if (/^\d{2}$/.test(grupoTxt)) {
           if (currentBem) bens.push(currentBem);
+          const numeroItemTxt = bensAnchors.bem != null ? textInColumn(row, pick, 'bem') : '';
           currentBem = {
             id: bemId++,
+            // Número do item impresso na coluna BEM do quadro, quando existe.
+            // É por ele que outras fichas do mesmo PDF referenciam o bem (o
+            // Demonstrativo da Lei 14.754/2023 aponta "bem 7"), então guardá-lo
+            // é o que permite casar as duas leituras. Achado 31/08/2026.
+            numeroItem: /^\d+$/.test(numeroItemTxt) ? numeroItemTxt : null,
             grupo: grupoTxt,
             codigo_bem: textInColumn(row, pick, 'codigo'),
             discriminacao: textoDaColunaDisc(row, pick, bensAnchors).substring(0, 512),
             situacao_anterior: parseMoneyBR(textInColumn(row, pick, 'val1', '')),
             situacao_atual: parseMoneyBR(textInColumn(row, pick, 'val2', '')),
+            // País começa null e só vira código quando a linha de metadados
+            // "NNN - PAÍS" aparecer. Se nenhuma vier (bem sem a linha), fica
+            // '105' (Brasil), que é o default da ficha e o que o .DBK crava.
             localizacao: '105',
+            paisNome: '',
             beneficiario: 'Titular',
+            cpf_beneficiario: '',
+            cnpj: '',
+            // Numa Declaração Final de Espólio as duas colunas de valor são
+            // "situação na data da partilha" e "valor de transferência", e não
+            // saldo anterior/atual. Os campos planos ficam preenchidos para
+            // compatibilidade, mas o bem carrega os nomes corretos e a marca
+            // `ehPartilha`, para o app não exibir uma "variação" que não existe.
+            ...(bensAnchors.ehPartilha ? {
+              ehPartilha: true,
+              situacaoDataPartilha: parseMoneyBR(textInColumn(row, pick, 'val1', '')),
+              valorTransferencia: parseMoneyBR(textInColumn(row, pick, 'val2', '')),
+            } : {}),
+            origemDocumento: origemPdf(pageNum, ri + 1),
           };
         } else if (currentBem) {
-          // Só o que cai na COLUNA de discriminação continua o texto do bem.
-          // Este é o filtro principal, e resolve dois defeitos de uma vez
-          // (auditoria de 21/08/2026, 45 dos 172 bens afetados):
-          //
-          // 1. Valor de campo do formulário que ficou sozinho numa linha,
-          //    sem o rótulo ao lado, e por isso nenhum regex pegava: a
-          //    localização ("105 - BRASIL", x≈17), a resposta de "Bem com
-          //    usufruto" ("Não", x≈470) e a continuação do nome do cartório
-          //    ("MUNICIPIO", x≈399) entravam como se fossem descrição
-          //    do bem. Nenhum deles mora na coluna de discriminação.
-          // 2. Texto REAL que era descartado inteiro por terminar num rótulo
-          //    ("... SPE LTDA CNPJ:"), agora preservado, porque a coluna diz
-          //    que aquilo é discriminação.
-          //
-          // `isBensMetadataRow` continua como segunda barreira, para o caso
-          // em que o valor de um campo cai DENTRO da coluna de discriminação
-          // (o "Titular"/"Dependente" da coluna Beneficiário, já documentado
-          // lá), mas aplicado só ao texto dessa coluna.
-          const extra = linhaTemRotuloAEsquerdaDaDisc(row, pick) ? '' : textoDaColunaDisc(row, pick, bensAnchors);
-          if (extra && !valorDeCampoNaColunaDisc(extra)) {
-            currentBem.discriminacao = normSpace(currentBem.discriminacao + ' ' + extra).substring(0, 512);
+          // Antes de tratar a linha como continuação da discriminação, tenta
+          // ler dela os CAMPOS de metadados do bem, que o formulário imprime
+          // em linhas próprias abaixo do bem. Cada `extrairMetadadoDoBem`
+          // devolve true quando consumiu a linha, e aí ela não vira texto.
+          if (!extrairMetadadoDoBem(currentBem, row, bensAnchors.disc)) {
+            // Só o que cai na COLUNA de discriminação continua o texto do bem.
+            // Este é o filtro principal, e resolve dois defeitos de uma vez
+            // (auditoria de 21/08/2026, 45 dos 172 bens afetados):
+            //
+            // 1. Valor de campo do formulário que ficou sozinho numa linha,
+            //    sem o rótulo ao lado, e por isso nenhum regex pegava: a
+            //    localização ("105 - BRASIL", x≈17), a resposta de "Bem com
+            //    usufruto" ("Não", x≈470) e a continuação do nome do cartório
+            //    ("MUNICIPIO", x≈399) entravam como se fossem descrição
+            //    do bem. Nenhum deles mora na coluna de discriminação.
+            // 2. Texto REAL que era descartado inteiro por terminar num rótulo
+            //    ("... SPE LTDA CNPJ:"), agora preservado, porque a coluna diz
+            //    que aquilo é discriminação.
+            //
+            // NOTA (auditoria 31/08/2026): `isBensMetadataRow` NÃO é chamada
+            // aqui, ao contrário do que a versão anterior deste comentário
+            // afirmava. Ela é código morto no fluxo de produção — só os testes
+            // a exercitam. Ligá-la neste ponto derrubava linhas legítimas de
+            // discriminação de declarações reais (texto livre que casa
+            // ROTULO_METADADO_RE ou que é exatamente "Titular"/"Dependente"),
+            // quebrando o teste das 172 discriminações. A barreira real é a
+            // dupla `linhaTemRotuloAEsquerdaDaDisc` + `valorDeCampoNaColunaDisc`
+            // logo abaixo, mais o `extrairMetadadoDoBem` acima.
+            const extra = linhaTemRotuloAEsquerdaDaDisc(row, pick) ? '' : textoDaColunaDisc(row, pick, bensAnchors);
+            if (extra && !valorDeCampoNaColunaDisc(extra)) {
+              currentBem.discriminacao = normSpace(currentBem.discriminacao + ' ' + extra).substring(0, 512);
+            }
+          }
+        }
+        // CNPJ da instituição ou empresa do bem, para o mesmo cruzamento que o
+        // registro 27 do .DBK permite. Vem numa linha de metadados, sempre
+        // rotulado, e por isso não se confunde com o CPF do beneficiário (que
+        // tem rótulo próprio) nem com um número solto da discriminação. O
+        // primeiro encontrado vale: um bem tem uma fonte só.
+        if (currentBem && !currentBem.cnpj) {
+          // Só a coluna ESQUERDA, antes da discriminação: é ali que a ficha
+          // imprime o campo do bem ("CNPJ:  02.335.109/0001-05", x≈17). O
+          // mesmo rótulo aparece em outros dois lugares que NÃO servem — o
+          // CPF do beneficiário, impresso à direita da discriminação, e um
+          // CNPJ que o contribuinte escreveu dentro do próprio texto do bem.
+          // Sem esse recorte por posição, 4 dos 172 bens da declaração de
+          // referência pegavam o CNPJ errado ou um que o arquivo não tem.
+          const limiteDisc = bensAnchors.disc ?? 100;
+          const cells = row.cells.filter(c => c.x < limiteDisc);
+          for (let ci = 0; ci < cells.length; ci++) {
+            const achado = BEM_CNPJ.exec(cells[ci].text);
+            const daCelula = achado ? cnpjDoBem(achado[1]) : '';
+            if (daCelula) { currentBem.cnpj = daCelula; break; }
+            // Rótulo e número em células separadas.
+            if (/^CPF(\/CNPJ)?:$|^CNPJ:$/.test(cells[ci].text.trim()) && cells[ci + 1]) {
+              const so = BEM_CNPJ_SOLTO.exec(cells[ci + 1].text.trim());
+              const daSeguinte = so ? cnpjDoBem(so[1]) : '';
+              if (daSeguinte) { currentBem.cnpj = daSeguinte; break; }
+            }
           }
         }
         continue;
@@ -2657,13 +4576,28 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         const codigoTxt = textInColumn(row, pick, 'codigo');
         if (/^\d{1,3}$/.test(codigoTxt)) {
           if (currentDivida) dividas.push(currentDivida);
+          const valores = valoresDaLinhaDeDivida(row, dividasAnchors);
           currentDivida = {
             id: dividaId++,
             codigo: codigoTxt,
-            discriminacao: textInColumn(row, pick, 'disc').substring(0, 512),
-            situacao_anterior: parseMoneyBR(textInColumn(row, pick, 'val1', '')),
-            situacao_atual: parseMoneyBR(textInColumn(row, pick, 'val2', '')),
-            valor_pago: parseMoneyBR(textInColumn(row, pick, 'pago', '')),
+            // dividas-03: lê o texto da coluna de discriminação até a primeira
+            // coluna de VALOR, e não só a faixa estreita da âncora. A
+            // justificação empurra parte do texto do credor para além do ponto
+            // médio disc/val1 (x≈207 no AJU-01), e `textInColumn` o descartava.
+            // O que NÃO é valor monetário, entre a discriminação e val1, é
+            // texto do credor — a mesma regra da ficha de Bens.
+            discriminacao: normSpace(row.cells
+              .filter(c => {
+                if (pick(c.x) === 'disc') return true;
+                if (dividasAnchors.disc == null || dividasAnchors.val1 == null) return false;
+                if (c.x < dividasAnchors.disc || c.x >= dividasAnchors.val1) return false;
+                return !EH_VALOR_MONETARIO.test(normSpace(c.text));
+              })
+              .map(c => c.text).join(' ')).substring(0, 512),
+            situacao_anterior: valores.situacao_anterior,
+            situacao_atual: valores.situacao_atual,
+            valor_pago: valores.valor_pago,
+            origemDocumento: origemPdf(pageNum, ri + 1),
           };
         } else if (currentDivida) {
           const extra = normSpace(row.cells.map(c => c.text).join(' '));
@@ -2695,7 +4629,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           }
           continue;
         }
-        if (row.cells.some(c => /^Dependente:/.test(c.text.trim()))) continue;
+        // Marcadores de agrupamento por titularidade. Cada um abre o bloco da
+        // pessoa e vale até o próximo. Vêm numa linha própria, na coluna mais à
+        // esquerda, e NÃO são pagamentos.
+        const textoRow = normSpace(row.cells.map(c => c.text).join(' '));
+        const mDependente = /^Dependente:\s*(.+)$/.exec(textoRow);
+        const mAlimentando = /^Alimentando:\s*(.+)$/.exec(textoRow);
+        if (mDependente) { titularidadePagamentoAtual = { tipo: 'dependente', nome: normSpace(mDependente[1]) }; continue; }
+        if (mAlimentando) { titularidadePagamentoAtual = { tipo: 'alimentando', nome: normSpace(mAlimentando[1]) }; continue; }
+        if (textoRow === 'Titular') { titularidadePagamentoAtual = { tipo: 'titular', nome: '' }; continue; }
         const pick = makeColumnPicker(pagAnchors);
         const codigoTxt = textInColumn(row, pick, 'codigo');
         const valorTxt = textInColumn(row, pick, 'valorPago', '');
@@ -2709,10 +4651,14 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
             valor_pago: parseMoneyBR(valorTxt),
             parcela_nao_dedutivel: parseMoneyBR(textInColumn(row, pick, 'parcNao', '')),
             descricao: '',
+            // A quem a despesa pertence, do marcador de agrupamento acima.
+            titularidade: titularidadePagamentoAtual ? titularidadePagamentoAtual.tipo : null,
+            titularidadeNome: titularidadePagamentoAtual ? titularidadePagamentoAtual.nome : '',
             // Mesmo achado do caminho .DBK (ver parseDBK, registro 26): sem
             // data, o Dashboard zerava Pagamentos Efetuados sempre que um
             // período estava ativo.
             data: anoCalendario ? `${anoCalendario}-12-31` : '',
+            origemDocumento: origemPdf(pageNum, ri + 1),
           };
         } else if (currentPag) {
           const extra = textInColumn(row, pick, 'nome');
@@ -2738,22 +4684,31 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           flushRuralTabelas();
           const texto = normSpace(cells.filter(t => t !== cells[0] && !RV_VALOR.test(t)).join(' '));
           if (ehBem) {
+            const ordem = bensRurais.length + 1;
+            const codigo = cells[0].padStart(2, '0');
+            const situacaoAnterior = parseMoneyBR(valores[0]);
             currentBemRural = {
               id: bemRuralId++,
-              codigo: cells[0].padStart(2, '0'),
+              ordemDeclaracao: ordem,
+              codigo,
               discriminacao: texto,
-              situacao_anterior: parseMoneyBR(valores[0]),
+              situacao_anterior: situacaoAnterior,
               situacao_atual: parseMoneyBR(valores[1]),
               movimentacoes: [],
+              origemDocumento: origemPdf(pageNum, ri + 1),
             };
           } else {
+            const ordem = dividasRurais.length + 1;
+            const situacaoAnterior = parseMoneyBR(valores[0]);
             currentDividaRural = {
               id: dividaRuralId++,
+              ordemDeclaracao: ordem,
               discriminacao: texto,
-              situacao_anterior: parseMoneyBR(valores[0]),
+              situacao_anterior: situacaoAnterior,
               situacao_atual: parseMoneyBR(valores[1]),
               valor_pago: parseMoneyBR(valores[2]),
               movimentacoes: [],
+              origemDocumento: origemPdf(pageNum, ri + 1),
             };
           }
           continue;
@@ -2782,9 +4737,28 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         if (cells.some(c => c.t === 'PARTICIPANTE(S)')) { emParticipantes = true; continue; }
 
         const cib = cells.find(c => AR_CIB.test(c.t));
-        // Linha de imóvel: código da atividade na primeira célula e CIB na
-        // última. Exigir o CIB evita confundir com linha de participante.
-        if (/^\d{2}$/.test(cells[0].t) && cib) {
+        // Linha de imóvel: código da atividade (2 dígitos) na primeira célula.
+        //
+        // O CIB NÃO pode ser exigido. Ele é a inscrição do imóvel no cadastro
+        // da Receita e a coluna vem VAZIA quando o contribuinte não a
+        // preencheu — é o caso do único imóvel do AJU-01 (p11 r7: código 11,
+        // participação 75,00, condição 2, nome, área 123,4, coluna CIB sem
+        // célula nenhuma). Enquanto era exigido, a linha inteira era
+        // descartada: `imoveisRurais` voltava vazio, a ficha inteira sumia, e
+        // o participante ficava órfão, com `imovelId` nulo — justamente o
+        // vínculo que o comentário acima diz ser o que o PDF entrega e o .DBK
+        // não (auditoria de 31/08/2026).
+        //
+        // O que substitui o CIB como discriminador contra a linha de
+        // participante: o código de 2 dígitos sozinho na primeira célula (a de
+        // participante começa pelo NOME, ver AR_PARTICIPANTE) mais a FORMA da
+        // linha, que traz pelo menos dois números além do código (participação
+        // e área) e pelo menos um texto (nome e localização).
+        const outras = cells.filter(c => c !== cells[0] && c !== cib);
+        const pareceLinhaDeImovel = cib
+          || (outras.filter(c => /^[\d.,]+$/.test(c.t)).length >= 2
+              && outras.some(c => !/^[\d.,]+$/.test(c.t)));
+        if (/^\d{2}$/.test(cells[0].t) && pareceLinhaDeImovel) {
           const numeros = cells.filter(c => c !== cells[0] && c !== cib && /^[\d.,]+$/.test(c.t));
           const texto = cells.filter(c => c !== cells[0] && c !== cib && !/^[\d.,]+$/.test(c.t));
           // Ordem impressa: PARTICIPAÇÃO (%), CONDIÇÃO EXPLORAÇÃO, NOME E
@@ -2795,13 +4769,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           const area = numeros[2] ? parseMoneyBR(numeros[2].t) : 0;
           ultimoImovelRural = {
             id: imovelRuralId++,
+            chaveImportacao: `pdf:imovel-rural:${cib ? cib.t.replace(/\D/g, '') : ''}:${cells[0].t}:${condicao}:${fingerprintTextoPdf(normSpace(texto.map(c => c.t).join(' ')))}`,
             codigoAtividade: cells[0].t,
             participacao,
             condicaoExploracao: condicao,
             nomeLocalizacao: normSpace(texto.map(c => c.t).join(' ')),
             area,
-            cib: cib.t,
+            cib: cib ? cib.t : '',
             dataAquisicao: '',
+            origemDocumento: origemPdf(pageNum, ri + 1),
           };
           imoveisRurais.push(ultimoImovelRural);
           emParticipantes = false;
@@ -2809,11 +4785,28 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         }
 
         if (emParticipantes) {
+          const textoPart = normSpace(cells.map(c => c.t).join(' '));
+          const mEstrangeiro = /Estrangeiro:\s*(Sim|Não)/i.exec(textoPart);
+          const estrangeiro = mEstrangeiro ? /Sim/i.test(mEstrangeiro[1]) : false;
           const m = AR_PARTICIPANTE.exec(cells[0].t);
-          if (m) {
+          // rural-07: o participante pode NÃO ter CPF (estrangeiro). Antes,
+          // AR_PARTICIPANTE (que exige o CPF entre parênteses) não casava e o
+          // participante era descartado em silêncio — justamente o caso que a
+          // coluna "Estrangeiro" existe para sinalizar. Aqui o nome é lido com
+          // ou sem CPF, e a marca de estrangeiro é preservada.
+          let nome = '';
+          let cpf = '';
+          if (m) { nome = normSpace(m[1]); cpf = m[2].replace(/\D/g, ''); }
+          else {
+            // Sem CPF: o nome é o texto da primeira célula, sem o campo
+            // "Estrangeiro:" que às vezes cai na mesma linha à direita.
+            nome = normSpace(cells[0].t.replace(/Estrangeiro:.*$/i, ''));
+          }
+          if (nome) {
             participantesRuraisOficial.push({
-              nome: normSpace(m[1]),
-              cpf: m[2].replace(/\D/g, ''),
+              nome,
+              cpf,
+              estrangeiro,
               // Vínculo que só o PDF entrega (ver ATUALIZAÇÃO 3, que registrou
               // isso como impossível pelo `.DBK`). A chave é o `id` do imóvel,
               // e NÃO o CIB: numa das declarações de referência dois imóveis
@@ -2824,6 +4817,8 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
               imovelId: ultimoImovelRural ? ultimoImovelRural.id : null,
               imovelCib: ultimoImovelRural ? ultimoImovelRural.cib : '',
               imovelNome: ultimoImovelRural ? ultimoImovelRural.nomeLocalizacao : '',
+              imovelChaveImportacao: ultimoImovelRural ? ultimoImovelRural.chaveImportacao : '',
+              origemDocumento: origemPdf(pageNum, ri + 1),
             });
           }
           continue;
@@ -2843,7 +4838,19 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         if (!especie) continue;
         const valores = cells.filter(t => RV_VALOR.test(t));
         if (valores.length < AR_REBANHO_COLUNAS.length) continue;
-        const item = { especieCodigo: especie[1], especieNome: cells[0] };
+        // rural-06: o nome da espécie pode quebrar em duas linhas ("Asininos,
+        // equinos" / "e muares"). Junta a continuação (linha seguinte só de
+        // texto) para não gravar o nome cortado.
+        let especieNome = cells[0];
+        const contRow = rows[ri + 1];
+        if (contRow) {
+          const contTextos = contRow.cells.map(c => c.text.trim()).filter(Boolean);
+          if (contTextos.length > 0 && !contTextos.some(t => RV_VALOR.test(t)) && !AR_ESPECIES.some(([re]) => re.test(contTextos[0]))) {
+            especieNome = normSpace(`${especieNome} ${contTextos.join(' ')}`);
+          }
+        }
+        const item = { especieCodigo: especie[1], especieNome };
+        item.origemDocumento = origemPdf(pageNum, ri + 1);
         AR_REBANHO_COLUNAS.forEach((chave, i) => { item[chave] = parseMoneyBR(valores[i]); });
         // Espécie inteiramente zerada não gera registro no .DBK; manter a
         // mesma regra evita cinco linhas vazias em toda declaração.
@@ -2875,11 +4882,23 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       if (section === 'apuracaoRural') {
         // "MOVIMENTAÇÃO DO REBANHO - BRASIL" vem logo depois e encerra esta.
         if (row.cells.some(c => /^MOVIMENTAÇÃO DO REBANHO/.test(c.text.trim()))) { section = null; continue; }  // aqui o prefixo BASTA: as duas versões encerram a apuração
+        // "Sem Informações": ficha vazia, não cria objeto (rural-04).
+        if (row.cells.some(c => /^Sem Informações$/.test(c.text.trim()))) { section = null; continue; }
+        const garanteApuracao = () => { if (!apuracaoResultadoRuralOficial) apuracaoResultadoRuralOficial = { origem: 'pdf' }; return apuracaoResultadoRuralOficial; };
+        // rural-03: "Opção pela forma de apuração do resultado tributável" traz
+        // um valor de TEXTO ("Pelo resultado"), que paresRotuloValor não pega.
+        // Simétrico ao campo opcaoApuracaoResultadoTributavel do .DBK.
+        const cellsAp = row.cells.map(c => c.text.trim());
+        const iOpc = cellsAp.findIndex(t => /^Opção pela forma de apuração do resultado tributável$/i.test(t));
+        if (iOpc >= 0 && cellsAp[iOpc + 1]) {
+          garanteApuracao().opcaoApuracao = normSpace(cellsAp[iOpc + 1]);
+          continue;
+        }
         for (const { rotulo, valor } of paresRotuloValor(row)) {
           const campo = AR_APURACAO_CAMPOS[rotulo];
-          if (campo) { apuracaoResultadoRuralOficial[campo] = valor; continue; }
-          if (AR_ADIANTAMENTO_ANO.test(rotulo)) apuracaoResultadoRuralOficial.adiantamentoVendaFutura = valor;
-          else if (AR_ADIANTAMENTO_ANTERIOR.test(rotulo)) apuracaoResultadoRuralOficial.adiantamentoAnosAnteriores = valor;
+          if (campo) { garanteApuracao()[campo] = valor; continue; }
+          if (AR_ADIANTAMENTO_ANO.test(rotulo)) garanteApuracao().adiantamentoVendaFutura = valor;
+          else if (AR_ADIANTAMENTO_ANTERIOR.test(rotulo)) garanteApuracao().adiantamentoAnosAnteriores = valor;
         }
         continue;
       }
@@ -2890,40 +4909,409 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         const proxima = (rows[ri + 1] ? rows[ri + 1].cells.map(c => c.text.trim()).filter(Boolean) : []);
         const primeiraData = (lista) => lista.find(t => GC_DATA.test(t));
         const valoresDe = (lista) => lista.filter(t => RV_VALOR.test(t));
+        const percentuaisDe = (lista) => lista.filter(t => GC_PERCENTUAL.test(t));
 
-        // Blocos com o valor na linha DE BAIXO.
-        if (rowHasCell(row, 'Especificação')) {
-          currentGc.bem = normSpace(cells.filter(t => t !== 'Especificação').join(' '));
+        // Troca de bloco dentro da ficha (ver GC_BLOCOS).
+        const novoBloco = GC_BLOCOS.find(([re]) => cells.some(t => re.test(t)));
+        if (novoBloco) {
+          gcBloco = novoBloco[1];
+          gcEspecEstado = 0;
+          // O cabeçalho do bloco "CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO" já é
+          // a informação de que a alienação foi parcelada.
+          if (gcBloco === 'calculoPrazo' || gcBloco === 'parcelasDetalhe') currentGc.alienacaoAPrazo = true;
+          // O cabeçalho pode trazer valor na mesma linha; segue o fluxo.
+        }
+
+        // gc-08: tabela "Faixa de Ganho de Capital / Ganho de Capital
+        // Distribuído". Quatro linhas de faixa (15%, 17,5%, 20%, 22,5%) e uma
+        // linha TOTAL, cada uma com três valores monetários (TOTAL, Anterior,
+        // Atual). A alíquota ("15", "17,5") não é RV_VALOR e sai da conta
+        // sozinha. Montada na forma do registro 75 do .DBK (faixa1..4 + total).
+        if (gcBloco === 'faixas') {
+          const ehFaixa = cells.some(t => /^(Até R\$|De R\$|Acima de R\$)/.test(t));
+          const ehTotalFaixa = cells.some(t => /^TOTAL$/.test(t)) && !cells.some(t => /^(Até R\$|De R\$|Acima de R\$)/.test(t));
+          if (ehFaixa || ehTotalFaixa) {
+            const vs = valoresDe(cells);
+            const trio = { total: parseMoneyBR(vs[0] || '0'), anterior: parseMoneyBR(vs[1] || '0'), atual: parseMoneyBR(vs[2] || '0') };
+            if (!currentGc._faixasTmp) currentGc._faixasTmp = [];
+            if (ehTotalFaixa) {
+              const t = currentGc._faixasTmp;
+              currentGc.faixasTributacao = [{
+                faixa1: t[0] || { total: 0, anterior: 0, atual: 0 },
+                faixa2: t[1] || { total: 0, anterior: 0, atual: 0 },
+                faixa3: t[2] || { total: 0, anterior: 0, atual: 0 },
+                faixa4: t[3] || { total: 0, anterior: 0, atual: 0 },
+                total: trio,
+              }];
+              delete currentGc._faixasTmp;
+            } else {
+              currentGc._faixasTmp.push(trio);
+            }
+            continue;
+          }
+        }
+
+        // gc-09: quadro "CUSTO DE AQUISIÇÃO" da participação societária (espécie
+        // de participação, quantidade de quotas/ações, custo médio, custo total).
+        // A linha de dados vem depois de dois cabeçalhos. Sem parser, a
+        // quantidade e o custo médio somiam e custosAquisicao ficava vazio.
+        if (gcBloco === 'custoAquisicaoParticipacao') {
+          const nums = cells.filter(t => RV_VALOR.test(t) || GC_PERCENTUAL.test(t) || /^[\d.]+$/.test(t));
+          const textos = cells.filter(t => !(RV_VALOR.test(t) || GC_PERCENTUAL.test(t) || /^[\d.]+$/.test(t)));
+          const ehCabecalho = cells.some(t => /Esp[ée]cie de Participa|Quantidade de|Custo m[ée]dio|Custo total|quotas\/a[çc][õo]es|pond\.|de aquisi/i.test(t));
+          if (!ehCabecalho && textos.length > 0 && nums.length >= 3) {
+            if (!currentGc.custosAquisicao) currentGc.custosAquisicao = [];
+            const registro = {
+              especie: normSpace(textos.join(' ')),
+              quantidade: parseMoneyBR(nums[0]),
+              custoMedio: parseFloat(nums[1].replace(/\./g, '').replace(',', '.')) || 0,
+              custoTotal: parseMoneyBR(nums[2]),
+            };
+            currentGc.custosAquisicao.push(registro);
+            // O campo plano que o resto do app consome.
+            if (!currentGc.custoAquisicao) currentGc.custoAquisicao = registro.custoTotal;
+            continue;
+          }
+        }
+
+        // gc-12: "Data de Recebimento da Última Parcela" (alienação a prazo).
+        if (cells.some(t => /Data de Recebimento da [ÚU]ltima Parcela/i.test(t))) {
+          const d = primeiraData(cells) || primeiraData(proxima);
+          if (d) currentGc.dataUltimaParcela = dataDDMMAAAAparaIso(d.replace(/\D/g, ''));
+          // segue o fluxo: a linha também traz a pergunta da parcela final.
+        }
+
+        // gc-02: o imóvel imprime "Especificação e endereço" como cabeçalho, e o
+        // nome do bem e o endereço vêm nas linhas SEGUINTES. A versão anterior
+        // exigia a célula exata 'Especificação' (que não existe) e o bem ficava
+        // vazio. Capturado por estado: 1 = próxima linha é o bem; 2 = linhas de
+        // endereço até o próximo bloco.
+        if (cells.some(t => /^Especifica[çc][ãa]o( e endere[çc]o)?$/i.test(t))) {
+          // Caso raro em que o valor vem na MESMA linha (móvel: "Especificação
+          // <texto>"): preserva o comportamento antigo.
+          const naMesma = normSpace(cells.filter(t => !/^Especifica/i.test(t)).join(' '));
+          if (naMesma) { currentGc.bem = naMesma; gcEspecEstado = 0; }
+          else gcEspecEstado = 1;
           continue;
         }
-        if (rowHasCell(row, 'Data de aquisição')) {
-          currentGc.dataAquisicao = dataDDMMAAAAparaIso((primeiraData(proxima) || '').replace(/\D/g, ''));
-          currentGc.custoAquisicao = parseMoneyBR(valoresDe(proxima)[0] || '0');
+        if (gcEspecEstado === 1) {
+          currentGc.bem = normSpace(cells.join(' '));
+          gcEspecEstado = 2;
           continue;
         }
-        if (rowHasCell(row, 'Natureza da operação')) {
-          currentGc.naturezaOperacao = proxima.find(t => !RV_VALOR.test(t) && !GC_DATA.test(t)) || '';
-          currentGc.valorAlienacao = parseMoneyBR(valoresDe(proxima)[0] || '0');
+        if (gcEspecEstado === 2) {
+          const trecho = normSpace(cells.join(' '));
+          if (trecho) currentGc.endereco = normSpace(`${currentGc.endereco || ''} ${trecho}`);
+          continue;
+        }
+        // gc-03: no imóvel, "Data de Aquisição:" e "Custo de aquisição (R$):"
+        // vêm com o valor NA MESMA linha (maiúscula e dois-pontos). A versão
+        // anterior exigia 'Data de aquisição' (minúscula) e lia da linha de
+        // baixo, então a data e o custo do imóvel ficavam vazios.
+        if (cells.some(t => /^Data de Aquisi[çc][ãa]o:?$/i.test(t))) {
+          const d = primeiraData(cells) || primeiraData(proxima);
+          if (d) currentGc.dataAquisicao = dataDDMMAAAAparaIso(d.replace(/\D/g, ''));
+          continue;
+        }
+        if (cells.some(t => /^Custo de aquisi[çc][ãa]o( \(R\$\))?:?$/i.test(t))) {
+          const v = valoresDe(cells).concat(valoresDe(proxima));
+          if (v.length > 0) currentGc.custoAquisicao = parseMoneyBR(v[0]);
+          continue;
+        }
+        if (rowHasCell(row, 'Natureza da operação') || rowHasCell(row, 'Natureza')) {
+          // gc-10: na participação a linha traz DOIS rótulos ("Natureza" e
+          // "Espécie da participação") e a de baixo, dois valores por posição
+          // ("ALIENAÇÕES..." e "QUOTAS"). Lê os dois por coordenada; a branch
+          // consumia a linha e a espécie se perdia. No imóvel/móvel só há
+          // "Natureza da operação" + o valor de alienação, tratado como antes.
+          const temEspecie = cells.some(t => /Esp[ée]cie da participa[çc][ãa]o/i.test(t));
+          if (temEspecie) {
+            const celE = row.cells.find(c => /Esp[ée]cie da participa/i.test(c.text));
+            const proxCells = (rows[ri + 1] ? rows[ri + 1].cells.map(c => ({ x: c.x, t: c.text.trim() })).filter(c => c.t) : []);
+            const naturezaCells = proxCells.filter(c => !RV_VALOR.test(c.t) && !GC_DATA.test(c.t) && (!celE || c.x < celE.x - 10));
+            const especieCells = celE ? proxCells.filter(c => !RV_VALOR.test(c.t) && c.x >= celE.x - 10) : [];
+            if (naturezaCells.length) currentGc.naturezaOperacao = normSpace(naturezaCells.map(c => c.t).join(' '));
+            if (especieCells.length) currentGc.especie = normSpace(especieCells.map(c => c.t).join(' '));
+          } else {
+            currentGc.naturezaOperacao = proxima.find(t => !RV_VALOR.test(t) && !GC_DATA.test(t)) || currentGc.naturezaOperacao;
+            const v = valoresDe(proxima);
+            if (v.length > 0) currentGc.valorAlienacao = parseMoneyBR(v[0]);
+          }
           continue;
         }
         if (rowHasCell(row, 'Data de Alienação')) {
           currentGc.dataAlienacao = dataDDMMAAAAparaIso((primeiraData(proxima) || '').replace(/\D/g, ''));
-          currentGc.custoCorretagem = parseMoneyBR(valoresDe(proxima)[0] || '0');
+          const vsAlien = valoresDe(proxima);
+          // gc-01: a participação societária imprime TRÊS colunas nesta linha
+          // (data | valor de alienação | corretagem). O imóvel/móvel imprime
+          // só duas (data | corretagem), e o valor de alienação vem da linha
+          // "Natureza da operação". A versão anterior cravava valoresDe[0] em
+          // custoCorretagem, e na participação isso gravava o VALOR DE
+          // ALIENAÇÃO como corretagem (28x maior), com valorAlienacao=0.
+          if (cells.some(t => /Valor de alienação/i.test(t)) && vsAlien.length >= 2) {
+            currentGc.valorAlienacao = parseMoneyBR(vsAlien[0]);
+            currentGc.custoCorretagem = parseMoneyBR(vsAlien[1]);
+          } else {
+            currentGc.custoCorretagem = parseMoneyBR(vsAlien[0] || '0');
+          }
           continue;
+        }
+        // Participação societária: nome, CNPJ, município, UF e espécie vêm em
+        // pares rótulo-em-cima / valor-embaixo. gc-11: quando a MESMA linha traz
+        // vários rótulos ("CNPJ da sociedade | Município | UF"), casa cada um
+        // com o valor da coluna correspondente por posição x, e não só o
+        // primeiro (a versão anterior usava .find(Boolean) e perdia município
+        // e UF; o acerto do CNPJ era acidental).
+        {
+          const celulasRotuloPar = row.cells
+            .map(c => ({ x: c.x, t: c.text.trim(), destino: GC_PARES_LINHA_SEGUINTE[gcNormalizaRotulo(c.text.trim())] }))
+            .filter(c => c.destino);
+          if (celulasRotuloPar.length > 0 && rows[ri + 1]) {
+            const proxCells = rows[ri + 1].cells.map(c => ({ x: c.x, t: c.text.trim() })).filter(c => c.t);
+            let casouPar = false;
+            for (const rot of celulasRotuloPar) {
+              const proximoRot = celulasRotuloPar.filter(r => r.x > rot.x).sort((a, b) => a.x - b.x)[0];
+              const limite = proximoRot ? proximoRot.x : Infinity;
+              const valorCells = proxCells.filter(c => c.x >= rot.x - 15 && c.x < limite && !RV_VALOR.test(c.t));
+              const texto = normSpace(valorCells.map(c => c.t).join(' '));
+              if (texto) {
+                gcSet(currentGc, rot.destino, rot.destino === 'sociedade.cnpj' ? texto.replace(/\D/g, '') : texto);
+                casouPar = true;
+              }
+            }
+            if (casouPar) continue;
+          }
+        }
+        // Endereço do imóvel alienado: o formulário imprime "Endereço" com o
+        // logradouro na linha de baixo. Guardado como texto único, que é como
+        // a ficha mostra.
+        if (rowHasCell(row, 'Endereço') && currentGc.tipo === 'imovel') {
+          const texto = normSpace(proxima.filter(t => !RV_VALOR.test(t)).join(' '));
+          if (texto) { currentGc.endereco = texto; continue; }
         }
         if (rowHasCell(row, 'CPF/CNPJ') && rowHasCell(row, 'Nome')) {
           const doc = proxima.find(t => GC_DOC.test(t));
           if (doc) currentGc.adquirenteCpfCnpj = doc.replace(/\D/g, '');
           currentGc.adquirenteNome = normSpace(proxima.filter(t => t !== doc).join(' '));
+          if (currentGc.adquirenteCpfCnpj || currentGc.adquirenteNome) {
+            currentGc.adquirentes.push({ cpfCnpj: currentGc.adquirenteCpfCnpj, nome: currentGc.adquirenteNome });
+          }
           continue;
         }
-        // Bloco final: rótulo e valor na MESMA linha. O rótulo tem que ser
-        // exato: "Ganho de Capital" aparece também em "Ganho de Capital da
-        // alienação atual", "Ganho de Capital Total" e "Faixa de Ganho de
-        // Capital", que são outros números.
-        if (rowHasCell(row, 'Ganho de Capital')) {
-          const v = valoresDe(cells);
-          if (v.length > 0) currentGc.ganhoCapital = parseMoneyBR(v[v.length - 1]);
+
+        // Perguntas da ficha (as do imóvel e a de valor do conjunto no móvel).
+        // Ficam como texto impresso + resposta: são a informação que a
+        // declaração mostra, e o .DBK já entrega as mesmas respostas em campos
+        // próprios para quem precisar delas estruturadas.
+        {
+          const pergunta = cells.find(t => t.trim().endsWith('?'));
+          if (pergunta) {
+            // A resposta marcada aparece de duas formas no formulário: numa
+            // célula só ("Sim (  )   Não ( X )") ou em DUAS células separadas
+            // ("Sim ( )" e "Não ( X )"), que é como o pdf.js entrega na maior
+            // parte das páginas. Juntar as células antes de procurar o "X"
+            // cobre os dois casos — sem isso, metade das perguntas era
+            // importada com resposta vazia.
+            const marcacao = normSpace(cells.filter(t => /^(Sim|Não)\s*\(/.test(normSpace(t))).join(' '));
+            const respostaSimples = cells.find(t => /^(Sim|Não)$/.test(t));
+            let resposta = respostaSimples || null;
+            if (!resposta && marcacao) resposta = /Sim\s*\(\s*X/i.test(marcacao) ? 'Sim' : (/Não\s*\(\s*X/i.test(marcacao) ? 'Não' : null);
+            if (!resposta) {
+              const naProxima = proxima.find(t => /^(Sim|Não)$/.test(t));
+              if (naProxima) resposta = naProxima;
+              else {
+                const marcacaoProxima = normSpace(proxima.filter(t => /^(Sim|Não)\s*\(/.test(normSpace(t))).join(' '));
+                if (marcacaoProxima) resposta = /Sim\s*\(\s*X/i.test(marcacaoProxima) ? 'Sim' : (/Não\s*\(\s*X/i.test(marcacaoProxima) ? 'Não' : null);
+              }
+            }
+            // As perguntas "Última Parcela?" se repetem uma vez por parcela no
+            // detalhamento; o dado delas já está em cada item de `parcelas`.
+            if (gcBloco !== 'parcelasDetalhe') {
+              currentGc.perguntasImpressas.push({ pergunta: normSpace(pergunta), resposta: resposta || '' });
+            }
+            if (/prazo\/presta/i.test(pergunta) && resposta) currentGc.alienacaoAPrazo = resposta === 'Sim';
+            if (/Sujeito a Registro P[úu]blico/i.test(pergunta) && resposta) currentGc.sujeitoRegistroPublico = resposta === 'Sim';
+            if (/alienação parcial desse bem/i.test(pergunta) && resposta) currentGc.houveAlienacaoParcialAnterior = resposta === 'Sim';
+            continue;
+          }
+        }
+
+        // Linha da tabela de parcelas (alienação a prazo): data seguida das 8
+        // colunas do quadro, na ordem impressa. A linha "Total" tem a mesma
+        // forma, sem data, e vira o total do quadro.
+        if ((gcBloco === 'calculoPrazo' || gcBloco === 'parcelasDetalhe') && primeiraData(cells)) {
+          const numeros = cells.filter(t => RV_VALOR.test(t) || GC_PERCENTUAL.test(t));
+          if (numeros.length >= 8) {
+            currentGc.parcelas.push({
+              data: dataDDMMAAAAparaIso((primeiraData(cells) || '').replace(/\D/g, '')),
+              valorRecebido: parseMoneyBR(numeros[0]),
+              custoCorretagem: parseMoneyBR(numeros[1]),
+              valorLiquido: parseMoneyBR(numeros[2]),
+              custoAquisicaoProporcional: parseMoneyBR(numeros[3]),
+              ganhoCapitalProporcional: parseMoneyBR(numeros[4]),
+              aliquotaMedia: parseMoneyBR(numeros[5]),
+              impostoDevido: parseMoneyBR(numeros[6]),
+              impostoPago: parseMoneyBR(numeros[7]),
+            });
+            continue;
+          }
+        }
+
+        // Linha "Total" do quadro de parcelas: mesmas colunas, sem data.
+        if ((gcBloco === 'calculoPrazo' || gcBloco === 'parcelasDetalhe') && cells.some(t => /^Total$/.test(t))) {
+          const numeros = cells.filter(t => RV_VALOR.test(t) || GC_PERCENTUAL.test(t));
+          if (numeros.length >= 8) {
+            currentGc.calculoImposto = {
+              ...(currentGc.calculoImposto || {}),
+              totalRecebidoParcelas: parseMoneyBR(numeros[0]),
+              totalCorretagemParcelas: parseMoneyBR(numeros[1]),
+              totalLiquidoParcelas: parseMoneyBR(numeros[2]),
+              totalAquisicaoParcelas: parseMoneyBR(numeros[3]),
+              ganhoCapitalTotal: parseMoneyBR(numeros[4]),
+              aliquotaMedia: parseMoneyBR(numeros[5]),
+              impostoDevido: parseMoneyBR(numeros[6]),
+              impostoPago: parseMoneyBR(numeros[7]),
+            };
+            continue;
+          }
+        }
+
+        // Soma dos ganhos de alienações anteriores: rótulo e valor podem cair
+        // na mesma linha ou na de baixo.
+        if (cells.some(t => /^Soma dos Ganhos de Capital de alienações anteriores/.test(t))) {
+          const v = valoresDe(cells).concat(valoresDe(proxima));
+          if (v.length > 0) currentGc.ganhoAlienacoesAnteriores = parseMoneyBR(v[0]);
+          continue;
+        }
+
+        // Quadro por rótulo, dentro do bloco corrente.
+        //
+        // O casamento é POR POSIÇÃO, não pela ordem da lista: uma linha do
+        // quadro "alienação a prazo" traz TRÊS pares rótulo-valor de uma vez
+        // ("Valor Recebido (R$) 6.000,00 Custo de Corretagem (R$) 0,00 Valor
+        // Líquido Recebido (R$) 6.000,00"). Pegar sempre o último valor da
+        // linha, como a primeira versão fazia, colocaria o mesmo número nos
+        // três campos.
+        {
+          const tabela = GC_ROTULOS[gcBloco] || {};
+          const ehValor = (t) => RV_VALOR.test(t) || GC_PERCENTUAL.test(t);
+          const soUnidade = (t) => /^\((R\$|%|US\$)\)$/.test(t);
+          const celulas = row.cells.map(c => ({ x: c.x, t: c.text.trim() })).filter(c => c.t);
+          const celulasRotulo = celulas.filter(c => !ehValor(c.t) && !soUnidade(c.t));
+          const celulasValor = celulas.filter(c => ehValor(c.t));
+          let casou = false;
+          for (const cel of celulasRotulo) {
+            const rotulo = gcNormalizaRotulo(cel.t);
+            // "Devido em 2025" e "Referente à alienação em 2025" trazem o ano
+            // junto; casa pelo prefixo.
+            const destino = tabela[rotulo]
+              || tabela[Object.keys(tabela).find(k => rotulo.startsWith(k)) || ''];
+            if (!destino) continue;
+            const proximoRotulo = celulasRotulo.find(r => r.x > cel.x);
+            const limite = proximoRotulo ? proximoRotulo.x : Infinity;
+            const valor = celulasValor.find(v => v.x > cel.x && v.x < limite);
+            if (!valor) continue;
+            gcSet(currentGc, destino, parseMoneyBR(valor.t));
+            casou = true;
+          }
+          if (casou) {
+            // O ganho apurado é o número que a tela do app mostra como "ganho
+            // de capital" da operação — mantido no campo plano que o resto do
+            // app já consome.
+            if (currentGc.apuracao?.ganhoCapital != null) currentGc.ganhoCapital = currentGc.apuracao.ganhoCapital;
+            continue;
+          }
+        }
+        continue;
+      }
+
+      // Ganho de capital de MOEDA ESTRANGEIRA EM ESPÉCIE: ficha própria, com
+      // uma tabela de alienações e a totalização mensal (que é onde a isenção
+      // dos US$ 5.000 do ano aparece).
+      if (section === 'ganhoCapitalMoeda') {
+        const cells = row.cells.map(c => c.text.trim()).filter(Boolean);
+        if (cells.length === 0) continue;
+        const fecharMoeda = () => {
+          if (currentGcMoeda && (currentGcMoeda.data || currentGcMoeda.valor)) gcMoedaOperacoesPdf.push(currentGcMoeda);
+          currentGcMoeda = null;
+        };
+        // TOTALIZAÇÃO fecha a alienação em montagem e troca de bloco.
+        if (cells.some(t => /^TOTALIZAÇÃO$/.test(t))) { fecharMoeda(); gcMoedaBloco = 'totalizacao'; continue; }
+        if (cells.some(t => /^ALIENAÇÃO DE MOEDA ESTRANGEIRA EM ESPÉCIE$/.test(t))) { gcMoedaBloco = 'alienacoes'; continue; }
+        if (cells.some(t => /^Sem Informações$/.test(t))) continue;
+        const numeros = cells.filter(t => RV_VALOR.test(t) || GC_PERCENTUAL.test(t));
+
+        // gc-04: a alienação detalhada de moeda em espécie. O formulário NÃO
+        // imprime o cabeçalho "ALIENAÇÃO DE MOEDA ESTRANGEIRA EM ESPÉCIE" que a
+        // versão anterior exigia — a alienação vem como uma sequência de blocos
+        // rótulo/valor (AJU-01 p22 r5-r11), e por isso nunca era lida.
+        if (gcMoedaBloco !== 'totalizacao') {
+          // "DÓLAR (ESTADOS UNIDOS)" abre uma nova moeda.
+          if (cells.length === 1 && /\(.+\)$/.test(cells[0]) && !RV_VALOR.test(cells[0]) && !/R\$|US\$|%/.test(cells[0])) {
+            fecharMoeda();
+            currentGcMoeda = { moeda: normSpace(cells[0]), adquirenteNome: '', adquirenteCpfCnpj: '', data: '', quantidade: 0, valor: 0, custoMedio: 0, custoTotal: 0, ganhoCapital: 0, origem: 'pdf', origemDocumento: origemPdf(pageNum, ri + 1) };
+            continue;
+          }
+          if (!currentGcMoeda) continue;
+          const proxCells = (rows[ri + 1] ? rows[ri + 1].cells.map(c => c.text.trim()).filter(Boolean) : []);
+          const proxNums = proxCells.filter(t => RV_VALOR.test(t) || GC_PERCENTUAL.test(t) || /^[\d.]+$/.test(t));
+          // Adquirente: "CPF/CNPJ do Adquirente | Nome do Adquirente".
+          if (cells.some(t => /CPF\/CNPJ do Adquirente/i.test(t))) {
+            const doc = proxCells.find(t => GC_DOC.test(t));
+            if (doc) currentGcMoeda.adquirenteCpfCnpj = doc.replace(/\D/g, '');
+            currentGcMoeda.adquirenteNome = normSpace(proxCells.filter(t => t !== doc).join(' '));
+            continue;
+          }
+          // "Data da Alienação | Quantidade | Valor da Alienação (R$)".
+          if (cells.some(t => /Data da Aliena[çc][ãa]o/i.test(t))) {
+            const d = proxCells.find(t => GC_DATA.test(t));
+            if (d) currentGcMoeda.data = dataDDMMAAAAparaIso(d.replace(/\D/g, ''));
+            const vs = proxCells.filter(t => RV_VALOR.test(t));
+            if (vs.length >= 2) { currentGcMoeda.quantidade = parseMoneyBR(vs[0]); currentGcMoeda.valor = parseMoneyBR(vs[1]); }
+            else if (vs.length === 1) currentGcMoeda.valor = parseMoneyBR(vs[0]);
+            continue;
+          }
+          // "Custo Médio (R$) | Custo de Aquisição (R$) | Ganho de Capital (R$)".
+          if (cells.some(t => /Custo M[ée]dio/i.test(t))) {
+            const custoMedioTxt = proxCells.find(t => GC_PERCENTUAL.test(t) || /^[\d.]+,\d{4,6}$/.test(t));
+            const vs = proxCells.filter(t => RV_VALOR.test(t));
+            if (custoMedioTxt) currentGcMoeda.custoMedio = parseFloat(custoMedioTxt.replace(/\./g, '').replace(',', '.')) || 0;
+            if (vs.length >= 2) { currentGcMoeda.custoTotal = parseMoneyBR(vs[0]); currentGcMoeda.ganhoCapital = parseMoneyBR(vs[1]); }
+            continue;
+          }
+          continue;
+        }
+        if (gcMoedaBloco === 'totalizacao') {
+          // Linha do mês: o nome do mês (ou o número) abre a linha e as sete
+          // colunas do quadro vêm em seguida.
+          const nomeMes = cells.map(t => GC_MOEDA_MESES.indexOf(normSpace(t).toUpperCase())).find(i => i >= 0);
+          if (nomeMes != null && nomeMes >= 0 && numeros.length >= 6) {
+            gcMoedaMensalPdf.push({
+              mes: nomeMes + 1,
+              alienacaoDolar: parseMoneyBR(numeros[0]),
+              alienacaoConsolidadaDolar: parseMoneyBR(numeros[1]),
+              ganhoCapital: parseMoneyBR(numeros[2]),
+              ganhoCapitalTributavel: parseMoneyBR(numeros[3]),
+              aliquota: parseMoneyBR(numeros[4]),
+              impostoDevido: parseMoneyBR(numeros[5]),
+              impostoPago: numeros[6] != null ? parseMoneyBR(numeros[6]) : 0,
+          origem: 'pdf',
+          origemDocumento: origemPdf(pageNum, ri + 1),
+            });
+          }
+          continue;
+        }
+        if (gcMoedaBloco === 'alienacoes' && numeros.length >= 3) {
+          const data = cells.find(t => GC_DATA.test(t));
+          const doc = cells.find(t => GC_DOC.test(t));
+          const texto = cells.filter(t => !RV_VALOR.test(t) && !GC_PERCENTUAL.test(t) && !GC_DATA.test(t) && !GC_DOC.test(t));
+          gcMoedaOperacoesPdf.push({
+            data: data ? dataDDMMAAAAparaIso(data.replace(/\D/g, '')) : '',
+            descricao: normSpace(texto.join(' ')),
+            adquirenteCpfCnpj: doc ? doc.replace(/\D/g, '') : '',
+            valores: numeros.map(parseMoneyBR),
+            origem: 'pdf',
+          });
         }
         continue;
       }
@@ -2950,6 +5338,24 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         if (rowHasCell(row, 'RENDIMENTOS TRIBUTÁVEIS')) { resumoBloco = 'rendimentos'; continue; }
         if (rowHasCell(row, 'DEDUÇÕES')) { resumoBloco = 'deducoes'; continue; }
 
+        // resumo-01: "IMPOSTO A RESTITUIR" imprime o rótulo numa linha e o valor
+        // na linha SEGUINTE, sozinho (Δy=3 > TOLERANCIA_LINHA), então nunca
+        // caía no mesmo par rótulo/valor. Lido explicitamente da próxima linha.
+        if (rowHasCell(row, 'IMPOSTO A RESTITUIR')) {
+          const prox = rows[ri + 1] ? rows[ri + 1].cells.map(c => c.text.trim()).filter(Boolean) : [];
+          const v = prox.find(t => RV_VALOR.test(t));
+          if (v != null) impostoDevido.impostoRestituir = parseMoneyBR(v);
+        }
+        // resumo-07: "Número de Quotas" traz um INTEIRO ("1"), que não é
+        // RV_VALOR e escapa de paresRotuloValor. Lido por célula adjacente.
+        {
+          const cellsR = row.cells.map(c => c.text.trim());
+          const iQ = cellsR.findIndex(t => /^Número de Quotas$/.test(t));
+          if (iQ >= 0 && cellsR[iQ + 1] && /^\d+$/.test(cellsR[iQ + 1])) {
+            impostoDevido.numeroQuotas = parseInt(cellsR[iQ + 1], 10);
+          }
+        }
+
         for (const { rotulo, valor } of paresRotuloValor(row)) {
           // "TOTAL" aparece duas vezes na página, uma por bloco; o rótulo
           // sozinho não diz qual é.
@@ -2958,7 +5364,8 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
             else if (resumoBloco === 'deducoes') impostoDevido.totalDeducoes = valor;
             continue;
           }
-          const campo = RESUMO_CAMPOS[rotulo];
+          const campo = RESUMO_CAMPOS[rotulo]
+            || (RESUMO_CAMPOS_PREFIXO.find(([pref]) => rotulo.startsWith(pref)) || [])[1];
           if (campo) { impostoDevido[campo] = valor; continue; }
           for (const [re, [campoAnterior, campoAtual]] of RESUMO_EVOLUCAO) {
             if (!re.test(rotulo)) continue;
@@ -2977,7 +5384,24 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         // dedução legal por dependente, que já vem pela ficha de Imposto
         // Devido e não é atributo de nenhum dependente em particular.
         if (row.cells.some(c => /^TOTAL DE DEDUÇÃO COM DEPENDENTES$/.test(c.text.trim()))) { section = null; continue; }
-        if (row.cells.some(c => DEP_RUIDO.test(c.text.trim()))) continue;
+        if (row.cells.some(c => DEP_RUIDO.test(c.text.trim()))) {
+          const ultimo = dependentes[dependentes.length - 1];
+          if (ultimo) {
+            const linha = normSpace(row.cells.map(c => c.text).join(' '));
+            const meta = /Email\s*:\s*(.*?)\s+Celular\s*:\s*(.*?)\s+Raça\/Cor:\s*(.*)$/i.exec(linha);
+            if (meta) {
+              ultimo.email = normSpace(meta[1]);
+              const celularDigitos = normSpace(meta[2]).replace(/\D/g, '');
+              ultimo.dddCelular = celularDigitos.length > 9 ? celularDigitos.slice(0, -9) : '';
+              ultimo.celular = celularDigitos.slice(-9);
+              ultimo.racaCor = normSpace(meta[3]);
+              if (/^Não informada$/i.test(ultimo.racaCor)) ultimo.racaCorCodigo = '0';
+            }
+            const mora = /Dependente mora com o titular da declaração\?\s*(Sim|Não)/i.exec(linha);
+            if (mora) ultimo.moraComTitular = simNaoTexto(mora[1]);
+          }
+          continue;
+        }
 
         const cells = row.cells.map(c => c.text.trim()).filter(Boolean);
         const data = cells.find(t => DEP_DATA.test(t));
@@ -2995,38 +5419,75 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           dataNascimento: data ? dataDDMMAAAAparaIso(data.replace(/\D/g, '')) : '',
           // Código cru, igual ao que o .DBK entrega (ver registro 25).
           parentesco: cells[0].padStart(2, '0'),
+          saidaComDeclarante: false,
+          nitPisPasep: '',
+          moraComTitular: null,
+          email: '',
+          dddCelular: '',
+          celular: '',
+          racaCorCodigo: '',
+          origemDocumento: origemPdf(pageNum, ri + 1),
         });
         continue;
       }
 
       if (section === 'rendimentosIsentosExclusiva') {
-        // Cabeçalho da sub-tabela, em duas variantes: a comum tem "CNPJ da
-        // Fonte Pagadora" e "Nome da Fonte Pagadora"; a de prêmios de loteria
-        // tem só "Descrição" no lugar das duas. Nenhuma das duas é item.
-        if (rowHasCell(row, 'Beneficiário') && rowHasCell(row, 'Valor')) continue;
-        if (rowHasCell(row, 'TOTAL')) { flushRie(); continue; }
-        if (rowHasCell(row, 'Sem Informações')) { flushRie(); continue; }
+        // Cabeçalho da sub-tabela. Monta as âncoras de coluna a partir dele; a
+        // variante comum tem "CNPJ/CPF da Fonte/Doador" + "Nome da Fonte/
+        // Doador", a de prêmios tem só "Descrição", a do código 99 tem "Nome"
+        // E "Descrição". Nenhuma é item.
+        if (rowHasCell(row, 'Beneficiário') && rowHasCell(row, 'Valor')) {
+          rieAnchors = {
+            beneficiario: findCellX(row, 'Beneficiário'),
+            cpf: findCellX(row, 'CPF'),
+            doc: findCellXRegex(row, /CNPJ da Fonte|CPF\/CNPJ (do|da)/),
+            nome: findCellXRegex(row, /^Nome (da|do)/),
+            descricao: findCellX(row, 'Descrição'),
+            valor: findCellX(row, 'Valor'),
+          };
+          rieAguardandoDetalhe = true;
+          continue;
+        }
+        if (rowHasCell(row, 'TOTAL')) { flushRie(); rieAnchors = null; rieAguardandoDetalhe = false; continue; }
+        if (rowHasCell(row, 'Sem Informações')) { flushRie(); rieAnchors = null; rieAguardandoDetalhe = false; continue; }
 
         const cells = row.cells.map(c => ({ ...c, t: c.text.trim() })).filter(c => c.t);
         if (cells.length === 0) continue;
         const valores = cells.filter(c => RV_VALOR.test(c.t));
 
-        // Linha de DETALHE: começa com "Titular" ou "Dependente".
+        // Linha de DETALHE: começa com "Titular" ou "Dependente". Lida por
+        // COLUNA (âncoras do cabeçalho), separando nome da fonte, descrição e o
+        // documento da fonte/doador — que antes se misturavam num campo só.
         if (RIE_BENEFICIARIO.test(cells[0].t) && rieGrupo) {
-          const cpf = cells.find(c => RIE_CPF.test(c.t));
-          const cnpj = cells.find(c => RIE_CNPJ.test(c.t));
+          rieAguardandoDetalhe = false;
+          const pick = rieAnchors ? makeColumnPicker(rieAnchors) : null;
+          const naColuna = (nome) => pick ? normSpace(cells.filter(c => pick(c.x) === nome).map(c => c.t).join(' ')) : '';
+          const cpf = cells.find(c => RIE_CPF.test(c.t) && (!pick || pick(c.x) === 'cpf'));
+          // Documento da fonte/doador: pode ser CPF (doador PF) ou CNPJ. Fica
+          // na coluna 'doc', à direita da coluna 'cpf' do beneficiário.
+          const doc = cells.find(c => (RIE_CPF.test(c.t) || RIE_CNPJ.test(c.t)) && c !== cpf && (!pick || pick(c.x) === 'doc'));
           const ultimoValor = valores[valores.length - 1];
-          // Nome/descrição da fonte: o que sobra entre os documentos e o valor.
-          // Filtrar por identidade de célula (e não por texto) evita descartar
-          // um pedaço de nome que por acaso repita um documento.
-          const nome = normSpace(cells
-            .filter(c => c !== cells[0] && c !== cpf && c !== cnpj && c !== ultimoValor)
-            .map(c => c.t).join(' '));
+          let nome, descricao;
+          if (pick && rieAnchors.nome != null) {
+            // Tem coluna Nome (e talvez Descrição, no código 99): campos
+            // separados.
+            nome = naColuna('nome');
+            descricao = rieAnchors.descricao != null ? naColuna('descricao') : '';
+          } else if (pick && rieAnchors.descricao != null) {
+            // Prêmios de loteria: só coluna Descrição, sem Nome. Aqui a
+            // descrição É o nome da fonte (não há outro), então vira nome_fonte.
+            nome = naColuna('descricao');
+            descricao = '';
+          } else {
+            nome = normSpace(cells.filter(c => c !== cells[0] && c !== cpf && c !== doc && c !== ultimoValor).map(c => c.t).join(' '));
+            descricao = '';
+          }
           rieGrupo.detalhes.push({
             beneficiario: cells[0].t,
             cpf: cpf ? cpf.t.replace(/\D/g, '') : '',
-            cnpj: cnpj ? cnpj.t.replace(/\D/g, '') : '',
+            cnpj: doc ? doc.t.replace(/\D/g, '') : '',
             nome,
+            ...(descricao ? { descricao } : {}),
             valor: ultimoValor ? parseMoneyBR(ultimoValor.t) : 0,
           });
           continue;
@@ -3078,14 +5539,31 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
           continue;
         }
 
-        // Sem valor e com texto: é continuação. Do nome da fonte, se a
-        // sub-tabela já começou; da descrição do código, se ainda não.
+        // Sem valor e com texto: é continuação.
         if (valores.length === 0 && rieGrupo) {
-          const texto = normSpace(cells.map(c => c.t).join(' '));
-          if (!texto) continue;
+          // rend-05: a linha entre o cabeçalho e o primeiro detalhe é a
+          // CONTINUAÇÃO do cabeçalho ("Pagadora" / "Pagadora"), não a descrição
+          // do código. Antes ela era colada em rieGrupo.descricao, produzindo
+          // "Outros Pagadora Pagadora".
+          if (rieAguardandoDetalhe) continue;
           const ultimo = rieGrupo.detalhes[rieGrupo.detalhes.length - 1];
-          if (ultimo) ultimo.nome = normSpace(`${ultimo.nome} ${texto}`);
-          else rieGrupo.descricao = normSpace(`${rieGrupo.descricao} ${texto}`);
+          if (ultimo) {
+            // Wrap de uma linha de detalhe: continua nome e descrição por
+            // COLUNA, para o pedaço de descrição não invadir o nome.
+            const pick = rieAnchors ? makeColumnPicker(rieAnchors) : null;
+            if (pick && rieAnchors.descricao != null) {
+              const nomeExtra = normSpace(cells.filter(c => pick(c.x) === 'nome').map(c => c.t).join(' '));
+              const descExtra = normSpace(cells.filter(c => pick(c.x) === 'descricao').map(c => c.t).join(' '));
+              if (nomeExtra) ultimo.nome = normSpace(`${ultimo.nome} ${nomeExtra}`);
+              if (descExtra) ultimo.descricao = normSpace(`${ultimo.descricao || ''} ${descExtra}`);
+            } else {
+              const texto = normSpace(cells.map(c => c.t).join(' '));
+              if (texto) ultimo.nome = normSpace(`${ultimo.nome} ${texto}`);
+            }
+          } else {
+            const texto = normSpace(cells.map(c => c.t).join(' '));
+            if (texto) rieGrupo.descricao = normSpace(`${rieGrupo.descricao} ${texto}`);
+          }
         }
         continue;
       }
@@ -3133,6 +5611,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
             // total anual, não um lançamento datado, e sem data o rendimento
             // seria descartado por qualquer consulta com período.
             data: anoCalendario ? `${anoCalendario}-12-31` : '',
+            origemDocumento: origemPdf(pageNum, ri + 1),
           };
           RPJ_COLUNAS.forEach((chave, i) => { currentRpj[chave] = parseMoneyBR(valores[i]); });
           continue;
@@ -3165,6 +5644,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
               consolidacao: {},
               temDados: false,
               origem: 'pdf',
+              origemDocumento: origemPdf(pageNum, ri + 1),
             };
             rvAguardandoConteudo = true;
           }
@@ -3213,11 +5693,123 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
         continue;
       }
 
+      // Ficha de FII/Fiagro: matriz com os meses nas colunas.
+      if (section === 'fiiFiagro') {
+        const textos = row.cells.map(c => c.text.trim()).filter(Boolean);
+        if (textos.length === 0) continue;
+        if (textos.some(t => /^Sem Informações$/.test(t))) continue;
+        // Subtítulo da ficha dos dependentes, que é onde o CPF é impresso
+        // ("GANHOS LÍQUIDOS OU PERDAS (CPF DEPENDENTE: 000.000.000-00)").
+        // Sem ele, dois dependentes diferentes cairiam na mesma chave em
+        // `ultimosPorBeneficiario`.
+        const cpfDep = /CPF DEPENDENTE:\s*([\d.-]+)/i.exec(normSpace(textos.join(' ')));
+        if (cpfDep) { fiiCpfDependente = cpfDep[1].replace(/\D/g, ''); continue; }
+        // Cabeçalho do quadro: "MÊS" seguido dos nomes dos meses. Guarda a
+        // posição x de cada mês, que é o que identifica a coluna.
+        //
+        // A célula "MÊS" SOZINHA não é cabeçalho: é o pedaço final do rótulo
+        // "RESULTADO LÍQUIDO DO MÊS", que o formulário quebra em três linhas
+        // visuais. Enquanto ela era aceita aqui, `fiiMesesColuna` era zerada
+        // no meio do quadro e a guarda logo abaixo descartava TODAS as linhas
+        // seguintes — a ficha inteira do AJU-01 saía vazia, com movimento
+        // impresso (auditoria de 31/08/2026). Por isso a troca só acontece
+        // quando a linha realmente traz nome de mês.
+        if (textos.some(t => /^MÊS$/.test(t))) {
+          const colunas = row.cells
+            .map(c => ({ x: c.x, mes: GC_MOEDA_MESES.indexOf(normSpace(c.text).toUpperCase()) + 1 }))
+            .filter(c => c.mes > 0)
+            .sort((a, b) => a.x - b.x);
+          if (colunas.length > 0) {
+            fiiMesesColuna = colunas;
+            fiiRotuloPartes = [];
+            fiiValoresPendentes = null;
+            continue;
+          }
+        }
+        if (fiiMesesColuna.length === 0) continue;
+
+        const gravarFii = (campo, celulas) => {
+          for (let vi = 0; vi < celulas.length; vi++) {
+            const celula = celulas[vi];
+            // Quando a linha traz exatamente um valor por coluna do quadro, a
+            // ORDEM é o casamento certo, e não depende de coordenada nenhuma.
+            // Bucketar pelo x de início erra aqui porque os números são
+            // impressos alinhados à DIREITA e os nomes de mês à esquerda: em
+            // AJU-01 p37 o valor de JANEIRO sai em x=189,4 e a âncora de
+            // FEVEREIRO está em x=229,1, dentro da tolerância de 40 — janeiro
+            // ia para fevereiro e era sobrescrito pelo valor de fevereiro logo
+            // depois. O bucket por x fica só como reserva, para um quadro que
+            // imprima menos valores do que colunas.
+            let escolhido = celulas.length === fiiMesesColuna.length ? fiiMesesColuna[vi] : null;
+            if (!escolhido) {
+              escolhido = fiiMesesColuna[0];
+              for (const col of fiiMesesColuna) if (col.x <= celula.x + 40) escolhido = col;
+            }
+            if (!escolhido) continue;
+            let registro = fiiFiagroMensalOficial.find(r => r.mes === escolhido.mes && r.titular === (fiiBloco !== 'dependente'));
+            if (!registro) {
+              registro = { mes: escolhido.mes, titular: fiiBloco !== 'dependente', cpfDependente: fiiBloco === 'dependente' ? fiiCpfDependente : null, origem: 'pdf', temDados: false, origemDocumento: origemPdf(pageNum, ri + 1) };
+              fiiFiagroMensalOficial.push(registro);
+            }
+            const texto = celula.text.trim();
+            registro[campo] = campo === 'aliquota' ? texto : parseMoneyBR(texto);
+            if (campo !== 'aliquota' && parseMoneyBR(texto) !== 0) registro.temDados = true;
+          }
+        };
+
+        const valores = row.cells.filter(c => RV_VALOR.test(c.text.trim()) || RV_ALIQUOTA.test(c.text.trim()));
+        const rotulo = normSpace(textos.filter(t => !RV_VALOR.test(t) && !RV_ALIQUOTA.test(t)).join(' ')).toUpperCase();
+
+        if (valores.length > 0) {
+          const campo = rotulo ? FII_LINHAS_MAP.get(rotulo) : null;
+          if (campo) {
+            // Rótulo inteiro na mesma linha dos valores: o caso simples.
+            gravarFii(campo, valores);
+            fiiRotuloPartes = [];
+            fiiValoresPendentes = null;
+          } else if (!rotulo) {
+            // Linha só de valores: o rótulo dela está partido, com o final na
+            // linha SEGUINTE. Segura os valores até o rótulo fechar.
+            fiiValoresPendentes = valores;
+          }
+          continue;
+        }
+
+        // Linha só de texto: é pedaço de rótulo. Acumula e tenta fechar.
+        fiiRotuloPartes.push(rotulo);
+        const combinado = normSpace(fiiRotuloPartes.join(' '));
+        const campoCombinado = FII_LINHAS_MAP.get(combinado);
+        if (campoCombinado && fiiValoresPendentes) {
+          gravarFii(campoCombinado, fiiValoresPendentes);
+          fiiRotuloPartes = [];
+          fiiValoresPendentes = null;
+        } else if (!FII_LINHAS.some(([nome]) => nome.startsWith(combinado))) {
+          // O acumulado não leva a rótulo nenhum: recomeça deste pedaço.
+          fiiRotuloPartes = [rotulo];
+        }
+        continue;
+      }
+
       if (section === 'doacoesEfetuadas') { processDoacaoRow(doacoesEfetuadasState, row); continue; }
       if (section === 'doacoesPartidos') { processDoacaoRow(doacoesPartidosState, row); continue; }
       if (section === 'doacoesEcaIdoso') { processDoacaoRow(doacoesEcaIdosoState, row); continue; }
     }
   }
+
+  const textoIntegral = paginasTexto.map(p => `PÁGINA ${p.numero}\n${p.texto}`).join('\n\f\n');
+  if (textoIntegral.replace(/PÁGINA \d+/g, '').trim().length < 100) {
+    throw new Error('O PDF não possui uma camada de texto utilizável. Gere novamente a imagem da declaração no programa IRPF ou aplique OCR antes de importar.');
+  }
+  const assinaturaIrpf = [
+    /DECLARAÇÃO DE AJUSTE ANUAL/i.test(textoIntegral),
+    /IDENTIFICAÇÃO DO CONTRIBUINTE/i.test(textoIntegral),
+    /ANO-CALENDÁRIO\s+\d{4}/i.test(textoIntegral),
+    /(?:BENS E DIREITOS|PAGAMENTOS EFETUADOS|RESUMO)/i.test(textoIntegral),
+  ].filter(Boolean).length;
+  if (options.validarDocumento !== false && (assinaturaIrpf < 3 || !(contribuinte.cpf || contribuinte.nome) || !anoCalendario)) {
+    throw new Error('O PDF tem texto, mas não foi reconhecido como uma declaração IRPF completa. Gere a imagem da declaração no programa oficial da Receita e tente novamente.');
+  }
+  const documentoFonte = await criarDocumentoFonte({ formato: 'pdf', textoIntegral, paginas: paginasTexto });
 
   if (currentBem) bens.push(currentBem);
   if (currentDivida) dividas.push(currentDivida);
@@ -3279,22 +5871,94 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
       impostoDevido.lei14754Imposto = demonstrativoExteriorOficial.reduce((s2, b) => s2 + b.impostoDevido, 0);
     }
   }
+  // Mesma correção do caminho .DBK, na mesma função (achado 07): o IRRF do 13º
+  // salário sai da ficha de Rendimentos de PJ e entra no rendimento exclusivo
+  // do 13º, que a declaração informa pelo bruto.
+  aplicarIrrfDecimoTerceiro(rendimentos);
+
   for (const ficha of fichasNaoLidasComConteudo) {
-    log(`A ficha "${ficha}" tem informação nesta declaração e NÃO foi importada: o app ainda não lê essa ficha. Confira esses valores na declaração original antes de usar os números desta tela.`, 'warning');
+    const aviso = `A ficha "${ficha}" tem informação nesta declaração e NÃO foi importada: o app ainda não lê essa ficha. Confira esses valores na declaração original antes de usar os números desta tela.`;
+    avisosImportacao.push(aviso);
+    log(aviso, 'warning');
   }
-  if (apuracaoGanhoCapital.length > 0) log(`Identificada(s) ${apuracaoGanhoCapital.length} operação(ões) na Apuração do Ganho de Capital`, 'success');
+  if (apuracaoGanhoCapital.length > 0) {
+    const porTipo = apuracaoGanhoCapital.reduce((acc, o) => { acc[o.tipo || 'movel'] = (acc[o.tipo || 'movel'] || 0) + 1; return acc; }, {});
+    const partes = [];
+    if (porTipo.imovel) partes.push(`${porTipo.imovel} de bem imóvel`);
+    if (porTipo.movel) partes.push(`${porTipo.movel} de direito/bem móvel`);
+    if (porTipo.participacao) partes.push(`${porTipo.participacao} de participação societária`);
+    log(`Ganhos de Capital: ${apuracaoGanhoCapital.length} operação(ões) importada(s)${partes.length ? ` (${partes.join(', ')})` : ''}`, 'success');
+  }
+  if (gcMoedaOperacoesPdf.length > 0 || gcMoedaMensalPdf.length > 0) {
+    log(`Ganhos de Capital: ficha de moedas em espécie importada (${gcMoedaOperacoesPdf.length} alienação(ões), ${gcMoedaMensalPdf.length} mês(es) na totalização)`, 'success');
+  }
+  // Descarta os meses de FII que ficaram só com zeros: a ficha imprime a
+  // matriz inteira mesmo quando o contribuinte não operou naquele mês, e um
+  // mês zerado importado apareceria na tela como se houvesse movimento.
+  const fiiComDados = fiiFiagroMensalOficial.filter(r => r.temDados);
+  fiiComDados.forEach(r => { delete r.temDados; });
+  fiiComDados.sort((a, b) => (b.titular - a.titular) || (a.mes - b.mes));
+  if (fiiComDados.length > 0) {
+    log(`Renda Variável (FII/Fiagro): ${fiiComDados.length} mês(es) com movimento importado(s)`, 'success');
+  }
+  const rendaVariavelAnualOficial = consolidarRendaVariavelAnualPdf(rendaVariavelMensalOficial);
+  const fiiFiagroAnualOficial = consolidarFiiFiagroAnualPdf(fiiComDados);
+  // Ganhos de Capital no mesmo formato do .DBK, para as telas não precisarem
+  // saber de qual arquivo o dado veio. O PDF não traz o cabeçalho consolidado
+  // (registro 60), então `consolidacao` fica null aqui.
+  const ganhosCapitalOficial = (apuracaoGanhoCapital.length > 0 || gcMoedaOperacoesPdf.length > 0 || gcMoedaMensalPdf.length > 0)
+    ? {
+      consolidacao: null,
+      operacoes: apuracaoGanhoCapital.map(op => ({
+        id: op.id,
+        tipo: op.tipo || 'movel',
+        numeroOperacao: '',
+        especificacao: op.bem,
+        sociedade: op.sociedade,
+        especie: op.especie,
+        endereco: op.endereco,
+        dataAquisicao: op.dataAquisicao,
+        custoAquisicao: op.custoAquisicao,
+        natureza: { codigo: '', descricao: op.naturezaOperacao || '' },
+        dataAlienacao: op.dataAlienacao,
+        valorAlienacao: op.valorAlienacao,
+        custoCorretagem: op.custoCorretagem,
+        alienacaoAPrazo: op.alienacaoAPrazo ?? null,
+        sujeitoRegistroPublico: op.sujeitoRegistroPublico ?? null,
+        houveAlienacaoParcialAnterior: op.houveAlienacaoParcialAnterior ?? null,
+        ganhoAlienacoesAnteriores: op.ganhoAlienacoesAnteriores ?? 0,
+        adquirentes: op.adquirentes || [],
+        perguntasImpressas: op.perguntasImpressas || [],
+        parcelas: op.parcelas || [],
+        apuracao: op.apuracao || null,
+        calculoImposto: op.calculoImposto || null,
+        consolidacaoBem: op.consolidacaoBem || null,
+        faixasTributacao: [],
+        ampliacoesReformas: [],
+        custosAquisicao: [],
+      })),
+      moedaEspecie: { operacoes: gcMoedaOperacoesPdf, mensal: gcMoedaMensalPdf.sort((a, b) => a.mes - b.mes) },
+      origem: 'pdf',
+    }
+    : null;
   const totalDoacoes = doacoesEfetuadas.length + doacoesPartidos.length + doacoesEcaIdoso.length;
   if (totalDoacoes > 0) {
     log(`Identificadas ${totalDoacoes} doação(ões): ${doacoesEfetuadas.length} efetuada(s), ${doacoesPartidos.length} a partidos/candidatos e ${doacoesEcaIdoso.length} diretamente na declaração (ECA/pessoa idosa)`, 'success');
   }
 
-  const pfExterior = rendimentos.filter(r => r.tipo === 'tributavel_pf_exterior');
-  if (pfExterior.length > 0) {
-    const total = pfExterior.reduce((acc, r) => acc + r.valor, 0)
-      .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    log(`Identificados ${pfExterior.length} mês(es) com rendimentos de pessoa física ou do exterior, somando R$ ${total}`, 'success');
-    log('Esta ficha (carnê-leão) foi implementada a partir do layout oficial da Receita, mas nunca pôde ser conferida contra uma declaração real preenchida. Confira esses valores na declaração original.', 'warning');
-  }
+  // ACHADO 06 da auditoria de 24/08/2026: o bloco que ficava aqui filtrava
+  // `tributavel_pf_exterior` de uma lista que este parser NUNCA preenche —
+  // esse tipo é emitido em um ponto só do arquivo, dentro do `parseDBK`. Era
+  // código morto que dava a impressão de que o caminho PDF lia o carnê-leão.
+  //
+  // Ele não lê, e o RRA também não: as quatro fichas correspondentes estão em
+  // FICHAS_NAO_LIDAS e viram aviso quando trazem conteúdo. O que estava
+  // faltando era o aviso SOBREVIVER à tela de importação — ele ia só para o
+  // log, que some quando a pessoa navega. Agora `fichasNaoLidasComConteudo`
+  // fica gravada no ano (ver reducer/blankYear) e o Dashboard a exibe fixa.
+  // A ficha em si só será implementada com uma declaração de referência que a
+  // traga preenchida: inventar o recorte da tabela sem um caso real é
+  // exatamente o tipo de suposição que esta auditoria existe para eliminar.
   if (dependentes.length > 0) log(`Identificados ${dependentes.length} dependente(s)`, 'success');
   if (impostoDevido) log('Resumo da declaração (imposto devido, deduções e evolução patrimonial) lido das páginas RESUMO e EVOLUÇÃO PATRIMONIAL', 'success');
   if (demonstrativoExteriorOficial.length > 0) log(`Demonstrativo da Lei 14.754/2023: ${demonstrativoExteriorOficial.length} bem(ns) no exterior`, 'success');
@@ -3305,7 +5969,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   // não fecha com o agregado, alguma linha não foi entendida e o silêncio
   // seria pior que o aviso.
   for (const d of rieDivergencias) {
-    log(`Conferência da ficha de rendimentos: "${d.descricao}" soma R$ ${d.somaDetalhe.toFixed(2)} no detalhe, mas a própria declaração informa R$ ${d.valorAgregado.toFixed(2)} no total do código. Confira esse item na declaração original.`, 'warning');
+    const aviso = `Conferência da ficha de rendimentos: "${d.descricao}" soma R$ ${d.somaDetalhe.toFixed(2)} no detalhe, mas a própria declaração informa R$ ${d.valorAgregado.toFixed(2)} no total do código. Confira esse item na declaração original.`;
+    avisosImportacao.push(aviso);
+    log(aviso, 'warning');
   }
   // NÃO avisar aqui, incondicionalmente, que o carnê-leão não é lido do PDF:
   // esse aviso disparava em TODA importação por PDF, inclusive quando a ficha
@@ -3327,12 +5993,110 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
   // Doações (nem "sem informação" — o tipo de registro simplesmente não
   // aparece), então esse caminho fica de fora de propósito (ver
   // parseDBK): o único jeito de importar Doações hoje é pelo PDF.
-  // Este aviso dizia que o `.DBK` "não tem registro correspondente" a essas
-  // fichas, o que era falso (registros 34, 90, 91 e 92 — ver ATUALIZAÇÃO 54).
-  // O que continua verdade é que o layout LIDO AQUI, do PDF, nunca foi
-  // conferido contra uma declaração com doação de verdade.
-  if (doacoesEfetuadas.length > 0 || doacoesPartidos.length > 0 || doacoesEcaIdoso.length > 0) {
-    log('As doações lidas deste PDF usam um layout de tabela extrapolado, que nunca pôde ser conferido contra uma declaração com doação real. Pelo arquivo .DBK essas fichas têm layout oficial: importe por lá se precisar de garantia.', 'warning');
+  //
+  // O aviso que ficava aqui dizia que o layout das doações "nunca pôde ser
+  // conferido contra uma declaração com doação real". Isso deixou de valer na
+  // auditoria de 31/08/2026: os três layouts (Efetuadas, Partidos e ECA/Idoso)
+  // foram conferidos campo a campo contra uma declaração com doação impressa, e
+  // as três fichas passaram a ser lidas — antes, duas doações DEDUTÍVEIS (ECA e
+  // Pessoa Idosa) e a eleitoral eram detectadas e nunca lidas, e este mesmo
+  // aviso sugeria o contrário, que elas tinham sido lidas e só precisavam de
+  // conferência. Sem o aviso enganoso; o estado de cada ficha vai por
+  // `estadoFichas`, como as demais.
+
+  const estadoFichas = {};
+  const temDadosPorFicha = {
+    'identificacao-contribuinte': Boolean(contribuinte.cpf || contribuinte.nome),
+    dependentes: dependentes.length > 0,
+    'rendimentos-pj-titular': rendimentos.some(r => r.tipo === 'tributavel_pj' && r.beneficiario === 'Titular'),
+    'rendimentos-pj-dependentes': rendimentos.some(r => r.tipo === 'tributavel_pj' && r.beneficiario === 'Dependente'),
+    'rendimentos-isentos': isentos.length > 0,
+    'rendimentos-tributacao-exclusiva': exclusivos.length > 0,
+    'imposto-pago-retido': Boolean(impostoDevido),
+    'pagamentos-efetuados': pagamentos.length > 0,
+    'doacoes-efetuadas': doacoesEfetuadas.length > 0,
+    'bens-direitos': bens.length > 0,
+    'dividas-onus': dividas.length > 0,
+    'doacoes-eleitorais': doacoesPartidos.length > 0,
+    'doacoes-eca': doacoesEcaIdoso.some(d => d.categoria === 'eca'),
+    'doacoes-idoso': doacoesEcaIdoso.some(d => d.categoria === 'idoso'),
+    'rural-brasil-identificacao': imoveisRurais.length > 0,
+    'rural-brasil-receitas-despesas': receitasDespesasRuraisOficial.length > 0,
+    'rural-brasil-apuracao': Boolean(apuracaoResultadoRuralOficial),
+    'rural-brasil-rebanho': movimentacaoRebanhoOficial.length > 0,
+    'rural-brasil-bens': bensRurais.length > 0,
+    'rural-brasil-dividas': dividasRurais.length > 0,
+    'rural-brasil-participantes': participantesRuraisOficial.length > 0,
+    'ganho-capital-imoveis': apuracaoGanhoCapital.some(op => op.tipo === 'imovel'),
+    'ganho-capital-moveis': apuracaoGanhoCapital.some(op => op.tipo === 'movel'),
+    'ganho-capital-participacao': apuracaoGanhoCapital.some(op => op.tipo === 'participacao'),
+    'ganho-capital-moeda': gcMoedaOperacoesPdf.length > 0 || gcMoedaMensalPdf.length > 0,
+    'renda-variavel-titular': rendaVariavelMensalOficial.some(item => item.titular),
+    'renda-variavel-dependentes': rendaVariavelMensalOficial.some(item => !item.titular),
+    'fii-fiagro-titular': fiiComDados.some(item => item.titular),
+    'fii-fiagro-dependentes': fiiComDados.some(item => !item.titular),
+    'lei-14754': demonstrativoExteriorOficial.length > 0,
+    resumo: Boolean(impostoDevido),
+  };
+
+  for (const catalogada of CATALOGO_FICHAS_PDF_2026) {
+    const observada = fichasPdfObservadas[catalogada.id];
+    if (!observada) {
+      estadoFichas[`pdf:${catalogada.id}`] = entradaEstadoFicha(
+        'ausente', 'pdf', 'Esta ficha não foi impressa no documento selecionado',
+        { titulo: catalogada.titulo, presenca: 'ausente', suporte: catalogada.suporte },
+      );
+      continue;
+    }
+    const temDados = temDadosPorFicha[catalogada.id] === true;
+    // Uma ficha mensal pode imprimir "Sem Informações" em alguns meses e
+    // trazer valores em outros. Conteúdo estruturado comprovado prevalece na
+    // presença final da ficha inteira.
+    if (temDados) observada.presenca = 'preenchida';
+    const detalhes = {
+      titulo: catalogada.titulo,
+      paginaInicio: observada.paginaInicio,
+      linhaInicio: observada.linhaInicio,
+      presenca: observada.presenca,
+      suporte: catalogada.suporte,
+    };
+    if (observada.presenca === 'vazia' && !temDados) {
+      estadoFichas[`pdf:${catalogada.id}`] = entradaEstadoFicha('vazia', 'pdf', undefined, detalhes);
+    } else if (catalogada.suporte === 'nao_suportada') {
+      estadoFichas[`pdf:${catalogada.id}`] = entradaEstadoFicha(
+        'nao_suportada', 'pdf',
+        'Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral',
+        { ...detalhes, presenca: observada.presenca === 'vazia' ? 'vazia' : 'indeterminada' },
+      );
+    } else if (temDados) {
+      estadoFichas[`pdf:${catalogada.id}`] = entradaEstadoFicha(
+        'parcial', 'pdf',
+        'Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente',
+        { ...detalhes, presenca: 'preenchida' },
+      );
+    } else {
+      estadoFichas[`pdf:${catalogada.id}`] = entradaEstadoFicha(
+        'erro', 'pdf',
+        'A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo',
+        { ...detalhes, presenca: 'indeterminada' },
+      );
+    }
+  }
+
+  // Consolidações anuais são produtos derivados, não fichas impressas. Ficam
+  // explicitamente fora do catálogo oficial para não serem confundidas com
+  // conteúdo lido do PDF.
+  if (rendaVariavelAnualOficial) {
+    estadoFichas['pdf:derivado-renda-variavel-anual'] = entradaEstadoFicha(
+      'parcial', 'pdf', 'Consolidação calculada a partir dos meses; não equivale a uma ficha anual integral',
+      { derivado: true, presenca: 'preenchida' },
+    );
+  }
+  if (fiiFiagroAnualOficial) {
+    estadoFichas['pdf:derivado-fii-fiagro-anual'] = entradaEstadoFicha(
+      'parcial', 'pdf', 'Consolidação calculada a partir dos meses; não equivale a uma ficha anual integral',
+      { derivado: true, presenca: 'preenchida' },
+    );
   }
 
   return {
@@ -3359,5 +6123,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop) {
     // valores de cada mês, que o .DBK não permite decifrar. Quem consome
     // precisa continuar aceitando as entradas só com `mes` vindas do .DBK.
     rendaVariavelMensalOficial,
+    rendaVariavelAnualOficial,
+    ganhosCapitalOficial,
+    fiiFiagroMensalOficial: fiiComDados,
+    fiiFiagroAnualOficial,
+    estadoFichas,
+    avisosImportacao,
+    fichasPdfObservadas,
+    totalFichasPdfCatalogadas: CATALOGO_FICHAS_PDF_2026.length,
+    versaoCatalogoFichasPdf: 'IRPF2026-oficial-1',
+    documentoFonte,
   };
 }

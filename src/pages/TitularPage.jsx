@@ -29,6 +29,11 @@ export default function TitularPage() {
   const [anoModalOpen, setAnoModalOpen] = useState(false);
   const pendingActionRef = useRef(null);
   const updDependente = (f, v) => setFormDependente(p => ({ ...p, [f]: v }));
+  const simNao = (v) => v === true ? 'Sim' : v === false ? 'Não' : '-';
+  const enderecoCompleto = contribuinte
+    ? [contribuinte.logradouro, contribuinte.numero, contribuinte.complemento, contribuinte.bairro,
+      contribuinte.municipio, contribuinte.uf, contribuinte.cep].filter(Boolean).join(', ')
+    : '';
 
   const salvarTitular = (ano = anoCalendario) => {
     // Sem esta guarda, salvar o formulário vazio disparava SET_CONTRIBUINTE
@@ -108,6 +113,26 @@ export default function TitularPage() {
             </div>
           </form>
         </div>
+
+        {contribuinte && (contribuinte.dataNascimento || contribuinte.logradouro || contribuinte.ocupacaoCodigo) && (
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <div className="card-header"><h3 className="card-title">Dados cadastrais importados da declaração</h3></div>
+            <div className="table-container">
+              <table>
+                <tbody>
+                  <tr><th>Data de nascimento</th><td>{formatDate(contribuinte.dataNascimento) || '-'}</td><th>Raça/Cor</th><td>{contribuinte.racaCor || contribuinte.racaCorCodigo || '-'}</td></tr>
+                  <tr><th>Possui cônjuge</th><td>{simNao(contribuinte.possuiConjuge)}</td><th>CPF do cônjuge</th><td>{formatCpfCnpj(contribuinte.cpfConjuge) || '-'}</td></tr>
+                  <tr><th>Endereço</th><td colSpan={3}>{enderecoCompleto || '-'}</td></tr>
+                  <tr><th>E-mail</th><td>{contribuinte.email || '-'}</td><th>Telefone/Celular</th><td>{[contribuinte.telefone, contribuinte.celular].filter(Boolean).join(' / ') || '-'}</td></tr>
+                  <tr><th>Natureza da ocupação</th><td colSpan={3}>{[contribuinte.naturezaOcupacaoCodigo, contribuinte.naturezaOcupacaoDescricao].filter(Boolean).join(' - ') || '-'}</td></tr>
+                  <tr><th>Ocupação principal</th><td colSpan={3}>{[contribuinte.ocupacaoCodigo, contribuinte.ocupacaoDescricao].filter(Boolean).join(' - ') || '-'}</td></tr>
+                  <tr><th>Tipo de declaração</th><td>{contribuinte.tipoDeclaracao || contribuinte.tipoDeclaracaoCodigo || '-'}</td><th>Retificadora</th><td>{simNao(contribuinte.retificadora)}</td></tr>
+                  <tr><th>Recibo anterior</th><td>{contribuinte.reciboUltimaDeclaracao || '-'}</td><th>Doença grave/deficiência</th><td>{simNao(contribuinte.doencaDeficiencia)}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         <div className="card">
           <div className="card-header">

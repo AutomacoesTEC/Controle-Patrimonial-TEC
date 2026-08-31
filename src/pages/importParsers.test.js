@@ -1,29 +1,79 @@
-// Testa os parsers contra os arquivos REAIS de exemplo (declaração de
-// declarante 1, exercício 2026/ano-calendário 2025),
-// não contra dado sintético — é o que teria pego a regressão do ano
-// cravado no código (ver commit da correção). Os arquivos moram fora do
-// repositório de propósito: têm CPF e dado financeiro de uma pessoa real,
-// e não fazem sentido entrar no histórico do git.
+// Testa os parsers contra as declarações REAIS de exemplo (exercício 2026,
+// ano-calendário 2025), não contra dado sintético: é o que teria pego a
+// regressão do ano cravado no código. As declarações moram fora do
+// repositório de propósito, porque carregam CPF e dado financeiro de pessoas
+// reais.
 //
-// Se os arquivos de exemplo não existirem (outra máquina, outra pasta),
-// os testes deste arquivo pulam em vez de falhar — ver `describe.skipIf`.
+// NENHUM dado pessoal fica neste arquivo. O nome dos arquivos e os valores
+// pessoais esperados (nome de adquirente, de participante rural, de
+// dependente, e-mail do titular) vêm de um MANIFESTO local, ao lado das
+// próprias declarações, que também fica fora do repositório. Sem ele, os
+// testes que dependem das declarações pulam em vez de falhar, e as asserções
+// sobre valor pessoal simplesmente não rodam, sem enfraquecer o resto.
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
 import { parseDBK, parsePDF, normalizarCpfCnpj, isBensMetadataRow } from './importParsers';
 
-const DIR = '/home/automacaotec/PROJETOS/Planilha Eudúcio';
-const DBK_PATH = `${DIR}/CPF-DO-DECLARANTE-1-IRPF-A-2026-2025-ORIGI.DBK`;
-const PDF_PATH = `${DIR}/DECLARANTE 1 2026-2025.pdf`;
+// Por padrão, as declarações ficam na pasta imediatamente acima do
+// repositório. IRPF_FIXTURES_DIR permite executar a mesma suíte em CI ou em
+// outra máquina sem gravar o caminho pessoal de um desenvolvedor no código.
+const DIR = process.env.IRPF_FIXTURES_DIR
+  || fileURLToPath(new URL('../../../', import.meta.url));
+// Manifesto local: nomes de arquivo e valores pessoais esperados. Fora do
+// repositório, ao lado das declarações. IRPF_FIXTURES_MANIFEST permite
+// apontá-lo para outro lugar.
+const MANIFESTO_PATH = process.env.IRPF_FIXTURES_MANIFEST || `${DIR}/declaracoes-reais.local.json`;
+const manifesto = existsSync(MANIFESTO_PATH) ? JSON.parse(readFileSync(MANIFESTO_PATH, 'utf8')) : null;
+const arq = (chave) => (manifesto?.arquivos?.[chave] ? `${DIR}/${manifesto.arquivos[chave]}` : null);
+// Valor pessoal esperado. Sem manifesto devolve null, e `esperaPessoal` não
+// executa a asserção: é o mesmo critério do `describe.skipIf` dos arquivos.
+const pessoal = (chave) => manifesto?.pessoais?.[chave] ?? null;
+const esperaPessoal = (recebido, chave) => {
+  const valor = pessoal(chave);
+  if (valor == null) return;
+  expect(recebido).toBe(valor);
+};
+
+const DBK_PATH = arq('dbk');
+const PDF_PATH = arq('pdf');
 // Segundo contribuinte, SEM .DBK, usado para provar que o parser não depende
 // do layout de um arquivo só: cabeçalho sem a coluna "BEM", coluna de valores
 // alguns pixels mais à direita, fichas de Dívidas e de Doações vindo "Sem
 // Informações", parcela não dedutível diferente de zero e pagamentos
 // espalhados por duas páginas. Ver PDF2_PATH nos testes lá embaixo.
-const PDF2_PATH = `${DIR}/DECLARANTE 2 2026-2025.pdf`;
+const PDF2_PATH = arq('pdf2');
 
-const temArquivos = existsSync(DBK_PATH) && existsSync(PDF_PATH);
-const temSegundoPdf = existsSync(PDF2_PATH);
+const temArquivos = !!DBK_PATH && !!PDF_PATH && existsSync(DBK_PATH) && existsSync(PDF_PATH);
+const temSegundoPdf = !!PDF2_PATH && existsSync(PDF2_PATH);
+
+describe('parsePDF, validação de entrada', () => {
+  const pdfSintetico = (textos) => ({
+    numPages: 1,
+    getPage: async () => ({
+      getTextContent: async () => ({
+        items: textos.map((str, i) => ({ str, transform: [1, 0, 0, 1, 20 + i * 8, 700] })),
+      }),
+    }),
+  });
+
+  it('recusa PDF sem camada de texto e orienta sobre OCR', async () => {
+    await expect(parsePDF(pdfSintetico([]))).rejects.toThrow(/camada de texto utilizável.*OCR/i);
+  });
+
+  it('recusa PDF textual que não tem a assinatura estrutural de uma declaração IRPF', async () => {
+    const texto = 'RELATÓRIO FINANCEIRO COMUM '.repeat(12);
+    await expect(parsePDF(pdfSintetico([texto]))).rejects.toThrow(/não foi reconhecido como uma declaração IRPF completa/i);
+  });
+});
+
+if (process.env.IRPF_FIXTURES_REQUIRED === '1' && (!temArquivos || !temSegundoPdf)) {
+  throw new Error(
+    `Fixtures reais do IRPF não encontradas em "${DIR}". `
+    + 'Defina IRPF_FIXTURES_DIR ou coloque os três arquivos ao lado do repositório.'
+  );
+}
 
 describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
   it('bate os totais e a contagem contra o registro-resumo interno do próprio .DBK', async () => {
@@ -31,7 +81,16 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     const r = await parseDBK(text);
 
     expect(r.anoCalendario).toBe(2025);
-    expect(r.contribuinte.cpf).toBe('CPF-DO-DECLARANTE-1');
+    esperaPessoal(r.contribuinte.cpf, 'titularCpf');
+    expect(r.contribuinte.dataNascimento).toBe('1952-06-10');
+    esperaPessoal(r.contribuinte.cpfConjuge, 'conjugeCpf');
+    expect(r.contribuinte.municipio).toBe('MUNICIPIO');
+    expect(r.contribuinte.uf).toBe('MG');
+    expect(r.contribuinte.ocupacaoCodigo).toBe('120');
+    expect(r.documentoFonte.formato).toBe('dbk');
+    expect(r.documentoFonte.totalRegistros).toBeGreaterThan(200);
+    expect(r.documentoFonte.textoIntegral).toBe(text);
+    expect(r.documentoFonte.sha256TextoExtraido).toMatch(/^[a-f0-9]{64}$/);
     expect(r.bens).toHaveLength(172);
     expect(r.dividas).toHaveLength(1);
     expect(r.pagamentos).toHaveLength(24);
@@ -41,6 +100,54 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(somaAnt).toBeCloseTo(79550353.28, 2);
     expect(somaAtu).toBeCloseTo(137977220.38, 2);
   });
+
+  // CNPJ da fonte de cada bem (NM_CPFCNPJ, posição 1042 do registro 27). É o
+  // campo que liga um bem ao rendimento pago pela MESMA instituição — ver
+  // aplicacoesResgatadasSemRendimento em demonstrativos.js. O caminho PDF lê o
+  // mesmo número de um rótulo impresso na coluna esquerda do bloco do bem, e
+  // este teste prova que os dois chegam ao mesmo valor.
+  it('lê o CNPJ da fonte de cada bem (registro 27) e o PDF chega ao mesmo número', async () => {
+    const dbk = await parseDBK(await readFile(DBK_PATH, 'latin1'));
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const pdf = await parsePDF(await pdfjsLib.getDocument({ data: new Uint8Array(await readFile(PDF_PATH)) }).promise);
+
+    const acha = (lista, trecho) => lista.find(b => (b.discriminacao || '').includes(trecho));
+    // Três rótulos diferentes na mesma ficha: "CNPJ:" com o número formatado,
+    // "CNPJ do Fundo:" num fundo de investimento e "CPF:" em dígitos crus,
+    // num empréstimo a pessoa física.
+    for (const [trecho, esperado] of [
+      ['XP INVESTIMENTOS SALDO EM CONTA CORRENTE', '02332886000104'],
+      ['GAVEA MACRO SELECAO', '25682163000122'],
+      // O terceiro par é o empréstimo a pessoa física: o trecho da
+      // discriminação e o CPF vêm do manifesto local, porque identificam
+      // alguém real. Sem manifesto, só este par sai da lista.
+      ...(pessoal('emprestimoTrecho') ? [[pessoal('emprestimoTrecho'), pessoal('emprestimoCpf')]] : []),
+    ]) {
+      expect(acha(dbk.bens, trecho)?.cnpj).toBe(esperado);
+      expect(acha(pdf.bens, trecho)?.cnpj).toBe(esperado);
+    }
+
+    // E o conjunto inteiro: casando bem a bem por discriminação e valores, os
+    // dois caminhos têm que dar o mesmo CNPJ.
+    const chave = (b) => `${(b.discriminacao || '').replace(/\s+/g, ' ')}|${b.situacao_anterior}|${b.situacao_atual}`;
+    const doDbk = new Map(dbk.bens.map(b => [chave(b), b.cnpj || '']));
+    const divergentes = [];
+    let comparados = 0;
+    for (const b of pdf.bens) {
+      const esperado = doDbk.get(chave(b));
+      if (esperado === undefined) continue;
+      comparados++;
+      if ((b.cnpj || '') !== esperado) divergentes.push(`${chave(b).slice(0, 50)} pdf=${b.cnpj || '-'} dbk=${esperado || '-'}`);
+    }
+    expect(comparados).toBeGreaterThan(150);
+    // LIMITAÇÃO CONHECIDA, e por isso o teto é 1 e não 0: o bloco de um bem
+    // pode atravessar a quebra de página, e o título "DECLARAÇÃO DE BENS E
+    // DIREITOS" repetido no topo da página seguinte fecha o bem antes de a
+    // linha do CNPJ ser lida. Acontece com 1 dos 172 bens desta declaração
+    // (as ações da COBEB, cuja discriminação vai até o rodapé da página 19).
+    // Pelo .DBK o campo vem sempre.
+    expect(divergentes.length).toBeLessThanOrEqual(1);
+  }, 90000);
 
   // Achado A6 da auditoria de 21/08/2026: a descrição de cada Pagamento
   // Efetuado só era lida pelo caminho PDF; pelo .DBK os 24 pagamentos vinham
@@ -103,8 +210,8 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(jeep.dataAlienacao).toBe('2025-02-07');
     expect(jeep.valorAlienacao).toBeCloseTo(199000, 2);
     expect(jeep.ganhoCapital).toBe(0); // prejuízo, a declaração mostra 0,00 (não negativo)
-    expect(jeep.adquirenteCpfCnpj).toBe('47395192672');
-    expect(jeep.adquirenteNome).toBe('CLAUDIA DECLARANTE 1 MACIEL');
+    esperaPessoal(jeep.adquirenteCpfCnpj, 'jeepAdquirenteCpf');
+    esperaPessoal(jeep.adquirenteNome, 'jeepAdquirenteNome');
 
     const ranger = r.apuracaoGanhoCapital.find(x => x.bem.includes('FORD RANGER'));
     expect(ranger.custoAquisicao).toBeCloseTo(341890, 2);
@@ -138,6 +245,8 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     const semiReboque = r.bensRurais.find(b => b.discriminacao.startsWith('SEMI REBOQUE MARCA LIBRELATTO MODELO S,'));
     expect(semiReboque.situacao_anterior).toBe(0);
     expect(semiReboque.situacao_atual).toBeCloseTo(100000, 2);
+    expect(semiReboque.controle).toMatch(/^\d{10}$/);
+    expect(new Set(r.bensRurais.map(b => b.controle)).size).toBe(r.bensRurais.length);
 
     const somaAnt = r.bensRurais.reduce((s, b) => s + b.situacao_anterior, 0);
     const somaAtu = r.bensRurais.reduce((s, b) => s + b.situacao_atual, 0);
@@ -160,6 +269,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(somaPago).toBeCloseTo(2074797.15, 2);
 
     const sicoob = r.dividasRurais.find(d => d.discriminacao.startsWith('EMPRESTIMO  DE CREDITO RURAL NO SICOOB'));
+    expect(sicoob.controle).toMatch(/^\d{10}$/);
     expect(sicoob.situacao_anterior).toBeCloseTo(721556.97, 2);
     expect(sicoob.situacao_atual).toBeCloseTo(541254.17, 2);
     expect(sicoob.valor_pago).toBeCloseTo(216819.99, 2);
@@ -268,18 +378,18 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     const r = await parseDBK(text);
     expect(r.participantesRuraisOficial).toHaveLength(18);
 
-    const osires = r.participantesRuraisOficial.find(p => p.nome.startsWith('OSIRES'));
-    expect(osires.cpf).toBe('04176006668');
-    expect(osires.nome).toBe('OSIRES PEREIRA CAMPOS');
+    const osires = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
+    esperaPessoal(osires.cpf, 'participante1Cpf');
+    esperaPessoal(osires.nome, 'participante1Nome');
 
     // Nome com apóstrofo vira espaço no .DBK (sem acentuação/pontuação
     // especial, mesma limitação já vista em outros campos de nome do
-    // arquivo) — "JOANA DAR'C BAIA ANTUNES" no PDF.
-    const joana = r.participantesRuraisOficial.find(p => p.cpf === '59614544600');
-    expect(joana.nome).toBe('JOANA DAR C BAIA ANTUNES');
+    // arquivo): o PDF traz o apóstrofo, o .DBK não.
+    const joana = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante2Cpf'));
+    esperaPessoal(joana.nome, 'participante2Nome');
 
-    const adelia = r.participantesRuraisOficial.find(p => p.nome.startsWith('ADELIA'));
-    expect(adelia.cpf).toBe('75476827668');
+    const adelia = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante3Cpf'));
+    esperaPessoal(adelia.cpf, 'participante3Cpf');
   });
 
   it('lê o Demonstrativo Lei 14.754/2023 por bem (registro 37) batendo com a página "DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023"', async () => {
@@ -321,7 +431,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // resultado líquido do mês 1.500,00 e alíquotas 15/20.
     const zeros = (n) => N13(0).repeat(n);
     const linha =
-      '40' + 'CPF-DO-DECLARANTE-1' + '07' +
+      '40' + '11144477735' + '07' +
       N13(1500) + zeros(12) +           // 16..172  operações comuns (13 mercados)
       zeros(13) +                       // 185..341 day-trade
       zeros(3) +                        // 354, 367, 380
@@ -433,8 +543,8 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // declaração de referência não tem registro 33 para confirmar a relação
     // entre os dois. Diante da dúvida, duplicar renda é o pior desfecho — então
     // ele fica de fora, e nem aviso gera, porque o valor NÃO está faltando.
-    const r33 = '33' + 'CPF-DO-DECLARANTE-1' + '00001' + 'T' + pad('11222333000144', 14) +
-      pad('EMPRESA QUE DISTRIBUIU LUCRO', 60) + N13(999999) + 'CPF-DO-DECLARANTE-1' + '0000000001';
+    const r33 = '33' + '11144477735' + '00001' + 'T' + pad('11222333000144', 14) +
+      pad('EMPRESA QUE DISTRIBUIU LUCRO', 60) + N13(999999) + '11144477735' + '0000000001';
     const avisos = [];
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${r33}\n`,
       (m, n) => { if (n === 'warning') avisos.push(m); });
@@ -450,23 +560,51 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     const original = await readFile(DBK_PATH, 'latin1');
     // 58 é REG_HERDEIROS no mapa oficial. Dizer "esta declaração tem a ficha
     // Herdeiros" é acionável; dizer "tem registro do tipo 58" não é.
-    const comFicha = `${original}\n58CPF-DO-DECLARANTE-10000012345678000000000000\n`;
+    const comFicha = `${original}\n58111444777350000012345678000000000000\n`;
     const avisos = [];
-    await parseDBK(comFicha, (m, n) => { if (n === 'warning') avisos.push(m); });
+    const r = await parseDBK(comFicha, (m, n) => { if (n === 'warning') avisos.push(m); });
     expect(avisos.some(m => m.includes('Herdeiros') && m.includes('não importa'))).toBe(true);
     // E o aviso genérico de "tipo desconhecido" NÃO deve disparar junto: o app
     // sabe o que é essa ficha, só não a modela.
     expect(avisos.some(m => m.includes('tipo 58'))).toBe(false);
+    // O aviso precisa sobreviver ao log transitório da tela para ser persistido
+    // junto ao ano importado e continuar disponível no Dashboard.
+    expect(r.fichasNaoLidasComConteudo).toContain('Herdeiros');
+    expect(r.registrosDbkNaoModelados).toContainEqual(expect.objectContaining({
+      tipoRegistro: '58', ocorrencias: 1,
+    }));
+    expect(r.avisosImportacao).toContainEqual(expect.objectContaining({
+      codigo: 'DBK_FICHA_NAO_SUPORTADA', tipoRegistro: '58',
+    }));
+    expect(r.estadoFichas['dbk:58']).toEqual(expect.objectContaining({
+      estado: 'nao_suportada', formato: 'dbk',
+    }));
   });
 
   it('avisa como DESCONHECIDO o tipo que nem o mapa oficial cobre', async () => {
     const original = await readFile(DBK_PATH, 'latin1');
     // 99 existe no XML de layout e não está na lista de fichas nomeadas: é o
     // caso de "o arquivo mudou, ou tem algo que este parser nunca viu".
-    const comTipoNovo = `${original}\n99CPF-DO-DECLARANTE-10000012345678000000000000\n`;
+    const comTipoNovo = `${original}\n99111444777350000012345678000000000000\n`;
     const avisos = [];
-    await parseDBK(comTipoNovo, (m, n) => { if (n === 'warning') avisos.push(m); });
+    const r = await parseDBK(comTipoNovo, (m, n) => { if (n === 'warning') avisos.push(m); });
     expect(avisos.some(m => m.includes('tipo 99') && m.includes('não conhece'))).toBe(true);
+    expect(r.fichasNaoLidasComConteudo).toContain('Registro DBK tipo 99');
+    expect(r.estadoFichas['dbk:99']).toEqual(expect.objectContaining({
+      estado: 'erro', formato: 'dbk',
+    }));
+  });
+
+  it('distingue presença de dados de completude auditada no DBK', async () => {
+    const r = await parseDBK('IRPF    20262025');
+    expect(r.estadoFichas['dbk:IR']).toEqual(expect.objectContaining({
+      estado: 'parcial', formato: 'dbk', presenca: 'preenchida',
+      suporte: 'parcial', completudeAuditada: false,
+    }));
+    expect(r.estadoFichas['dbk:58']).toEqual(expect.objectContaining({
+      estado: 'vazia', formato: 'dbk', presenca: 'vazia', completudeAuditada: false,
+    }));
+    expect(r.fichasNaoLidasComConteudo).toEqual([]);
   });
 
 
@@ -545,8 +683,8 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(r.participantesRuraisOficial).toHaveLength(18);
     expect(r.participantesRuraisOficial.every(p => /^\d{11}$/.test(p.cpf))).toBe(true);
     expect(r.participantesRuraisOficial.every(p => !/^\d/.test(p.nome))).toBe(true);
-    const osires = r.participantesRuraisOficial.find(p => p.cpf === '04176006668');
-    expect(osires.nome).toBe('OSIRES PEREIRA CAMPOS');
+    const osires = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
+    esperaPessoal(osires.nome, 'participante1Nome');
   });
 
   it('registro 57: a chave NR_CHAVE_AR liga o participante ao imóvel', async () => {
@@ -555,7 +693,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // .DBK", e a 45 repetiu. Era falso: o campo NR_CHAVE_AR sempre esteve lá,
     // no registro 50 (posição 164) e no 57 (posição 89).
     expect(r.participantesRuraisOficial.every(p => p.imovelId != null)).toBe(true);
-    const osires = r.participantesRuraisOficial.find(p => p.cpf === '04176006668');
+    const osires = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
     expect(osires.imovelNome).toBe('NOME DA FAZENDA, MUNICIPIO');
     // Três participantes da MESMA fazenda, que é o caso que prova que a chave
     // não é um índice sequencial disfarçado.
@@ -584,7 +722,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // pos:  1     3            14  15            26   28      41     54     67     80     93     106    119    132     145     158
     //       tipo  CPF          dep CPF_DEPEN     mes  RENDTO  ALUG   OUTROS EXTER  LIVCX  ALIM   DEDUC  PREVID BASECAL IMPOSTO CONTROLE
     const linha =
-      '22' + 'CPF-DO-DECLARANTE-1' + 'N' + '           ' + '03' +
+      '22' + '11144477735' + 'N' + '           ' + '03' +
       N13(1000) + N13(2500) + N13(300) + N13(700) +
       N13(0) + N13(0) + N13(0) + N13(200) + N13(4300) + N13(150) + '0000000001';
     const arquivo = `${await readFile(DBK_PATH, 'latin1')}\n${linha}\n`;
@@ -612,9 +750,9 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
 
   it('registro 22: mês zerado não vira lançamento, e dependente é identificado', async () => {
     const N13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
-    const zerado = '22' + 'CPF-DO-DECLARANTE-1' + 'N' + '           ' + '05' + N13(0).repeat(4) +
+    const zerado = '22' + '11144477735' + 'N' + '           ' + '05' + N13(0).repeat(4) +
       N13(0).repeat(5) + N13(0) + '0000000002';
-    const doDependente = '22' + 'CPF-DO-DECLARANTE-1' + 'S' + '25307150687' + '07' +
+    const doDependente = '22' + '11144477735' + 'S' + '33344455508' + '07' +
       N13(800) + N13(0) + N13(0) + N13(0) + N13(0) + N13(0) + N13(0) + N13(0) + N13(800) + N13(0) + '0000000003';
     const arquivo = `${await readFile(DBK_PATH, 'latin1')}\n${zerado}\n${doDependente}\n`;
     const r = await parseDBK(arquivo);
@@ -625,7 +763,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(pf).toHaveLength(1);
     expect(pf[0].mes).toBe(7);
     expect(pf[0].beneficiario).toBe('Dependente');
-    expect(pf[0].cpf_dependente).toBe('25307150687');
+    expect(pf[0].cpf_dependente).toBe('33344455508');
   });
 
   // DOAÇÕES pelo .DBK. Este handoff afirmava, desde a ATUALIZAÇÃO 6, que o
@@ -638,9 +776,9 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
   it('lê as doações efetuadas e a partidos (registros 90 e 34)', async () => {
     const N13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
     const pad = (t, n) => String(t).padEnd(n).slice(0, n);
-    const efetuada = '90' + 'CPF-DO-DECLARANTE-1' + '41' + pad('26459474000190', 14) +
+    const efetuada = '90' + '11144477735' + '41' + pad('26459474000190', 14) +
       pad('FUNDO MUNICIPAL DA CRIANCA', 60) + N13(2857.33) + N13(0) + '2' + '0000000001';
-    const partido = '34' + 'CPF-DO-DECLARANTE-1' + pad('12345678000199', 14) +
+    const partido = '34' + '11144477735' + pad('12345678000199', 14) +
       pad('PARTIDO EXEMPLO', 60) + N13(500) + '0000000002';
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${efetuada}\n${partido}\n`);
 
@@ -660,9 +798,9 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     const pad = (t, n) => String(t).padEnd(n).slice(0, n);
     // O beneficiário destas duas fichas não é uma pessoa e sim um FUNDO,
     // identificado por esfera (N/E/M), UF e município — não há campo de nome.
-    const eca = '91' + 'CPF-DO-DECLARANTE-1' + 'M' + 'MG' + pad('MINAS GERAIS', 30) +
+    const eca = '91' + '11144477735' + 'M' + 'MG' + pad('MINAS GERAIS', 30) +
       pad('MUNICIPIO', 40) + N13(1000) + pad('26459474000190', 14) + '0000000001';
-    const idoso = '92' + 'CPF-DO-DECLARANTE-1' + 'E' + 'MG' + pad('MINAS GERAIS', 30) +
+    const idoso = '92' + '11144477735' + 'E' + 'MG' + pad('MINAS GERAIS', 30) +
       pad('', 40) + N13(750) + pad('11222333000144', 14) + '0000000002';
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${eca}\n${idoso}\n`);
 
@@ -708,7 +846,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
       for (let k = 0; k < 13; k++) buf[pos - 1 + k] = t[k];
     };
     '18'.split('').forEach((c, k) => { buf[k] = c; });
-    'CPF-DO-DECLARANTE-1'.split('').forEach((c, k) => { buf[2 + k] = c; });
+    '11144477735'.split('').forEach((c, k) => { buf[2 + k] = c; });
     put(14, 80000);    // VR_RENDTRIB  rendimentos tributáveis
     put(27, 16754.34); // VR_DESCSIMP  desconto simplificado
     put(40, 63245.66); // VR_BASECALC  base de cálculo
@@ -774,7 +912,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // pos: 1 tipo | 3 CPF titular | 14 CPF depend. | 25 CNPJ | 39 nome |
     //      99 rendimento | 112 previdência | 125 13º | 138 IRRF |
     //      151 data saída | 159 IRRF 13º | 172 controle
-    const linha = '32' + 'CPF-DO-DECLARANTE-1' + '25307150687' + pad('16727230000197', 14) +
+    const linha = '32' + '11144477735' + '33344455508' + pad('16727230000197', 14) +
       pad('FUNDO DE RENDIMENTO GERAL DE PREVIDENCIA SOCIAL', 60) +
       N13(57754.33) + N13(0) + N13(4556.29) + N13(3360.61) +
       pad('', 8) + N13(274.90) + '0000000001';
@@ -782,7 +920,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
 
     const doDependente = r.rendimentos.filter(x => x.tipo === 'tributavel_pj' && x.beneficiario === 'Dependente');
     expect(doDependente).toHaveLength(1);
-    expect(doDependente[0].cpf_dependente).toBe('25307150687');
+    expect(doDependente[0].cpf_dependente).toBe('33344455508');
     expect(doDependente[0].cnpj_fonte).toBe('16727230000197');
     expect(doDependente[0].nome_fonte).toBe('FUNDO DE RENDIMENTO GERAL DE PREVIDENCIA SOCIAL');
     expect(doDependente[0].valor).toBeCloseTo(57754.33, 2);
@@ -820,7 +958,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
   it('lê o detalhe com IRRF (registro 85) e com descrição (86 e 89)', async () => {
     const N13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
     const pad = (t, n) => String(t).padEnd(n).slice(0, n);
-    const cab = (tipo, cod) => tipo + 'CPF-DO-DECLARANTE-1' + 'T' + 'CPF-DO-DECLARANTE-1' + cod + pad('11222333000144', 14) + pad('FONTE EXEMPLO LTDA', 60);
+    const cab = (tipo, cod) => tipo + '11144477735' + 'T' + '11144477735' + cod + pad('11222333000144', 14) + pad('FONTE EXEMPLO LTDA', 60);
     // 85: valor + 13º + IRRF + IRRF sobre 13º
     const r85 = cab('85', '0011') + N13(1000) + N13(200) + N13(150) + N13(30) + '0000000001';
     // 86: valor + descrição + chave do bem
@@ -852,10 +990,10 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
   it('lê as variantes SEM fonte pagadora (registros 83 e 87)', async () => {
     const N13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
     // 83: beneficiário e código, valor logo na 30 — sem CNPJ nem nome.
-    const r83 = '83' + 'CPF-DO-DECLARANTE-1' + 'D' + '25307150687' + '0016' + N13(800) + '0000000001';
+    const r83 = '83' + '11144477735' + 'D' + '33344455508' + '0016' + N13(800) + '0000000001';
     // 87: nem beneficiário tem — código na 14, valor na 18, e um valor de ganho
     // de capital à parte na 31.
-    const r87 = '87' + 'CPF-DO-DECLARANTE-1' + '0005' + N13(2000) + N13(1500) + '0000000002';
+    const r87 = '87' + '11144477735' + '0005' + N13(2000) + N13(1500) + '0000000002';
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${r83}\n${r87}\n`);
 
     const i16 = r.rendimentos.filter(x => x.tipo === 'isento_0016');
@@ -883,12 +1021,12 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     //     pensão(116) | IRRF(129) | mês(142,2) | cod(144,5) | filler(149,1) |
     //     opção(150,1) | meses(151,4) | impRRA(155) | isento65(168) |
     //     tributável(181) | juros(194) | controle(207,10)
-    const r45 = '45' + 'CPF-DO-DECLARANTE-1' + '  ' + pad('11222333000144', 14) +
+    const r45 = '45' + '11144477735' + '  ' + pad('11222333000144', 14) +
       pad('INSS - ACAO JUDICIAL', 60) +
       N13(120000) + N13(8000) + N13(0) + N13(9000) + '06' + '00001' + ' ' + '1' + '0024' +
       N13(9000) + N13(12000) + N13(100000) + N13(15000) + '0000000001';
     // 47: igual, com o CPF do dependente em (16,11) empurrando tudo 11 à frente.
-    const r47 = '47' + 'CPF-DO-DECLARANTE-1' + '  ' + '25307150687' + pad('99888777000166', 14) +
+    const r47 = '47' + '11144477735' + '  ' + '33344455508' + pad('99888777000166', 14) +
       pad('FONTE DO DEPENDENTE', 60) +
       N13(30000) + N13(0) + N13(0) + N13(2000) + '03' + '00002' + ' ' + '2' + '0012' +
       N13(2000) + N13(0) + N13(30000) + N13(0) + '0000000002';
@@ -918,7 +1056,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(doTitular.opcaoTributacao).toBe('1');
 
     const doDependente = rra.find(x => x.beneficiario === 'Dependente');
-    expect(doDependente.cpf_dependente).toBe('25307150687');
+    expect(doDependente.cpf_dependente).toBe('33344455508');
     expect(doDependente.nome_fonte).toBe('FONTE DO DEPENDENTE');
     expect(doDependente.valor).toBeCloseTo(30000, 2);
     expect(doDependente.numeroMeses).toBe(12);
@@ -928,7 +1066,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
   it('rendimento com exigibilidade suspensa NÃO entra, e vira aviso', async () => {
     const N13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
     const pad = (t, n) => String(t).padEnd(n).slice(0, n);
-    const r80 = '80' + 'CPF-DO-DECLARANTE-1' + pad('11222333000144', 14) +
+    const r80 = '80' + '11144477735' + pad('11222333000144', 14) +
       pad('EMPRESA EM DISCUSSAO JUDICIAL', 60) + N13(50000) + N13(50000) + '0000000001';
     const avisos = [];
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${r80}\n`,
@@ -949,11 +1087,13 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // Só existe 1 dependente na declaração de exemplo.
     expect(r.dependentes).toHaveLength(1);
     const ana = r.dependentes[0];
-    expect(ana.nome).toBe('ANA MARIA DECLARANTE 1');
-    expect(ana.cpf).toBe('25307150687');
+    esperaPessoal(ana.nome, 'dependenteNome');
+    esperaPessoal(ana.cpf, 'dependenteCpf');
     expect(ana.dataNascimento).toBe('1955-01-19');
     // Código cru da declaração (não traduzido, ver comentário no parser).
     expect(ana.parentesco).toBe('11');
+    expect(ana.moraComTitular).toBe(true);
+    expect(ana.celular).toBe('991946333');
   });
 });
 
@@ -965,7 +1105,7 @@ describe.skipIf(!temArquivos)('parsePDF (arquivo real, o mesmo declarante do .DB
     const r = await parsePDF(pdf);
 
     expect(r.anoCalendario).toBe(2025);
-    expect(r.contribuinte.cpf).toBe('CPF-DO-DECLARANTE-1');
+    esperaPessoal(r.contribuinte.cpf, 'titularCpf');
     expect(r.bens).toHaveLength(172);
     expect(r.dividas).toHaveLength(1);
     expect(r.pagamentos).toHaveLength(24);
@@ -1211,7 +1351,19 @@ describe.skipIf(!temSegundoPdf)('parsePDF, segundo contribuinte (layout diferent
   it('bate com os totais impressos na própria declaração', async () => {
     const r = await lerPdf2();
     expect(r.anoCalendario).toBe(2025);
-    expect(r.contribuinte.cpf).toBe('CPF no manifesto local');
+    esperaPessoal(r.contribuinte.cpf, 'titular2Cpf');
+    expect(r.contribuinte.dataNascimento).toBe('1965-02-02');
+    esperaPessoal(r.contribuinte.cpfConjuge, 'dependente2Cpf');
+    expect(r.contribuinte.municipio).toBe('RIO POMBA');
+    expect(r.contribuinte.uf).toBe('MG');
+    esperaPessoal(r.contribuinte.email, 'titular2Email');
+    expect(r.contribuinte.ocupacaoCodigo).toBe('120');
+    expect(r.contribuinte.tipoDeclaracao).toContain('Original');
+    expect(r.documentoFonte.formato).toBe('pdf');
+    expect(r.documentoFonte.totalPaginas).toBe(50);
+    expect(r.documentoFonte.paginas).toHaveLength(50);
+    expect(r.documentoFonte.caracteresExtraidos).toBeGreaterThan(70000);
+    expect(r.documentoFonte.sha256TextoExtraido).toMatch(/^[a-f0-9]{64}$/);
 
     // Página "EVOLUÇÃO PATRIMONIAL": 60.723.823,07 → 71.231.012,07.
     expect(r.bens).toHaveLength(74);
@@ -1256,6 +1408,38 @@ describe.skipIf(!temSegundoPdf)('parsePDF, segundo contribuinte (layout diferent
   }, 30000);
 });
 
+describe.skipIf(!temArquivos || !temSegundoPdf)('catálogo de fichas observado nos dois PDFs reais', () => {
+  const ler = async (path) => {
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const data = new Uint8Array(await readFile(path));
+    return parsePDF(await pdfjsLib.getDocument({ data }).promise);
+  };
+
+  it('não confunde falha de reconhecimento com ficha oficialmente vazia', async () => {
+    for (const path of [PDF_PATH, PDF2_PATH]) {
+      const r = await ler(path);
+      const erros = Object.entries(r.estadoFichas)
+        .filter(([, detalhe]) => detalhe.estado === 'erro')
+        .map(([id, detalhe]) => `${id}: ${detalhe.motivo}`);
+      expect(erros).toEqual([]);
+      expect(Object.keys(r.fichasPdfObservadas).length).toBeGreaterThan(15);
+      expect(r.totalFichasPdfCatalogadas).toBeGreaterThan(40);
+      expect(Object.keys(r.estadoFichas).filter(id => id.startsWith('pdf:')).length)
+        .toBeGreaterThanOrEqual(r.totalFichasPdfCatalogadas);
+      expect(r.estadoFichas['pdf:saida-definitiva']).toEqual(expect.objectContaining({
+        estado: 'ausente', presenca: 'ausente', suporte: 'nao_suportada',
+      }));
+      expect(r.estadoFichas['pdf:alimentandos']).toEqual(expect.objectContaining({
+        estado: 'vazia', presenca: 'vazia', suporte: 'nao_suportada',
+        paginaInicio: expect.any(Number), linhaInicio: expect.any(Number),
+      }));
+      expect(r.estadoFichas['pdf:identificacao-contribuinte']).toEqual(expect.objectContaining({
+        titulo: 'Identificação do contribuinte', paginaInicio: 1,
+      }));
+    }
+  }, 60000);
+});
+
 // Regressão do achado de 21/08/2026, depois de a usuária cobrar detalhe na
 // extração do PDF: as fichas "Doações Diretamente na Declaração - ECA" e
 // "- Pessoa Idosa" NUNCA eram lidas, em declaração nenhuma. O gatilho delas
@@ -1274,7 +1458,10 @@ describe('parsePDF: fichas de Doações que ficam depois do anexo de Atividade R
   const lerFixture = async () => {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const data = new Uint8Array(await readFile(FIXTURE));
-    return parsePDF(await pdfjsLib.getDocument({ data }).promise);
+    // Esta fixture reproduz somente as páginas/seções necessárias ao teste,
+    // não uma declaração inteira. A validação estrutural completa continua
+    // obrigatória em toda chamada real do app e tem testes negativos próprios.
+    return parsePDF(await pdfjsLib.getDocument({ data }).promise, undefined, undefined, { validarDocumento: false });
   };
 
   it('lê ECA e Pessoa Idosa mesmo vindo depois do Demonstrativo de Atividade Rural', async () => {
@@ -1363,7 +1550,7 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Rendimentos de PJ do titular e dos de
     // Nesta ficha cada linha traz DOIS documentos: o CNPJ da fonte e, depois
     // do rótulo "CPF DO DEPENDENTE:", o CPF de quem recebeu. Trocar um pelo
     // outro é o erro fácil aqui.
-    expect(dep.every(x => x.cpf_dependente === '65578791620')).toBe(true);
+    expect(dep.every(x => x.cpf_dependente === pessoal('dependente2Cpf'))).toBe(true);
     const inss = dep.find(x => x.cnpj_fonte === '16727230000197');
     expect(inss.nome_fonte).toBe('FUNDO DE RENDIMENTO GERAL DE PREVIDENCIA SOCIAL');
     expect(inss.valor).toBeCloseTo(57754.33, 2);
@@ -1479,6 +1666,7 @@ describe.skipIf(!temArquivos)('parsePDF: bens e dívidas da Atividade Rural', ()
     expect(trator.codigo).toBe('16');
     expect(trator.discriminacao).toContain('TRATOR AGRICOLA DE RODAS NEW HOLAND');
     expect(trator.discriminacao).toContain('CARMO MAQUINAS COMERCIO E REPRES. LTDA');
+    expect(new Set(rp.bensRurais.map(item => item.chaveImportacao)).size).toBe(60);
   }, 30000);
 
   it('lê as 6 dívidas vinculadas, batendo com a linha TOTAL impressa', async () => {
@@ -1498,6 +1686,7 @@ describe.skipIf(!temArquivos)('parsePDF: bens e dívidas da Atividade Rural', ()
     const quitada = rp.dividasRurais.find(d => d.situacao_atual === 0);
     expect(quitada).toBeTruthy();
     expect(quitada.valor_pago).toBeGreaterThan(0);
+    expect(new Set(rp.dividasRurais.map(item => item.chaveImportacao)).size).toBe(6);
   }, 30000);
 
   it('a trava do anexo rural continua valendo: nada disso entra como bem ou dívida comum', async () => {
@@ -1562,8 +1751,8 @@ describe.skipIf(!temArquivos)('parsePDF: imóveis rurais, participantes e rebanh
     expect(rp.participantesRuraisOficial.map(p => p.cpf).sort())
       .toEqual(rd.participantesRuraisOficial.map(p => p.cpf).sort());
     // Os NOMES batem depois de tirar acento: o .DBK grava sem acentuação
-    // ("JOSE VIDAL", "JOANA DAR C") e o PDF traz o texto impresso, com acento
-    // e apóstrofo ("JOSÉ VIDAL", "JOANA DAR'C"). O do PDF é o mais fiel à
+    // sem acentuação nem apóstrofo, e o PDF traz o texto impresso com os dois.
+    // O do PDF é o mais fiel à
     // declaração; não é divergência de leitura.
     const semAcento = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z ]/gi, ' ').replace(/\s+/g, ' ').trim();
     const porCpf = (lista) => Object.fromEntries(lista.map(p => [p.cpf, semAcento(p.nome)]));
@@ -1574,8 +1763,8 @@ describe.skipIf(!temArquivos)('parsePDF: imóveis rurais, participantes e rebanh
     // QUAL fazenda cada um é coproprietário. A ATUALIZAÇÃO 3 registrou esse
     // vínculo como impossível pelo arquivo .DBK.
     expect(rp.participantesRuraisOficial.every(p => p.imovelId != null)).toBe(true);
-    const osires = rp.participantesRuraisOficial.find(p => p.cpf === '04176006668');
-    expect(osires.nome).toBe('OSIRES PEREIRA CAMPOS');
+    const osires = rp.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
+    esperaPessoal(osires.nome, 'participante1Nome');
     expect(osires.imovelCib).toBe('2211420-3');
     expect(osires.imovelNome).toBe('NOME DA FAZENDA, MUNICIPIO');
     // O vínculo é pelo `id` do imóvel, e não pelo CIB, porque o CIB se repete
@@ -1693,7 +1882,7 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Ganho de Capital do segundo contribui
     expect(aPrazo.dataAlienacao).toBe('2024-02-08');
     expect(aPrazo.dataAquisicao).toBe('2014-09-16');
     expect(aPrazo.valorAlienacao).toBeCloseTo(11500, 2);
-    expect(aPrazo.adquirenteNome).toBe('FABIANO DOS SANTOS DA SILVA');
+    esperaPessoal(aPrazo.adquirenteNome, 'aPrazoAdquirenteNome');
 
     const outra = r.apuracaoGanhoCapital.find(x => x.dataAlienacao.startsWith('2025'));
     expect(outra.custoAquisicao).toBeCloseTo(21000, 2);
@@ -1721,7 +1910,8 @@ describe.skipIf(!temArquivos)('parsePDF: Dependentes, Resumo e Lei 14.754 batend
 
   it('a ficha de Dependentes sai idêntica pelos dois caminhos', async () => {
     const { rp, rd } = await lerAmbos();
-    expect(rp.dependentes).toEqual(rd.dependentes);
+    const semProvenienciaPdf = rp.dependentes.map(({ origemDocumento, ...dependente }) => dependente);
+    expect(semProvenienciaPdf).toEqual(rd.dependentes);
     expect(rp.dependentes).toHaveLength(1);
     // O código de parentesco vai cru nos dois, sem tradução (ver registro 25).
     expect(rp.dependentes[0].parentesco).toBe('11');
@@ -1799,9 +1989,11 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Dependentes e Resumo do segundo contr
     const r = await parsePDF(await pdfjsLib.getDocument({ data }).promise);
 
     expect(r.dependentes).toHaveLength(1);
-    expect(r.dependentes[0].nome).toBe('ROSIMAR DE PAULA MOREIRA MARTINS');
-    expect(r.dependentes[0].cpf).toBe('65578791620');
+    esperaPessoal(r.dependentes[0].nome, 'dependente2Nome');
+    esperaPessoal(r.dependentes[0].cpf, 'dependente2Cpf');
     expect(r.dependentes[0].dataNascimento).toBe('1965-06-23');
+    expect(r.dependentes[0].racaCor).toBe('Não informada');
+    expect(r.dependentes[0].moraComTitular).toBe(true);
 
     // Valores impressos na página RESUMO desta declaração.
     expect(r.impostoDevido.rendimentosTributaveisTotal).toBeCloseTo(340649.47, 2);
@@ -2013,6 +2205,41 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Rendimentos Isentos e Exclusiva do se
   }, 60000);
 });
 
+// Ponta a ponta: importa a declaração real, monta o demonstrativo e confere
+// que a conferência de aplicação resgatada aponta o caso certo e SÓ ele.
+// Achado de 24/08/2026, o segundo maior item da conciliação daquele ano.
+describe.skipIf(!temSegundoPdf || !temArquivos)('aplicação resgatada sem rendimento: as duas declarações reais', () => {
+  const demonstrativoDoPdf = async (caminho) => {
+    const { reducer, initialState } = await import('../store/reducer');
+    const { demonstrativoConciliacao } = await import('../store/demonstrativos');
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const payload = await parsePDF(await pdfjsLib.getDocument({ data: new Uint8Array(await readFile(caminho)) }).promise);
+    return demonstrativoConciliacao(reducer(initialState, { type: 'IMPORT_DECLARACAO', payload }), '2025-01-01', '2025-12-31');
+  };
+
+  it('aponta a LCI do Sicoob e mostra os 102.194,93 que a mesma cooperativa pagou como lucros e dividendos', async () => {
+    const d = await demonstrativoDoPdf(PDF2_PATH);
+    expect(d.aplicacoesSemRendimento).toHaveLength(1);
+    const a = d.aplicacoesSemRendimento[0];
+    expect(a.discriminacao).toContain('SICOOB LCI');
+    expect(a.cnpj).toBe('02335109000105');
+    expect(a.valorResgatado).toBeCloseTo(483154.01, 2);
+    // O que a declaração informa dessa mesma fonte, e que é o motivo do aviso:
+    // 102.194,93 no código 09 (lucros e dividendos) e 4.396,57 no código 06.
+    const porTipo = Object.fromEntries(a.outrosDaMesmaFonte.map(o => [o.tipo, o.valor]));
+    expect(porTipo.isento_0009).toBeCloseTo(102194.93, 2);
+    expect(porTipo.exclusivo_0006).toBeCloseTo(4396.57, 2);
+    // Nenhum outro bem do contribuinte entra: a conta poupança de 122,08 que
+    // também zerou fica abaixo do piso, e as demais aplicações têm rendimento
+    // da própria fonte na ficha certa.
+  }, 60000);
+
+  it('não gera ruído na outra declaração, com 172 bens e nenhum caso', async () => {
+    const d = await demonstrativoDoPdf(PDF_PATH);
+    expect(d.aplicacoesSemRendimento).toEqual([]);
+  }, 60000);
+});
+
 describe.skipIf(!temSegundoPdf)('parsePDF: Renda Variável com valores (segundo contribuinte)', () => {
   const lerPdf2 = async () => {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -2046,6 +2273,19 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Renda Variável com valores (segundo 
       expect(ficha.consolidacao.totalImpostoDevido).toBe(0);
       expect(ficha.consolidacao.impostoPagar).toBe(0);
     }
+    expect(r.rendaVariavelAnualOficial).toEqual(expect.objectContaining({
+      origem: 'pdf', derivadoDosMeses: true,
+    }));
+    expect(r.rendaVariavelAnualOficial.prejuizoACompensar).toBeCloseTo(100056.47, 2);
+    expect(r.rendaVariavelAnualOficial.resultadoLiquido).toBeCloseTo(-245.4, 2);
+    expect(r.fiiFiagroAnualOficial).toBeNull();
+    expect(r.estadoFichas['pdf:derivado-renda-variavel-anual']).toEqual(expect.objectContaining({
+      estado: 'parcial', presenca: 'preenchida', derivado: true, completudeAuditada: false,
+    }));
+    // Uma consolidação anual de FII/Fiagro não é uma ficha impressa. Se o
+    // documento não traz essa seção, o parser não deve inventar uma ficha
+    // vazia nem confundir ausência com o texto oficial "Sem Informações".
+    expect(r.estadoFichas['pdf:derivado-fii-fiagro-anual']).toBeUndefined();
   }, 60000);
 
   it('lê a ficha da dependente só a partir de julho, com a perda de 245,40 e o CPF dela', async () => {
@@ -2054,7 +2294,11 @@ describe.skipIf(!temSegundoPdf)('parsePDF: Renda Variável com valores (segundo 
     // Janeiro a junho vêm "Sem Informações" na declaração: não podem virar
     // ficha zerada, senão o app afirma um dado que a declaração não traz.
     expect(dep.map(f => f.mes)).toEqual([7, 8, 9, 10, 11, 12]);
-    expect(dep.every(f => f.cpfDependente === '65578791620')).toBe(true);
+    expect(dep.every(f => f.cpfDependente === pessoal('dependente2Cpf'))).toBe(true);
+    expect(r.fichasPdfObservadas['renda-variavel-dependentes'].presenca).toBe('preenchida');
+    expect(r.estadoFichas['pdf:renda-variavel-dependentes']).toEqual(expect.objectContaining({
+      estado: 'parcial', presenca: 'preenchida',
+    }));
 
     const julho = dep.find(f => f.mes === 7);
     // Valor NEGATIVO: a perda tem que chegar com sinal, não em módulo.
@@ -2308,6 +2552,9 @@ describe('parsePDF: avisa quando uma ficha não lida vem PREENCHIDA', () => {
     expect(r.fichasNaoLidasComConteudo).toContain('MOVIMENTAÇÃO DO REBANHO - EXTERIOR');
     expect(r.fichasNaoLidasComConteudo).toContain('RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM EXIGIBILIDADE SUSPENSA)');
     expect(r.fichasNaoLidasComConteudo).toHaveLength(2);
+    expect(r.estadoFichas['pdf:rural-exterior-rebanho']).toEqual(expect.objectContaining({
+      estado: 'nao_suportada', formato: 'pdf',
+    }));
     // E o aviso chega ao log da tela de importação, não fica só no objeto.
     const avisos = [];
     await lerFixture((msg, tipo) => { if (tipo === 'warning') avisos.push(msg); });
@@ -2353,7 +2600,7 @@ describe.skipIf(!temArquivos)('o mesmo parser serve para .DEC, .DBK e .F2B', () 
     const texto = await readFile(DBK_PATH, 'latin1');
     const r = await parseDBK(texto);
     expect(r.formato).toBe('dbk');
-    expect(r.contribuinte.cpf).toBe('CPF-DO-DECLARANTE-1');
+    esperaPessoal(r.contribuinte.cpf, 'titularCpf');
     expect(r.bens).toHaveLength(172);
   });
 
@@ -2368,4 +2615,434 @@ describe.skipIf(!temArquivos)('o mesmo parser serve para .DEC, .DBK e .F2B', () 
     expect(r.contribuinte.cpf).toBe('');
     expect(avisos.length).toBeGreaterThan(0);
   });
+});
+
+// ---------------------------------------------------------------------------
+// Regressões da auditoria independente de 24/08/2026.
+// ---------------------------------------------------------------------------
+
+describe.skipIf(!temArquivos)('achado 14: a quem o bem pertence (registro 27)', () => {
+  it('lê os SEIS bens da dependente, que vinham todos marcados como do Titular', async () => {
+    const r = await parseDBK(await readFile(DBK_PATH, 'latin1'));
+    const doDependente = r.bens.filter(b => b.beneficiario === 'Dependente');
+    expect(r.bens).toHaveLength(172);
+    expect(doDependente).toHaveLength(6);
+    // Todos apontam para a MESMA dependente, a única da declaração (registro 25).
+    const cpfs = [...new Set(doDependente.map(b => b.cpf_beneficiario))];
+    expect(cpfs).toHaveLength(1);
+    expect(cpfs[0]).toBe(r.dependentes[0].cpf);
+    // E os outros 166 continuam do titular, sem CPF de beneficiário.
+    expect(r.bens.filter(b => b.beneficiario === 'Titular')).toHaveLength(166);
+  });
+
+  it('as posições continuam certas com o registro na largura OFICIAL (com NM_PAIS)', async () => {
+    // O arquivo real omite NM_PAIS e a linha tem 1251 caracteres; o layout
+    // oficial prevê 1291. O parser deriva o deslocamento do comprimento, então
+    // os dois formatos leem igual. Achado 18.
+    const texto = await readFile(DBK_PATH, 'latin1');
+    const linhas = texto.split(/\r\n/).filter(l => l.trim());
+    const comPais = linhas.map(l => (l.startsWith('27')
+      ? `${l.slice(0, 19)}${' '.repeat(40)}${l.slice(19)}`
+      : l));
+    const r = await parseDBK(comPais.join('\r\n'));
+    expect(r.bens).toHaveLength(172);
+    expect(r.bens.reduce((s, b) => s + b.situacao_atual, 0)).toBeCloseTo(137977220.38, 2);
+    expect(r.bens.filter(b => b.beneficiario === 'Dependente')).toHaveLength(6);
+  });
+});
+
+describe.skipIf(!temArquivos)('achado 07: IRRF sobre o 13º salário chega ao rendimento exclusivo', () => {
+  it('.DBK: o exclusivo do 13º entra com o IRRF que a ficha de PJ informa', async () => {
+    const r = await parseDBK(await readFile(DBK_PATH, 'latin1'));
+    const decimoTerceiro = r.rendimentos.find(x => x.tipo === 'exclusivo_0001');
+    expect(decimoTerceiro.valor).toBeCloseTo(3573.29, 2);
+    // A própria declaração informa 59,70 de IRRF sobre o 13º, e o valor da
+    // ficha de exclusivos é o BRUTO (Ajuda oficial, aba Totais, linha 01).
+    expect(decimoTerceiro.irrf).toBeCloseTo(59.70, 2);
+  });
+
+  it('o IRRF do 13º não é somado duas vezes quando há mais de uma fonte pagadora', async () => {
+    const r = await parseDBK(await readFile(DBK_PATH, 'latin1'));
+    const totalIrrf13 = r.rendimentos
+      .filter(x => x.tipo === 'exclusivo_0001' || x.tipo === 'exclusivo_0008')
+      .reduce((s, x) => s + (x.irrf || 0), 0);
+    expect(totalIrrf13).toBeCloseTo(59.70, 2);
+  });
+});
+
+describe.skipIf(!temArquivos)('achado 08: divergência entre detalhe e agregado não passa em silêncio', () => {
+  it('avisa quando a soma do detalhe por fonte não fecha com o total do código', async () => {
+    const texto = await readFile(DBK_PATH, 'latin1');
+    const linhas = texto.split(/\r\n/).filter(l => l.trim());
+    const i84 = linhas.findIndex(l => l.startsWith('84'));
+    // Zera o valor de UM detalhe: o agregado do registro 23 continua dizendo o
+    // total cheio, e a diferença tem que virar aviso.
+    const adulterado = linhas[i84].slice(0, 103) + '0000000000000' + linhas[i84].slice(116);
+    const avisos = [];
+    await parseDBK(linhas.map((l, k) => (k === i84 ? adulterado : l)).join('\r\n'),
+      (msg, nivel) => avisos.push([nivel || 'info', msg]));
+    const warnings = avisos.filter(a => a[0] === 'warning').map(a => a[1]);
+    expect(warnings.some(m => /Conferência da ficha de rendimentos/.test(m))).toBe(true);
+  });
+
+  it('o arquivo íntegro não gera nenhum aviso de conferência', async () => {
+    const avisos = [];
+    await parseDBK(await readFile(DBK_PATH, 'latin1'), (msg, nivel) => avisos.push([nivel || 'info', msg]));
+    const warnings = avisos.filter(a => a[0] === 'warning').map(a => a[1]);
+    expect(warnings.filter(m => /Conferência da ficha de rendimentos/.test(m))).toHaveLength(0);
+  });
+});
+
+describe('achado 19: normalizarCpfCnpj com preenchimento em branco', () => {
+  it('CNPJ cujo preenchimento veio em espaços não perde os três primeiros dígitos', () => {
+    // O campo tem 19 posições; com preenchimento em branco, o trim de field()
+    // devolve só os 14 dígitos do CNPJ. A regra antiga classificava isso como
+    // CPF e cortava em 11.
+    expect(normalizarCpfCnpj('     12345678000199')).toBe('12345678000199');
+  });
+  it('continua lendo o CPF com preenchimento NUMÉRICO, que é o caso do arquivo real', () => {
+    expect(normalizarCpfCnpj('0000111144477735')).toBe('11144477735');
+  });
+  it('continua lendo o CNPJ com preenchimento numérico', () => {
+    expect(normalizarCpfCnpj('0000112345678000199')).toBe('12345678000199');
+  });
+});
+
+describe.skipIf(!temArquivos)('achado 05: RRA que a declaração informa duas vezes', () => {
+  it('marca o RRA como já contado quando o valor bate com o código 0007 dos exclusivos', async () => {
+    const texto = await readFile(DBK_PATH, 'latin1');
+    const linhas = texto.split(/\r\n/).filter(l => l.trim());
+    const cpf = '11144477735';
+    const n13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
+    const rra = '45' + cpf + '  ' + '12345678000199' + 'FONTE RRA TESTE'.padEnd(60)
+      + n13(120000) + n13(10000) + n13(0) + n13(5000) + '12' + '00001' + ' ' + '1' + '0024'
+      + n13(5000) + n13(0) + n13(105000) + n13(3000) + '0000000001';
+    const agregado = '24' + cpf + '0007' + n13(105000) + '0000000002';
+    const avisos = [];
+    const r = await parseDBK([...linhas, rra, agregado].join('\r\n'),
+      (msg, nivel) => avisos.push([nivel || 'info', msg]));
+    const doRra = r.rendimentos.find(x => x.tipo === 'tributavel_rra');
+    expect(doRra.valor).toBeCloseTo(105000, 2);
+    expect(doRra.naoSomar).toBe(true);
+    expect(avisos.filter(a => a[0] === 'warning').some(a => /já entra por lá/.test(a[1]))).toBe(true);
+  });
+
+  it('RRA de valor DIFERENTE do exclusivo continua somando normalmente', async () => {
+    const texto = await readFile(DBK_PATH, 'latin1');
+    const linhas = texto.split(/\r\n/).filter(l => l.trim());
+    const cpf = '11144477735';
+    const n13 = (v) => String(Math.round(v * 100)).padStart(13, '0');
+    const rra = '45' + cpf + '  ' + '12345678000199' + 'FONTE RRA TESTE'.padEnd(60)
+      + n13(120000) + n13(10000) + n13(0) + n13(5000) + '12' + '00001' + ' ' + '2' + '0024'
+      + n13(5000) + n13(0) + n13(105000) + n13(3000) + '0000000001';
+    const r = await parseDBK([...linhas, rra].join('\r\n'));
+    const doRra = r.rendimentos.find(x => x.tipo === 'tributavel_rra');
+    expect(doRra.naoSomar).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GANHOS DE CAPITAL (as quatro fichas do menu do programa da Receita) e RENDA
+// VARIÁVEL (as duas fichas), pelos DOIS caminhos de importação.
+//
+// A declaração de referência só tem operações de BEM MÓVEL, e as fichas de
+// imóvel, participação societária, moedas em espécie, FII/Fiagro e o
+// fechamento anual da renda variável nunca apareceram preenchidas em arquivo
+// real. Para essas, o teste monta a linha do registro no LAYOUT OFICIAL
+// (mapeamentoTxt.xml do próprio IRPF2026) e confere que cada valor cai no
+// campo certo — que é exatamente o risco de um layout posicional: um campo
+// deslocado passa despercebido até alguém conferir número a número.
+describe('Ganhos de Capital e Renda Variável: layout dos registros', () => {
+  const pad = (t, n) => String(t).padEnd(n).slice(0, n);
+  const num = (v, n) => String(Math.round(v * 100)).padStart(n, '0');       // N13.2
+  const numDec = (v, n, casas) => String(Math.round(v * Math.pow(10, casas))).padStart(n, '0');
+  const CPF = '11144477735';
+
+  // Registro 61: bem imóvel. Monta por posição absoluta, do jeito que o
+  // arquivo é: cada campo escrito na sua coluna, o resto em branco.
+  const registro61 = () => {
+    const buf = new Array(926).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '61'); put(3, CPF); put(14, CPF); put(25, '01013112'); put(33, '0001'); put(37, '1');
+    put(38, pad('APARTAMENTO 101 EDIFICIO SOL', 152));
+    put(190, pad('RUA', 15)); put(205, pad('DAS FLORES', 40)); put(245, pad('100', 6));
+    put(272, pad('CENTRO', 20)); put(292, pad('30140000', 9)); put(305, pad('BELO HORIZONTE', 40)); put(345, 'MG');
+    put(410, '15032010'); put(418, num(300000, 13));
+    put(431, '0'); put(432, '0'); put(433, '1'); put(434, '0'); put(435, '1'); put(436, '2');
+    put(437, num(0, 13));
+    put(450, '01'); put(452, pad('VENDA', 70));
+    put(522, '0'); put(523, '20062025');
+    put(555, '0'); put(556, num(800000, 13)); put(569, num(24000, 13)); put(582, num(0, 13));
+    put(595, '0'); put(596, num(0, 13));
+    put(648, num(476000, 13)); put(661, numDec(15, 9, 6)); put(670, num(71400, 13)); put(683, num(71400, 13));
+    put(748, num(0, 13)); put(761, num(71400, 13)); put(774, num(71400, 13)); put(787, num(0, 13));
+    put(800, num(71400, 13)); put(813, num(0, 13)); put(826, num(71400, 13));
+    put(839, num(0, 13)); put(852, num(476000, 13));
+    put(895, '0'); put(896, num(0, 13));
+    return buf.join('');
+  };
+  // Registro 68: apuração do ganho do imóvel, com as reduções.
+  const registro68 = () => {
+    const buf = new Array(335).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '68'); put(3, CPF); put(14, CPF); put(25, '01013112'); put(33, '0001'); put(37, '1');
+    put(38, num(800000, 13)); put(51, num(24000, 13)); put(64, num(776000, 13)); put(77, num(0, 13));
+    put(90, num(300000, 13)); put(103, num(476000, 13)); put(116, num(0, 13));
+    put(129, numDec(0, 9, 6)); put(138, num(0, 13)); put(151, num(476000, 13));
+    put(164, numDec(0, 9, 6)); put(173, num(0, 13)); put(186, num(476000, 13));
+    put(199, numDec(0, 9, 6)); put(208, num(0, 13)); put(221, num(476000, 13));
+    put(300, num(476000, 13)); put(313, numDec(0, 13, 4));
+    return buf.join('');
+  };
+  // Registro 63: participação societária, com apuração embutida.
+  const registro63 = () => {
+    const buf = new Array(876).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '63'); put(3, CPF); put(14, CPF); put(25, '01013112'); put(33, '0002');
+    put(37, pad('PADARIA DO BAIRRO LTDA', 152));
+    put(189, '11222333000181'); put(203, '4123'); put(207, pad('CONTAGEM', 40)); put(247, 'MG');
+    put(249, '01'); put(251, pad('VENDA', 70));
+    put(321, '3'); put(322, pad('QUOTAS', 90));
+    put(412, '0'); put(413, '10112025');
+    put(445, '0'); put(446, num(150000, 13)); put(459, num(0, 13)); put(472, '0'); put(473, '0'); put(474, num(0, 13));
+    put(487, num(150000, 13)); put(500, num(0, 13)); put(513, num(150000, 13)); put(526, num(50000, 13)); put(539, num(100000, 13));
+    put(591, num(100000, 13)); put(604, numDec(15, 9, 6)); put(613, num(15000, 13)); put(626, num(0, 13));
+    put(639, num(15000, 13)); put(652, num(15000, 13));
+    put(834, num(50000, 13));
+    return buf.join('');
+  };
+  // Registro 65: adquirente, com o indicador de tipo na posição 37.
+  const registro65 = (tipo, operacao, doc, nome) => {
+    const buf = new Array(121).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '65'); put(3, CPF); put(14, CPF); put(25, '01013112'); put(33, operacao); put(37, tipo);
+    put(38, pad(doc, 14)); put(52, pad(nome, 60));
+    return buf.join('');
+  };
+  // Registro 74: moeda estrangeira em espécie (uma venda).
+  const registro74 = () => {
+    const buf = new Array(299).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '74'); put(3, CPF); put(14, CPF); put(25, '01013112'); put(33, '0001');
+    put(37, pad('USD', 7)); put(44, pad('DOLAR DOS ESTADOS UNIDOS', 40));
+    put(84, '3'); put(85, pad('Venda', 15));
+    put(100, pad('CASA DE CAMBIO XYZ LTDA', 60)); put(160, pad('11222333000181', 14));
+    put(174, '15082025'); put(182, num(60000, 13)); put(195, num(10000, 13));
+    put(208, numDec(4.5, 17, 6)); put(225, num(45000, 13)); put(238, num(15000, 13));
+    put(251, num(0, 13)); put(264, num(0, 13)); put(277, numDec(1, 13, 4));
+    return buf.join('');
+  };
+  // Registro 42: FII/Fiagro mês a mês.
+  const registro42 = (mes) => {
+    const buf = new Array(170).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '42'); put(3, CPF); put(14, String(mes).padStart(2, '0'));
+    put(16, num(2500, 13)); put(29, num(0, 13)); put(42, num(2500, 13)); put(55, num(0, 13));
+    put(68, '020'); put(71, num(500, 13)); put(84, num(0, 13)); put(97, num(120, 13));
+    put(110, num(0, 13)); put(123, num(380, 13)); put(136, num(380, 13)); put(149, 'N');
+    return buf.join('');
+  };
+  // Registro 41 e 43: fechamentos anuais.
+  const registro41 = () => {
+    const buf = new Array(153).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '41'); put(3, CPF);
+    put(14, num(9000, 13)); put(27, num(1000, 13)); put(40, num(8000, 13)); put(53, num(0, 13));
+    put(66, num(1200, 13)); put(79, num(1200, 13)); put(92, num(0, 13)); put(105, num(0, 13));
+    put(118, num(50, 13)); put(131, num(1150, 13));
+    return buf.join('');
+  };
+  const registro43 = () => {
+    const buf = new Array(114).fill(' ');
+    const put = (pos, texto) => { for (let i = 0; i < texto.length; i++) buf[pos - 1 + i] = texto[i]; };
+    put(1, '43'); put(3, CPF);
+    put(14, num(30000, 13)); put(27, num(0, 13)); put(40, num(30000, 13)); put(53, num(0, 13));
+    put(66, num(6000, 13)); put(79, num(4560, 13)); put(92, num(1440, 13));
+    return buf.join('');
+  };
+
+  it('lê a ficha de BENS IMÓVEIS inteira, com endereço, perguntas, reduções e consolidação', async () => {
+    const texto = [registro61(), registro68(), registro65('1', '0001', '09735390620', 'MARIA DA SILVA')].join('\r\n');
+    const r = await parseDBK(texto);
+
+    expect(r.ganhosCapitalOficial.operacoes).toHaveLength(1);
+    const op = r.ganhosCapitalOficial.operacoes[0];
+    expect(op.tipo).toBe('imovel');
+    expect(op.especificacao).toBe('APARTAMENTO 101 EDIFICIO SOL');
+    expect(op.endereco.logradouro).toBe('DAS FLORES');
+    expect(op.endereco.municipio).toBe('BELO HORIZONTE');
+    expect(op.endereco.uf).toBe('MG');
+    expect(op.dataAquisicao).toBe('2010-03-15');
+    expect(op.custoAquisicao).toBeCloseTo(300000, 2);
+    expect(op.dataAlienacao).toBe('2025-06-20');
+    expect(op.valorAlienacao).toBeCloseTo(800000, 2);
+    expect(op.custoCorretagem).toBeCloseTo(24000, 2);
+    expect(op.natureza).toEqual({ codigo: '01', descricao: 'VENDA' });
+    // A pergunta do conjunto de bens é gravada INVERTIDA em relação ao texto
+    // impresso ("0" no arquivo = "Sim" na ficha) — ver o comentário no parser.
+    expect(op.perguntas.conjuntoSuperiorA35Mil).toBe(true);
+    expect(op.perguntas.possuiOutroImovel).toBe(true);
+    expect(op.perguntas.outraAlienacaoUltimos5Anos).toBe(false);
+    expect(op.perguntas.imovelResidencial).toBe(true);
+    // Apuração vem do registro 68, com o ganho já líquido das reduções.
+    expect(op.apuracao.valorLiquido).toBeCloseTo(776000, 2);
+    expect(op.apuracao.ganhoCapital).toBeCloseTo(476000, 2);
+    expect(op.apuracao.reducoes.ganhoTributavel).toBeCloseTo(476000, 2);
+    // Alíquota é N9.6: 15% e não 150.000,00 (seria o erro de ler como N13.2).
+    expect(op.calculoImposto.aliquotaMedia).toBeCloseTo(15, 6);
+    expect(op.calculoImposto.impostoDevido).toBeCloseTo(71400, 2);
+    expect(op.consolidacaoBem.rendimentoExclusivo).toBeCloseTo(476000, 2);
+    expect(op.adquirentes).toEqual([{ cpfCnpj: '09735390620', nome: 'MARIA DA SILVA' }]);
+
+    // E o resumo que o resto do app consome sai coerente com isso.
+    expect(r.apuracaoGanhoCapital[0].ganhoCapital).toBeCloseTo(476000, 2);
+    expect(r.apuracaoGanhoCapital[0].impostoDevido).toBeCloseTo(71400, 2);
+  });
+
+  it('lê a ficha de PARTICIPAÇÕES SOCIETÁRIAS, com a apuração que vem no próprio registro', async () => {
+    const r = await parseDBK([registro63(), registro65('3', '0002', '11222333000181', 'COMPRADOR LTDA')].join('\r\n'));
+
+    const op = r.ganhosCapitalOficial.operacoes[0];
+    expect(op.tipo).toBe('participacao');
+    expect(op.sociedade.nome).toBe('PADARIA DO BAIRRO LTDA');
+    expect(op.sociedade.cnpj).toBe('11222333000181');
+    expect(op.sociedade.municipio).toBe('CONTAGEM');
+    expect(op.especie).toEqual({ codigo: '3', descricao: 'QUOTAS' });
+    expect(op.apuracao.custoAquisicao).toBeCloseTo(50000, 2);
+    expect(op.apuracao.ganhoCapital).toBeCloseTo(100000, 2);
+    expect(op.calculoImposto.impostoDevidoAposCompensacao).toBeCloseTo(15000, 2);
+    expect(op.custoTotalAquisicaoConsolidado).toBeCloseTo(50000, 2);
+    expect(op.adquirentes[0].nome).toBe('COMPRADOR LTDA');
+  });
+
+  it('não mistura operações de fichas diferentes que tenham o mesmo número', async () => {
+    // Imóvel 0001 e móvel 0001 coexistem numa declaração real. O vínculo dos
+    // adquirentes é (tipo + número), não a ordem das linhas: sem o tipo, o
+    // adquirente do móvel entraria no imóvel.
+    const texto = [
+      registro61(),
+      registro65('1', '0001', '09735390620', 'COMPRADOR DO IMOVEL'),
+      registro65('2', '0001', '11222333000181', 'COMPRADOR DO CARRO'),
+    ].join('\r\n');
+    const r = await parseDBK(texto);
+    const imovel = r.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'imovel');
+    const movel = r.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'movel');
+    expect(imovel.adquirentes.map(a => a.nome)).toEqual(['COMPRADOR DO IMOVEL']);
+    expect(movel.adquirentes.map(a => a.nome)).toEqual(['COMPRADOR DO CARRO']);
+  });
+
+  it('lê a ficha de MOEDAS EM ESPÉCIE', async () => {
+    const r = await parseDBK(registro74());
+    const moeda = r.ganhosCapitalOficial.moedaEspecie.operacoes[0];
+    expect(moeda.moeda).toBe('DOLAR DOS ESTADOS UNIDOS');
+    expect(moeda.tipoOperacaoDescricao).toBe('Venda');
+    expect(moeda.data).toBe('2025-08-15');
+    expect(moeda.valor).toBeCloseTo(60000, 2);
+    expect(moeda.quantidade).toBeCloseTo(10000, 2);
+    // Custo médio é N17.6: 4,50 por dólar, não 45.000.000,00.
+    expect(moeda.custoMedio).toBeCloseTo(4.5, 6);
+    expect(moeda.custoTotal).toBeCloseTo(45000, 2);
+    expect(moeda.ganhoCapital).toBeCloseTo(15000, 2);
+    expect(moeda.adquirenteCpfCnpj).toBe('11222333000181');
+  });
+
+  it('lê as duas fichas de RENDA VARIÁVEL: FII/Fiagro mês a mês e os fechamentos anuais', async () => {
+    const r = await parseDBK([registro42(3), registro42(4), registro41(), registro43()].join('\r\n'));
+
+    expect(r.fiiFiagroMensalOficial).toHaveLength(2);
+    const marco = r.fiiFiagroMensalOficial.find(m => m.mes === 3);
+    expect(marco.titular).toBe(true);
+    expect(marco.resultadoLiquidoMes).toBeCloseTo(2500, 2);
+    expect(marco.baseCalculoImposto).toBeCloseTo(2500, 2);
+    // Alíquota do FII vem como inteiro de 3 dígitos no arquivo.
+    expect(marco.aliquota).toBe('20%');
+    expect(marco.impostoDevido).toBeCloseTo(500, 2);
+    expect(marco.impostoRetidoNoMes).toBeCloseTo(120, 2);
+    expect(marco.impostoAPagar).toBeCloseTo(380, 2);
+
+    expect(r.rendaVariavelAnualOficial.resultadoLiquido).toBeCloseTo(9000, 2);
+    expect(r.rendaVariavelAnualOficial.baseCalculo).toBeCloseTo(8000, 2);
+    expect(r.rendaVariavelAnualOficial.consolidacaoImpostoAPagar).toBeCloseTo(1150, 2);
+
+    expect(r.fiiFiagroAnualOficial.resultadoLiquido).toBeCloseTo(30000, 2);
+    expect(r.fiiFiagroAnualOficial.impostoDevido).toBeCloseTo(6000, 2);
+    expect(r.fiiFiagroAnualOficial.impostoRetidoLei11033).toBeCloseTo(1440, 2);
+  });
+
+  it('não inventa ficha de Ganhos de Capital numa declaração que não tem nenhuma', async () => {
+    const r = await parseDBK('16' + '11144477735' + ' '.repeat(900));
+    expect(r.ganhosCapitalOficial).toBeNull();
+    expect(r.apuracaoGanhoCapital).toEqual([]);
+    expect(r.fiiFiagroMensalOficial).toEqual([]);
+    expect(r.rendaVariavelAnualOficial).toBeNull();
+  });
+});
+
+describe.skipIf(!temArquivos)('Ganhos de Capital: arquivo real', () => {
+  it('lê as 3 operações de bem móvel com apuração, adquirente e a ficha de moedas', async () => {
+    const r = await parseDBK(await readFile(DBK_PATH, 'latin1'));
+
+    expect(r.ganhosCapitalOficial.operacoes).toHaveLength(3);
+    expect(r.ganhosCapitalOficial.operacoes.every(o => o.tipo === 'movel')).toBe(true);
+    const jeep = r.ganhosCapitalOficial.operacoes.find(o => o.especificacao.startsWith('JEEP'));
+    expect(jeep.dataAquisicao).toBe('2022-05-22');
+    expect(jeep.custoAquisicao).toBeCloseTo(269655.86, 2);
+    expect(jeep.dataAlienacao).toBe('2025-02-07');
+    expect(jeep.valorAlienacao).toBeCloseTo(199000, 2);
+    expect(jeep.sujeitoRegistroPublico).toBe(true);
+    expect(jeep.alienacaoAPrazo).toBe(false);
+    expect(jeep.adquirentes).toHaveLength(1);
+    esperaPessoal(jeep.adquirentes[0].cpfCnpj, 'jeepAdquirenteCpf');
+    esperaPessoal(jeep.adquirentes[0].nome, 'jeepAdquirenteNome');
+    // Venda com prejuízo: a declaração apura ganho ZERO, não negativo.
+    expect(jeep.apuracao.ganhoCapital).toBe(0);
+    expect(jeep.apuracao.custoAquisicao).toBeCloseTo(269655.86, 2);
+    // O cabeçalho do demonstrativo (registro 60) traz o período e o país.
+    expect(r.ganhosCapitalOficial.consolidacao.periodoInicio).toBe('2025-01-01');
+    expect(r.ganhosCapitalOficial.consolidacao.periodoFim).toBe('2025-12-31');
+    expect(r.ganhosCapitalOficial.consolidacao.pais).toBe('BRASIL');
+    // Ficha de moedas: 12 meses zerados (a declaração não tem alienação de
+    // moeda), com a alíquota de 15% que o próprio programa grava.
+    expect(r.ganhosCapitalOficial.moedaEspecie.mensal).toHaveLength(12);
+    expect(r.ganhosCapitalOficial.moedaEspecie.mensal.every(m => m.ganhoCapital === 0)).toBe(true);
+    expect(r.ganhosCapitalOficial.moedaEspecie.operacoes).toEqual([]);
+  });
+});
+
+describe.skipIf(!temSegundoPdf)('Ganhos de Capital pelo PDF: alienação a prazo e colisão de títulos', () => {
+  it('lê as parcelas, as perguntas e os quadros de consolidação da operação', async () => {
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const data = new Uint8Array(await readFile(PDF2_PATH));
+    const r = await parsePDF(await pdfjsLib.getDocument({ data }).promise);
+
+    const fiat = r.ganhosCapitalOficial.operacoes.find(o => o.especificacao.startsWith('FIAT UNO'));
+    expect(fiat.tipo).toBe('movel');
+    expect(fiat.custoAquisicao).toBeCloseTo(15000, 2);
+    expect(fiat.valorAlienacao).toBeCloseTo(11500, 2);
+    expect(fiat.alienacaoAPrazo).toBe(true);
+    // Seis parcelas recebidas em 2025, com a última marcada.
+    expect(fiat.parcelas).toHaveLength(6);
+    expect(fiat.parcelas[0].data).toBe('2025-01-06');
+    expect(fiat.parcelas[0].valorRecebido).toBeCloseTo(500, 2);
+    expect(fiat.parcelas[0].custoAquisicaoProporcional).toBeCloseTo(652.18, 2);
+    expect(fiat.parcelas[5].valorRecebido).toBeCloseTo(3000, 2);
+    // Totais do quadro a prazo: a soma das parcelas do ano e o que já havia
+    // sido recebido em anos anteriores, que são números diferentes.
+    expect(fiat.calculoImposto.totalRecebidoParcelas).toBeCloseTo(5500, 2);
+    expect(fiat.calculoImposto.valorBrutoAnosAnteriores).toBeCloseTo(6000, 2);
+    expect(fiat.calculoImposto.aliquotaMedia).toBeCloseTo(15, 6);
+    // Perguntas com resposta lida (a marcação "Sim ( )  Não ( X )" vem em
+    // duas células separadas no PDF).
+    const respostas = Object.fromEntries(fiat.perguntasImpressas.map(p => [p.pergunta, p.resposta]));
+    expect(respostas['Sujeito a Registro Público?']).toBe('Não');
+    expect(respostas['A alienação foi a prazo/prestação?']).toBe('Sim');
+    expect(respostas['Já houve alienação parcial desse bem?']).toBe('Não');
+    // Os quadros de transporte no fim da ficha (RENDIMENTOS ISENTOS e
+    // RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA) têm o mesmo título de duas
+    // FICHAS da declaração. Sem a guarda, o parser abandonava a operação ali e
+    // abria uma ficha de rendimentos fantasma no meio do demonstrativo.
+    expect(fiat.consolidacaoBem).not.toBeNull();
+    expect(fiat.consolidacaoBem.rendimentoIsento).toBeDefined();
+    expect(fiat.consolidacaoBem.rendimentoExclusivo).toBeDefined();
+  }, 30000);
 });
