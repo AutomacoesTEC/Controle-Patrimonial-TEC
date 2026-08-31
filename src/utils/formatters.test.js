@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -200,5 +200,30 @@ describe('marcadoresDoBem', () => {
   it('acumula os dois marcadores quando o bem é do dependente e fica no exterior', () => {
     const marcas = marcadoresDoBem({ beneficiario: 'Dependente', cpf_beneficiario: '33344455508', localizacao: '249', paisNome: 'PORTUGAL' });
     expect(marcas.map(m => m.tipo)).toEqual(['dependente', 'exterior']);
+  });
+});
+
+describe('describeRelacaoDependencia', () => {
+  it('traduz o código cru da relação de dependência pela tabela oficial', () => {
+    // Tabela oficial do programa da Receita (tabelas-irpf2026/dependencias.xml).
+    // O AJU-01 usa o código 21.
+    expect(describeRelacaoDependencia('21')).toBe('Filho(a) ou enteado(a) até 21 (vinte e um) anos.');
+    expect(describeRelacaoDependencia('22')).toBe('Filho(a) ou enteado(a) cursando nível superior, até 24 anos');
+    expect(describeRelacaoDependencia('31')).toBe('Pais, avós e bisavós com ou sem rend. até  R$ 28.467,20.');
+    expect(describeRelacaoDependencia('51')).toBe('Tutor ou Curador de pessoa absolutamente incapaz');
+  });
+
+  it('guarda o texto legal completo, que é diferente do rótulo de tela', () => {
+    expect(textoOficialRelacaoDependencia('23'))
+      .toContain('em qualquer idade, quando a sua remuneração não exceder as deduções autorizadas por lei');
+    expect(textoOficialRelacaoDependencia('23')).not.toBe(describeRelacaoDependencia('23'));
+  });
+
+  it('código desconhecido não inventa relação', () => {
+    // Um exercício futuro pode acrescentar código. Devolver texto de outro
+    // código mudaria a relação de dependência declarada.
+    expect(describeRelacaoDependencia('99')).toBe('');
+    expect(describeRelacaoDependencia('')).toBe('');
+    expect(describeRelacaoDependencia(null)).toBe('');
   });
 });

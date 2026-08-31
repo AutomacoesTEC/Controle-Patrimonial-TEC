@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCpfCnpj, formatDate } from '../utils/formatters';
+import { formatCpfCnpj, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import DateInput from '../components/DateInput';
@@ -141,16 +141,32 @@ export default function TitularPage() {
           </div>
           <div className="table-container">
             <table>
-              <thead><tr><th>Nome</th><th>CPF</th><th>Data de Nascimento</th><th>Relação de Dependência</th><th>Ações</th></tr></thead>
+              <thead><tr><th>Nome</th><th>CPF</th><th>Data de Nascimento</th><th>Relação de Dependência</th><th>Raça/Cor</th><th>Mora com o titular</th><th>Contato</th><th>Ações</th></tr></thead>
               <tbody>
                 {dependentes.length === 0 ? (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dependente cadastrado.</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dependente cadastrado.</td></tr>
                 ) : dependentes.map(d => (
                   <tr key={d.id}>
                     <td>{d.nome}</td>
                     <td>{formatCpfCnpj(d.cpf)}</td>
                     <td>{formatDate(d.dataNascimento)}</td>
-                    <td>{d.parentesco}</td>
+                    {/* O código sozinho não permite conferir nada: a dedução
+                        por dependente depende da relação. A descrição é a da
+                        tabela oficial do programa da Receita, e o texto legal
+                        completo fica na dica do mouse. */}
+                    <td title={textoOficialRelacaoDependencia(d.parentesco) || undefined}>
+                      {d.parentesco}
+                      {describeRelacaoDependencia(d.parentesco) && (
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{describeRelacaoDependencia(d.parentesco)}</div>
+                      )}
+                    </td>
+                    <td>{d.racaCor || d.racaCorCodigo || '-'}</td>
+                    <td>{simNao(d.moraComTitular)}</td>
+                    <td style={{ fontSize: '12px' }}>
+                      {d.email && <div>{d.email}</div>}
+                      {(d.dddCelular || d.celular) && <div>{[d.dddCelular && `(${d.dddCelular})`, d.celular].filter(Boolean).join(' ')}</div>}
+                      {!d.email && !d.celular && '-'}
+                    </td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicaoDependente(d)}>Editar</button>

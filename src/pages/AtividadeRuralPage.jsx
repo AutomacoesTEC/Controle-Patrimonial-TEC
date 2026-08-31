@@ -260,7 +260,14 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
             {participantesRuraisOficial.map((p, i) => (
               <tr key={i}>
                 <td>{p.nome}</td>
-                <td>{formatCpfCnpj(p.cpf)}</td>
+                {/* Participante estrangeiro não tem CPF, e a ficha o imprime
+                    sem documento. Deixar a célula vazia faria parecer dado
+                    faltando na importação. */}
+                <td>
+                  {p.estrangeiro
+                    ? <span className="badge badge-orange">Estrangeiro, sem CPF</span>
+                    : (formatCpfCnpj(p.cpf) || '-')}
+                </td>
                 {temVinculo && <td>{p.imovelNome || '-'}</td>}
               </tr>
             ))}
@@ -732,6 +739,14 @@ function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizo
             <h3 className="card-title">Apuração do Resultado Oficial</h3>
             <span className="badge badge-blue" title="Lida da declaração importada (.DBK ou PDF), não depende de lançamento nenhum feito no app">Da declaração original</span>
           </div>
+          {/* A opção pela forma de apuração muda o resultado tributável: pelo
+              resultado do livro-caixa, ou pelo limite de 20% da receita bruta.
+              Sem ela na tela, os números abaixo não se explicam. */}
+          {apuracaoResultadoRuralOficial.opcaoApuracao && (
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
+              Opção pela forma de apuração do resultado: <strong>{apuracaoResultadoRuralOficial.opcaoApuracao}</strong>
+            </p>
+          )}
           <div className="stats-grid" style={{ marginBottom: 0 }}>
             <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Receita Bruta Total</div>
@@ -837,6 +852,10 @@ function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizo
 // ver HANDOFF-2026-08-20.md); qualquer outro código aparece cru na tela em
 // vez de arriscar uma tradução inventada para um código nunca visto.
 const ESPECIE_REBANHO_NOME = { '01': 'Bovinos e bufalinos' };
+// O nome da espécie agora vem IMPRESSO na própria declaração (o parser o lê
+// junto com as seis colunas). A tabela acima fica como retaguarda para o
+// caminho .DBK, que só traz o código.
+const nomeDaEspecie = (m) => m.especieNome || ESPECIE_REBANHO_NOME[m.especieCodigo] || `Espécie (código ${m.especieCodigo})`;
 const formatCabecas = (v) => (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // Puramente informativo (igual impostoDevido/apuracaoGanhoCapital): mostra
@@ -865,7 +884,7 @@ function RebanhoSection({ movimentacaoRebanhoOficial }) {
           <tbody>
             {movimentacaoRebanhoOficial.map((m, i) => (
               <tr key={i}>
-                <td>{ESPECIE_REBANHO_NOME[m.especieCodigo] || `Espécie (código ${m.especieCodigo})`}</td>
+                <td>{nomeDaEspecie(m)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.estoqueInicial)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.aquisicoes)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.nascimentos)}</td>

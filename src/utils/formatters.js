@@ -232,6 +232,35 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// Relação de dependência, a tabela oficial do programa da Receita
+// (tabelas-irpf2026/dependencias.xml, extraído do IRPF 2026). O app guardava
+// e exibia o CÓDIGO CRU, e "21" sozinho não permite conferir nada: a dedução
+// por dependente depende da relação (filho até 21 anos, até 24 se cursando
+// nível superior, com deficiência em qualquer idade, e assim por diante).
+//
+// `curto` é o rótulo que o próprio programa mostra na tela; `oficial` é o
+// texto legal completo, usado como dica ao passar o mouse.
+export const RELACAO_DEPENDENCIA = {
+  '11': { curto: 'Companheiro(a) ou cônjuge', oficial: "Companheiro(a) com o(a) qual o(a) contribuinte tenha filho ou viva há mais de 5 (cinco) anos, ou cônjuge." },
+  '21': { curto: 'Filho(a) ou enteado(a) até 21 (vinte e um) anos.', oficial: "Filho(a) ou enteado(a) até 21 (vinte e um) anos." },
+  '22': { curto: 'Filho(a) ou enteado(a) cursando nível superior, até 24 anos', oficial: "Filho(a) ou enteado(a) cursando estabelecimento de nível superior ou escola técnica de 2º grau, até 24 (vinte e quatro) anos." },
+  '23': { curto: 'Filho(a) ou enteado(a) em qualquer idade, com deficiência', oficial: "Filho(a) ou enteado(a) com deficiência, em qualquer idade, quando a sua remuneração não exceder as deduções autorizadas por lei." },
+  '24': { curto: 'Irmãos, netos ou bisnetos até 21 anos com guarda judicial', oficial: "Irmão(ã), neto(a) ou bisneto(a) sem arrimo dos pais, do(a) qual o contribuinte detém a guarda judicial, até 21 (vinte e um) anos." },
+  '25': { curto: 'Irmãos, netos ou bisnetos até 24 anos, com guarda judicial', oficial: "Irmão(ã), neto(a) ou bisneto(a) sem arrimo dos pais, com idade até 24 anos, se ainda estiver cursando estabelecimento de nível superior ou escola técnica de 2º grau, desde que o contribuinte tenha detido sua guarda judicial até os 21 anos." },
+  '26': { curto: 'Irmãos, netos ou bisnetos com deficiência e guarda judicial.', oficial: "Irmão(ã), neto(a) ou bisneto(a) com deficiência, sem arrimo dos pais, do(a) qual o contribuinte detém a guarda judicial, em qualquer idade, quando a sua remuneração não exceder as deduções autorizadas por lei (Acórdão proferido pelo STF na ADI 5583/DF)." },
+  '31': { curto: 'Pais, avós e bisavós com ou sem rend. até  R$ 28.467,20.', oficial: "Pais, avós e bisavós que, em 2025, receberam rendimentos, tributáveis ou não, até R$ 28.467,20." },
+  '41': { curto: 'Menor pobre, até 21 (vinte e um) anos, com guarda judicial', oficial: "Menor pobre, até 21 (vinte e um) anos, que o contribuinte crie e eduque e do qual detenha a guarda judicial." },
+  '51': { curto: 'Tutor ou Curador de pessoa absolutamente incapaz', oficial: "A pessoa absolutamente incapaz, da qual o contribuinte seja tutor ou curador." },
+};
+
+export function describeRelacaoDependencia(codigo) {
+  return RELACAO_DEPENDENCIA[String(codigo || '').trim()]?.curto || '';
+}
+
+export function textoOficialRelacaoDependencia(codigo) {
+  return RELACAO_DEPENDENCIA[String(codigo || '').trim()]?.oficial || '';
+}
+
 // Marcadores de um bem que mudam a leitura fiscal dele e que a tabela não
 // mostrava: de quem o bem é, e onde ele está.
 //
