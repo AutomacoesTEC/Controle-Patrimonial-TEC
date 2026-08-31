@@ -232,6 +232,31 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// De onde veio um item importado: formato do arquivo, página e linha.
+//
+// Todo item que o parser do PDF produz carrega `origemDocumento`, e nada
+// disso aparecia na interface. É o que permite conferir um número contra a
+// declaração impressa sem procurar página por página.
+//
+// O caminho .DBK ainda NÃO marca origem nos itens (ver importParsers): lá o
+// arquivo é de largura fixa e a referência útil seria o número do registro.
+// Enquanto isso não existe, item vindo do .DBK simplesmente não mostra origem,
+// em vez de mostrar uma origem inventada.
+export function descreverOrigemDocumento(item) {
+  const o = item?.origemDocumento;
+  if (!o) return '';
+  if (o.formato === 'pdf') {
+    if (!o.pagina) return 'PDF da declaração';
+    return o.linha
+      ? `PDF, página ${o.pagina}, linha ${o.linha}`
+      : `PDF, página ${o.pagina}`;
+  }
+  if (o.formato === 'dbk') {
+    return o.registro ? `Arquivo da declaração, registro ${o.registro}` : 'Arquivo da declaração';
+  }
+  return '';
+}
+
 // Relação de dependência, a tabela oficial do programa da Receita
 // (tabelas-irpf2026/dependencias.xml, extraído do IRPF 2026). O app guardava
 // e exibia o CÓDIGO CRU, e "21" sozinho não permite conferir nada: a dedução

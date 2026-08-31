@@ -4019,6 +4019,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         rendimentos.push({
           ...base,
           id: rendId++,
+          ...(d.origemDocumento ? { origemDocumento: d.origemDocumento } : {}),
           cnpj_fonte: d.cnpj,
           nome_fonte: d.nome,
           // rend-06: a descrição do rendimento (coluna própria no código 99) é
@@ -4042,6 +4043,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
       rendimentos.push({
         ...base,
         id: rendId++,
+        ...(g.origemDocumento ? { origemDocumento: g.origemDocumento } : {}),
         cnpj_fonte: '',
         nome_fonte: '',
         beneficiario: ehDependente ? 'Dependente' : 'Titular',
@@ -4068,6 +4070,13 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
   // Referência compacta para localizar cada registro estruturado no texto
   // preservado por página. `linha` é a linha visual reconstruída pelo parser,
   // não uma posição inventada no conteúdo original.
+  // Página e linha visual de onde o item saiu, para a interface poder apontar
+  // o número de volta na declaração impressa.
+  //
+  // ATENÇÃO ao comparar com AUDITORIA/rows-pdfjs/*.rows.txt: o dump rotula as
+  // linhas a partir de ZERO (p5 r40) e este campo guarda a contagem a partir de
+  // UM (linha 41), que é como uma pessoa conta linha numa página. São o mesmo
+  // lugar do documento. Não "corrigir" um pelo outro.
   const origemPdf = (pagina, linha) => ({ formato: 'pdf', pagina, linha });
 
   // Índice da linha visual que já foi consumida como continuação de um título
@@ -5614,6 +5623,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
             descricao = '';
           }
           rieGrupo.detalhes.push({
+            // Página e linha de onde ESTE detalhe saiu, para a tela poder
+            // apontar o item de volta na declaração impressa.
+            origemDocumento: origemPdf(pageNum, ri + 1),
             beneficiario: cells[0].t,
             cpf: cpf ? cpf.t.replace(/\D/g, '') : '',
             cnpj: doc ? doc.t.replace(/\D/g, '') : '',
@@ -5635,6 +5647,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
             codigo: agregada[1],
             descricao: normSpace(agregada[2]),
             valorAgregado: parseMoneyBR(valores[0].t),
+            // Origem da linha AGREGADA, usada quando o código não tem
+            // sub-tabela e é ela que vira o rendimento.
+            origemDocumento: origemPdf(pageNum, ri + 1),
             detalhes: [],
           };
           continue;

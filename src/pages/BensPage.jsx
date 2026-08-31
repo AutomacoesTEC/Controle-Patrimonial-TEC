@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
-import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem, descreverOrigemDocumento} from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -171,6 +171,9 @@ export default function BensPage({ onVoltar } = {}) {
                       {/* De quem o bem é e onde ele está: bem do dependente não é
                           patrimônio do titular, e bem no exterior tem regra
                           própria. Ver marcadoresDoBem. */}
+                      {descreverOrigemDocumento(bem) && (
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(bem)}</div>
+                      )}
                       {marcadoresDoBem(bem).map(marca => (
                         <span
                           key={marca.tipo}

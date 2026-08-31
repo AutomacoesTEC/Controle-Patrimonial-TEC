@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -225,5 +225,31 @@ describe('describeRelacaoDependencia', () => {
     expect(describeRelacaoDependencia('99')).toBe('');
     expect(describeRelacaoDependencia('')).toBe('');
     expect(describeRelacaoDependencia(null)).toBe('');
+  });
+});
+
+describe('descreverOrigemDocumento', () => {
+  it('descreve a origem de um item vindo do PDF', () => {
+    // AJU-01: o primeiro pagamento sai da página 7, linha 31.
+    expect(descreverOrigemDocumento({ origemDocumento: { formato: 'pdf', pagina: 7, linha: 31 } }))
+      .toBe('PDF, página 7, linha 31');
+  });
+
+  it('aguenta origem parcial sem inventar o que falta', () => {
+    expect(descreverOrigemDocumento({ origemDocumento: { formato: 'pdf', pagina: 7 } })).toBe('PDF, página 7');
+    expect(descreverOrigemDocumento({ origemDocumento: { formato: 'pdf' } })).toBe('PDF da declaração');
+  });
+
+  it('item sem origem não mostra origem nenhuma', () => {
+    // Cadastro manual e itens vindos do .DBK, que ainda não marcam origem.
+    // Uma origem inventada aponta a pessoa para a página errada do documento.
+    expect(descreverOrigemDocumento({})).toBe('');
+    expect(descreverOrigemDocumento(null)).toBe('');
+    expect(descreverOrigemDocumento({ origemDocumento: { formato: 'xml' } })).toBe('');
+  });
+
+  it('já entende o formato do arquivo eletrônico, para quando ele marcar origem', () => {
+    expect(descreverOrigemDocumento({ origemDocumento: { formato: 'dbk', registro: 27 } }))
+      .toBe('Arquivo da declaração, registro 27');
   });
 });

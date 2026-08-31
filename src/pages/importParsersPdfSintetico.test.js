@@ -971,3 +971,44 @@ describe.skipIf(!temPdfs)('quadros de espólio e de saída definitiva', () => {
     expect(aju.saidaDefinitivaOficial).toBeNull();
   });
 });
+
+// Rastreabilidade: todo item importado precisa saber de que página e linha da
+// declaração ele saiu. Sem isso, conferir um número contra o documento
+// impresso vira busca página por página.
+describe.skipIf(!temPdfs)('origem de cada item no documento', () => {
+  let aju;
+  beforeAll(async () => { aju = await extrair('AJU'); });
+
+  it('todo rendimento sabe de onde veio, inclusive os isentos e os exclusivos', () => {
+    // Antes, só os dois rendimentos de PJ carregavam origem: os isentos e os
+    // de tributação exclusiva saem do flush do agregado, fora do laço de
+    // páginas, e perdiam a referência.
+    const semOrigem = aju.rendimentos.filter(r => !r.origemDocumento);
+    expect(semOrigem).toEqual([]);
+    expect(aju.rendimentos.length).toBeGreaterThan(15);
+  });
+
+  it('a origem aponta para uma página que existe no documento', () => {
+    for (const r of aju.rendimentos) {
+      expect(r.origemDocumento.formato).toBe('pdf');
+      expect(r.origemDocumento.pagina).toBeGreaterThan(0);
+      expect(r.origemDocumento.pagina).toBeLessThanOrEqual(41);
+      expect(r.origemDocumento.linha).toBeGreaterThan(0);
+    }
+  });
+
+  it('bens, pagamentos e dependentes também carregam origem', () => {
+    for (const lista of [aju.bens, aju.pagamentos, aju.dependentes]) {
+      expect(lista.length).toBeGreaterThan(0);
+      expect(lista.filter(x => !x.origemDocumento)).toEqual([]);
+    }
+    // Primeiro pagamento da ficha: p7 r30 no dump (contagem a partir de zero),
+    // que é a linha 31 contada a partir de um, como o campo guarda.
+    expect(aju.pagamentos[0].origemDocumento).toEqual({ formato: 'pdf', pagina: 7, linha: 31 });
+    // E o último rendimento sai da linha do detalhe do dependente, p5 r40 no
+    // dump: prova de que a origem aponta para a linha do DADO, e não para o
+    // rodapé da página que vem logo abaixo.
+    const ultimo = aju.rendimentos[aju.rendimentos.length - 1];
+    expect(ultimo.origemDocumento).toEqual({ formato: 'pdf', pagina: 5, linha: 41 });
+  });
+});

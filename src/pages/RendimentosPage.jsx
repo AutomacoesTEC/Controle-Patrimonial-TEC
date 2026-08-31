@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -157,7 +157,12 @@ export default function RendimentosPage() {
                         <td>{describeRendimentoTipo(r.tipo)}</td>
                         <td>{formatDate(r.data)}</td>
                         <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
-                        <td>{(r.nome_fonte || '').substring(0, 50)}</td>
+                        <td>
+                          {(r.nome_fonte || '').substring(0, 50)}
+                          {descreverOrigemDocumento(r) && (
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(r)}</div>
+                          )}
+                        </td>
                         <td>{r.beneficiario}</td>
                         <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.valor)}</td>
                         <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -102,7 +102,12 @@ export default function PagamentosPage() {
                     )}
                   </td>
                   <td>{formatDate(p.data)}</td>
-                  <td>{(p.nome_beneficiario || '').substring(0, 40)}</td>
+                  <td>
+                    {(p.nome_beneficiario || '').substring(0, 40)}
+                    {descreverOrigemDocumento(p) && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(p)}</div>
+                    )}
+                  </td>
                   <td style={{ fontSize: '12px' }}>
                     {descreverTitularidade(p) || <span style={{ color: 'var(--text-muted)' }}>Não informada</span>}
                   </td>

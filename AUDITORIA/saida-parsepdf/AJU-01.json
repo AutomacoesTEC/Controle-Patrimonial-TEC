@@ -277,6 +277,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 3,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 4,
+          "linha": 43
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU ISE DIVIDENDOS",
         "beneficiario": "Titular",
@@ -291,6 +296,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 4,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 7
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU ISE APLICACAO",
         "beneficiario": "Titular",
@@ -305,6 +315,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 5,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 10
+        },
         "cnpj_fonte": "22233344405",
         "nome_fonte": "AJU ISE DOACAO RECEBIDA",
         "beneficiario": "Titular",
@@ -319,6 +334,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 6,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 14
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU ISE GANHO ISENTO",
         "descricao": "AJU ISE GANHO ISENTO",
@@ -334,6 +354,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 7,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 16
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU ISE DEPENDENTE DETALHE",
         "descricao": "AJU ISE DEPENDENTE DETALHE",
@@ -349,6 +374,11 @@
         "irrf": 505.16,
         "data": "2025-12-31",
         "id": 8,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 21
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -363,6 +393,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 9,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 22
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -377,6 +412,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 10,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 23
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -391,6 +431,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 11,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 24
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -405,6 +450,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 12,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 28
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU EXC APLICACAO",
         "beneficiario": "Titular",
@@ -419,6 +469,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 13,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 29
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -433,6 +488,11 @@
         "irrf": 105.26,
         "data": "2025-12-31",
         "id": 14,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 30
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Dependente",
@@ -447,6 +507,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 15,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 33
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU EXC JCP",
         "beneficiario": "Titular",
@@ -461,6 +526,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 16,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 34
+        },
         "cnpj_fonte": "",
         "nome_fonte": "",
         "beneficiario": "Titular",
@@ -475,6 +545,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 17,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 37
+        },
         "cnpj_fonte": "",
         "nome_fonte": "AJU EXC PREMIO",
         "beneficiario": "Titular",
@@ -489,6 +564,11 @@
         "irrf": 0,
         "data": "2025-12-31",
         "id": 18,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 5,
+          "linha": 41
+        },
         "cnpj_fonte": "55566677000183",
         "nome_fonte": "AJU EXC DEPENDENTE",
         "descricao": "AJU EXC DEPENDENTE",
