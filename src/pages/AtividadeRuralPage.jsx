@@ -869,7 +869,7 @@ function RebanhoSection({ movimentacaoRebanhoOficial }) {
     <div className="card" style={{ marginBottom: '20px' }}>
       <div className="card-header">
         <h3 className="card-title">Movimentação do Rebanho</h3>
-        <span className="badge badge-blue" title="Lida do arquivo .DBK importado, não depende de lançamento nenhum feito no app">Da declaração original</span>
+        <span className="badge badge-blue" title="Lida da declaração importada, pelo PDF ou pelo arquivo .DBK, e não depende de lançamento nenhum feito no app">Da declaração original</span>
       </div>
       <div className="table-container">
         <table>

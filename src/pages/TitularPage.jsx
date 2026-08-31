@@ -128,6 +128,19 @@ export default function TitularPage() {
                   <tr><th>Ocupação principal</th><td colSpan={3}>{[contribuinte.ocupacaoCodigo, contribuinte.ocupacaoDescricao].filter(Boolean).join(' - ') || '-'}</td></tr>
                   <tr><th>Tipo de declaração</th><td>{contribuinte.tipoDeclaracao || contribuinte.tipoDeclaracaoCodigo || '-'}</td><th>Retificadora</th><td>{simNao(contribuinte.retificadora)}</td></tr>
                   <tr><th>Recibo anterior</th><td>{contribuinte.reciboUltimaDeclaracao || '-'}</td><th>Doença grave/deficiência</th><td>{simNao(contribuinte.doencaDeficiencia)}</td></tr>
+                  {/* Duas perguntas que a identificação imprime e que ficavam
+                      só no estado. A primeira NÃO é cadastral: quem era
+                      residente no exterior e passou a ser residente no Brasil
+                      no ano tem a tributação partida em duas condições
+                      diferentes dentro do mesmo ano-calendário, e essa é a
+                      única linha da tela que diz isso. Rótulos conferidos no
+                      AJU-01 p1 r9 e no parser (importParsers.js). */}
+                  <tr>
+                    <th title="Passou a ser residente no Brasil durante o ano-calendário, vindo do exterior. Muda a condição de residência dentro do próprio ano.">Era residente no exterior e passou a ser residente no Brasil</th>
+                    <td>{simNao(contribuinte.retornoPais)}</td>
+                    <th>Houve alteração de dados cadastrais</th>
+                    <td>{simNao(contribuinte.alteracaoDadosCadastrais)}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>

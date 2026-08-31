@@ -259,6 +259,81 @@ export function codigosDoRendimento(rendimento) {
   };
 }
 
+// As outras COLUNAS da ficha de Rendimentos Tributáveis Recebidos de Pessoa
+// Jurídica. A ficha impressa tem cinco colunas de valor por fonte pagadora
+// (AJU-01 p2 r5/r6: "REND. RECEBIDOS DE PES. JURÍDICA", "CONTR. PREVID.
+// OFICIAL", "IMPOSTO RETIDO NA FONTE", "13º SALÁRIO" e "IRRF SOBRE 13º
+// SALÁRIO"), e a tabela do app mostrava só duas delas, valor e imposto
+// retido. As três que sobravam são extraídas desde sempre e morriam no estado.
+//
+// RIGOR FISCAL, e é o motivo de cada uma aparecer com o seu próprio nome:
+//
+// - A contribuição previdenciária oficial descontada pela fonte é DEDUÇÃO da
+//   base de cálculo do ajuste anual (art. 4º, IV, da Lei nº 9.250/1995), não
+//   é imposto e não se soma ao IRRF.
+// - O 13º salário é rendimento de TRIBUTAÇÃO EXCLUSIVA na fonte (art. 638 do
+//   Decreto nº 9.580/2018): não entra na base do ajuste anual e o imposto
+//   dele não é compensável na apuração do saldo. Por isso ele não está no
+//   valor da linha, e a nota diz onde ele é somado, para ninguém contá-lo
+//   duas vezes ao conferir. O próprio programa da Receita o transporta para a
+//   ficha de Rendimentos Sujeitos à Tributação Exclusiva/Definitiva, no
+//   código 01 (titular) ou 08 (dependentes) — conferido no AJU-01, cujo 13º
+//   do titular, 5.105,15 com IRRF de 505,16, reaparece inteiro no
+//   `exclusivo_0001`.
+const ehNumeroPositivo = (v) => Number.isFinite(Number(v)) && Number(v) > 0;
+
+export function colunasDaFontePagadora(rendimento) {
+  if (!rendimento) return [];
+  const colunas = [];
+  if (ehNumeroPositivo(rendimento.contribuicaoPrevidenciaria)) {
+    colunas.push({
+      chave: 'previdencia',
+      rotulo: 'Contribuição previdenciária oficial',
+      valor: Number(rendimento.contribuicaoPrevidenciaria),
+      nota: 'Descontada pela fonte pagadora. É dedução da base de cálculo do ajuste anual, não é imposto.',
+    });
+  }
+  if (ehNumeroPositivo(rendimento.decimoTerceiro)) {
+    colunas.push({
+      chave: 'decimoTerceiro',
+      rotulo: '13º salário',
+      valor: Number(rendimento.decimoTerceiro),
+      nota: 'Tributação exclusiva na fonte: não entra na base do ajuste anual e já está lançado à parte, na ficha de rendimentos sujeitos à tributação exclusiva. Não some com o valor desta linha.',
+    });
+  }
+  if (ehNumeroPositivo(rendimento.irrfDecimoTerceiro)) {
+    colunas.push({
+      chave: 'irrfDecimoTerceiro',
+      rotulo: 'IRRF sobre o 13º salário',
+      valor: Number(rendimento.irrfDecimoTerceiro),
+      nota: 'Imposto da tributação exclusiva do 13º salário. É definitivo: não se soma ao imposto retido da coluna ao lado nem se compensa no ajuste anual.',
+    });
+  }
+  return colunas;
+}
+
+// A coluna "Tipo" do Demonstrativo de Apuração da Lei nº 14.754/2023, com a
+// legenda que a própria ficha imprime logo abaixo da tabela (AJU-01 p39 r11,
+// r14, r15 e r18 a r20).
+//
+// RIGOR FISCAL: as duas siglas não são detalhe de layout. O rendimento de
+// APLICAÇÃO FINANCEIRA no exterior é tributado pelo art. 3º da Lei nº
+// 14.754/2023, no momento da realização; o LUCRO de entidade CONTROLADA no
+// exterior é tributado pelo art. 5º, em 31 de dezembro, tenha sido distribuído
+// ou não. Ficam nas mesmas colunas da mesma tabela e o número do bem se
+// repete, então sem esta coluna as duas linhas do AJU-01 aparecem como "bem 7"
+// duas vezes, sem nada que diga qual é qual.
+export const TIPO_DEMONSTRATIVO_EXTERIOR = {
+  AF: 'Aplicação financeira',
+  LD: 'Lucros e dividendos',
+};
+
+export function descreverTipoDemonstrativoExterior(tipo) {
+  const sigla = String(tipo || '').trim().toUpperCase();
+  if (!sigla) return null;
+  return { sigla, descricao: TIPO_DEMONSTRATIVO_EXTERIOR[sigla] || '' };
+}
+
 // Documento de um participante de imóvel rural explorado em condomínio ou
 // parceria. O participante pode ser ESTRANGEIRO e, nesse caso, a ficha o
 // imprime sem CPF: célula vazia ali parece dado perdido na importação, quando

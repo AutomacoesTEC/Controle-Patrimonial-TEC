@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS, descreverTipoDemonstrativoExterior } from '../utils/formatters';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { totaisEvolucaoPatrimonial } from '../store/demonstrativos';
@@ -15,7 +15,12 @@ import { blocosResumoDeclaracao, conferenciasResumo } from '../store/resumoDecla
 // layout foi extrapolado do mesmo padrão visual já confirmado em
 // Pagamentos Efetuados (mesmo programa da Receita, mesma família de
 // tabela), nunca conferido campo a campo contra um caso real.
-function CardDoacoes({ titulo, itens, comCategoria = false }) {
+// `comParcelaNaoDedutivel`: só a ficha de DOAÇÕES EFETUADAS tem essa coluna.
+// Conferido no AJU-01: p8 r15/r16 imprimem "PARC. NÃO DEDUTÍVEL" ao lado do
+// valor pago, e as fichas de partidos (p10 r11) e de ECA e pessoa idosa
+// (p38 r47, p39 r4) só têm nome, documento e valor. Ligar a coluna nas três
+// poria uma coluna vazia em duas tabelas que a declaração não tem.
+function CardDoacoes({ titulo, itens, comCategoria = false, comParcelaNaoDedutivel = false }) {
   if (itens.length === 0) return null;
   // A ressalva de layout vale só para doação vinda do ARQUIVO. Doação
   // cadastrada à mão (origem 'manual', ver ADD_DOACAO_* no reducer) foi
@@ -55,6 +60,9 @@ function CardDoacoes({ titulo, itens, comCategoria = false }) {
               <th>Beneficiário</th>
               <th>CPF/CNPJ</th>
               <th style={{ textAlign: 'right' }}>Valor</th>
+              {comParcelaNaoDedutivel && (
+                <th style={{ textAlign: 'right' }} title="Parte do valor pago que não reduz a base de cálculo do imposto. A ficha a informa em coluna própria, ao lado do valor.">Parcela não dedutível</th>
+              )}
               <th>Descrição</th>
             </tr>
           </thead>
@@ -66,6 +74,9 @@ function CardDoacoes({ titulo, itens, comCategoria = false }) {
                 <td>{it.nome_beneficiario}</td>
                 <td>{formatCpfCnpj(it.cpf_cnpj)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(it.valor)}</td>
+                {comParcelaNaoDedutivel && (
+                  <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(it.parcela_nao_dedutivel || 0)}</td>
+                )}
                 <td>{it.descricao}</td>
               </tr>
             ))}
@@ -323,7 +334,7 @@ export default function RelatorioPage() {
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
               <h3 className="card-title">Demonstrativo Lei 14.754/2023 (por bem)</h3>
-              <span className="badge badge-blue" title="Lido do arquivo .DBK importado, não é calculado pelo app">Da declaração original</span>
+              <span className="badge badge-blue" title="Lido da declaração importada, pelo PDF ou pelo arquivo .DBK, e não calculado pelo app">Da declaração original</span>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
               Detalhamento por bem do total já mostrado acima (Imposto Lei 14.754/2023). O número do
@@ -335,6 +346,12 @@ export default function RelatorioPage() {
                 <thead>
                   <tr>
                     <th>Bem</th>
+                    {/* A ficha imprime esta coluna e a legenda dela (AJU-01
+                        p39 r11 e r18 a r20). Sem ela, as duas linhas do mesmo
+                        bem ficam indistinguíveis, e são regimes diferentes:
+                        art. 3º da Lei nº 14.754/2023 na aplicação financeira,
+                        art. 5º no lucro de entidade controlada. */}
+                    <th>Tipo</th>
                     <th style={{ textAlign: 'right' }}>Ganho/Prejuízo</th>
                     <th style={{ textAlign: 'right' }}>Imposto Devido</th>
                     <th style={{ textAlign: 'right' }}>Imposto Pago no Brasil/Exterior</th>
@@ -346,6 +363,20 @@ export default function RelatorioPage() {
                   {demonstrativoExteriorOficial.map((d, i) => (
                     <tr key={i}>
                       <td>{d.bem}</td>
+                      <td>
+                        {(() => {
+                          const t = descreverTipoDemonstrativoExterior(d.tipo);
+                          if (!t) return '-';
+                          return (
+                            <>
+                              {t.sigla}
+                              {t.descricao && (
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t.descricao}</div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.ganhoPrejuizo)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.impostoDevido)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.impostoPagoBrasilExterior)}</td>
@@ -359,7 +390,7 @@ export default function RelatorioPage() {
           </div>
         )}
 
-        <CardDoacoes titulo="Doações Efetuadas" itens={doacoesEfetuadasOficial} />
+        <CardDoacoes titulo="Doações Efetuadas" itens={doacoesEfetuadasOficial} comParcelaNaoDedutivel />
         <CardDoacoes titulo="Doações a Partidos Políticos e Candidatos a Cargos Eletivos" itens={doacoesPartidosOficial} />
         <CardDoacoes titulo="Doações Diretamente na Declaração (ECA e Pessoa Idosa)" itens={doacoesEcaIdosoOficial} comCategoria />
 

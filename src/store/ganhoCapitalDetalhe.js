@@ -98,11 +98,24 @@ export function blocosOperacaoGanhoCapital(op) {
   const calculo = op.calculoImposto ? bloco('calculo', op.alienacaoAPrazo
     ? 'Cálculo do imposto, alienação a prazo'
     : 'Cálculo do imposto, alienação à vista', [
+    // Na ordem em que a declaração imprime as linhas do quadro: a prazo,
+    // AJU-01 p18 r4/r5 (cabeçalho de duas linhas) e r8 (linha TOTAL); à
+    // vista, AJU-01 p20 r39 a r44.
     linha('Total recebido nas parcelas', op.calculoImposto.totalRecebidoParcelas),
+    linha('Total da corretagem das parcelas', op.calculoImposto.totalCorretagemParcelas),
+    linha('Total líquido das parcelas', op.calculoImposto.totalLiquidoParcelas),
     linha('Total do custo de aquisição das parcelas', op.calculoImposto.totalAquisicaoParcelas),
     linha('Ganho de capital total', op.calculoImposto.ganhoCapitalTotal),
     linha('Alíquota média', op.calculoImposto.aliquotaMedia, 'percentual'),
     linha('Imposto devido', op.calculoImposto.impostoDevido),
+    // RIGOR FISCAL: o imposto retido na fonte da Lei nº 11.033/2004 é
+    // COMPENSADO com o imposto devido do ganho de capital, e o que a pessoa
+    // efetivamente deve é o resultado dessa compensação. Mostrar só o imposto
+    // devido bruto e o imposto pago, pulando as duas linhas do meio, faz a
+    // tela afirmar um valor devido que a declaração não afirma sempre que
+    // houver retenção. As duas só aparecem quando a ficha as imprime.
+    linha('IR na fonte (Lei nº 11.033/2004)', op.calculoImposto.irFonteLei11033),
+    linha('Imposto devido após compensação', op.calculoImposto.impostoDevidoAposCompensacao),
     linha('Imposto pago', op.calculoImposto.impostoPago),
   ]) : null;
 

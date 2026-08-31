@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -90,6 +90,13 @@ export default function RendimentosPage() {
       ['Beneficiário', r => r.beneficiario || 'Titular'],
       ['Valor', r => r.valor || 0],
       ['IRRF', r => r.irrf || 0],
+      // As três colunas restantes da ficha de pessoa jurídica. Só ela as tem,
+      // então ficam zeradas nas demais linhas — mas sem elas a planilha
+      // exportada esconderia o 13º salário e a previdência oficial que a tela
+      // mostra. Ver colunasDaFontePagadora.
+      ['Contribuição previdenciária oficial', r => r.contribuicaoPrevidenciaria || 0],
+      ['13º salário (tributação exclusiva)', r => r.decimoTerceiro || 0],
+      ['IRRF sobre o 13º salário', r => r.irrfDecimoTerceiro || 0],
     ],
     'Rendimentos', 'rendimentos', state.anoCalendario
   );
@@ -184,7 +191,21 @@ export default function RendimentosPage() {
                           )}
                         </td>
                         <td>{r.beneficiario}</td>
-                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.valor)}</td>
+                        <td style={{ textAlign: 'right' }} className="currency">
+                          {formatCurrency(r.valor)}
+                          {/* As outras colunas da ficha de pessoa jurídica.
+                              Ficam sob o valor, e não em colunas próprias,
+                              porque só a ficha de PJ as tem: como coluna,
+                              ficariam vazias em toda a tabela. Cada uma diz o
+                              que é ao passar o mouse, para o 13º não ser
+                              somado ao valor da linha. Ver
+                              colunasDaFontePagadora. */}
+                          {colunasDaFontePagadora(r).map(c => (
+                            <div key={c.chave} title={c.nota} style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>
+                              {c.rotulo}: {formatCurrency(c.valor)}
+                            </div>
+                          ))}
+                        </td>
                         <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>
                         <td>
                           <div style={{ display: 'flex', gap: '4px' }}>
