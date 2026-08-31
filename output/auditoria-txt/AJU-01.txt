@@ -1,0 +1,2301 @@
+===== PAGINA 1 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+IDENTIFICAÇÃO DO CONTRIBUINTE
+CPF: 111.444.777-35Nome: AUDITORIA PDF TEC AJUSTE
+Data de Nascimento: 11/01/1980
+CPF do cônjuge ou companheiro(a): 222.333.444-05Possui cônjuge ou companheiro(a)? Sim
+Houve alteração de dados cadastrais? Sim
+Endereço: RUA SENTINELA AJU PES Número: 1101
+Complemento: APTO 11 Bairro/Distrito: BAIRRO SENTINELA
+Município: SAO PAULO UF: SP
+CEP: 01001-000 DDD/Telefone: (11) 3456-7890
+Natureza da Ocupação: 12 - PROPRIETÁRIO DE EMPRESA OU DE FIRMA INDIVIDUAL OU EMPREGADOR-TITULAR
+Ocupação Principal: 391 - OUTROS TÉCNICOS DE NÍVEL MÉDIO
+Tipo de declaração: Declaração de Ajuste Anual Original
+Nº do recibo da última declaração entregue do exercício de 2025:
+DDD/Celular:E-mail: AUDITORIA.PDF.AJU@EXAMPLE.INVALID (11) 99876-5432
+Há declarante ou dependente com doença grave ou deficiência física ou mental? Não
+Era residente no exterior e passou a ser residente no Brasil em 2025? Não
+PardaRaça/Cor:
+DEPENDENTES
+CÓDIGO NOME DATA DE NASCIMENTO CPF
+21 AJU PES DEPENDENTE UM 12/02/2015 333.444.555-08
+AJU.PES.DEP1@EXAMPLE.INVALIDEmail : 997654321(11)Celular : PardaRaça/Cor:
+Dependente mora com o titular da declaração? Não
+TOTAL DE DEDUÇÃO COM DEPENDENTES 2.275,08
+ALIMENTANDOS
+Os pagamentos de pensão alimentícia ou de despesas com instrução ou médicas em favor dos alimentandos devem ser em razão
+de decisão judicial, acordo homologado judicialmente ou escritura pública a que se refere o art. 733 da Lei nº 13.105,
+de 16 de março de 2015 - Código de Processo Civil.
+NOME RESIDENTE DATA DE NASCIMENTO CPF Alimentando do:
+444.555.666-19No Brasil 13/03/2010AJU PES ALIMENTANDO UM (Titular)
+111.444.777-35
+INFORMAÇÕES SOBRE A ESCRITURA PÚBLICA
+Nome do cartório: CARTORIO AJU PES SENTINELA
+UF: SP
+CNPJ: 55.566.677/0001-83
+Livro: L11
+Data da lavratura: 14/04/2025
+Folhas: F22 Município: SAO PAULO
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (Valores em Reais)
+NOME DA FONTE PAGADORA REND. RECEBIDOS
+DE PES. JURÍDICA
+CONTR. PREVID.
+OFICIAL
+IMPOSTO RETIDO
+NA FONTE
+13º SALÁRIO IRRF SOBRE 13º
+SALÁRIO
+Página 1 de 41
+===== PAGINA 2 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (Valores em Reais)
+NOME DA FONTE PAGADORA REND. RECEBIDOS
+DE PES. JURÍDICA
+CONTR. PREVID.
+OFICIAL
+IMPOSTO RETIDO
+NA FONTE
+13º SALÁRIO IRRF SOBRE 13º
+SALÁRIO
+AJU RPJ FONTE TITULAR 51.101,11 5.102,12 4.104,14 5.105,15 505,16
+CNPJ/CPF: 55.566.677/0001-83
+TOTAL 51.101,11 5.105,154.104,145.102,12 505,16
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOAS JURÍDICAS PELOS DEPENDENTES (Valores em Reais)
+NOME DA FONTE PAGADORA REND. RECEBIDOS
+DE PES. JURÍDICA
+CONTR. PREVID.
+OFICIAL
+IMPOSTO RETIDO
+NA FONTE
+13º SALÁRIO IRRF SOBRE
+13º SALÁRIO
+AJU RPJ FONTE DEPENDENTE
+55.566.677/0001-83
+12.201,21 1.202,22 904,24 1.205,25
+333.444.555-08CPF DO DEPENDENTE:
+105,26
+CNPJ/CPF:
+TOTAL 12.201,21 1.202,22 904,24 1.205,25 105,26
+Página 2 de 41
+===== PAGINA 3 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELO TITULAR (Valores em Reais)
+0,00 0 305,35 1.304,34JAN
+FEV
+MAR
+ABR
+MAI
+JUN
+JUL
+AGO
+SET
+OUT
+NOV
+DEZ
+PREVIDÊNCIA
+OFICIAL
+QUANTIDADE DE
+DEPENDENTES
+PENSÃO
+ALIMENTÍCIA LIVRO CAIXA DARF PAGO
+CÓD. 0190
+406,36
+0,00 0 0,00 1.312,43 512,44
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+0,00 0 0,00 0,00 0,00
+TOTAL 0,00 305,35 2.616,77 918,80
+DEDUÇÕES CARNÊ-LEÃO
+OUT
+NOV
+JUN
+AGO
+JUL
+SET
+MAR
+ABR
+DEZ
+FEV
+TOTAL
+MAI
+JAN
+0,00
+0,00
+0,00
+0,00
+RENDIMENTOS
+0,00
+6.624,84
+0,00
+0,00
+0,00
+TRABALHO NÃO
+ASSALARIADO
+0,00
+0,00
+0,00
+0,00 4.322,52
+0,00
+0,00
+0,00
+0,00
+0,00
+ALUGUÉIS, INCLUSIVE
+POR TEMPORADA
+0,00
+0,00
+0,00
+0,00
+2.302,32
+0,00
+0,00
+7.311,41
+7.311,41
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+EXTERIOR
+0,00
+0,00
+0,00
+0,00
+303,33
+0,00
+0,00
+0,00
+0,00
+303,33
+0,00
+0,00
+0,00
+OUTROS
+0,00
+0,00
+0,00
+0,00
+NIT/PIS/PASEP:
+Página 3 de 41
+===== PAGINA 4 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELOS DEPENDENTES
+0,00 0 0,00 0,00
+0,00
+JAN
+FEV
+MAR
+ABR
+MAI
+JUN
+JUL
+AGO
+SET
+OUT
+NOV
+DEZ
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 403,63
+0,00
+204,64
+0,00 0 0,00 0,00
+2.411,65
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+0,00 0 0,00 0,00
+0,00
+0,00
+TOTAL
+2.411,65
+0,00 0,00 403,63 204,64
+EXTERIOR
+PREVIDÊNCIA
+OFICIAL
+QUANTIDADE DE
+DEPENDENTES
+PENSÃO
+ALIMENTÍCIA LIVRO CAIXA DARF PAGO
+CÓD. 0190
+333.444.555-08
+CARNÊ-LEÃODEDUÇÕES
+0,00
+0,00
+SET
+TRABALHO NÃO
+ASSALARIADO
+MAI
+DEZ
+0,00
+NOV
+0,00
+0,00
+JUN
+TOTAL
+0,00
+JAN
+0,00
+0,00
+0,00
+AGO
+OUT
+0,00
+RENDIMENTOS
+JUL
+ABR
+0,00
+MAR
+0,00
+0,00
+FEV
+0,00
+0,00
+1.402,62
+ALUGUÉIS, INCLUSIVE
+POR TEMPORADA
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+OUTROS
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+1.402,62 0,00
+CPF do dependente: NIT/PIS/PASEP:
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS (Valores em Reais)
+09. Lucros e dividendos recebidos 20.502,72
+CNPJ da Fonte Pagadora Nome da Fonte PagadoraBeneficiário ValorCPF
+55.566.677/0001-83 AJU ISE DIVIDENDOSTitular 20.502,72111.444.777-35
+Página 4 de 41
+===== PAGINA 5 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+12. Rendimentos de cadernetas de poupança, letras hipotecárias, letras de crédito do agronegócio e imobiliário (LCA e LCI) e
+certificados de recebíveis do agronegócio e imobiliários (CRA e CRI)
+3.503,73
+CNPJ da Fonte Pagadora Nome da Fonte PagadoraBeneficiário ValorCPF
+55.566.677/0001-83 AJU ISE APLICACAOTitular 3.503,73111.444.777-35
+14. Transferências patrimoniais - doações e heranças 14.504,74
+CPF/CNPJ do Doador/Espólio Nome do Doador/EspólioBeneficiário ValorCPF
+222.333.444-05 AJU ISE DOACAO RECEBIDATitular 14.504,74111.444.777-35
+99. Outros
+CPF/CNPJ da Fonte
+Pagadora
+Nome da Fonte
+Pagadora
+Beneficiário ValorCPF Descrição
+Titular 111.444.777-35 55.566.677/0001-83 AJU ISE GANHO
+ISENTO
+AJU ISE GANHO
+ISENTO
+5.505,75
+Dependente 333.444.555-08 55.566.677/0001-83 AJU ISE
+DEPENDENTE
+DETALHE
+AJU ISE
+DEPENDENTE
+DETALHE
+1.506,76
+7.012,51
+TOTAL 45.523,70
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA / DEFINITIVA (Valores em Reais)
+01. 13º salário 5.105,15
+02. Ganhos de capital na alienação de bens e/ou direitos 92.162,65
+04. Ganhos de capital na alienação de moeda estrangeira em espécie 2.001,02
+05. Ganhos líquidos em renda variável (bolsa de valores, de mercadorias, de futuros e assemelhados e fundos de
+investimento imobiliário e Fiagro)
+5.834,05
+06. Rendimentos de aplicações financeiras 6.601,81
+CNPJ da Fonte Pagadora Nome da Fonte PagadoraBeneficiário ValorCPF
+55.566.677/0001-83 AJU EXC APLICACAOTitular 6.601,81111.444.777-35
+07. Rendimentos recebidos acumuladamente 21.391,92
+08. 13º salário recebido pelos dependentes 1.205,25
+10. Juros sobre capital próprio 2.602,82
+CNPJ da Fonte Pagadora Nome da Fonte PagadoraBeneficiário ValorCPF
+55.566.677/0001-83 AJU EXC JCPTitular 2.602,82111.444.777-35
+12. Aplicações Financeiras e Lucros e Dividendos no Exterior (Lei 14.754/2023) 3.084,35
+Beneficiário ValorCPF Descrição
+Titular 111.444.777-35 AJU EXC PREMIO 1.603,83
+1.603,8313 - Prêmios líquidos obtidos em loterias de apostas de quota fixa - Lei 14.790/2023
+99. Outros 604,84
+CPF/CNPJ da Fonte
+Pagadora
+Nome da Fonte
+Pagadora
+Beneficiário ValorCPF Descrição
+Dependente 333.444.555-08 55.566.677/0001-83 AJU EXC AJU EXC 604,84
+Página 5 de 41
+===== PAGINA 6 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DEPENDENTE DEPENDENTE
+TOTAL 142.197,69
+(Valores em Reais)
+NOME DA FONTE PAGADORA CNPJ/CPF
+RENDIMENTOS
+TRIBUTÁVEIS
+(IMPOSTO COM
+EXIGIBILIDADE
+SUSPENSA)
+DEPÓSITOS
+JUDICIAIS DO
+IMPOSTO
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM
+EXIGIBILIDADE SUSPENSA)
+55.566.677/0001-83 17.701,91 7.702,92AJU EXI FONTE TITULAR
+TOTAL 17.701,91 7.702,92
+(Valores em Reais)
+NOME DA FONTE PAGADORA CNPJ/CPF
+RENDIMENTOS
+TRIBUTÁVEIS
+(IMPOSTO COM
+EXIGIBILIDADE
+SUSPENSA)
+DEPÓSITOS
+JUDICIAIS DO
+IMPOSTO
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM
+EXIGIBILIDADE SUSPENSA)
+55.566.677/0001-83 8.711,96 3.712,97AJU EXI FONTE DEPENDENTE
+CPF DO DEPENDENTE: 333.444.555-08
+TOTAL 8.711,96 3.712,97
+RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELO TITULAR
+(Valores em Reais)
+NOME DA FONTE
+PAGADORA
+CNPJ/CPF TOTAL RENDIMENTOS
+TRIBUTÁVEIS
+CONTR. PREV.
+OFICIAL
+PENSÃO
+ALIMENTÍCIA
+IMPOSTO RETIDO
+NA FONTE
+AJU RRA TITULAR EXCLUSIVA 55.566.677/0001-83 31.801,01 3.802,02 1.803,03 4.804,04
+OPÇÃO DE TRIBUTAÇÃO: Exclusiva MÊS
+RECEBIMENTO:
+Dez. NÚM. MESES: 11,0
+0,00IMPOSTO DEVIDO RRA:
+ALIMENTANDO
+AJU PES ALIMENTANDO UM 1.803,03
+TOTAL 1.803,03
+0,00Valor Recebido
+Referente a Juros:
+TOTAL 31.801,01 3.802,02 1.803,03 4.804,04
+RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS
+DEPENDENTES
+(Valores em Reais)
+NOME DA FONTE
+PAGADORA
+CNPJ/CPF TOTAL RENDIMENTOS
+TRIBUTÁVEIS
+CONTR. PREV.
+OFICIAL
+PENSÃO
+ALIMENTÍCIA
+IMPOSTO RETIDO
+NA FONTE
+Página 6 de 41
+===== PAGINA 7 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS
+DEPENDENTES
+(Valores em Reais)
+NOME DA FONTE
+PAGADORA
+CNPJ/CPF TOTAL RENDIMENTOS
+TRIBUTÁVEIS
+CONTR. PREV.
+OFICIAL
+PENSÃO
+ALIMENTÍCIA
+IMPOSTO RETIDO
+NA FONTE
+AJU RRA DEPENDENTE AJUSTE 55.566.677/0001-83 9.811,06 812,07 313,08 914,09
+OPÇÃO DE TRIBUTAÇÃO: Ajuste MÊS
+RECEBIMENTO:
+Dez.
+0,00PARCELA ISENTA 65 ANOS: CPF DO DEPENDENTE: 333.444.555-08
+Valor Recebido
+Referente a Juros:
+0,00
+ALIMENTANDO
+AJU PES ALIMENTANDO UM 313,08
+TOTAL 313,08
+TOTAL 9.811,06 812,07 313,08 914,09
+(Valores em Reais)IMPOSTO PAGO / RETIDO
+01. Imposto complementar 1.901,11
+02. Imposto pago no exterior pelo titular e pelos dependentes
+03. Imposto sobre a renda na fonte (Lei 11.033/2004)
+0,00
+0,00
+0,00
+Imposto devido com os rendimentos no exterior
+Diferença a ser considerada para cálculo do imposto (limite legal)
+0,00
+0,00Imposto devido sem os rendimentos no exterior
+918,8006. Carnê-Leão do titular
+1.818,33
+204,64
+04. Imposto retido na fonte do titular 4.104,14
+05. Imposto retido na fonte dos dependentes
+07. Carnê-Leão dos dependentes
+(Valores em Reais)
+CÓD.  NOME DO BENEFICIÁRIO CPF/CNPJ DO
+BENEFICIÁRIO
+VALOR PAGO PARC. NÃO
+DEDUTÍVEL
+PAGAMENTOS EFETUADOS
+Titular
+10 AJU PAG MEDICO 444.555.666-19 2.001,21 101,22
+AJU PAG MEDICODescrição:
+21 AJU PAG HOSPITAL 55.566.677/0001-83 3.003,25 0,00
+AJU PAG HOSPITALDescrição:
+60 AJU PAG ADVOGADO RRA 444.555.666-19 2.805,05 0,00
+AJU PAG ADVOGADO RRADescrição:
+36 AJU PAG PREVIDENCIA 55.566.677/0001-83 5.507,29 507,30
+AJU PAG PREVIDENCIADescrição:
+99 AJU PAG OUTROS DETALHE 444.555.666-19 808,31 108,32
+AJU PAG OUTROS DETALHEDescrição:
+Dependente: AJU PES DEPENDENTE UM
+Página 7 de 41
+===== PAGINA 8 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+CÓD.  NOME DO BENEFICIÁRIO CPF/CNPJ DO
+BENEFICIÁRIO
+VALOR PAGO PARC. NÃO
+DEDUTÍVEL
+PAGAMENTOS EFETUADOS
+11 AJU PAG DENTISTA DEP 444.555.666-19 1.502,23 102,24
+AJU PAG DENTISTA DEPDescrição:
+01 AJU PAG ESCOLA DEP 55.566.677/0001-83 4.504,26 504,27
+AJU PAG ESCOLA DEPDescrição:
+Alimentando: AJU PES ALIMENTANDO UM
+30 AJU PES ALIMENTANDO UM 444.555.666-19 6.006,28 0,00
+AJU PES ALIMENTANDO UMDescrição:
+TOTAL 26.137,88 1.323,35
+DOAÇÕES EFETUADAS (Valores em Reais)
+CÓD.  NOME DO BENEFICIÁRIO CPF/CNPJ DO
+BENEFICIÁRIO
+VALOR PAGO PARC. NÃO
+DEDUTÍVEL
+80 AJU DOA PESSOA FISICA 222.333.444-05 7.101,41 0,00
+81 AJU DOA BEM DEPENDENTE 333.444.555-08 8.102,42 0,00
+40 AJU DOA INCENTIVO 55.566.677/0001-83 1.103,43 0,00
+TOTAL 16.307,26 0,00
+DECLARAÇÃO DE BENS E DIREITOS (Valores em Reais)
+GRUPO DISCRIMINAÇÃO SITUAÇÃO EM
+31/12/2024 31/12/2025
+CÓDIGOBEM
+Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)?    Não
+01 AJU BEM IMOVEL APARTAMENTO SENTINELA,
+ADQUIRIDO EM 15/05/2025, MATRICULA 11001,
+CARTORIO AJU, 50% DO TITULAR.
+0,00 210.101,51
+Inscrição Municipal (IPTU):  AJU-IPTU-2101
+111
+105 - BRASIL Bem com usufruto: Não
+Logradouro: AJU BEM IMOVEL Nº: 2101
+Comp.: APTO 21 Bairro: BAIRRO SENTINELA
+UF: SPMunicípio: SAO PAULO CEP: 01001-000
+Registrado no Cartório: Sim
+Matrícula: 11001
+Área Total:
+Nome Cartório: AJU CARTORIO
+Data de Aquisição: 15/05/202571,2 m²
+Página 8 de 41
+===== PAGINA 9 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DECLARAÇÃO DE BENS E DIREITOS (Valores em Reais)
+GRUPO DISCRIMINAÇÃO SITUAÇÃO EM
+31/12/2024 31/12/2025
+CÓDIGOBEM
+02 AJU BEM VEICULO MODELO SENTINELA ANO 2025
+COR AZUL; RENAVAM SINTETICO 26262603903
+USADO PORQUE O CAMPO RECUSOU TEXTO.
+0,00 82.202,52
+RENAVAM:  26262603903
+012
+105 - BRASIL Bem com usufruto: Não
+03 AJU BEM PARTICIPACAO SOCIETARIA 1234 QUOTAS 50.507,57 61.508,58
+CNPJ:  55.566.677/0001-83
+025
+105 - BRASIL
+TitularBem ou direito pertencente ao: CPF:
+Bem com usufruto: Não
+04 AJU BEM APLICACAO RENDA FIXA SENTINELA 31.405,55 42.406,56
+CNPJ:  55.566.677/0001-83
+024
+105 - BRASIL
+TitularBem ou direito pertencente ao: CPF:
+Bem com usufruto: Não
+04 AJU BEM EXTERIOR LEI 14754 CONTA SENTINELA 11.711,61 22.712,62027
+249 - ESTADOS UNIDOS DA AMÉRICA
+TitularBem ou direito pertencente ao: CPF:
+Bem com usufruto: Não
+314,64
+Valor Recebido:
+Imposto Pago Exterior/IRRF Brasil: 314,64Imposto Pago no Exterior:
+0,003.713,63
+Lucros e Dividendos (R$)
+Rendimento ou Perda:
+Aplicação Financeira (R$)
+06 AJU BEM CONTA BANCARIA TITULAR AJU BANCO
+SENTINELA
+12.303,53 23.304,54
+CNPJ:  55.566.677/0001-83
+013
+105 - BRASIL
+TitularBem ou direito pertencente ao: CPF:
+Banco:        Agência: 2303       Conta: 240024-5 Conta Pagamento? Não
+Bem com usufruto: Não
+06 AJU BEM NUMERARIO DEPENDENTE 1.609,59 2.610,60106
+105 - BRASIL
+Dependente 333.444.555-08Bem ou direito pertencente ao: CPF:
+Bem com usufruto: Não
+TOTAL 444.846,93107.537,85
+Página 9 de 41
+===== PAGINA 10 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DÍVIDAS E ÔNUS REAIS (Valores em Reais)
+CÓDIGO DISCRIMINAÇÃO SITUAÇÃO EM
+31/12/2024
+SITUAÇÃO EM 31/12/2025 VALOR PAGO
+EM 2025
+13 CNPJ 55.566.677/0001-83 - AJU DIV FINANCIAMENTO
+SENTINELA
+91.801,71 72.802,72 19.003,73
+14 CPF 222.333.444-05 - AJU DIV EMPRESTIMO PESSOAL 10.804,74 6.805,75 3.998,99
+TOTAL 102.606,45 79.608,47 23.002,72
+DOAÇÕES A PARTIDOS POLÍTICOS E CANDIDATOS A CARGOS ELETIVOS (Valores em Reais)
+NOME CNPJ VALOR
+AJU ELEITORAL SENTINELA 55.566.677/0001-83 1.201,44
+TOTAL 1.201,44
+Página 10 de 41
+===== PAGINA 11 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DEMONSTRATIVO DE ATIVIDADE RURAL - BRASIL
+DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - BRASIL
+CÓDIGO
+ATIVIDADE
+PARTICIPAÇÃO
+(%)
+CONDIÇÃO
+EXPLORAÇÃO
+NOME E LOCALIZAÇÃO ÁREA
+(ha)
+CIB
+11 75,00 2 AJU RUR FAZENDA BRASIL SENTINELA,
+ESTRADA AJU RURAL KM 22 - UBERABA/MG -
+CEP 38000-000
+123,4
+PARTICIPANTE(S)
+AJU RUR PARTICIPANTE UM (222.333.444-05) Estrangeiro: Não
+RECEITAS E DESPESAS - BRASIL
+MÊS RECEITA BRUTA DESPESAS DE CUSTEIO/INVESTIMENTO
+(Valores em Reais)
+11.205,0518.101,01
+13.211,1119.104,04
+15.217,1720.107,07
+17.223,2321.110,10
+0,000,00
+0,000,00
+0,000,00
+0,000,00
+0,000,00
+0,000,00
+0,000,00
+0,000,00
+Janeiro
+Fevereiro
+Março
+Abril
+Maio
+Junho
+Julho
+Agosto
+Setembro
+Outubro
+Novembro
+Dezembro
+TOTAL 78.422,22 56.856,56
+APURAÇÃO DO RESULTADO - BRASIL
+APURAÇÃO DO RESULTADO TRIBUTÁVEL
+Receita bruta total
+Despesa de custeio e investimento total
+Resultado
+Compensação de prejuízo(s) de exercício(s) anterior(es)
+Limite de 20% sobre a receita bruta total
+RESULTADO TRIBUTÁVEL
+INFORMAÇÕES PARA O EXERCÍCIO SEGUINTE
+Saldo de prejuízo(s) a compensar
+Adiantamento(s) recebido(s) em 2025 por conta de venda para entrega futura
+Adiantamento(s) recebido(s) até 2024 a ser(em) informado(s) como receita(s) de produto(s) entregue(s) em 2025
+RESULTADO NÃO TRIBUTÁVEL
+APURAÇÃO DO RESULTADO NÃO TRIBUTÁVEL
+78.422,22
+56.856,56
+21.565,66
+7.201,13
+0,00
+15.684,44
+21.565,66
+7.201,13
+0,00
+0,00
+0,00
+(Valores em Reais)
+INFORMAÇÃO DO EXERCÍCIO ANTERIOR
+Saldo de prejuízo(s) a compensar de exercício(s) anterior(es)
+Opção pela forma de apuração do resultado tributável Pelo resultado
+ESPÉCIE ESTOQUE INICIAL AQUISIÇÕES NASCIMENTOS CONSUMO E PERDAS VENDAS ESTOQUE FINAL
+MOVIMENTAÇÃO DO REBANHO - BRASIL
+Bovinos e bufalinos 101,0026,004,0013,0022,00101,00
+Suínos 0,00 0,00 0,00 0,00 0,00 0,00
+Caprinos e ovinos 0,000,000,000,000,000,00
+Página 11 de 41
+===== PAGINA 12 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+ESPÉCIE ESTOQUE INICIAL AQUISIÇÕES NASCIMENTOS CONSUMO E PERDAS VENDAS ESTOQUE FINAL
+MOVIMENTAÇÃO DO REBANHO - BRASIL
+Asininos, equinos
+e muares
+0,000,000,000,000,000,00
+Outros 0,000,000,000,000,000,00
+BENS DA ATIVIDADE RURAL - BRASIL
+CÓDIGO DISCRIMINAÇÃO
+(Valores em Reais)
+SITUAÇÃO EM
+31/12/2025
+SITUAÇÃO EM
+31/12/2024
+16 AJU RUR BEM TRATOR SENTINELA SERIE 2601 81.301,14 92.302,15
+81.301,14 92.302,15TOTAL
+DÍVIDAS VINCULADAS À ATIVIDADE RURAL - BRASIL (Valores em Reais)
+DISCRIMINAÇÃO SITUAÇÃO EM
+31/12/2024
+SITUAÇÃO EM
+31/12/2025
+ITEM VALOR PAGO EM 2025
+CNPJ 55.566.677/0001-83 - AJU RUR DIVIDA
+CUSTEIO SENTINELA
+41.401,16 32.402,171 0,00
+0,0032.402,1741.401,16TOTAL
+Página 12 de 41
+===== PAGINA 13 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DEMONSTRATIVO DE ATIVIDADE RURAL - EXTERIOR
+DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - EXTERIOR
+CÓDIGO
+ATIVIDADE
+PARTICIPAÇÃO
+(%)
+CONDIÇÃO
+EXPLORAÇÃO
+NOME E LOCALIZAÇÃO ÁREA
+(ha)
+11 100,00 1 AJU RUE FARM EXTERIOR SENTINELA, 249 -
+ESTADOS UNIDOS - 2801 AUDIT FARM ROAD
+234,5
+PARTICIPANTE(S)
+AJU RUR PARTICIPANTE UM (222.333.444-05) Estrangeiro: Não
+RECEITAS E DESPESAS - EXTERIOR (Valores em Reais)
+CÓDIGO
+DO PAÍS
+RECEITA BRUTA
+TOTAL
+MOEDA ORIGINAL
+DESPESAS DE
+CUSTEIO/INVESTIM.
+TOTAL
+MOEDA ORIGINAL
+RESULTADO
+MOEDA ORIGINAL
+RESULTADO
+US$
+NOME DO PAÍS
+249 58.005,45 40.017,96 17.987,49 17.987,49ESTADOS UNIDOS DA AMÉRICA
+TOTAL 17.987,49
+APURAÇÃO DO RESULTADO - EXTERIOR
+APURAÇÃO DO RESULTADO TRIBUTÁVEL
+Resultado total - (R$) (Resultado total - US$ multiplicado por 5,5018)
+Resultado total - US$
+Compensação de prejuízo(s) de exercício(s) anterior(es) - R$
+Limite de 20% sobre a receita bruta total - R$
+RESULTADO TRIBUTÁVEL - R$
+INFORMAÇÕES PARA O EXERCÍCIO SEGUINTE
+Saldo de prejuízo(s) a compensar - R$
+Adiantamento(s) recebido(s) em 2025 por conta de venda para entrega futura - R$
+Adiantamento(s) recebido(s) até 2024 a ser(em) informado(s) como receita(s) de produto(s) entregue(s) em 2025 - R$
+RESULTADO NÃO TRIBUTÁVEL - R$
+APURAÇÃO DO RESULTADO NÃO TRIBUTÁVEL
+98.963,57
+17.987,49
+0,00
+0,00
+98.963,57
+8.507,27
+0,00
+0,00
+0,00
+(Valores em Reais)
+Saldo de prejuízo(s) a compensar de exercício(s) anterior(es) - R$
+INFORMAÇÃO DO EXERCÍCIO ANTERIOR
+8.507,27
+Pelo resultadoOpção pela forma de apuração do resultado tributável
+ESPÉCIE ESTOQUE INICIAL AQUISIÇÕES NASCIMENTOS CONSUMO E PERDAS VENDAS ESTOQUE FINAL
+MOVIMENTAÇÃO DO REBANHO - EXTERIOR
+50,0016,002,008,0012,0051,00Bovinos e bufalinos
+0,000,000,000,000,000,00Suínos
+Caprinos e ovinos 0,000,000,000,000,000,00
+Asininos, equinos
+e muares
+0,000,000,000,000,00 0,00
+0,000,000,000,000,00Outros 0,00
+SITUAÇÃO EM 31/12/2024 SITUAÇÃO EM
+31/12/2025
+DISCRIMINAÇÃOCÓDIGO
+BENS DA ATIVIDADE RURAL - EXTERIOR (Valores em Reais)
+Página 13 de 41
+===== PAGINA 14 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+AJU RUE BEM MAQUINA SENTINELA
+249 - ESTADOS UNIDOS DA AMÉRICA
+16 51.508,28 62.509,29
+51.508,28 62.509,29TOTAL
+DÍVIDAS VINCULADAS À ATIVIDADE RURAL - EXTERIOR (Valores em Reais)
+DISCRIMINAÇÃO SITUAÇÃO EM
+31/12/2024
+SITUAÇÃO EM
+31/12/2025
+ITEM VALOR PAGO EM 2025
+AJU RUE DIVIDA EXTERIOR SENTINELA 31.510,30 24.511,311 0,00
+0,0024.511,3131.510,30TOTAL
+Demonstrativo da Apuração do Ganho de Capital - BENS IMÓVEIS CPF: 111.444.777-35
+DADOS DO IMÓVEL
+SAO PAULO               SP               01001000
+AJU GCI IMOVEL URBANO SENTINELA
+RUA    AJU GCI IMOVEL    2901,    APTO 29    BAIRRO SENTINELA
+Especificação e endereço
+DADOS DA OPERAÇÃO
+160.602,42
+Custo de Corretagem - R$
+5.603,43
+VENDA
+18/08/2025
+Natureza da operação
+Data de Alienação
+Valor de Alienação - (R$)
+PERGUNTAS
+A alienação foi a prazo/prestação? Não
+Houve no imóvel alienado edificação, ampliação, reforma ou trata-se de imóvel adquirido em partes e em datas diferentes? Não
+ADQUIRENTE
+CPF/CNPJ Nome
+222.333.444-05 AJU GCI ADQUIRENTE
+APURAÇÃO DO CUSTO DE AQUISIÇÃO
+Data de Aquisição: 18/08/2018
+Custo de aquisição (R$): 100.601,41
+Bem atualizado de acordo com a Lei 14.973/2024? Não
+Página 14 de 41
+===== PAGINA 15 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+APURAÇÃO DOS GANHOS DE CAPITAL
+154.998,99
+100.601,41
+Ganho de Capital - Resultado 1 54.397,58
+Percentual de Redução (Lei n. 7.713, de 1988) 0,000000
+Valor de Redução (Lei n. 7.713, de 1988) 0,00
+Ganho de Capital - Resultado 2 54.397,58
+Percentual de Redução (Lei n. 11.196, de 2005 - FR1) 0,000000
+Valor de Redução (Lei n. 11.196, de 2005 - FR1) 0,00
+Ganhos de Capital - Resultado 3 54.397,58
+Percentual de Redução (Lei n. 11.196, de 2005 - FR2) 0,000000
+Valor de Redução (Lei n. 11.196, de 2005 - FR2) 0,00
+Ganhos de Capital - Resultado 4 54.397,58
+Percentual de Redução - Aplicação Outro Imóvel 0,000000
+Valor de Redução - Aplicação Outro Imóvel 0,00
+Ganhos de Capital - Resultado 5 54.397,58
+Custo de Aquisição
+Custo de Corretagem
+160.602,42
+5.603,43
+(R$)
+(R$)
+(R$)
+(R$)
+(%)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+Valor da Alienação
+Valor Líquido da Alienação
+(R$)
+(%)
+(%)
+(%)
+Sim (  )     Não ( X )
+Soma dos Ganhos de Capital de alienações anteriores:
+Já houve alienação parcial desse bem?
+0,00
+Faixa de Ganho de Capital
+Até R$ 5.000.000,00
+Ganho de Capital Distribuído - (R$)
+Alíquota - (%)
+0,00Acima de R$ 30.000.000,00
+0,00
+Ganho de Capital da alienação atual: R$
+20
+15
+0,00
+De R$ 5.000.000,01 Até R$ 10.000.000,00
+22,5
+De R$ 10.000.000,01 Até R$ 30.000.000,00
+54.397,58
+17,5
+TOTAL Anterior Atual
+TOTAL 54.397,58
+0,00
+0,00
+0,00
+0,00
+0,00
+54.397,58
+0,00
+0,00
+0,00
+54.397,58
+54.397,58
+54.397,58
+15,000000
+Ganho de Capital Total
+Alíquota Média
+Imposto Devido
+Imposto Pago
+8.159,63
+0,00
+(R$)
+(%)
+(R$)
+(R$)
+CÁLCULO DO IMPOSTO - ALIENAÇÃO À VISTA
+Página 15 de 41
+===== PAGINA 16 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+IMPOSTO A PAGAR
+Diferido de anos anteriores 0,00
+Referente à alienação em 2025 8.159,63
+Total 8.159,63
+Devido em 2025 8.159,63
+Diferido para anos posteriores 0,00
+IR na fonte (Lei 11.033/2004) 0,00
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+CONSOLIDAÇÃO DO BEM
+IMPOSTO PAGO
+Total 0,00(R$)
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+Total 0,00(R$)
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+Total 54.397,58(R$)
+Página 16 de 41
+===== PAGINA 17 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+Demonstrativo da Apuração do Ganho de Capital - BENS MÓVEIS
+DADOS DO MÓVEL
+Especificação AJU GCM VEICULO SENTINELA
+DADOS DA AQUISIÇÃO
+30.611,44
+Data de aquisição
+19/09/2022
+Custo de Aquisição R$
+DADOS DA OPERAÇÃO
+42.612,45
+Custo de Corretagem - R$
+1.613,46
+VENDA
+19/09/2025
+Natureza da operação
+Data de Alienação
+Valor de Alienação - (R$)
+A alienação foi a prazo/prestação? Sim
+Sujeito a Registro Público? Não
+ADQUIRENTE
+CPF/CNPJ Nome
+222.333.444-05 AJU GCM ADQUIRENTE
+APURAÇÃO DO GANHO DE CAPITAL
+42.612,45
+1.613,46
+Valor de alienação
+Custo de corretagem
+Valor líquido de alienação
+Custo de aquisição
+Ganho de Capital
+40.998,99
+30.611,44
+10.387,55
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+Sim (  )     Não ( X )
+Soma dos Ganhos de Capital de alienações anteriores:
+Já houve alienação parcial desse bem?
+0,00
+Faixa de Ganho de Capital
+Até R$ 5.000.000,00
+Ganho de Capital Distribuído - (R$)
+Alíquota - (%)
+0,00Acima de R$ 30.000.000,00
+0,00
+Ganho de Capital da alienação atual: R$
+20
+15
+0,00
+De R$ 5.000.000,01 Até R$ 10.000.000,00
+22,5
+De R$ 10.000.000,01 Até R$ 30.000.000,00
+10.387,55
+17,5
+TOTAL Anterior Atual
+TOTAL 10.387,55
+0,00
+0,00
+0,00
+0,00
+0,00
+10.387,55
+0,00
+0,00
+0,00
+10.387,55
+10.387,55
+CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO
+Data Parcela Valor Recebido
+(R$)
+Custo de
+Aquisição
+Ganho de
+Capital
+Proporcional
+% Alíquota
+Média de Imp.
+Devido
+Imposto
+Devido (R$)
+Imposto
+Pago (R$)
+Valor Líquido
+(R$)
+Custo de
+Corretagem
+(R$)
+19/09/2025 13.666,33 10.203,82 3.462,51 15,000000 519,37 0,000,00 13.666,33
+19/10/2025 13.666,33 10.203,82 3.462,51 15,000000 519,37 0,000,00 13.666,33
+19/11/2025 13.666,33 10.203,82 3.462,51 15,000000 519,37 0,000,00 13.666,33
+CPF: 111.444.777-35
+Página 17 de 41
+===== PAGINA 18 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+Data Parcela Valor Recebido
+(R$)
+Custo de
+Aquisição
+Ganho de
+Capital
+Proporcional
+% Alíquota
+Média de Imp.
+Devido
+Imposto
+Devido (R$)
+Imposto
+Pago (R$)
+Valor Líquido
+(R$)
+Custo de
+Corretagem
+(R$)
+Total 40.998,99 30.611,46 10.387,53 1.558,11 0,0015,0000000,00 40.998,99
+Data de Recebimento da Última ParcelaSim ( X )     Não (   ) 19/11/2025A prestação/parcela final foi recebida em 2025?
+CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO - DETALHE DAS PARCELAS
+13.666,33
+0,00
+Valor Recebido
+Custo de corretagem
+Valor líquido de alienação
+Custo de aquisição Proporcional
+Ganho de Capital
+13.666,33
+10.203,82
+3.462,51
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+Imposto Devido
+Alíquota Média
+Imposto Pago 0,00
+519,37
+15,000000
+(R$)
+(R$)
+(%)
+Sim (   )     Não ( X )Data de Recebimento da Parcela: Última Parcela?19/09/2025
+13.666,33
+0,00
+Valor Recebido
+Custo de corretagem
+Valor líquido de alienação
+Custo de aquisição Proporcional
+Ganho de Capital
+13.666,33
+10.203,82
+3.462,51
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+Imposto Devido
+Alíquota Média
+Imposto Pago 0,00
+519,37
+15,000000
+(R$)
+(R$)
+(%)
+Sim (   )     Não ( X )Data de Recebimento da Parcela: Última Parcela?19/10/2025
+13.666,33
+0,00
+Valor Recebido
+Custo de corretagem
+Valor líquido de alienação
+Custo de aquisição Proporcional
+Ganho de Capital
+13.666,33
+10.203,82
+3.462,51
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+Imposto Devido
+Alíquota Média
+Imposto Pago 0,00
+519,37
+15,000000
+(R$)
+(R$)
+(%)
+Sim ( X )     Não (   )Data de Recebimento da Parcela: Última Parcela?19/11/2025
+Página 18 de 41
+===== PAGINA 19 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+IMPOSTO A PAGAR
+Diferido de anos anteriores 0,00
+Referente à alienação em 2025 1.558,13
+Total 1.558,13
+Devido em 2025 1.558,11
+Diferido para anos posteriores 0,00
+IR na fonte (Lei 11.033/2004) 0,00
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+CONSOLIDAÇÃO DO BEM
+IMPOSTO PAGO
+Total 0,00(R$)
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+Total 0,00(R$)
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+Total 10.387,55(R$)
+Página 19 de 41
+===== PAGINA 20 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+Demonstrativo da Apuração do Ganho de Capital - PARTICIPAÇÃO SOCIETÁRIA
+DADOS DA PARTICIPAÇÃO SOCIETÁRIA
+Nome da sociedade
+AJU GCP EMPRESA SENTINELA
+CNPJ da sociedade
+55.566.677/0001-83
+Município
+SAO PAULO
+UF
+SP
+Natureza
+ALIENAÇÕES, RESGATES E OUTRAS TRANSFERÊNCIAS
+70.622,48
+Valor de alienação -  (R$) Custo de Corretagem - (R$)
+2.623,49
+Espécie da participação
+QUOTAS
+Data de Alienação
+20/10/2025
+A alienação foi a prazo/prestação? Não
+ADQUIRENTE
+CPF/CNPJ Nome
+222.333.444-05 AJU GCP ADQUIRENTE
+CUSTO DE AQUISIÇÃO
+Espécie de Participação Societária Quantidade de
+quotas/ações alienadas
+Custo médio
+pond./unitário -  R$
+Custo total
+de aquisição -  R$
+Quota 1.234 32,918534 40.621,47
+APURAÇÃO DOS GANHOS DE CAPITAL
+67.998,99
+Custo de Aquisição 40.621,47
+Ganhos de Capital 27.377,52
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+70.622,48
+2.623,49
+Valor Líquido de Alienação
+Custo de Corretagem
+Valor de Alienação
+Sim (  )     Não ( X )
+Soma dos Ganhos de Capital de alienações anteriores:
+Já houve alienação parcial desse bem?
+0,00
+Faixa de Ganho de Capital
+Até R$ 5.000.000,00
+Ganho de Capital Distribuído - (R$)
+Alíquota - (%)
+0,00Acima de R$ 30.000.000,00
+0,00
+Ganho de Capital da alienação atual: R$
+20
+15
+0,00
+De R$ 5.000.000,01 Até R$ 10.000.000,00
+22,5
+De R$ 10.000.000,01 Até R$ 30.000.000,00
+27.377,52
+17,5
+TOTAL Anterior Atual
+TOTAL 27.377,52
+0,00
+0,00
+0,00
+0,00
+0,00
+27.377,52
+0,00
+0,00
+0,00
+27.377,52
+27.377,52
+CÁLCULO DO IMPOSTO - ALIENAÇÃO À VISTA
+Ganho de Capital -  (R$) 27.377,52
+Alíquota Média - (%) 15,000000
+Imposto devido -  (R$) 4.106,62
+Imposto de renda na fonte (Lei nº 11.033, de 2004) -  (R$) 0,00
+Imposto devido após compensação -  (R$) 4.106,62
+Imposto pago -  (R$) 0,00
+CPF: 111.444.777-35
+Página 20 de 41
+===== PAGINA 21 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+IMPOSTO A PAGAR
+Diferido de anos anteriores 0,00
+Referente à alienação em 2025 4.106,62
+Total 4.106,62
+Devido em 2025 4.106,62
+Diferido para anos posteriores 0,00
+IR na fonte (Lei 11.033/2004) 0,00
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+(R$)
+CONSOLIDAÇÃO DA PARTICIPAÇÃO SOCIETÁRIA
+IMPOSTO PAGO
+Total 0,00(R$)
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+Total 0,00(R$)
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+Total 27.377,52(R$)
+Página 21 de 41
+===== PAGINA 22 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DÓLAR (ESTADOS UNIDOS)
+Moeda Estrangeira
+5,371549
+21/11/2025 8.632,51
+222.333.444-05 AJU GCE ADQUIRENTE
+6.631,49 2.001,02
+1.234,56
+CPF/CNPJ do Adquirente Nome do Adquirente
+Data da Alienação Quantidade Valor da Alienação (R$)
+Custo Médio (R$) Custo de Aquisição (R$) Ganho de Capital (R$)
+Demonstrativo da Apuração do Ganho de Capital - MOEDAS EM ESPÉCIE CPF: 111.444.777-35
+Mês
+TOTALIZAÇÃO
+Alienações em
+Dólar (US$)
+Alienações
+Consolidadas em
+Dólar (US$)
+Ganhos de Capital
+Tributável (R$)
+Imposto Pago
+(R$)
+Ganhos de Capital
+(R$)
+Alíquota Média
+(%)
+Imposto Devido
+(R$)
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Janeiro
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Fevereiro
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Março
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Abril
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Maio
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Junho
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Julho
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Agosto
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Setembro
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Outubro
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Novembro
+0,00 0,00 0,00 0,00 0,00 0,00 0,00Dezembro
+CONSOLIDAÇÃO
+IMPOSTO PAGO
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+0,00
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+(R$)
+0,00
+0,00
+(R$)
+(R$)
+Total
+Total
+Total
+Página 22 de 41
+===== PAGINA 23 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - TITULAR
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - JAN
+Mercado à Vista - Ações 2.600,60 600,61
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 101,01 101,01
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 2.701,61 701,62
+Resultado negativo até o mês anterior 0,00 0,00
+BASE DE CÁLCULO DO IMPOSTO 2.701,61 701,62
+Prejuízo a compensar 0,00 0,00
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 405,24 140,32
+Total do imposto devido 545,56
+IR fonte de day-trade do mês 140,64
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 377,29
+Imposto pago 501,65
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 27,63
+Página 23 de 41
+===== PAGINA 24 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - FEV
+Mercado à Vista - Ações -1.803,67 701,66
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 101,01 101,01
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS -1.702,66 802,67
+Resultado negativo até o mês anterior 0,00 0,00
+BASE DE CÁLCULO DO IMPOSTO 0,00 802,67
+Prejuízo a compensar 1.702,66 0,00
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 160,53
+Total do imposto devido 160,53
+IR fonte de day-trade do mês 160,69
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,16
+Imposto a pagar 0,00
+Imposto pago 202,70
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 17,68
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 17,68
+Página 24 de 41
+===== PAGINA 25 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - MAR
+Mercado à Vista - Ações 3.602,70 -1.004,73
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 101,01 101,01
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 3.703,71 -903,72
+Resultado negativo até o mês anterior 1.702,66 0,00
+BASE DE CÁLCULO DO IMPOSTO 2.001,05 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 300,15 0,00
+Total do imposto devido 300,15
+IR fonte de day-trade do mês 90,74
+IR fonte de day-trade dos meses anteriores 0,16
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 153,84
+Imposto pago 604,75
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+17,68IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 37,73
+Página 25 de 41
+===== PAGINA 26 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - ABR
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 26 de 41
+===== PAGINA 27 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - MAI
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 27 de 41
+===== PAGINA 28 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - JUN
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 28 de 41
+===== PAGINA 29 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - JUL
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 29 de 41
+===== PAGINA 30 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - AGO
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 30 de 41
+===== PAGINA 31 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - SET
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 31 de 41
+===== PAGINA 32 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - OUT
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 32 de 41
+===== PAGINA 33 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - NOV
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 33 de 41
+===== PAGINA 34 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - DEZ
+Mercado à Vista - Ações 0,00 0,00
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 0,00 0,00
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 0,00 0,00
+Resultado negativo até o mês anterior 0,00 903,72
+BASE DE CÁLCULO DO IMPOSTO 0,00 0,00
+Prejuízo a compensar 0,00 903,72
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 0,00 0,00
+Total do imposto devido 0,00
+IR fonte de day-trade do mês 0,00
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 0,00
+Imposto pago 0,00
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 0,00
+Página 34 de 41
+===== PAGINA 35 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - DEPENDENTES
+GANHOS LÍQUIDOS OU PERDAS - JAN (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - FEV (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - MAR (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+(Valores em Reais)
+TIPO DE MERCADO/ATIVO OPERAÇÕES COMUNS OPERAÇÕES DAY-TRADE
+GANHOS LÍQUIDOS OU PERDAS - ABR (CPF DEPENDENTE: 333.444.555-08)
+Mercado à Vista - Ações 1.610,75 310,76
+Mercado à Vista - Ouro 0,00 0,00
+Mercado à Vista - Ouro ativo financeiro fora de bolsa 0,00 0,00
+Mercado de Opções - Ações 101,01 101,01
+Mercado de Opções - Ouro 0,00 0,00
+Mercado de Opções - Fora de bolsa 0,00 0,00
+Mercado de Opções - Outros 0,00 0,00
+Mercado Futuro - Dólar dos EUA 0,00 0,00
+Mercado Futuro - Índices 0,00 0,00
+Mercado Futuro - Juros 0,00 0,00
+Mercado Futuro - Outros 0,00 0,00
+Mercado a Termo - Ações/Ouro 0,00 0,00
+Mercado a Termo - Outros 0,00 0,00
+RESULTADO LÍQUIDO DO MÊS 1.711,76 411,77
+Resultado negativo até o mês anterior 0,00 0,00
+BASE DE CÁLCULO DO IMPOSTO 1.711,76 411,77
+Prejuízo a compensar 0,00 0,00
+Alíquota do imposto 15% 20%
+IMPOSTO DEVIDO 256,76 82,35
+Total do imposto devido 339,11
+IR fonte de day-trade do mês 82,79
+IR fonte de day-trade dos meses anteriores 0,00
+IR fonte de day-trade a compensar 0,00
+Imposto a pagar 238,54
+Imposto pago 303,80
+CONSOLIDAÇÃO DO MÊS
+IR fonte (Lei nº 11.033/2004) a compensar 0,00
+0,00IR fonte (Lei nº 11.033/2004) nos meses anteriores
+IR fonte (Lei nº 11.033/2004) no mês 17,78
+GANHOS LÍQUIDOS OU PERDAS - MAI (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - JUN (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+Página 35 de 41
+===== PAGINA 36 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+GANHOS LÍQUIDOS OU PERDAS - JUL (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - AGO (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - SET (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - OUT (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - NOV (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - DEZ (CPF DEPENDENTE: 333.444.555-08)
+Sem Informações
+Página 36 de 41
+===== PAGINA 37 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+Janeiro Fevereiro Março Abril MaioMÊS
+RESULTADO LÍQUIDO DO
+MÊS
+RESULTADO NEGATIVO ATÉ
+O MÊS ANTERIOR
+BASE DE CÁLCULO DO
+IMPOSTO
+PREJUÍZO A COMPENSAR
+ALÍQUOTA DO IMPOSTO
+IMPOSTO DEVIDO
+IMPOSTO PAGO
+0,00 0,00 0,00 0,00 1.801,81 -902,84
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 1.801,81 0,00
+0,00 0,00 0,00 0,00 0,00 902,84
+0,00 0,00 0,00 0,00 20,00 20,00
+0,00 0,00 0,00 0,00 360,36 0,00
+0,00 0,00 0,00 0,00 361,83 0,00
+MÊS
+RESULTADO LÍQUIDO DO
+MÊS
+RESULTADO NEGATIVO ATÉ
+O MÊS ANTERIOR
+BASE DE CÁLCULO DO
+IMPOSTO
+PREJUÍZO A COMPENSAR
+ALÍQUOTA DO IMPOSTO
+IMPOSTO DEVIDO
+IMPOSTO PAGO
+Julho Agosto Setembro Outubro Novembro Dezembro
+Junho
+0,00 0,00 0,00 0,00 0,00 0,00
+902,84 902,84 902,84 902,84 902,84 902,84
+0,00 0,00 0,00 0,00 0,00 0,00
+902,84 902,84 902,84 902,84 902,84 902,84
+20,00 20,00 20,00 20,00 20,00 20,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - TITULAR
+(Valores em Reais)GANHOS LÍQUIDOS OU PERDAS
+0,00IMPOSTO RETIDO MESES
+ANTERIORES 0,00 0,00 0,000,000,00
+18,82IMPOSTO RETIDO NO MÊS 0,00 0,00 9,850,000,00
+0,00 0,000,000,00 9,850,00IMPOSTO A COMPENSAR
+0,000,00 0,000,00IMPOSTO A PAGAR 0,00 341,54
+0,00
+9,85
+9,859,85 9,85
+9,85
+0,00
+9,85
+0,000,00 0,00
+9,85
+9,85
+0,00
+IMPOSTO A COMPENSAR 9,85
+0,00
+0,00
+0,00
+9,85
+9,85IMPOSTO RETIDO MESES
+ANTERIORES 9,85
+0,00
+0,00
+IMPOSTO A PAGAR
+IMPOSTO RETIDO NO MÊS
+0,00
+Página 37 de 41
+===== PAGINA 38 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - DEPENDENTES
+Janeiro Fevereiro Março Abril MaioMÊS
+RESULTADO LÍQUIDO DO
+MÊS
+RESULTADO NEGATIVO ATÉ
+O MÊS ANTERIOR
+BASE DE CÁLCULO DO
+IMPOSTO
+PREJUÍZO A COMPENSAR
+ALÍQUOTA DO IMPOSTO
+IMPOSTO DEVIDO
+IMPOSTO PAGO
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+MÊS
+RESULTADO LÍQUIDO DO
+MÊS
+RESULTADO NEGATIVO ATÉ
+O MÊS ANTERIOR
+BASE DE CÁLCULO DO
+IMPOSTO
+PREJUÍZO A COMPENSAR
+ALÍQUOTA DO IMPOSTO
+IMPOSTO DEVIDO
+IMPOSTO PAGO
+Julho Agosto Setembro Outubro Novembro Dezembro
+Junho
+1.811,86 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+20,00 0,00 0,00 0,00 0,00 0,00
+0,00 0,00 0,00 0,00 0,00 0,00
+362,88 0,00 0,00 0,00 0,00 0,00
+GANHOS LÍQUIDOS OU PERDAS (CPF DEPENDENTE: 333.444.555-08) (Valores em Reais)
+0,000,00 0,000,00 0,00IMPOSTO RETIDO MESES
+ANTERIORES 0,00
+0,00 0,00 0,000,00IMPOSTO RETIDO NO MÊS 0,000,00
+0,00 0,00 0,000,00IMPOSTO A COMPENSAR 0,000,00
+0,00 0,000,00 0,00 0,000,00IMPOSTO A PAGAR
+0,00
+0,00
+0,00
+18,87
+IMPOSTO A COMPENSAR 0,00 0,00
+IMPOSTO RETIDO MESES
+ANTERIORES
+0,00
+0,00
+0,00
+0,00
+0,00 0,00
+IMPOSTO RETIDO NO MÊS 0,00 0,000,00
+0,000,00
+0,00
+0,00 0,000,00 0,00IMPOSTO A PAGAR 0,000,00
+DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - ECA (Valores em Reais)
+FUNDO CNPJ VALORTIPO DE FUNDO
+SP - SÃO PAULO - SAO PAULO 97.537.776/0001-87 301,45Municipal
+TOTAL 301,45
+Página 38 de 41
+===== PAGINA 39 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - PESSOA IDOSA (Valores em Reais)
+FUNDO CNPJ VALORTIPO DE FUNDO
+SP - SÃO PAULO 17.087.890/0001-13 302,46Estadual
+TOTAL 302,46
+Demonstrativo de Apuração do Imposto de Renda Incidente sobre Rendimentos de Aplicações Financeiras no Exterior e sobre
+Lucros e Dividendos de Entidade Controlada no Exterior e de Compensação de Perdas em Aplicações Financeiras no Exterior
+Bem Tipo Ganho/Prejuízo Imposto Devido Imposto Pago no
+Brasil / Exterior Base de Cálculo Saldo
+Prejuízo do ano anterior: 0,00
+DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023
+7 AF 3.713,63 557,04 314,64 1.616,03 1.616,03
+7 LD - - 314,64 0,00 1.616,03
+Base de Cálculo:
+Imposto Devido:
+1.616,03
+242,40
+Legenda Tipo
+AF - Aplicação Financeira
+LD - Lucros e Dividendos
+Bem
+A identificação do bem pode ser verificada na impressão da ficha de Bens e Direitos.
+Página 39 de 41
+===== PAGINA 40 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+RESUMO
+RENDIMENTOS TRIBUTÁVEIS
+Recebidos de Pessoa Jurídica pelo titular
+Recebidos de Pessoa Jurídica pelos dependentes
+Recebidos de Pessoa Física/Exterior pelos dependentes
+Resultado tributável da Atividade Rural
+TOTAL
+DEDUÇÕES
+Contribuições às previdências oficial e complementar aberta ou fechada de que trata o § 15 do art. 40 da CF/1988 (até o limite
+do patrocinador)
+Contribuição à prev. complementar, inclusive o valor para as fechadas de que trata o § 15 do art. 40 da CF/1988 que exceder o
+limite do patrocinador
+Dependentes
+Despesas com instrução
+Despesas médicas
+Pensão alimentícia judicial
+Livro caixa
+TOTAL
+IMPOSTO DEVIDO IMPOSTO A RESTITUIR
+51.101,11
+12.201,21
+3.814,27
+120.529,23
+211.696,46
+6.304,34
+4.999,99
+2.275,08
+3.561,50
+6.303,23
+6.006,28
+3.020,40
+33.595,97
+0,00
+IMPOSTO PAGO
+Imposto retido na fonte do titular
+Imp. retido na fonte dos dependentes
+Imposto complementar
+Carnê-Leão do titular
+INFORMAÇÕES BANCÁRIAS
+Banco
+Agência (sem DV)
+Conta para débito
+4.104,14
+1.818,33
+918,80
+1.901,11
+SALDO DE IMPOSTO A PAGAR 22.907,85
+Imposto pago no exterior 0,00
+Imposto retido na fonte (Lei nº 11.033/2004) 0,00
+Valor da quota
+Número de Quotas
+22.907,85
+1
+Total do imposto pago 13.751,06
+PARCELAMENTO
+Recebidos de Pessoa Física/Exterior pelo titular 14.239,58
+Débito automático: NÃO
+Pensão alimentícia por escritura pública 0,00
+9.811,06Recebidos acumuladamente pelos dependentes
+0,00Recebidos acumuladamente pelo titular
+Contribuição à previdência oficial (Rendimentos recebidos acumuladamente) 812,07
+313,08Pensão alimentícia judicial (Rendimentos recebidos acumuladamente)
+Carnê-Leão dos dependentes 204,64
+4.804,04Imposto retido RRA
+TRIBUTAÇÃO UTILIZANDO AS DEDUÇÕES LEGAIS
+Total do imposto devido 36.658,91
+Dedução de incentivo
+0,00
+Imposto devido
+Imposto devido RRA
+38.123,85
+17,20
+36.416,51
+Aliquota efetiva (%)
+Base de cálculo do imposto
+Imposto devido I
+178.100,49
+1.707,34
+Imposto Lei 14.754/2023 242,40
+Página 40 de 41
+===== PAGINA 41 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC AJUSTE
+DECLARAÇÃO DE AJUSTE ANUAL
+111.444.777-35
+Total do imposto retido na fonte (Lei nº11.033/2004), conforme dados informados pelo contribuinte
+Doações a Partidos Políticos e Candidatos a Cargos Eletivos 1.201,44
+Rendimentos sujeitos à tributação exclusiva/definitiva
+Imposto pago sobre Ganhos de Capital
+142.197,69
+0,00
+Rendimentos isentos e não tributáveis
+0,00Imposto devido sobre Ganhos de Capital Moeda Estrangeira - Bens, direitos e aplic. financeiras
+OUTRAS INFORMAÇÕES
+45.523,70
+0,00Imposto pago Ganhos de Capital Moeda Estrangeira - Bens, direitos e Aplicações Financeiras
+Imposto pago sobre Renda Variável 1.670,93
+Imposto a pagar sobre o Ganho de Capital - Moeda Estrangeira em Espécie 0,00
+Rendimentos tributáveis - imposto com exigibilidade suspensa 26.413,87
+Depósitos judiciais do imposto 11.415,89
+Imposto devido sobre Ganhos de Capital 13.824,36
+Imposto devido sobre ganhos líquidos em Renda Variável 862,82
+111,71
+0,00Imposto diferido dos Ganhos de Capital
+Bens e direitos em 31/12/2025
+Dívidas e ônus reais em 31/12/2025
+Dívidas e ônus reais em 31/12/2024
+107.537,85
+444.846,93
+102.606,45
+79.608,47
+Bens e direitos em 31/12/2024
+EVOLUÇÃO PATRIMONIAL
+Página 41 de 41

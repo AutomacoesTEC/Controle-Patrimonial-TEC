@@ -1,0 +1,17 @@
+{
+  "AJU-01": {
+    "arquivo": "AJU-01-DECLARACAO-COMPLETA-IRPF-2026.pdf",
+    "paginas": 41,
+    "chars": 58988
+  },
+  "ESP-01": {
+    "arquivo": "ESP-01-DECLARACAO-FINAL-ESPOLIO-IRPF-2026.pdf",
+    "paginas": 8,
+    "chars": 9171
+  },
+  "SAI-01": {
+    "arquivo": "SAI-01-DECLARACAO-SAIDA-DEFINITIVA-IRPF-2026.pdf",
+    "paginas": 9,
+    "chars": 11368
+  }
+}

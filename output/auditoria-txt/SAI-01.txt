@@ -1,0 +1,371 @@
+===== PAGINA 1 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+IDENTIFICAÇÃO DO CONTRIBUINTE
+CPF: 999.000.111-12Nome: AUDITORIA PDF TEC SAIDA
+Data de Nascimento: 11/01/1980
+Possui cônjuge ou companheiro(a)? Não
+Houve alteração de dados cadastrais? Sim
+Endereço: AUDIT EXIT AVENUE Número: 4201
+Complemento: SUITE 42 Bairro/Distrito: DOWNTOWN
+Cidade: SAO PAULO Cód. Ext.: 294
+País: 249 - ESTADOS UNIDOS DA AMÉRICA
+Código Postal: 33101 DDI/Telefone: (1) 3055554202
+Natureza da Ocupação: 12 - PROPRIETÁRIO DE EMPRESA OU DE FIRMA INDIVIDUAL OU EMPREGADOR-TITULAR
+Ocupação Principal: 391 - OUTROS TÉCNICOS DE NÍVEL MÉDIO
+Tipo de declaração: Declaração de Saída Definitiva Original
+Nº do recibo da última declaração entregue do exercício de 2025:
+E-mail: SAI.AUDITORIA@EXAMPLE.INVALID
+Há declarante ou dependente com doença grave ou deficiência física ou mental? Não
+PardaRaça/Cor:
+SAÍDA
+CPF do procurador: 101.202.303-64 Nome do procurador: SAI PROCURADOR SENTINELA
+Endereço do Procurador:4201 AUDIT EXIT AVENUE, SUITE 42, MIAMI/FL, 33101
+Data da caracterização da condição de não residente: 24/12/2025
+Data da caracterização da condição de residente no país:
+249 - ESTADOS UNIDOS DA AMÉRICAPaís de destino:
+DEPENDENTES
+Sem Informações
+ALIMENTANDOS
+Sem Informações
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (Valores em Reais)
+NOME DA FONTE PAGADORA REND. RECEBIDOS
+DE PES. JURÍDICA
+CONTR. PREVID.
+OFICIAL
+IMPOSTO RETIDO
+NA FONTE
+13º SALÁRIO IRRF SOBRE 13º
+SALÁRIO
+SAI RPJ FONTE TITULAR 43.201,11 4.202,12 3.203,13 3.604,14 304,15
+CNPJ/CPF: 55.566.677/0001-83
+Data da comunicação da condição de não residente à fonte pagadora: 24/12/2025
+TOTAL 43.201,11 3.604,143.203,134.202,12 304,15
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES
+Sem Informações
+Página 1 de 9
+===== PAGINA 2 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELO TITULAR
+Sem Informações
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELOS DEPENDENTES
+Sem Informações
+RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS (Valores em Reais)
+TOTAL 0,00
+RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA / DEFINITIVA (Valores em Reais)
+01. 13º salário 3.604,14
+TOTAL 3.604,14
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM EXIGIBILIDADE SUSPENSA)
+Sem Informações
+RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM EXIGIBILIDADE
+SUSPENSA)
+Sem Informações
+RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELO TITULAR
+Sem Informações
+RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS DEPENDENTES
+Sem Informações
+(Valores em Reais)IMPOSTO PAGO / RETIDO
+01. Imposto complementar 0,00
+02. Imposto pago no exterior pelo titular e pelos dependentes
+03. Imposto sobre a renda na fonte (Lei 11.033/2004)
+0,00
+0,00
+0,00
+Imposto devido com os rendimentos no exterior
+Diferença a ser considerada para cálculo do imposto (limite legal)
+0,00
+0,00Imposto devido sem os rendimentos no exterior
+0,0006. Carnê-Leão do titular
+0,00
+0,00
+04. Imposto retido na fonte do titular 3.203,13
+05. Imposto retido na fonte dos dependentes
+07. Carnê-Leão dos dependentes
+PAGAMENTOS EFETUADOS
+Sem Informações
+DOAÇÕES EFETUADAS
+Sem Informações
+Página 2 de 9
+===== PAGINA 3 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+DECLARAÇÃO DE BENS E DIREITOS (Valores em Reais)
+GRUPO DISCRIMINAÇÃO SITUAÇÃO EM 31/12/2024 SITUAÇÃO NA DATA DA
+CARACTERIZAÇÃO DA
+CONDIÇÃO DE NÃO
+RESIDENTE
+CÓDIGOBEM
+01 SAI BEM IMOVEL BRASIL SENTINELA, ADQUIRIDO EM
+25/05/2025, MATRICULA 44001.
+0,00 144.401,41
+Inscrição Municipal (IPTU):  SAI-IPTU-4401
+111
+105 - BRASIL Bem com usufruto: Não
+Logradouro: SAI BEM IMOVEL Nº: 4401
+Comp.: APTO 44 Bairro: BAIRRO SENTINELA
+UF: SPMunicípio: SAO PAULO CEP: 01001-000
+Registrado no Cartório: Sim
+Matrícula: 44001
+Área Total:
+Nome Cartório:
+Data de Aquisição: 25/05/202544,4
+04 SAI BEM EXTERIOR CONTA SENTINELA MOEDA USD 24.402,42 35.403,43022
+249 - ESTADOS UNIDOS DA AMÉRICA
+TitularBem ou direito pertencente ao: CPF:
+Bem com usufruto: Não
+404,45
+Valor Recebido:
+Imposto Pago Exterior/IRRF Brasil: 0,00Imposto Pago no Exterior:
+0,002.404,44
+Lucros e Dividendos (R$)
+Rendimento ou Perda:
+Aplicação Financeira (R$)
+TOTAL 179.804,8424.402,42
+DÍVIDAS E ÔNUS REAIS
+Sem Informações
+DOAÇÕES A PARTIDOS POLÍTICOS E CANDIDATOS A CARGOS ELETIVOS
+Sem Informações
+Página 3 de 9
+===== PAGINA 4 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+DEMONSTRATIVO DE ATIVIDADE RURAL - BRASIL
+DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - BRASIL
+Sem Informações
+RECEITAS E DESPESAS - BRASIL
+Sem Informações
+APURAÇÃO DO RESULTADO - BRASIL
+Sem Informações
+MOVIMENTAÇÃO DO REBANHO - BRASIL
+Sem Informações
+BENS DA ATIVIDADE RURAL - BRASIL
+Sem Informações
+DÍVIDAS VINCULADAS À ATIVIDADE RURAL - BRASIL
+Sem Informações
+Página 4 de 9
+===== PAGINA 5 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+DEMONSTRATIVO DE ATIVIDADE RURAL - EXTERIOR
+DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - EXTERIOR
+Sem Informações
+RECEITAS E DESPESAS - EXTERIOR
+Sem Informações
+APURAÇÃO DO RESULTADO - EXTERIOR
+Sem Informações
+MOVIMENTAÇÃO DO REBANHO - EXTERIOR
+Sem Informações
+BENS DA ATIVIDADE RURAL - EXTERIOR
+Sem Informações
+DÍVIDAS VINCULADAS À ATIVIDADE RURAL - EXTERIOR
+Sem Informações
+DEMONSTRATIVO DA APURAÇÃO DOS GANHOS DE CAPITAL
+Sem Informações
+Página 5 de 9
+===== PAGINA 6 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - TITULAR
+GANHOS LÍQUIDOS OU PERDAS - JAN
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - FEV
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - MAR
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - ABR
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - MAI
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - JUN
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - JUL
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - AGO
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - SET
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - OUT
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - NOV
+Sem Informações
+GANHOS LÍQUIDOS OU PERDAS - DEZ
+Sem Informações
+RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - DEPENDENTES
+Sem Informações
+FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - TITULAR
+Sem Informações
+FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - DEPENDENTES
+Sem Informações
+DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - ECA
+Sem Informações
+DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - PESSOA IDOSA
+Sem Informações
+Página 6 de 9
+===== PAGINA 7 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+Demonstrativo de Apuração do Imposto de Renda Incidente sobre Rendimentos de Aplicações Financeiras no Exterior e sobre
+Lucros e Dividendos de Entidade Controlada no Exterior e de Compensação de Perdas em Aplicações Financeiras no Exterior
+Bem Tipo Ganho/Prejuízo Imposto Devido Imposto Pago no
+Brasil / Exterior Base de Cálculo Saldo
+Prejuízo do ano anterior: 0,00
+DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023
+2 AF 2.404,44 360,66 404,45 0,00 -
+Base de Cálculo:
+Imposto Devido:
+0,00
+0,00
+Legenda Tipo
+AF - Aplicação Financeira
+LD - Lucros e Dividendos
+Bem
+A identificação do bem pode ser verificada na impressão da ficha de Bens e Direitos.
+Página 7 de 9
+===== PAGINA 8 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+RESUMO
+RENDIMENTOS TRIBUTÁVEIS
+Recebidos de Pessoa Jurídica pelo titular
+Recebidos de Pessoa Jurídica pelos dependentes
+Recebidos de Pessoa Física/Exterior pelos dependentes
+Resultado tributável da Atividade Rural
+TOTAL
+DEDUÇÕES
+Contribuições às previdências oficial e complementar aberta ou fechada de que trata o § 15 do art. 40 da CF/1988 (até o limite
+do patrocinador)
+Contribuição à prev. complementar, inclusive o valor para as fechadas de que trata o § 15 do art. 40 da CF/1988 que exceder o
+limite do patrocinador
+Dependentes
+Despesas com instrução
+Despesas médicas
+Pensão alimentícia judicial
+Livro caixa
+TOTAL
+IMPOSTO DEVIDO IMPOSTO A RESTITUIR
+43.201,11
+0,00
+0,00
+0,00
+43.201,11
+4.202,12
+0,00
+0,00
+0,00
+0,00
+0,00
+0,00
+4.202,12
+2.032,33
+IMPOSTO PAGO
+Imposto retido na fonte do titular
+Imp. retido na fonte dos dependentes
+Imposto complementar
+Carnê-Leão do titular
+INFORMAÇÕES BANCÁRIAS
+Banco
+Agência (sem DV)
+Conta para crédito
+3.203,13
+0,00
+0,00
+0,00
+SALDO DE IMPOSTO A PAGAR 0,00
+Imposto pago no exterior 0,00
+Imposto retido na fonte (Lei nº 11.033/2004) 0,00
+Valor da quota 0,00
+Total do imposto pago 3.203,13
+QUOTA ÚNICA
+Recebidos de Pessoa Física/Exterior pelo titular 0,00
+Pensão alimentícia por escritura pública 0,00
+0,00Recebidos acumuladamente pelos dependentes
+0,00Recebidos acumuladamente pelo titular
+Contribuição à previdência oficial (Rendimentos recebidos acumuladamente) 0,00
+0,00Pensão alimentícia judicial (Rendimentos recebidos acumuladamente)
+Carnê-Leão dos dependentes 0,00
+0,00Imposto retido RRA
+TRIBUTAÇÃO UTILIZANDO AS DEDUÇÕES LEGAIS
+Total do imposto devido 1.170,80
+Dedução de incentivo
+0,00
+Imposto devido
+Imposto devido RRA
+1.170,80
+2,71
+1.170,80
+Aliquota efetiva (%)
+Base de cálculo do imposto
+Imposto devido I
+38.998,99
+0,00
+PixTipo de Conta
+Página 8 de 9
+===== PAGINA 9 =====
+NOME:
+IMPOSTO SOBRE A RENDA - PESSOA FÍSICACPF:
+ANO-CALENDÁRIO 2025EXERCÍCIO 2026
+AUDITORIA PDF TEC SAIDA
+DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS
+999.000.111-12
+Total do imposto retido na fonte (Lei nº11.033/2004), conforme dados informados pelo contribuinte
+Doações a Partidos Políticos e Candidatos a Cargos Eletivos 0,00
+Rendimentos sujeitos à tributação exclusiva/definitiva
+Imposto pago sobre Ganhos de Capital
+3.604,14
+0,00
+Rendimentos isentos e não tributáveis
+0,00Imposto devido sobre Ganhos de Capital Moeda Estrangeira - Bens, direitos e aplic. financeiras
+OUTRAS INFORMAÇÕES
+0,00
+0,00Imposto pago Ganhos de Capital Moeda Estrangeira - Bens, direitos e Aplicações Financeiras
+Imposto pago sobre Renda Variável 0,00
+Imposto a pagar sobre o Ganho de Capital - Moeda Estrangeira em Espécie 0,00
+Rendimentos tributáveis - imposto com exigibilidade suspensa 0,00
+Depósitos judiciais do imposto 0,00
+Imposto devido sobre Ganhos de Capital 0,00
+Imposto devido sobre ganhos líquidos em Renda Variável 0,00
+0,00
+0,00Imposto diferido dos Ganhos de Capital
+Bens e direitos - situação na data da caracterização da condição de não residente
+Dívidas e ônus reais - situação na data da caracterização da condição de não residente
+Dívidas e ônus reais em 31/12/2024
+24.402,42
+179.804,84
+0,00
+0,00
+Bens e direitos em 31/12/2024
+EVOLUÇÃO PATRIMONIAL
+Página 9 de 9
