@@ -17,6 +17,10 @@ dist-ssr
 # builder e artefatos binários do release, não faz sentido versionar).
 build/
 release/
+build-app/
+dist-app/
+installer/
+.build-venv/
 *.zip
 
 # Editor directories and files
@@ -29,3 +33,11 @@ release/
 *.njsproj
 *.sln
 *.sw?
+
+# Pasta de trabalho de sessão (PDFs intermediários da auditoria); nada aqui é
+# referenciado por código ou teste.
+tmp/
+
+# Scripts descartáveis de auditoria, criados na raiz durante uma sessão e sem
+# nenhuma referência no projeto.
+*-audit-tmp.mjs
