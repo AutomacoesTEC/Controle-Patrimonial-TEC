@@ -1,9 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
+import {
+  blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
+  conferenciasGanhoCapital, NOME_FICHA_GC,
+} from '../store/ganhoCapitalDetalhe';
 
 // Ganhos de Capital não tem cadastro próprio: é calculado a partir das
 // movimentações de venda (venda_parcial/venda_total) já registradas em Bens e
@@ -23,6 +27,20 @@ const FICHA_GC = {
   movel: 'Direitos/Bens Móveis',
   participacao: 'Participações Societárias',
 };
+
+// Percentual como a declaração o imprime, sem inventar nem cortar precisão:
+// a alíquota média sai "15,00" e o custo médio ponderado da participação sai
+// "32,918534". Duas casas no mínimo, seis no máximo, sem zeros à toa.
+function formatarPercentualGc(valor) {
+  const texto = Number(valor).toFixed(6).replace(/(\.\d{2}\d*?)0+$/, '$1');
+  return texto.replace('.', ',');
+}
+
+function ValorDaLinha({ linha }) {
+  if (linha.formato === 'texto') return <>{linha.valor}</>;
+  if (linha.formato === 'percentual') return <>{formatarPercentualGc(linha.valor)}%</>;
+  return <>{formatCurrency(linha.valor)}</>;
+}
 
 export default function GanhosCapitalPage() {
   const { state } = useData();
@@ -56,6 +74,8 @@ export default function GanhosCapitalPage() {
   // operação; daqui saem o detalhe de cada uma e a ficha de moedas em espécie.
   const gcOficial = dados?.ganhosCapitalOficial || null;
   const moedaEspecie = gcOficial?.moedaEspecie || { operacoes: [], mensal: [] };
+  const operacoesDetalhadas = gcOficial?.operacoes || [];
+  const avisosGc = conferenciasGanhoCapital(operacoesDetalhadas);
   const moedaMensalComMovimento = (moedaEspecie.mensal || []).filter(
     m => (m.alienacaoDolar || 0) !== 0 || (m.ganhoCapital || 0) !== 0 || (m.impostoDevido || 0) !== 0
   );
@@ -240,6 +260,154 @@ export default function GanhosCapitalPage() {
             </div>
           </div>
         )}
+        {/* Demonstrativo completo, operação por operação. O card acima é o
+            resumo de uma linha; aqui fica o que EXPLICA cada número, a começar
+            pela cadeia de reduções do imóvel. Montagem em
+            src/store/ganhoCapitalDetalhe.js, testada contra o retorno real. */}
+        {operacoesDetalhadas.length > 0 && (
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <div className="card-header">
+              <h3 className="card-title">Demonstrativo por Operação</h3>
+              <span className="badge badge-blue" title="Lido do arquivo importado, não é calculado pelo app">Da declaração original</span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
+              Os rótulos e a ordem são os do demonstrativo impresso. No ganho de capital de imóvel, o
+              valor tributável não é a alienação menos o custo: entre um e outro entram a redução da
+              Lei nº 7.713/1988 e os fatores da Lei nº 11.196/2005, que aparecem abaixo mesmo quando
+              são zero, porque a declaração também os imprime.
+            </p>
+
+            {avisosGc.length > 0 && (
+              <div style={{ padding: '12px 14px', marginBottom: '16px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--accent-warning)' }}>Conferência do demonstrativo</div>
+                {avisosGc.map((aviso, i) => (
+                  <div key={i} style={{ fontSize: '12px', marginTop: '4px' }}>{aviso}</div>
+                ))}
+              </div>
+            )}
+
+            {operacoesDetalhadas.map((op, idx) => {
+              const blocos = blocosOperacaoGanhoCapital(op);
+              const parcelas = parcelasDaOperacao(op);
+              const faixas = faixasDaOperacao(op);
+              return (
+                <div key={op.id ?? idx} style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: idx < operacoesDetalhadas.length - 1 ? '1px solid var(--border-color)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    <span className="badge badge-blue">{NOME_FICHA_GC[op.tipo] || op.tipo}</span>
+                    <strong>{op.especificacao || op.sociedade?.nome || 'Operação'}</strong>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      Aquisição {formatDate(op.dataAquisicao) || 'não informada'}, alienação {formatDate(op.dataAlienacao) || 'não informada'}
+                    </span>
+                    {op.alienacaoAPrazo && <span className="badge badge-orange">Alienação a prazo</span>}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '16px' }}>
+                    {blocos.map(bl => (
+                      <div key={bl.id} style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '14px 16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                          {bl.titulo}
+                        </div>
+                        <table style={{ width: '100%', fontSize: '13px' }}>
+                          <tbody>
+                            {bl.linhas.map((l, i) => (
+                              <tr key={i}>
+                                <td style={{ padding: '3px 12px 3px 0', color: 'var(--text-secondary)' }}>{l.rotulo}</td>
+                                <td style={{ padding: '3px 0', textAlign: 'right', whiteSpace: 'nowrap' }} className={l.formato === 'moeda' ? 'currency' : undefined}>
+                                  <ValorDaLinha linha={l} />
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
+
+                  {(op.adquirentes || []).length > 0 && (
+                    <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      Adquirente(s): {op.adquirentes.map(a => `${a.nome} (${formatCpfCnpj(a.cpfCnpj)})`).join(', ')}
+                    </div>
+                  )}
+
+                  {(op.custosAquisicao || []).length > 0 && (
+                    <div className="table-container" style={{ marginTop: '16px' }}>
+                      <table>
+                        <thead><tr><th>Espécie</th><th style={{ textAlign: 'right' }}>Quantidade</th><th style={{ textAlign: 'right' }}>Custo médio</th><th style={{ textAlign: 'right' }}>Custo total</th></tr></thead>
+                        <tbody>
+                          {op.custosAquisicao.map((c, i) => (
+                            <tr key={i}>
+                              <td>{c.especie}</td>
+                              <td style={{ textAlign: 'right' }}>{c.quantidade}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatarPercentualGc(c.custoMedio).replace('%', '')}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(c.custoTotal)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {parcelas.length > 0 && (
+                    <div className="table-container" style={{ marginTop: '16px' }}>
+                      {/* No parcelado o imposto é devido conforme o recebimento,
+                          e não de uma vez na data da alienação. */}
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Parcela</th><th>Data</th>
+                            <th style={{ textAlign: 'right' }}>Recebido</th>
+                            <th style={{ textAlign: 'right' }}>Custo proporcional</th>
+                            <th style={{ textAlign: 'right' }}>Ganho proporcional</th>
+                            <th style={{ textAlign: 'right' }}>Imposto devido</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parcelas.map(p => (
+                            <tr key={p.numero}>
+                              <td>{p.numero}</td>
+                              <td>{formatDate(p.data)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valorRecebido)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.custoAquisicaoProporcional)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.ganhoCapitalProporcional)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.impostoDevido)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {faixas.length > 0 && (
+                    <div className="table-container" style={{ marginTop: '16px' }}>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Faixa de ganho de capital</th><th>Alíquota</th>
+                            <th style={{ textAlign: 'right' }}>Total</th>
+                            <th style={{ textAlign: 'right' }}>Anterior</th>
+                            <th style={{ textAlign: 'right' }}>Atual</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {faixas.map((f, i) => (
+                            <tr key={i} style={f.ehTotal ? { fontWeight: 700 } : undefined}>
+                              <td>{f.rotulo}</td>
+                              <td>{f.aliquota}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.total)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.anterior)}</td>
+                              <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(f.atual)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {(moedaEspecie.operacoes.length > 0 || moedaMensalComMovimento.length > 0) && (
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
