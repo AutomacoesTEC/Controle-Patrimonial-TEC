@@ -4,6 +4,7 @@ import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TI
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { totaisEvolucaoPatrimonial } from '../store/demonstrativos';
+import { blocosResumoDeclaracao, conferenciasResumo } from '../store/resumoDeclaracao';
 
 // As 3 tabelas de Doações compartilham o mesmo aviso: diferente dos demais
 // cards "Da declaração original" deste arquivo (bens/pagamentos/renda
@@ -75,6 +76,17 @@ function CardDoacoes({ titulo, itens, comCategoria = false }) {
   );
 }
 
+// Cada linha do RESUMO carrega o próprio formato. Alíquota efetiva é
+// percentual e número de quotas é inteiro: exibir qualquer um deles como
+// moeda seria erro de leitura fiscal, não de estilo.
+function formatarValorResumo(linha) {
+  if (linha.formato === 'percentual') {
+    return `${linha.valor.toFixed(2).replace('.', ',')}%`;
+  }
+  if (linha.formato === 'inteiro') return String(linha.valor);
+  return formatCurrency(linha.valor);
+}
+
 export default function RelatorioPage() {
   const { state } = useData();
   const anosDisponiveis = anosComDado(state);
@@ -97,6 +109,11 @@ export default function RelatorioPage() {
     doacoesEfetuadasOficial = [], doacoesPartidosOficial = [], doacoesEcaIdosoOficial = [],
     dividasRurais = [],
   } = dados || {};
+
+  // Blocos do RESUMO como a declaração os imprime. A montagem é lógica pura
+  // (src/store/resumoDeclaracao.js), testada contra o retorno real do parser.
+  const blocosResumo = blocosResumoDeclaracao(impostoDevido);
+  const avisosResumo = conferenciasResumo(impostoDevido);
 
   const seletorAno = anosDisponiveis.length > 0 && (
     <select
@@ -226,9 +243,14 @@ export default function RelatorioPage() {
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
               <h3 className="card-title">Resumo da Declaração Importada</h3>
-              <span className="badge badge-blue" title="Lido do arquivo .DBK importado, não é calculado pelo app">Da declaração original</span>
+              <span className="badge badge-blue" title="Lido do arquivo importado, não é calculado pelo app">Da declaração original</span>
             </div>
-            <div className="stats-grid" style={{ marginBottom: 0 }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
+              Os rótulos e a ordem são os da página RESUMO da declaração impressa, para conferir
+              linha a linha com o documento ao lado. Valor zerado aparece porque a declaração
+              também o imprime; linha que este modelo de declaração não informa fica de fora.
+            </p>
+            <div className="stats-grid">
               <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Base de Cálculo</div>
                 <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(impostoDevido.baseCalculo)}</div>
@@ -241,16 +263,58 @@ export default function RelatorioPage() {
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total do Imposto Pago</div>
                 <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(impostoDevido.impostoPagoTotal)}</div>
               </div>
-              <div style={{ padding: '16px', background: 'rgba(59,130,246,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(59,130,246,0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--accent-primary)', textTransform: 'uppercase', fontWeight: 600 }}>Saldo a Pagar</div>
-                <div style={{ fontSize: '20px', fontWeight: 700 }}>{formatCurrency(impostoDevido.saldoPagar)}</div>
-              </div>
-              {impostoDevido.lei14754Imposto > 0 && (
-                <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Imposto Lei 14.754/2023 (Exterior)</div>
-                  <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(impostoDevido.lei14754Imposto)}</div>
+              {/* Paga OU restitui: o card de destaque mostra o resultado que a
+                  declaração de fato apurou, nunca os dois ao mesmo tempo. */}
+              {impostoDevido.impostoRestituir > 0 ? (
+                <div style={{ padding: '16px', background: 'rgba(16,185,129,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--accent-success)', textTransform: 'uppercase', fontWeight: 600 }}>Imposto a Restituir</div>
+                  <div style={{ fontSize: '20px', fontWeight: 700 }}>{formatCurrency(impostoDevido.impostoRestituir)}</div>
+                </div>
+              ) : (
+                <div style={{ padding: '16px', background: 'rgba(59,130,246,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(59,130,246,0.2)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--accent-primary)', textTransform: 'uppercase', fontWeight: 600 }}>Saldo a Pagar</div>
+                  <div style={{ fontSize: '20px', fontWeight: 700 }}>{formatCurrency(impostoDevido.saldoPagar)}</div>
                 </div>
               )}
+            </div>
+
+            {avisosResumo.length > 0 && (
+              <div style={{ padding: '12px 14px', marginBottom: '16px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--accent-warning)' }}>Conferência do quadro</div>
+                {avisosResumo.map((aviso, i) => (
+                  <div key={i} style={{ fontSize: '12px', marginTop: '4px' }}>{aviso}</div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+              {blocosResumo.map(bl => (
+                <div key={bl.id} style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    {bl.titulo}
+                  </div>
+                  <table style={{ width: '100%', fontSize: '13px' }}>
+                    <tbody>
+                      {bl.linhas.map((l, i) => (
+                        <tr key={i}>
+                          <td style={{ padding: '3px 0', color: 'var(--text-secondary)' }}>{l.rotulo}</td>
+                          <td style={{ padding: '3px 0', textAlign: 'right', whiteSpace: 'nowrap' }} className="currency">
+                            {formatarValorResumo(l)}
+                          </td>
+                        </tr>
+                      ))}
+                      {bl.total && (
+                        <tr>
+                          <td style={{ padding: '6px 0 0', fontWeight: 700, borderTop: '1px solid var(--border-color)' }}>{bl.total.rotulo}</td>
+                          <td style={{ padding: '6px 0 0', textAlign: 'right', fontWeight: 700, whiteSpace: 'nowrap', borderTop: '1px solid var(--border-color)' }} className="currency">
+                            {formatCurrency(bl.total.valor)}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
             </div>
           </div>
         )}
