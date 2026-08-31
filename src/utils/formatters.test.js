@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -146,5 +146,28 @@ describe('resumirMeses', () => {
     expect(resumirMeses([])).toBe('');
     expect(resumirMeses(null)).toBe('');
     expect(resumirMeses([{ mes: 3 }])).toBe('');
+  });
+});
+
+describe('descreverTitularidade', () => {
+  it('nomeia o dependente e o alimentando, e o titular sozinho', () => {
+    expect(descreverTitularidade({ titularidade: 'titular' })).toBe('Titular');
+    expect(descreverTitularidade({ titularidade: 'dependente', titularidadeNome: 'AJU PES DEPENDENTE UM' }))
+      .toBe('Dependente: AJU PES DEPENDENTE UM');
+    expect(descreverTitularidade({ titularidade: 'alimentando', titularidadeNome: 'AJU PES ALIMENTANDO UM' }))
+      .toBe('Alimentando: AJU PES ALIMENTANDO UM');
+  });
+
+  it('sem titularidade informada não afirma que o pagamento é do titular', () => {
+    // Pagamento cadastrado à mão antes deste campo existir não tem o dado.
+    // Assumir "Titular" mudaria a leitura fiscal de uma despesa que pode ser
+    // de dependente ou de alimentando.
+    expect(descreverTitularidade({})).toBe('');
+    expect(descreverTitularidade({ titularidade: '' })).toBe('');
+    expect(descreverTitularidade(null)).toBe('');
+  });
+
+  it('titularidade conhecida sem nome mostra só o tipo', () => {
+    expect(descreverTitularidade({ titularidade: 'dependente', titularidadeNome: '  ' })).toBe('Dependente');
   });
 });

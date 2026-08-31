@@ -1,13 +1,16 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
-const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', data: new Date().toISOString().slice(0, 10) };
+// titularidade nasce vazia de propósito: o cadastro manual não deve assumir
+// que a despesa é do titular. Titular, dependente e alimentando têm regras de
+// dedução diferentes, e o campo em branco é honesto ("não informado").
+const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: new Date().toISOString().slice(0, 10) };
 
 export default function PagamentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
@@ -27,7 +30,7 @@ export default function PagamentosPage() {
   };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
-    setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', data: p.data || new Date().toISOString().slice(0, 10) });
+    setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', titularidade: p.titularidade || '', titularidadeNome: p.titularidadeNome || '', data: p.data || new Date().toISOString().slice(0, 10) });
     setModalOpen(true);
   };
 
@@ -65,6 +68,7 @@ export default function PagamentosPage() {
       ['Descrição do Código', p => describePagamentoCodigo(p.codigo) || ''],
       ['Data', p => formatDate(p.data)],
       ['Nome Beneficiário', p => p.nome_beneficiario || ''],
+      ['Titularidade', p => descreverTitularidade(p)],
       ['CPF/CNPJ', p => formatCpfCnpj(p.cpf_cnpj)],
       ['Valor Pago', p => p.valor_pago || 0],
       ['Parcela Não Dedutível', p => p.parcela_nao_dedutivel || 0],
@@ -85,7 +89,7 @@ export default function PagamentosPage() {
       <div className="page-body animate-in">
         <div className="table-container">
           <table>
-            <thead><tr><th>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
             <tbody>
               {pagamentos.length === 0 ? (
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum pagamento cadastrado.</td></tr>
@@ -99,6 +103,9 @@ export default function PagamentosPage() {
                   </td>
                   <td>{formatDate(p.data)}</td>
                   <td>{(p.nome_beneficiario || '').substring(0, 40)}</td>
+                  <td style={{ fontSize: '12px' }}>
+                    {descreverTitularidade(p) || <span style={{ color: 'var(--text-muted)' }}>Não informada</span>}
+                  </td>
                   <td>{formatCpfCnpj(p.cpf_cnpj)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor_pago)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.parcela_nao_dedutivel)}</td>
@@ -145,6 +152,27 @@ export default function PagamentosPage() {
                   <div className="form-group"><label>CPF/CNPJ Beneficiário</label><input className="form-control" value={form.cpf_cnpj} onChange={e => upd('cpf_cnpj', e.target.value)} /></div>
                 </div>
                 <div className="form-group"><label>Nome do Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Titularidade</label>
+                    <select className="form-control" value={form.titularidade} onChange={e => upd('titularidade', e.target.value)}>
+                      <option value="">Não informada</option>
+                      {Object.entries(TITULARIDADE_PAGAMENTO).map(([valor, rotulo]) => (
+                        <option key={valor} value={valor}>{rotulo}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Nome do dependente ou alimentando</label>
+                    <input
+                      className="form-control"
+                      value={form.titularidadeNome}
+                      onChange={e => upd('titularidadeNome', e.target.value)}
+                      disabled={form.titularidade !== 'dependente' && form.titularidade !== 'alimentando'}
+                      placeholder={form.titularidade === 'dependente' || form.titularidade === 'alimentando' ? '' : 'Só para dependente ou alimentando'}
+                    />
+                  </div>
+                </div>
                 <div className="form-row">
                   <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
                   <div className="form-group"><label>Valor Pago</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>

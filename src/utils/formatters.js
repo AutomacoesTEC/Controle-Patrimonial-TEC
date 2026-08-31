@@ -207,6 +207,31 @@ export function describePagamentoCodigo(codigo) {
   return CODIGOS_PAGAMENTO.find(c => c.codigo === codigo)?.nome || '';
 }
 
+// A quem o pagamento se refere. A ficha imprime isso como um marcador que
+// vale para as linhas seguintes ("Dependente: FULANO", "Alimentando: FULANO")
+// e o parser o resolve item a item (ver importParsers, pagamentos-01).
+//
+// Não é rótulo decorativo: titular, dependente e alimentando têm regras de
+// dedução diferentes na declaração. Despesa de instrução de dependente tem
+// limite individual; pensão a alimentando é dedução própria, e não despesa do
+// titular. Exibir tudo como se fosse do titular apaga essa distinção na hora
+// de conferir.
+export const TITULARIDADE_PAGAMENTO = {
+  titular: 'Titular',
+  dependente: 'Dependente',
+  alimentando: 'Alimentando',
+};
+
+export function descreverTitularidade(pagamento) {
+  const tipo = pagamento?.titularidade;
+  const rotulo = TITULARIDADE_PAGAMENTO[tipo];
+  // Sem titularidade informada, não afirma que é do titular: pagamento
+  // cadastrado à mão antes deste campo existir simplesmente não tem o dado.
+  if (!rotulo) return '';
+  const nome = (pagamento?.titularidadeNome || '').trim();
+  return nome ? `${rotulo}: ${nome}` : rotulo;
+}
+
 // Tipo de movimentação de um bem: como a situação atual dele muda quando a
 // usuária registra uma compra, venda, benfeitoria etc (ver BemModal e
 // RelatorioPage). Fica aqui para os dois usarem o mesmo rótulo.
