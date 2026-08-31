@@ -2377,7 +2377,35 @@
             "rendimentoIsento": 0,
             "rendimentoExclusivo": 54397.58
           },
-          "faixasTributacao": [],
+          "faixasTributacao": [
+            {
+              "faixa1": {
+                "total": 54397.58,
+                "anterior": 0,
+                "atual": 54397.58
+              },
+              "faixa2": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa3": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa4": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "total": {
+                "total": 54397.58,
+                "anterior": 0,
+                "atual": 54397.58
+              }
+            }
+          ],
           "ampliacoesReformas": [],
           "custosAquisicao": []
         },
@@ -2485,7 +2513,35 @@
             "rendimentoIsento": 0,
             "rendimentoExclusivo": 10387.55
           },
-          "faixasTributacao": [],
+          "faixasTributacao": [
+            {
+              "faixa1": {
+                "total": 10387.55,
+                "anterior": 0,
+                "atual": 10387.55
+              },
+              "faixa2": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa3": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa4": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "total": {
+                "total": 10387.55,
+                "anterior": 0,
+                "atual": 10387.55
+              }
+            }
+          ],
           "ampliacoesReformas": [],
           "custosAquisicao": []
         },
@@ -2556,9 +2612,44 @@
             "rendimentoIsento": 0,
             "rendimentoExclusivo": 27377.52
           },
-          "faixasTributacao": [],
+          "faixasTributacao": [
+            {
+              "faixa1": {
+                "total": 27377.52,
+                "anterior": 0,
+                "atual": 27377.52
+              },
+              "faixa2": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa3": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "faixa4": {
+                "total": 0,
+                "anterior": 0,
+                "atual": 0
+              },
+              "total": {
+                "total": 27377.52,
+                "anterior": 0,
+                "atual": 27377.52
+              }
+            }
+          ],
           "ampliacoesReformas": [],
-          "custosAquisicao": []
+          "custosAquisicao": [
+            {
+              "especie": "Quota",
+              "quantidade": 1234,
+              "custoMedio": 32.918534,
+              "custoTotal": 40621.47
+            }
+          ]
         }
       ],
       "moedaEspecie": {

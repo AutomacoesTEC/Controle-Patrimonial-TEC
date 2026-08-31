@@ -38,7 +38,7 @@ Status: [x] resolvido, [ ] aberto.
 - [x] gc-05  FIX  participação: "CONSOLIDAÇÃO DA PARTICIPAÇÃO SOCIETÁRIA"
 - [x] gc-06  FIX  imóvel: "Valor da Alienação"/"Valor Líquido da Alienação" (com "da")
 - [x] gc-07  FIX  reduções Lei 7.713/Lei 11.196 e os cinco "Resultado" colidindo
-- [x] gc-08  FIX  faixas de tributação lidas como bloco mas não extraídas
+- [x] gc-08  FIX  faixas de tributação lidas como bloco mas não extraídas (REABERTO e fechado de novo em 31/08/2026: a leitura estava certa, mas a montagem final de ganhosCapitalOficial cravava faixasTributacao em [] por cima. Verificado no retorno real, não no relato)
 - [x] gc-09  FIX  participação: quadro CUSTO DE AQUISIÇÃO sem parser
 - [x] gc-10  FIX  participação: "Espécie da participação" consumida pela branch de Natureza
 - [x] gc-11  FIX  participação: Município e UF da sociedade perdidos

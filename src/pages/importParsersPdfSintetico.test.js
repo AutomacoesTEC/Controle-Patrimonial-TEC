@@ -1012,3 +1012,39 @@ describe.skipIf(!temPdfs)('origem de cada item no documento', () => {
     expect(ultimo.origemDocumento).toEqual({ formato: 'pdf', pagina: 5, linha: 41 });
   });
 });
+
+// gc-08, reaberto em 31/08/2026. O achado constava como resolvido no
+// MAPA-RESOLUCAO e o retorno real trazia faixasTributacao vazia nas três
+// operações. A leitura estava certa: quem descartava era a MONTAGEM final do
+// ganhosCapitalOficial, que cravava faixasTributacao, ampliacoesReformas e
+// custosAquisicao em [] por cima do que o parser tinha lido.
+describe.skipIf(!temPdfs)('faixas de tributação do ganho de capital', () => {
+  let aju;
+  beforeAll(async () => { aju = await extrair('AJU'); });
+
+  it('a tabela de faixas do imóvel chega ao resultado (AJU-01 p15 r26 a r30)', () => {
+    const imovel = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'imovel');
+    expect(imovel.faixasTributacao).toHaveLength(1);
+    const f = imovel.faixasTributacao[0];
+    // p15 r26: faixa de 15%, com TOTAL, Anterior e Atual.
+    expect(f.faixa1).toEqual({ total: 54397.58, anterior: 0, atual: 54397.58 });
+    // p15 r27 a r29: as três faixas superiores, zeradas nesta operação. Zero
+    // impresso é zero lido: some se for tratado como ausência.
+    expect(f.faixa2).toEqual({ total: 0, anterior: 0, atual: 0 });
+    expect(f.faixa3).toEqual({ total: 0, anterior: 0, atual: 0 });
+    expect(f.faixa4).toEqual({ total: 0, anterior: 0, atual: 0 });
+    // p15 r30: a linha TOTAL da tabela.
+    expect(f.total).toEqual({ total: 54397.58, anterior: 0, atual: 54397.58 });
+  });
+
+  it('as três operações trazem a tabela, e o total dela fecha com o ganho apurado', () => {
+    for (const op of aju.ganhosCapitalOficial.operacoes) {
+      expect(op.faixasTributacao).toHaveLength(1);
+      const somaFaixas = ['faixa1', 'faixa2', 'faixa3', 'faixa4']
+        .reduce((s, k) => s + op.faixasTributacao[0][k].total, 0);
+      // A soma das faixas é o próprio total da tabela: é a conferência que a
+      // declaração permite fazer sozinha.
+      expect(somaFaixas).toBeCloseTo(op.faixasTributacao[0].total.total, 2);
+    }
+  });
+});

@@ -6090,9 +6090,15 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         apuracao: op.apuracao || null,
         calculoImposto: op.calculoImposto || null,
         consolidacaoBem: op.consolidacaoBem || null,
-        faixasTributacao: [],
-        ampliacoesReformas: [],
-        custosAquisicao: [],
+        // Estes três eram cravados em [] aqui, DESCARTANDO o que o parser
+        // tinha acabado de ler. No AJU-01 a tabela de faixas está impressa
+        // (p15 r25 a r30: quatro faixas mais a linha TOTAL), o handler de
+        // `gcBloco === 'faixas'` a lia corretamente, e a montagem final jogava
+        // fora. O achado gc-08 constava como resolvido no mapa e o retorno real
+        // vinha vazio.
+        faixasTributacao: op.faixasTributacao || [],
+        ampliacoesReformas: op.ampliacoesReformas || [],
+        custosAquisicao: op.custosAquisicao || [],
       })),
       moedaEspecie: { operacoes: gcMoedaOperacoesPdf, mensal: gcMoedaMensalPdf.sort((a, b) => a.mes - b.mes) },
       origem: 'pdf',
