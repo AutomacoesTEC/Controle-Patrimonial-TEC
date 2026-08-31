@@ -75,7 +75,10 @@ def c = dec.getContribuinte()
 
 // Atividade rural no Brasil: um imóvel em CONDOMÍNIO, que é a condição que
 // justifica ter participantes, com o par que interessa ao teste.
-def arBrasil = fv(dec, 'atividadeRuralBrasil')
+// A atividade rural pende de dec.getAtividadeRural(), e o Brasil é o campo
+// `brasil` dentro dele (mesma navegação do preencher-irpf-2026-sintetico).
+def ar = dec.getAtividadeRural()
+def arBrasil = fv(ar, 'brasil')
 def imBr = new serpro.ppgd.irpf.negocio.atividaderural.brasil.ImovelARBrasil()
 [codigo: '11', nome: 'RUR FAZENDA SENTINELA', localizacao: 'ESTRADA RUR SENTINELA KM 77 - UBERABA/MG - CEP 38000-000',
  area: '200,00', participacao: '50,00', condicaoExploracao: '2', cib: '1234567-8'].each { k, v -> setC(imBr, k, v) }
@@ -101,8 +104,13 @@ def recBr = fv(arBrasil, 'receitasDespesas')
 setC(fv(recBr, 'janeiro'), 'receitaBrutaMensal', '77.001,01')
 setC(fv(recBr, 'janeiro'), 'despesaCusteioInvestimento', '11.002,02')
 
-dec.calcular()
-repo.grava(dec)
+// Mesma sequência dos demais scripts desta pasta: os validadores especiais
+// entram antes do recálculo, e uma falha de recálculo não impede a gravação
+// (a declaração é sintética e mínima).
+try {
+  dec.adicionaValidadoresEspeciais(); dec.recalcularDeclaracao()
+} catch (Throwable t) { logs << "RECALCULO_AVISO|Declaracao|recalcularDeclaracao|${t.class.simpleName}: ${t.message}|salvo assim mesmo" }
+repo.salvar(dec, path)
 
 println "RUR-01 gravada em: ${path}"
 if (logs) { println 'OCORRENCIAS:'; logs.each { println '  ' + it } }
