@@ -21,6 +21,20 @@
 // sem janela, mas abrir e imprimir exigem a interface. Depois de rodar isto, o
 // PDF precisa ser exportado pela janela Impressão do próprio programa.
 //
+// AVISO, aprendido do jeito difícil em 31/08/2026: NÃO edite nenhum XML do PGD
+// por fora. Cada XML tem um `.conf` ao lado com um hash de integridade, e o
+// programa valida esse hash na ABERTURA. Editar o iddeclaracoes.xml com um
+// script de texto invalidou o par e o IRPF 2026 parou de abrir, com
+// HashInvalidoException e sem mensagem na tela. Ver
+// HANDOFF-2026-08-31-SESSAO-TELAS.md, seção 1.
+//
+// Este script grava pela API (repo.salvar), que regrava o .conf junto, e por
+// isso a declaração em si fica íntegra. O que FALTA fazer, e tem que ser pela
+// API também, é registrar a declaração em iddeclaracoes.xml: carregar a
+// ColecaoIdDeclaracao, acrescentar o IdentificadorDeclaracao e salvar pelo
+// repositório. NÃO usar registrar-sai-01-em-iddeclaracoes.py como modelo: ele
+// edita o arquivo por substituição de texto e causa exatamente esse estrago.
+//
 // Uso, no PowerShell do Windows, com o IRPF 2026 FECHADO:
 //   $rfb = "C:\Arquivos de Programas RFB\IRPF2026"
 //   & "$rfb\jre\bin\java.exe" -cp "$rfb\lib\*;$rfb\lib-modulos\*;$rfb\irpf.jar" `
