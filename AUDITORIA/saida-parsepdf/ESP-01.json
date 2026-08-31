@@ -1,0 +1,1016 @@
+{
+  "erro": null,
+  "logs": [
+    "[success] PDF aberto, 8 páginas",
+    "[success] Contribuinte: AUDITORIA PDF TEC HERANCA, CPF: 55566677720",
+    "[undefined] Ano-calendário desta declaração: 2025",
+    "[undefined] Identificados 1 bens e direitos",
+    "[undefined] Identificadas 0 dívidas e ônus reais",
+    "[undefined] Identificados 0 pagamentos efetuados",
+    "[undefined] Identificadas 0 doações efetuadas",
+    "[undefined] Identificadas 0 doações a partidos políticos e candidatos",
+    "[undefined] Identificadas 0 doações diretamente na declaração (ECA/pessoa idosa)",
+    "[success] Resumo da declaração (imposto devido, deduções e evolução patrimonial) lido das páginas RESUMO e EVOLUÇÃO PATRIMONIAL"
+  ],
+  "resultado": {
+    "formato": "pdf",
+    "contribuinte": {
+      "cpf": "55566677720",
+      "nome": "AUDITORIA PDF TEC HERANCA",
+      "dataNascimento": "1980-01-11",
+      "racaCor": "Parda",
+      "possuiConjuge": false,
+      "cpfConjuge": "",
+      "retornoPais": null,
+      "alteracaoDadosCadastrais": true,
+      "doencaDeficiencia": false,
+      "logradouro": "RUA SENTINELA ESP PES",
+      "numero": "5501",
+      "complemento": "APTO 55",
+      "bairro": "BAIRRO SENTINELA",
+      "municipio": "SAO PAULO",
+      "uf": "SP",
+      "cep": "01001-000",
+      "telefone": "(11) 3456-7890",
+      "email": "ESP.AUDITORIA@EXAMPLE.INVALID",
+      "celular": "",
+      "tipoDeclaracao": "Declaração Final de Espólio Original",
+      "reciboUltimaDeclaracao": ""
+    },
+    "bens": [
+      {
+        "id": 1,
+        "numeroItem": null,
+        "grupo": "99",
+        "codigo_bem": "99",
+        "discriminacao": "ESP BEM PARTILHA SENTINELA",
+        "situacao_anterior": 123401.41,
+        "situacao_atual": 123401.41,
+        "localizacao": "105",
+        "paisNome": "BRASIL",
+        "beneficiario": "Titular",
+        "cpf_beneficiario": "",
+        "cnpj": "",
+        "ehPartilha": true,
+        "situacaoDataPartilha": 123401.41,
+        "valorTransferencia": 123401.41,
+        "origemDocumento": {
+          "formato": "pdf",
+          "pagina": 3,
+          "linha": 7
+        },
+        "lendoHerdeiros": true,
+        "herdeiros": [
+          {
+            "nome": "ESP HERDEIRO UM",
+            "cpf_cnpj": "77788899941",
+            "percentual": 60
+          },
+          {
+            "nome": "ESP HERDEIRO DOIS",
+            "cpf_cnpj": "88899900078",
+            "percentual": 40
+          }
+        ]
+      }
+    ],
+    "dividas": [],
+    "rendimentos": [],
+    "pagamentos": [],
+    "anoCalendario": 2025,
+    "doacoesEfetuadasOficial": [],
+    "doacoesPartidosOficial": [],
+    "dependentes": [],
+    "impostoDevido": {
+      "origem": "pdf",
+      "modeloDeclaracao": "completa",
+      "rendimentosPjTitular": 0,
+      "rendimentosPjDependentes": 0,
+      "rendimentosPfExteriorTitular": 0,
+      "rendimentosPfExteriorDependentes": 0,
+      "rendimentosAcumuladosTitular": 0,
+      "rendimentosAcumuladosDependentes": 0,
+      "resultadoTributavelRural": 0,
+      "rendimentosTributaveisTotal": 0,
+      "previdenciaOficialComplementar": 0,
+      "previdenciaOficialRRA": 0,
+      "previdenciaComplementar": 0,
+      "dependentes": 0,
+      "despesasInstrucao": 0,
+      "despesasMedicas": 0,
+      "pensaoJudicial": 0,
+      "pensaoEscritura": 0,
+      "pensaoJudicialRRA": 0,
+      "livroCaixa": 0,
+      "totalDeducoes": 0,
+      "impostoRestituir": 0,
+      "baseCalculo": 0,
+      "saldoPagar": 0,
+      "impostoDevidoBruto": 0,
+      "deducaoIncentivo": 0,
+      "impostoDevidoI": 0,
+      "valorQuota": 0,
+      "impostoDevidoRRA": 0,
+      "aliquotaEfetiva": 0,
+      "impostoDevidoTotal": 0,
+      "irrfTitular": 0,
+      "irrfDependentes": 0,
+      "carneLeaoTitular": 0,
+      "carneLeaoDependentes": 0,
+      "impostoComplementar": 0,
+      "impostoPagoExterior": 0,
+      "irFonteLei11033Pago": 0,
+      "irrfRRA": 0,
+      "impostoPagoTotal": 0,
+      "bensAnteriorOficial": 123401.41,
+      "bensAtualOficial": 123401.41,
+      "dividasAnteriorOficial": 0,
+      "dividasAtualOficial": 0,
+      "rendimentosIsentosOficial": 0,
+      "rendimentosExclusivoOficial": 0,
+      "rendimentosExigibilidadeSuspensa": 0,
+      "depositosJudiciais": 0,
+      "impostoPagoGanhosCapital": 0,
+      "impostoPagoGanhosCapitalMoeda": 0,
+      "irFonteLei11033Ano": 0,
+      "impostoPagoRendaVariavel": 0,
+      "doacoesPartidosOficial": 0,
+      "impostoPagarGanhosCapitalMoeda": 0,
+      "impostoDiferidoGanhosCapital": 0,
+      "impostoDevidoGanhosCapital": 0,
+      "impostoDevidoRendaVariavel": 0,
+      "impostoDevidoGanhosCapitalMoeda": 0
+    },
+    "apuracaoGanhoCapital": [],
+    "receitasDespesasRuraisOficial": [],
+    "apuracaoResultadoRuralOficial": null,
+    "fichasNaoLidasComConteudo": [],
+    "imoveisRurais": [],
+    "bensRurais": [],
+    "dividasRurais": [],
+    "participantesRuraisOficial": [],
+    "movimentacaoRebanhoOficial": [],
+    "demonstrativoExteriorOficial": [],
+    "doacoesEcaIdosoOficial": [],
+    "rendaVariavelMensalOficial": [],
+    "rendaVariavelAnualOficial": null,
+    "ganhosCapitalOficial": null,
+    "fiiFiagroMensalOficial": [],
+    "fiiFiagroAnualOficial": null,
+    "estadoFichas": {
+      "pdf:identificacao-contribuinte": {
+        "estado": "parcial",
+        "formato": "pdf",
+        "presenca": "preenchida",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
+        "titulo": "Identificação do contribuinte",
+        "paginaInicio": 1,
+        "linhaInicio": 4
+      },
+      "pdf:inventariante": {
+        "estado": "nao_suportada",
+        "formato": "pdf",
+        "presenca": "indeterminada",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral",
+        "titulo": "Espólio, inventariante e partilha",
+        "paginaInicio": 1,
+        "linhaInicio": 19
+      },
+      "pdf:saida-definitiva": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Saída definitiva do país"
+      },
+      "pdf:dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Dependentes",
+        "paginaInicio": 1,
+        "linhaInicio": 34
+      },
+      "pdf:alimentandos": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Alimentandos",
+        "paginaInicio": 1,
+        "linhaInicio": 36
+      },
+      "pdf:herdeiros": {
+        "estado": "nao_suportada",
+        "formato": "pdf",
+        "presenca": "indeterminada",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral",
+        "titulo": "Herdeiros",
+        "paginaInicio": 2,
+        "linhaInicio": 4
+      },
+      "pdf:rendimentos-pj-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos tributáveis de PJ do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 8
+      },
+      "pdf:rendimentos-pj-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos tributáveis de PJ dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 10
+      },
+      "pdf:rendimentos-pf-exterior-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos de PF e exterior do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 12
+      },
+      "pdf:rendimentos-pf-exterior-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos de PF e exterior dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 14
+      },
+      "pdf:rendimentos-isentos": {
+        "estado": "erro",
+        "formato": "pdf",
+        "presenca": "indeterminada",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
+        "titulo": "Rendimentos isentos e não tributáveis",
+        "paginaInicio": 2,
+        "linhaInicio": 16
+      },
+      "pdf:rendimentos-tributacao-exclusiva": {
+        "estado": "erro",
+        "formato": "pdf",
+        "presenca": "indeterminada",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
+        "titulo": "Rendimentos sujeitos à tributação exclusiva ou definitiva",
+        "paginaInicio": 2,
+        "linhaInicio": 18
+      },
+      "pdf:rendimentos-exigibilidade-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos de PJ com exigibilidade suspensa do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 20
+      },
+      "pdf:rendimentos-exigibilidade-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos de PJ com exigibilidade suspensa dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 22
+      },
+      "pdf:rra-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos recebidos acumuladamente pelo titular",
+        "paginaInicio": 2,
+        "linhaInicio": 25
+      },
+      "pdf:rra-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Rendimentos recebidos acumuladamente pelos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 27
+      },
+      "pdf:demais-rendimentos-titular": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Demais rendimentos do titular"
+      },
+      "pdf:demais-rendimentos-dependentes": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Demais rendimentos dos dependentes"
+      },
+      "pdf:transportes": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Rendimentos de transportes"
+      },
+      "pdf:imposto-pago-retido": {
+        "estado": "parcial",
+        "formato": "pdf",
+        "presenca": "preenchida",
+        "suporte": "parcial",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
+        "titulo": "Imposto pago ou retido",
+        "paginaInicio": 2,
+        "linhaInicio": 29
+      },
+      "pdf:pagamentos-efetuados": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Pagamentos efetuados",
+        "paginaInicio": 2,
+        "linhaInicio": 31
+      },
+      "pdf:doacoes-efetuadas": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Doações efetuadas",
+        "paginaInicio": 2,
+        "linhaInicio": 33
+      },
+      "pdf:bens-direitos": {
+        "estado": "parcial",
+        "formato": "pdf",
+        "presenca": "preenchida",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
+        "titulo": "Bens e direitos",
+        "paginaInicio": 3,
+        "linhaInicio": 4
+      },
+      "pdf:dividas-onus": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Dívidas e ônus reais",
+        "paginaInicio": 3,
+        "linhaInicio": 13
+      },
+      "pdf:conjuge": {
+        "estado": "nao_suportada",
+        "formato": "pdf",
+        "presenca": "indeterminada",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral",
+        "titulo": "Informações do cônjuge",
+        "paginaInicio": 1,
+        "linhaInicio": 30
+      },
+      "pdf:doacoes-eleitorais": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Doações a partidos e candidatos",
+        "paginaInicio": 3,
+        "linhaInicio": 15
+      },
+      "pdf:doacoes-eca": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Doações diretamente na declaração - ECA",
+        "paginaInicio": 6,
+        "linhaInicio": 35
+      },
+      "pdf:doacoes-idoso": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Doações diretamente na declaração - pessoa idosa",
+        "paginaInicio": 6,
+        "linhaInicio": 37
+      },
+      "pdf:rural-brasil-identificacao": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - imóveis explorados",
+        "paginaInicio": 4,
+        "linhaInicio": 5
+      },
+      "pdf:rural-brasil-receitas-despesas": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - receitas e despesas",
+        "paginaInicio": 4,
+        "linhaInicio": 7
+      },
+      "pdf:rural-brasil-apuracao": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - apuração do resultado",
+        "paginaInicio": 4,
+        "linhaInicio": 9
+      },
+      "pdf:rural-brasil-rebanho": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - movimentação do rebanho",
+        "paginaInicio": 4,
+        "linhaInicio": 11
+      },
+      "pdf:rural-brasil-bens": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - bens",
+        "paginaInicio": 4,
+        "linhaInicio": 13
+      },
+      "pdf:rural-brasil-dividas": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural Brasil - dívidas vinculadas",
+        "paginaInicio": 4,
+        "linhaInicio": 15
+      },
+      "pdf:rural-brasil-participantes": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Atividade rural Brasil - participantes"
+      },
+      "pdf:rural-exterior-identificacao": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - imóveis explorados",
+        "paginaInicio": 5,
+        "linhaInicio": 5
+      },
+      "pdf:rural-exterior-receitas-despesas": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - receitas e despesas",
+        "paginaInicio": 5,
+        "linhaInicio": 7
+      },
+      "pdf:rural-exterior-apuracao": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - apuração do resultado",
+        "paginaInicio": 5,
+        "linhaInicio": 9
+      },
+      "pdf:rural-exterior-rebanho": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - movimentação do rebanho",
+        "paginaInicio": 5,
+        "linhaInicio": 11
+      },
+      "pdf:rural-exterior-bens": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - bens",
+        "paginaInicio": 5,
+        "linhaInicio": 13
+      },
+      "pdf:rural-exterior-dividas": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "nao_suportada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Atividade rural exterior - dívidas vinculadas",
+        "paginaInicio": 5,
+        "linhaInicio": 15
+      },
+      "pdf:ganho-capital-imoveis": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Ganho de capital - bens imóveis"
+      },
+      "pdf:ganho-capital-moveis": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Ganho de capital - bens móveis"
+      },
+      "pdf:ganho-capital-participacao": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Ganho de capital - participação societária"
+      },
+      "pdf:ganho-capital-moeda": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "parcial",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Ganho de capital - moeda em espécie"
+      },
+      "pdf:renda-variavel-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Renda variável - operações do titular",
+        "paginaInicio": 6,
+        "linhaInicio": 4
+      },
+      "pdf:renda-variavel-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "Renda variável - operações dos dependentes",
+        "paginaInicio": 6,
+        "linhaInicio": 29
+      },
+      "pdf:fii-fiagro-titular": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "parcial",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "FII e Fiagro - titular",
+        "paginaInicio": 6,
+        "linhaInicio": 31
+      },
+      "pdf:fii-fiagro-dependentes": {
+        "estado": "vazia",
+        "formato": "pdf",
+        "presenca": "vazia",
+        "suporte": "parcial",
+        "derivado": false,
+        "completudeAuditada": false,
+        "titulo": "FII e Fiagro - dependentes",
+        "paginaInicio": 6,
+        "linhaInicio": 33
+      },
+      "pdf:lei-14754": {
+        "estado": "ausente",
+        "formato": "pdf",
+        "presenca": "ausente",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Esta ficha não foi impressa no documento selecionado",
+        "titulo": "Demonstrativo de apuração - Lei 14.754/2023"
+      },
+      "pdf:resumo": {
+        "estado": "parcial",
+        "formato": "pdf",
+        "presenca": "preenchida",
+        "suporte": "estruturada",
+        "derivado": false,
+        "completudeAuditada": false,
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
+        "titulo": "Resumo da declaração e evolução patrimonial",
+        "paginaInicio": 7,
+        "linhaInicio": 4
+      }
+    },
+    "avisosImportacao": [],
+    "fichasPdfObservadas": {
+      "identificacao-contribuinte": {
+        "id": "identificacao-contribuinte",
+        "titulo": "Identificação do contribuinte",
+        "paginaInicio": 1,
+        "linhaInicio": 4,
+        "presenca": "preenchida"
+      },
+      "inventariante": {
+        "id": "inventariante",
+        "titulo": "Espólio, inventariante e partilha",
+        "paginaInicio": 1,
+        "linhaInicio": 19,
+        "presenca": "indeterminada"
+      },
+      "conjuge": {
+        "id": "conjuge",
+        "titulo": "Informações do cônjuge",
+        "paginaInicio": 1,
+        "linhaInicio": 30,
+        "presenca": "indeterminada"
+      },
+      "dependentes": {
+        "id": "dependentes",
+        "titulo": "Dependentes",
+        "paginaInicio": 1,
+        "linhaInicio": 34,
+        "presenca": "vazia"
+      },
+      "alimentandos": {
+        "id": "alimentandos",
+        "titulo": "Alimentandos",
+        "paginaInicio": 1,
+        "linhaInicio": 36,
+        "presenca": "vazia"
+      },
+      "herdeiros": {
+        "id": "herdeiros",
+        "titulo": "Herdeiros",
+        "paginaInicio": 2,
+        "linhaInicio": 4,
+        "presenca": "indeterminada"
+      },
+      "rendimentos-pj-titular": {
+        "id": "rendimentos-pj-titular",
+        "titulo": "Rendimentos tributáveis de PJ do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 8,
+        "presenca": "vazia"
+      },
+      "rendimentos-pj-dependentes": {
+        "id": "rendimentos-pj-dependentes",
+        "titulo": "Rendimentos tributáveis de PJ dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 10,
+        "presenca": "vazia"
+      },
+      "rendimentos-pf-exterior-titular": {
+        "id": "rendimentos-pf-exterior-titular",
+        "titulo": "Rendimentos de PF e exterior do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 12,
+        "presenca": "vazia"
+      },
+      "rendimentos-pf-exterior-dependentes": {
+        "id": "rendimentos-pf-exterior-dependentes",
+        "titulo": "Rendimentos de PF e exterior dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 14,
+        "presenca": "vazia"
+      },
+      "rendimentos-isentos": {
+        "id": "rendimentos-isentos",
+        "titulo": "Rendimentos isentos e não tributáveis",
+        "paginaInicio": 2,
+        "linhaInicio": 16,
+        "presenca": "indeterminada"
+      },
+      "rendimentos-tributacao-exclusiva": {
+        "id": "rendimentos-tributacao-exclusiva",
+        "titulo": "Rendimentos sujeitos à tributação exclusiva ou definitiva",
+        "paginaInicio": 2,
+        "linhaInicio": 18,
+        "presenca": "indeterminada"
+      },
+      "rendimentos-exigibilidade-titular": {
+        "id": "rendimentos-exigibilidade-titular",
+        "titulo": "Rendimentos de PJ com exigibilidade suspensa do titular",
+        "paginaInicio": 2,
+        "linhaInicio": 20,
+        "presenca": "vazia"
+      },
+      "rendimentos-exigibilidade-dependentes": {
+        "id": "rendimentos-exigibilidade-dependentes",
+        "titulo": "Rendimentos de PJ com exigibilidade suspensa dos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 22,
+        "presenca": "vazia"
+      },
+      "rra-titular": {
+        "id": "rra-titular",
+        "titulo": "Rendimentos recebidos acumuladamente pelo titular",
+        "paginaInicio": 2,
+        "linhaInicio": 25,
+        "presenca": "vazia"
+      },
+      "rra-dependentes": {
+        "id": "rra-dependentes",
+        "titulo": "Rendimentos recebidos acumuladamente pelos dependentes",
+        "paginaInicio": 2,
+        "linhaInicio": 27,
+        "presenca": "vazia"
+      },
+      "imposto-pago-retido": {
+        "id": "imposto-pago-retido",
+        "titulo": "Imposto pago ou retido",
+        "paginaInicio": 2,
+        "linhaInicio": 29,
+        "presenca": "preenchida"
+      },
+      "pagamentos-efetuados": {
+        "id": "pagamentos-efetuados",
+        "titulo": "Pagamentos efetuados",
+        "paginaInicio": 2,
+        "linhaInicio": 31,
+        "presenca": "vazia"
+      },
+      "doacoes-efetuadas": {
+        "id": "doacoes-efetuadas",
+        "titulo": "Doações efetuadas",
+        "paginaInicio": 2,
+        "linhaInicio": 33,
+        "presenca": "vazia"
+      },
+      "bens-direitos": {
+        "id": "bens-direitos",
+        "titulo": "Bens e direitos",
+        "paginaInicio": 3,
+        "linhaInicio": 4,
+        "presenca": "preenchida"
+      },
+      "dividas-onus": {
+        "id": "dividas-onus",
+        "titulo": "Dívidas e ônus reais",
+        "paginaInicio": 3,
+        "linhaInicio": 13,
+        "presenca": "vazia"
+      },
+      "doacoes-eleitorais": {
+        "id": "doacoes-eleitorais",
+        "titulo": "Doações a partidos e candidatos",
+        "paginaInicio": 3,
+        "linhaInicio": 15,
+        "presenca": "vazia"
+      },
+      "rural-brasil-identificacao": {
+        "id": "rural-brasil-identificacao",
+        "titulo": "Atividade rural Brasil - imóveis explorados",
+        "paginaInicio": 4,
+        "linhaInicio": 5,
+        "presenca": "vazia"
+      },
+      "rural-brasil-receitas-despesas": {
+        "id": "rural-brasil-receitas-despesas",
+        "titulo": "Atividade rural Brasil - receitas e despesas",
+        "paginaInicio": 4,
+        "linhaInicio": 7,
+        "presenca": "vazia"
+      },
+      "rural-brasil-apuracao": {
+        "id": "rural-brasil-apuracao",
+        "titulo": "Atividade rural Brasil - apuração do resultado",
+        "paginaInicio": 4,
+        "linhaInicio": 9,
+        "presenca": "vazia"
+      },
+      "rural-brasil-rebanho": {
+        "id": "rural-brasil-rebanho",
+        "titulo": "Atividade rural Brasil - movimentação do rebanho",
+        "paginaInicio": 4,
+        "linhaInicio": 11,
+        "presenca": "vazia"
+      },
+      "rural-brasil-bens": {
+        "id": "rural-brasil-bens",
+        "titulo": "Atividade rural Brasil - bens",
+        "paginaInicio": 4,
+        "linhaInicio": 13,
+        "presenca": "vazia"
+      },
+      "rural-brasil-dividas": {
+        "id": "rural-brasil-dividas",
+        "titulo": "Atividade rural Brasil - dívidas vinculadas",
+        "paginaInicio": 4,
+        "linhaInicio": 15,
+        "presenca": "vazia"
+      },
+      "rural-exterior-identificacao": {
+        "id": "rural-exterior-identificacao",
+        "titulo": "Atividade rural exterior - imóveis explorados",
+        "paginaInicio": 5,
+        "linhaInicio": 5,
+        "presenca": "vazia"
+      },
+      "rural-exterior-receitas-despesas": {
+        "id": "rural-exterior-receitas-despesas",
+        "titulo": "Atividade rural exterior - receitas e despesas",
+        "paginaInicio": 5,
+        "linhaInicio": 7,
+        "presenca": "vazia"
+      },
+      "rural-exterior-apuracao": {
+        "id": "rural-exterior-apuracao",
+        "titulo": "Atividade rural exterior - apuração do resultado",
+        "paginaInicio": 5,
+        "linhaInicio": 9,
+        "presenca": "vazia"
+      },
+      "rural-exterior-rebanho": {
+        "id": "rural-exterior-rebanho",
+        "titulo": "Atividade rural exterior - movimentação do rebanho",
+        "paginaInicio": 5,
+        "linhaInicio": 11,
+        "presenca": "vazia"
+      },
+      "rural-exterior-bens": {
+        "id": "rural-exterior-bens",
+        "titulo": "Atividade rural exterior - bens",
+        "paginaInicio": 5,
+        "linhaInicio": 13,
+        "presenca": "vazia"
+      },
+      "rural-exterior-dividas": {
+        "id": "rural-exterior-dividas",
+        "titulo": "Atividade rural exterior - dívidas vinculadas",
+        "paginaInicio": 5,
+        "linhaInicio": 15,
+        "presenca": "vazia"
+      },
+      "renda-variavel-titular": {
+        "id": "renda-variavel-titular",
+        "titulo": "Renda variável - operações do titular",
+        "paginaInicio": 6,
+        "linhaInicio": 4,
+        "presenca": "vazia"
+      },
+      "renda-variavel-dependentes": {
+        "id": "renda-variavel-dependentes",
+        "titulo": "Renda variável - operações dos dependentes",
+        "paginaInicio": 6,
+        "linhaInicio": 29,
+        "presenca": "vazia"
+      },
+      "fii-fiagro-titular": {
+        "id": "fii-fiagro-titular",
+        "titulo": "FII e Fiagro - titular",
+        "paginaInicio": 6,
+        "linhaInicio": 31,
+        "presenca": "vazia"
+      },
+      "fii-fiagro-dependentes": {
+        "id": "fii-fiagro-dependentes",
+        "titulo": "FII e Fiagro - dependentes",
+        "paginaInicio": 6,
+        "linhaInicio": 33,
+        "presenca": "vazia"
+      },
+      "doacoes-eca": {
+        "id": "doacoes-eca",
+        "titulo": "Doações diretamente na declaração - ECA",
+        "paginaInicio": 6,
+        "linhaInicio": 35,
+        "presenca": "vazia"
+      },
+      "doacoes-idoso": {
+        "id": "doacoes-idoso",
+        "titulo": "Doações diretamente na declaração - pessoa idosa",
+        "paginaInicio": 6,
+        "linhaInicio": 37,
+        "presenca": "vazia"
+      },
+      "resumo": {
+        "id": "resumo",
+        "titulo": "Resumo da declaração e evolução patrimonial",
+        "paginaInicio": 7,
+        "linhaInicio": 4,
+        "presenca": "preenchida"
+      }
+    },
+    "totalFichasPdfCatalogadas": 51,
+    "versaoCatalogoFichasPdf": "IRPF2026-oficial-1",
+    "documentoFonte": "[omitido]"
+  }
+}

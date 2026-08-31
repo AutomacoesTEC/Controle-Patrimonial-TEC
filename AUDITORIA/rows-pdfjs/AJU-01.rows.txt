@@ -1,0 +1,1500 @@
+===== PAGINA 1 ===== (41 rows)
+p1 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p1 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p1 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p1 r3 y=767 | [x=19.0]IDENTIFICAÇÃO DO CONTRIBUINTE
+p1 r4 y=750 | [x=19.0]Nome: [x=157.0]AUDITORIA PDF TEC AJUSTE [x=404.0]CPF: [x=465.0]111.444.777-35
+p1 r5 y=737 | [x=19.0]Data de Nascimento: [x=157.0]11/01/1980
+p1 r6 y=723 | [x=20.0]Raça/Cor: [x=158.0]Parda
+p1 r7 y=709 | [x=19.0]Possui cônjuge ou companheiro(a)? [x=157.0]Sim [x=333.0]CPF do cônjuge ou companheiro(a): 222.333.444-05
+p1 r8 y=693 | [x=19.0]Era residente no exterior e passou a ser residente no Brasil em 2025? [x=273.0]Não
+p1 r9 y=678 | [x=19.0]Houve alteração de dados cadastrais? Sim
+p1 r10 y=664 | [x=19.0]Há declarante ou dependente com doença grave ou deficiência física ou mental? [x=318.0]Não
+p1 r11 y=642 | [x=19.0]Endereço: [x=144.0]RUA SENTINELA AJU PES [x=404.0]Número: [x=465.0]1101
+p1 r12 y=629 | [x=19.0]Complemento: [x=144.0]APTO 11 [x=404.0]Bairro/Distrito: [x=465.0]BAIRRO SENTINELA
+p1 r13 y=616 | [x=19.0]Município: [x=144.0]SAO PAULO [x=404.0]UF: [x=465.0]SP
+p1 r14 y=603 | [x=19.0]CEP: [x=144.0]01001-000 [x=404.0]DDD/Telefone: [x=477.0](11) 3456-7890
+p1 r15 y=590 | [x=19.0]E-mail: [x=144.0]AUDITORIA.PDF.AJU@EXAMPLE.INVALID [x=404.0]DDD/Celular: [x=477.0](11) 99876-5432
+p1 r16 y=569 | [x=19.0]Natureza da Ocupação: [x=144.0]12 - PROPRIETÁRIO DE EMPRESA OU DE FIRMA INDIVIDUAL OU EMPREGADOR-TITULAR
+p1 r17 y=556 | [x=19.0]Ocupação Principal: [x=144.0]391 - OUTROS TÉCNICOS DE NÍVEL MÉDIO
+p1 r18 y=542 | [x=19.0]Tipo de declaração: [x=144.0]Declaração de Ajuste Anual Original
+p1 r19 y=528 | [x=19.0]Nº do recibo da última declaração entregue do exercício de 2025:
+p1 r20 y=427 | [x=17.0]DEPENDENTES
+p1 r21 y=411 | [x=19.0]CÓDIGO [x=81.0]NOME [x=347.0]DATA DE NASCIMENTO [x=492.5]CPF
+p1 r22 y=394 | [x=19.0]21 [x=80.0]AJU PES DEPENDENTE UM [x=373.5]12/02/2015 [x=474.0]333.444.555-08
+p1 r23 y=380 | [x=21.0]Email : [x=51.0]AJU.PES.DEP1@EXAMPLE.INVALID [x=347.0]Celular : [x=384.0](11) [x=399.0]997654321 [x=474.0]Raça/Cor: [x=514.0]Parda
+p1 r24 y=365 | [x=22.0]Dependente mora com o titular da declaração? Não
+p1 r25 y=340 | [x=21.0]TOTAL DE DEDUÇÃO COM DEPENDENTES [x=515.9]2.275,08
+p1 r26 y=322 | [x=19.0]ALIMENTANDOS
+p1 r27 y=306 | [x=19.0]Os pagamentos de pensão alimentícia ou de despesas com instrução ou médicas em favor dos alimentandos devem ser em razão
+p1 r28 y=293 | [x=19.0]de decisão judicial, acordo homologado judicialmente ou escritura pública a que se refere o art. 733 da Lei nº 13.105,
+p1 r29 y=281 | [x=19.0]de 16 de março de 2015 - Código de Processo Civil.
+p1 r30 y=260 | [x=19.0]NOME [x=259.0]RESIDENTE [x=328.0]DATA DE NASCIMENTO [x=457.0]CPF [x=511.6]Alimentando do:
+p1 r31 y=240 | [x=19.0]AJU PES ALIMENTANDO UM [x=258.0]No Brasil [x=355.0]13/03/2010 [x=437.0]444.555.666-19 [x=526.7](Titular)
+p1 r32 y=229 | [x=512.5]111.444.777-35
+p1 r33 y=215 | [x=21.0]INFORMAÇÕES SOBRE A ESCRITURA PÚBLICA
+p1 r34 y=197 | [x=23.0]CNPJ: 55.566.677/0001-83 [x=173.0]Nome do cartório: CARTORIO AJU PES SENTINELA
+p1 r35 y=182 | [x=23.0]Livro: L11 [x=110.0]Folhas: F22 [x=203.0]UF: SP [x=296.0]Município: SAO PAULO
+p1 r36 y=167 | [x=23.0]Data da lavratura: 14/04/2025
+p1 r37 y=139 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR [x=493.5](Valores em Reais)
+p1 r38 y=122 | [x=16.0]NOME DA FONTE PAGADORA [x=178.8]REND. RECEBIDOS [x=269.1]CONTR. PREVID. [x=343.7]IMPOSTO RETIDO [x=436.3]13º SALÁRIO [x=496.1]IRRF SOBRE 13º
+p1 r39 y=111 | [x=182.3]DE PES. JURÍDICA [x=302.9]OFICIAL [x=372.6]NA FONTE [x=524.3]SALÁRIO
+p1 r40 y=27 | [x=257.3]Página 1 de 41
+===== PAGINA 2 ===== (16 rows)
+p2 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p2 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p2 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p2 r3 y=768 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR [x=493.5](Valores em Reais)
+p2 r4 y=751 | [x=16.0]NOME DA FONTE PAGADORA [x=178.8]REND. RECEBIDOS [x=269.1]CONTR. PREVID. [x=343.7]IMPOSTO RETIDO [x=436.3]13º SALÁRIO [x=496.1]IRRF SOBRE 13º
+p2 r5 y=740 | [x=182.3]DE PES. JURÍDICA [x=302.9]OFICIAL [x=372.6]NA FONTE [x=524.3]SALÁRIO
+p2 r6 y=721 | [x=16.0]AJU RPJ FONTE TITULAR [x=217.4]51.101,11 [x=302.9]5.102,12 [x=381.9]4.104,14 [x=453.9]5.105,15 [x=534.5]505,16
+p2 r7 y=705 | [x=16.0]CNPJ/CPF: [x=78.7]55.566.677/0001-83
+p2 r8 y=682 | [x=15.0]TOTAL [x=217.4]51.101,11 [x=302.9]5.102,12 [x=381.9]4.104,14 [x=453.9]5.105,15 [x=534.5]505,16
+p2 r9 y=657 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOAS JURÍDICAS PELOS DEPENDENTES [x=493.5](Valores em Reais)
+p2 r10 y=640 | [x=18.0]NOME DA FONTE PAGADORA [x=191.8]REND. RECEBIDOS [x=278.1]CONTR. PREVID. [x=350.7]IMPOSTO RETIDO [x=448.3]13º SALÁRIO [x=525.1]IRRF SOBRE
+p2 r11 y=629 | [x=195.3]DE PES. JURÍDICA [x=311.9]OFICIAL [x=379.6]NA FONTE [x=525.3]13º SALÁRIO
+p2 r12 y=607 | [x=18.0]AJU RPJ FONTE DEPENDENTE [x=230.4]12.201,21 [x=311.9]1.202,22 [x=395.5]904,24 [x=465.9]1.205,25 [x=549.5]105,26
+p2 r13 y=588 | [x=18.0]CNPJ/CPF: [x=67.0]55.566.677/0001-83 [x=343.0]CPF DO DEPENDENTE: [x=443.0]333.444.555-08
+p2 r14 y=561 | [x=15.0]TOTAL [x=230.4]12.201,21 [x=311.9]1.202,22 [x=395.5]904,24 [x=465.9]1.205,25 [x=549.5]105,26
+p2 r15 y=27 | [x=257.3]Página 2 de 41
+===== PAGINA 3 ===== (53 rows)
+p3 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p3 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p3 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p3 r3 y=768 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELO TITULAR [x=493.5](Valores em Reais)
+p3 r4 y=747 | [x=23.7]NIT/PIS/PASEP:
+p3 r5 y=727 | [x=234.9]RENDIMENTOS
+p3 r6 y=707 | [x=76.3]TRABALHO NÃO [x=189.9]ALUGUÉIS, INCLUSIVE
+p3 r7 y=705 | [x=384.8]OUTROS
+p3 r8 y=702 | [x=514.1]EXTERIOR
+p3 r9 y=696 | [x=82.5]ASSALARIADO [x=206.8]POR TEMPORADA
+p3 r10 y=677 | [x=26.4]JAN [x=123.4]0,00 [x=245.9]2.302,32 [x=539.4]0,00
+p3 r11 y=674 | [x=394.5]303,33
+p3 r12 y=660 | [x=26.2]FEV [x=123.4]0,00 [x=261.4]0,00 [x=523.9]7.311,41
+p3 r13 y=657 | [x=403.4]0,00
+p3 r14 y=642 | [x=25.1]MAR [x=123.4]0,00 [x=245.9]4.322,52 [x=539.4]0,00
+p3 r15 y=639 | [x=403.4]0,00
+p3 r16 y=625 | [x=25.8]ABR [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r17 y=622 | [x=403.4]0,00
+p3 r18 y=608 | [x=26.9]MAI [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r19 y=605 | [x=403.4]0,00
+p3 r20 y=591 | [x=26.2]JUN [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r21 y=588 | [x=403.4]0,00
+p3 r22 y=574 | [x=26.9]JUL [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r23 y=571 | [x=403.4]0,00
+p3 r24 y=556 | [x=25.1]AGO [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r25 y=553 | [x=403.4]0,00
+p3 r26 y=539 | [x=26.2]SET [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r27 y=536 | [x=403.4]0,00
+p3 r28 y=522 | [x=25.6]OUT [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r29 y=519 | [x=403.4]0,00
+p3 r30 y=505 | [x=25.3]NOV [x=123.4]0,00 [x=261.4]0,00 [x=539.4]0,00
+p3 r31 y=502 | [x=403.4]0,00
+p3 r32 y=488 | [x=26.0]DEZ [x=123.4]0,00 [x=261.4]0,00 [x=403.4]0,00 [x=539.4]0,00
+p3 r33 y=468 | [x=19.0]TOTAL [x=123.4]0,00 [x=245.9]6.624,84 [x=523.9]7.311,41
+p3 r34 y=466 | [x=394.5]303,33
+p3 r35 y=440 | [x=238.8]DEDUÇÕES [x=500.0]CARNÊ-LEÃO
+p3 r36 y=422 | [x=76.8]PREVIDÊNCIA [x=173.1]QUANTIDADE DE [x=318.7]PENSÃO [x=512.9]DARF PAGO
+p3 r37 y=416 | [x=406.8]LIVRO CAIXA
+p3 r38 y=411 | [x=99.9]OFICIAL [x=176.0]DEPENDENTES [x=301.8]ALIMENTÍCIA [x=520.0]CÓD. 0190
+p3 r39 y=391 | [x=26.4]JAN [x=115.4]0,00 [x=235.6]0 [x=327.5]305,35 [x=425.9]1.304,34 [x=535.5]406,36
+p3 r40 y=374 | [x=26.2]FEV [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=425.9]1.312,43 [x=535.5]512,44
+p3 r41 y=356 | [x=25.1]MAR [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r42 y=339 | [x=25.8]ABR [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r43 y=322 | [x=26.9]MAI [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r44 y=305 | [x=26.2]JUN [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r45 y=288 | [x=26.9]JUL [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r46 y=270 | [x=25.1]AGO [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r47 y=253 | [x=26.2]SET [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r48 y=236 | [x=25.6]OUT [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r49 y=219 | [x=25.3]NOV [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r50 y=203 | [x=26.0]DEZ [x=115.4]0,00 [x=235.6]0 [x=336.4]0,00 [x=441.4]0,00 [x=544.4]0,00
+p3 r51 y=183 | [x=19.0]TOTAL [x=115.4]0,00 [x=327.5]305,35 [x=425.9]2.616,77 [x=535.5]918,80
+p3 r52 y=27 | [x=257.3]Página 3 de 41
+===== PAGINA 4 ===== (44 rows)
+p4 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p4 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p4 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p4 r3 y=768 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELOS DEPENDENTES [x=493.5](Valores em Reais)
+p4 r4 y=748 | [x=35.3]CPF do dependente: [x=136.0]333.444.555-08 [x=338.7]NIT/PIS/PASEP:
+p4 r5 y=731 | [x=259.9]RENDIMENTOS
+p4 r6 y=710 | [x=98.3]TRABALHO NÃO [x=212.9]ALUGUÉIS, INCLUSIVE
+p4 r7 y=705 | [x=401.8]OUTROS [x=501.1]EXTERIOR
+p4 r8 y=699 | [x=104.5]ASSALARIADO [x=229.8]POR TEMPORADA
+p4 r9 y=675 | [x=27.4]JAN [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r10 y=658 | [x=27.2]FEV [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r11 y=640 | [x=26.1]MAR [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r12 y=623 | [x=26.8]ABR [x=145.4]0,00 [x=268.9]1.402,62 [x=420.4]0,00 [x=526.4]0,00
+p4 r13 y=606 | [x=27.9]MAI [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=510.9]2.411,65
+p4 r14 y=589 | [x=27.2]JUN [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r15 y=572 | [x=27.9]JUL [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r16 y=554 | [x=26.1]AGO [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r17 y=537 | [x=27.2]SET [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r18 y=520 | [x=26.6]OUT [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r19 y=503 | [x=26.3]NOV [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r20 y=487 | [x=27.0]DEZ [x=145.4]0,00 [x=284.4]0,00 [x=420.4]0,00 [x=526.4]0,00
+p4 r21 y=466 | [x=20.0]TOTAL [x=145.4]0,00 [x=268.9]1.402,62 [x=420.4]0,00 [x=510.9]2.411,65
+p4 r22 y=447 | [x=239.8]DEDUÇÕES [x=500.0]CARNÊ-LEÃO
+p4 r23 y=425 | [x=83.8]PREVIDÊNCIA [x=181.1]QUANTIDADE DE [x=325.7]PENSÃO [x=512.9]DARF PAGO
+p4 r24 y=420 | [x=410.8]LIVRO CAIXA
+p4 r25 y=414 | [x=106.9]OFICIAL [x=184.0]DEPENDENTES [x=308.8]ALIMENTÍCIA [x=520.0]CÓD. 0190
+p4 r26 y=391 | [x=27.4]JAN [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r27 y=374 | [x=27.2]FEV [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r28 y=356 | [x=26.1]MAR [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r29 y=339 | [x=26.8]ABR [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=436.5]403,63 [x=535.5]204,64
+p4 r30 y=322 | [x=27.9]MAI [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r31 y=305 | [x=27.2]JUN [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r32 y=288 | [x=27.9]JUL [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r33 y=270 | [x=26.1]AGO [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r34 y=253 | [x=27.2]SET [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r35 y=236 | [x=26.6]OUT [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r36 y=219 | [x=26.3]NOV [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r37 y=203 | [x=27.0]DEZ [x=122.4]0,00 [x=243.6]0 [x=343.4]0,00 [x=445.4]0,00 [x=544.4]0,00
+p4 r38 y=182 | [x=20.0]TOTAL [x=122.4]0,00 [x=343.4]0,00 [x=436.5]403,63 [x=535.5]204,64
+p4 r39 y=161 | [x=17.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS [x=499.5](Valores em Reais)
+p4 r40 y=143 | [x=17.0]09. Lucros e dividendos recebidos [x=532.4]20.502,72
+p4 r41 y=123 | [x=45.1]Beneficiário [x=140.5]CPF [x=200.2]CNPJ da Fonte Pagadora [x=329.0]Nome da Fonte Pagadora [x=508.7]Valor
+p4 r42 y=99 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=205.7]55.566.677/0001-83 [x=331.9]AJU ISE DIVIDENDOS [x=495.4]20.502,72
+p4 r43 y=27 | [x=257.3]Página 4 de 41
+===== PAGINA 5 ===== (42 rows)
+p5 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p5 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p5 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p5 r3 y=771 | [x=17.0]12. Rendimentos de cadernetas de poupança, letras hipotecárias, letras de crédito do agronegócio e imobiliário (LCA e LCI) e [x=536.9]3.503,73
+p5 r4 y=760 | [x=17.0]certificados de recebíveis do agronegócio e imobiliários (CRA e CRI)
+p5 r5 y=740 | [x=45.1]Beneficiário [x=140.5]CPF [x=198.7]CNPJ da Fonte Pagadora [x=323.5]Nome da Fonte Pagadora [x=506.7]Valor
+p5 r6 y=720 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=205.7]55.566.677/0001-83 [x=334.4]AJU ISE APLICACAO [x=499.9]3.503,73
+p5 r7 y=681 | [x=17.0]14. Transferências patrimoniais - doações e heranças [x=532.4]14.504,74
+p5 r8 y=662 | [x=45.1]Beneficiário [x=140.5]CPF [x=192.4]CPF/CNPJ do Doador/Espólio [x=335.8]Nome do Doador/Espólio [x=506.2]Valor
+p5 r9 y=636 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=213.5]222.333.444-05 [x=312.9]AJU ISE DOACAO RECEBIDA [x=495.4]14.504,74
+p5 r10 y=600 | [x=17.0]99. Outros [x=537.9]7.012,51
+p5 r11 y=582 | [x=42.1]Beneficiário [x=137.5]CPF [x=188.5]CPF/CNPJ da Fonte [x=294.9]Nome da Fonte [x=397.2]Descrição [x=508.3]Valor
+p5 r12 y=571 | [x=207.7]Pagadora [x=305.2]Pagadora
+p5 r13 y=553 | [x=48.4]Titular [x=119.5]111.444.777-35 [x=192.7]55.566.677/0001-83 [x=290.1]AJU ISE GANHO [x=384.1]AJU ISE GANHO [x=495.9]5.505,75
+p5 r14 y=542 | [x=306.1]ISENTO [x=400.1]ISENTO
+p5 r15 y=526 | [x=37.7]Dependente [x=119.5]333.444.555-08 [x=192.7]55.566.677/0001-83 [x=305.9]AJU ISE [x=399.9]AJU ISE [x=495.9]1.506,76
+p5 r16 y=515 | [x=293.7]DEPENDENTE [x=387.7]DEPENDENTE
+p5 r17 y=504 | [x=302.6]DETALHE [x=396.6]DETALHE
+p5 r18 y=465 | [x=17.0]TOTAL [x=532.4]45.523,70
+p5 r19 y=441 | [x=17.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA / DEFINITIVA [x=499.5](Valores em Reais)
+p5 r20 y=417 | [x=17.0]01. 13º salário [x=525.9]5.105,15
+p5 r21 y=400 | [x=17.0]02. Ganhos de capital na alienação de bens e/ou direitos [x=521.4]92.162,65
+p5 r22 y=384 | [x=17.0]04. Ganhos de capital na alienação de moeda estrangeira em espécie [x=525.9]2.001,02
+p5 r23 y=368 | [x=17.0]05. Ganhos líquidos em renda variável (bolsa de valores, de mercadorias, de futuros e assemelhados e fundos de [x=525.9]5.834,05
+p5 r24 y=357 | [x=17.0]investimento imobiliário e Fiagro)
+p5 r25 y=340 | [x=17.0]06. Rendimentos de aplicações financeiras [x=525.9]6.601,81
+p5 r26 y=322 | [x=45.1]Beneficiário [x=140.5]CPF [x=198.7]CNPJ da Fonte Pagadora [x=323.5]Nome da Fonte Pagadora [x=506.7]Valor
+p5 r27 y=302 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=205.7]55.566.677/0001-83 [x=332.6]AJU EXC APLICACAO [x=499.9]6.601,81
+p5 r28 y=274 | [x=17.0]07. Rendimentos recebidos acumuladamente [x=521.4]21.391,92
+p5 r29 y=258 | [x=17.0]08. 13º salário recebido pelos dependentes [x=525.9]1.205,25
+p5 r30 y=242 | [x=17.0]10. Juros sobre capital próprio [x=525.9]2.602,82
+p5 r31 y=223 | [x=45.1]Beneficiário [x=140.5]CPF [x=198.7]CNPJ da Fonte Pagadora [x=323.5]Nome da Fonte Pagadora [x=506.7]Valor
+p5 r32 y=203 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=205.7]55.566.677/0001-83 [x=347.9]AJU EXC JCP [x=499.9]2.602,82
+p5 r33 y=176 | [x=17.0]12. Aplicações Financeiras e Lucros e Dividendos no Exterior (Lei 14.754/2023) [x=525.9]3.084,35
+p5 r34 y=160 | [x=17.0]13 - Prêmios líquidos obtidos em loterias de apostas de quota fixa - Lei 14.790/2023 [x=525.9]1.603,83
+p5 r35 y=145 | [x=45.1]Beneficiário [x=140.5]CPF [x=199.0]Descrição [x=511.3]Valor
+p5 r36 y=126 | [x=51.4]Titular [x=122.5]111.444.777-35 [x=199.0]AJU EXC PREMIO [x=498.9]1.603,83
+p5 r37 y=98 | [x=17.0]99. Outros [x=532.5]604,84
+p5 r38 y=83 | [x=45.1]Beneficiário [x=140.5]CPF [x=191.5]CPF/CNPJ da Fonte [x=297.9]Nome da Fonte [x=400.2]Descrição [x=511.3]Valor
+p5 r39 y=72 | [x=210.7]Pagadora [x=308.2]Pagadora
+p5 r40 y=54 | [x=40.7]Dependente [x=122.5]333.444.555-08 [x=195.7]55.566.677/0001-83 [x=307.1]AJU EXC [x=401.1]AJU EXC [x=505.5]604,84
+p5 r41 y=27 | [x=257.3]Página 5 de 41
+===== PAGINA 6 ===== (42 rows)
+p6 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p6 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p6 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p6 r3 y=771 | [x=296.7]DEPENDENTE [x=390.7]DEPENDENTE
+p6 r4 y=743 | [x=17.0]TOTAL [x=517.0]142.197,69
+p6 r5 y=702 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM
+p6 r6 y=691 | [x=17.0]EXIGIBILIDADE SUSPENSA) [x=499.5](Valores em Reais)
+p6 r7 y=665 | [x=414.5]RENDIMENTOS
+p6 r8 y=653 | [x=422.0]TRIBUTÁVEIS [x=511.5]DEPÓSITOS
+p6 r9 y=640 | [x=17.0]NOME DA FONTE PAGADORA [x=309.0]CNPJ/CPF [x=413.0](IMPOSTO COM [x=504.5]JUDICIAIS DO
+p6 r10 y=628 | [x=416.0]EXIGIBILIDADE [x=522.5]IMPOSTO
+p6 r11 y=615 | [x=429.0]SUSPENSA)
+p6 r12 y=588 | [x=16.0]AJU EXI FONTE TITULAR [x=302.0]55.566.677/0001-83 [x=444.4]17.701,91 [x=531.9]7.702,92
+p6 r13 y=564 | [x=15.0]TOTAL [x=444.4]17.701,91 [x=531.9]7.702,92
+p6 r14 y=539 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM
+p6 r15 y=530 | [x=504.5](Valores em Reais)
+p6 r16 y=527 | [x=17.0]EXIGIBILIDADE SUSPENSA)
+p6 r17 y=501 | [x=420.5]RENDIMENTOS
+p6 r18 y=489 | [x=428.0]TRIBUTÁVEIS [x=520.5]DEPÓSITOS
+p6 r19 y=476 | [x=17.0]NOME DA FONTE PAGADORA [x=304.0]CNPJ/CPF [x=419.0](IMPOSTO COM [x=513.5]JUDICIAIS DO
+p6 r20 y=464 | [x=422.0]EXIGIBILIDADE [x=531.5]IMPOSTO
+p6 r21 y=451 | [x=435.0]SUSPENSA)
+p6 r22 y=425 | [x=15.0]AJU EXI FONTE DEPENDENTE [x=296.0]55.566.677/0001-83 [x=455.9]8.711,96 [x=541.9]3.712,97
+p6 r23 y=409 | [x=15.0]CPF DO DEPENDENTE: [x=166.0]333.444.555-08
+p6 r24 y=379 | [x=15.0]TOTAL [x=455.9]8.711,96 [x=541.9]3.712,97
+p6 r25 y=355 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELO TITULAR
+p6 r26 y=341 | [x=493.5](Valores em Reais)
+p6 r27 y=322 | [x=29.2]NOME DA FONTE [x=189.9]CNPJ/CPF [x=254.9]TOTAL RENDIMENTOS [x=356.1]CONTR. PREV. [x=453.7]PENSÃO [x=498.7]IMPOSTO RETIDO
+p6 r28 y=311 | [x=39.8]PAGADORA [x=289.5]TRIBUTÁVEIS [x=381.9]OFICIAL [x=436.8]ALIMENTÍCIA [x=527.5]NA FONTE
+p6 r29 y=290 | [x=16.0]AJU RRA TITULAR EXCLUSIVA [x=172.7]55.566.677/0001-83 [x=302.4]31.801,01 [x=380.9]3.802,02 [x=452.9]1.803,03 [x=537.9]4.804,04
+p6 r30 y=270 | [x=365.0]ALIMENTANDO
+p6 r31 y=250 | [x=309.5]AJU PES ALIMENTANDO UM [x=479.0]1.803,03
+p6 r32 y=225 | [x=404.0]TOTAL [x=479.0]1.803,03
+p6 r33 y=203 | [x=17.0]OPÇÃO DE TRIBUTAÇÃO: [x=126.0]Exclusiva [x=180.0]MÊS [x=262.0]Dez. [x=333.0]Valor Recebido [x=407.0]0,00 [x=489.0]NÚM. MESES: [x=547.0]11,0
+p6 r34 y=192 | [x=180.0]RECEBIMENTO: [x=333.0]Referente a Juros:
+p6 r35 y=178 | [x=17.0]IMPOSTO DEVIDO RRA: [x=131.0]0,00
+p6 r36 y=157 | [x=15.0]TOTAL [x=302.4]31.801,01 [x=380.9]3.802,02 [x=452.9]1.803,03 [x=537.9]4.804,04
+p6 r37 y=136 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS [x=493.5](Valores em Reais)
+p6 r38 y=122 | [x=17.0]DEPENDENTES
+p6 r39 y=102 | [x=29.2]NOME DA FONTE [x=189.9]CNPJ/CPF [x=252.9]TOTAL RENDIMENTOS [x=355.1]CONTR. PREV. [x=452.7]PENSÃO [x=498.7]IMPOSTO RETIDO
+p6 r40 y=91 | [x=39.8]PAGADORA [x=287.5]TRIBUTÁVEIS [x=380.9]OFICIAL [x=435.8]ALIMENTÍCIA [x=527.5]NA FONTE
+p6 r41 y=27 | [x=257.3]Página 6 de 41
+===== PAGINA 7 ===== (42 rows)
+p7 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p7 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p7 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p7 r3 y=768 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS [x=493.5](Valores em Reais)
+p7 r4 y=754 | [x=17.0]DEPENDENTES
+p7 r5 y=734 | [x=29.2]NOME DA FONTE [x=189.9]CNPJ/CPF [x=252.9]TOTAL RENDIMENTOS [x=355.1]CONTR. PREV. [x=452.7]PENSÃO [x=498.7]IMPOSTO RETIDO
+p7 r6 y=723 | [x=39.8]PAGADORA [x=287.5]TRIBUTÁVEIS [x=380.9]OFICIAL [x=435.8]ALIMENTÍCIA [x=527.5]NA FONTE
+p7 r7 y=702 | [x=16.0]AJU RRA DEPENDENTE AJUSTE [x=172.7]55.566.677/0001-83 [x=306.9]9.811,06 [x=386.5]812,07 [x=458.5]313,08 [x=544.5]914,09
+p7 r8 y=682 | [x=365.0]ALIMENTANDO
+p7 r9 y=662 | [x=309.5]AJU PES ALIMENTANDO UM [x=486.5]313,08
+p7 r10 y=637 | [x=404.0]TOTAL [x=486.5]313,08
+p7 r11 y=615 | [x=17.0]OPÇÃO DE TRIBUTAÇÃO: [x=125.0]Ajuste [x=180.0]MÊS [x=262.0]Dez. [x=340.0]Valor Recebido [x=414.0]0,00
+p7 r12 y=604 | [x=180.0]RECEBIMENTO: [x=340.0]Referente a Juros:
+p7 r13 y=586 | [x=17.0]PARCELA ISENTA 65 ANOS: [x=125.0]0,00 [x=198.0]CPF DO DEPENDENTE: [x=315.5]333.444.555-08
+p7 r14 y=562 | [x=15.0]TOTAL [x=306.9]9.811,06 [x=386.5]812,07 [x=458.5]313,08 [x=544.5]914,09
+p7 r15 y=543 | [x=17.0]IMPOSTO PAGO / RETIDO [x=499.5](Valores em Reais)
+p7 r16 y=523 | [x=17.0]01. Imposto complementar [x=537.9]1.901,11
+p7 r17 y=508 | [x=17.0]02. Imposto pago no exterior pelo titular e pelos dependentes [x=553.4]0,00
+p7 r18 y=493 | [x=28.0]Imposto devido com os rendimentos no exterior [x=553.4]0,00
+p7 r19 y=478 | [x=28.0]Imposto devido sem os rendimentos no exterior [x=553.4]0,00
+p7 r20 y=463 | [x=28.0]Diferença a ser considerada para cálculo do imposto (limite legal) [x=553.4]0,00
+p7 r21 y=448 | [x=17.0]03. Imposto sobre a renda na fonte (Lei 11.033/2004) [x=553.4]0,00
+p7 r22 y=433 | [x=17.0]04. Imposto retido na fonte do titular [x=537.9]4.104,14
+p7 r23 y=418 | [x=17.0]05. Imposto retido na fonte dos dependentes [x=537.9]1.818,33
+p7 r24 y=403 | [x=17.0]06. Carnê-Leão do titular [x=544.5]918,80
+p7 r25 y=388 | [x=17.0]07. Carnê-Leão dos dependentes [x=544.5]204,64
+p7 r26 y=359 | [x=17.0]PAGAMENTOS EFETUADOS [x=493.5](Valores em Reais)
+p7 r27 y=337 | [x=17.0]CÓD. [x=57.5]NOME DO BENEFICIÁRIO [x=256.5]CPF/CNPJ DO [x=431.5]VALOR PAGO [x=519.3]PARC. NÃO
+p7 r28 y=325 | [x=254.7]BENEFICIÁRIO [x=518.8]DEDUTÍVEL
+p7 r29 y=298 | [x=16.0]Titular
+p7 r30 y=282 | [x=17.0]10 [x=53.0]AJU PAG MEDICO [x=254.0]444.555.666-19 [x=452.0]2.001,21 [x=539.5]101,22
+p7 r31 y=264 | [x=19.0]Descrição: [x=69.0]AJU PAG MEDICO
+p7 r32 y=244 | [x=17.0]21 [x=53.0]AJU PAG HOSPITAL [x=245.2]55.566.677/0001-83 [x=452.0]3.003,25 [x=549.5]0,00
+p7 r33 y=226 | [x=19.0]Descrição: [x=69.0]AJU PAG HOSPITAL
+p7 r34 y=206 | [x=17.0]60 [x=53.0]AJU PAG ADVOGADO RRA [x=254.0]444.555.666-19 [x=452.0]2.805,05 [x=549.5]0,00
+p7 r35 y=188 | [x=19.0]Descrição: [x=69.0]AJU PAG ADVOGADO RRA
+p7 r36 y=168 | [x=17.0]36 [x=53.0]AJU PAG PREVIDENCIA [x=245.2]55.566.677/0001-83 [x=452.0]5.507,29 [x=539.5]507,30
+p7 r37 y=150 | [x=19.0]Descrição: [x=69.0]AJU PAG PREVIDENCIA
+p7 r38 y=130 | [x=17.0]99 [x=53.0]AJU PAG OUTROS DETALHE [x=254.0]444.555.666-19 [x=459.5]808,31 [x=539.5]108,32
+p7 r39 y=112 | [x=19.0]Descrição: [x=69.0]AJU PAG OUTROS DETALHE
+p7 r40 y=84 | [x=16.0]Dependente: AJU PES DEPENDENTE UM
+p7 r41 y=27 | [x=257.3]Página 7 de 41
+===== PAGINA 8 ===== (38 rows)
+p8 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p8 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p8 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p8 r3 y=768 | [x=17.0]PAGAMENTOS EFETUADOS [x=493.5](Valores em Reais)
+p8 r4 y=746 | [x=17.0]CÓD. [x=57.5]NOME DO BENEFICIÁRIO [x=256.5]CPF/CNPJ DO [x=431.5]VALOR PAGO [x=519.3]PARC. NÃO
+p8 r5 y=734 | [x=254.7]BENEFICIÁRIO [x=518.8]DEDUTÍVEL
+p8 r6 y=710 | [x=17.0]11 [x=53.0]AJU PAG DENTISTA DEP [x=254.0]444.555.666-19 [x=452.0]1.502,23 [x=539.5]102,24
+p8 r7 y=692 | [x=19.0]Descrição: [x=69.0]AJU PAG DENTISTA DEP
+p8 r8 y=672 | [x=17.0]01 [x=53.0]AJU PAG ESCOLA DEP [x=245.2]55.566.677/0001-83 [x=452.0]4.504,26 [x=539.5]504,27
+p8 r9 y=654 | [x=19.0]Descrição: [x=69.0]AJU PAG ESCOLA DEP
+p8 r10 y=626 | [x=16.0]Alimentando: AJU PES ALIMENTANDO UM
+p8 r11 y=610 | [x=17.0]30 [x=53.0]AJU PES ALIMENTANDO UM [x=254.0]444.555.666-19 [x=452.0]6.006,28 [x=549.5]0,00
+p8 r12 y=592 | [x=19.0]Descrição: [x=69.0]AJU PES ALIMENTANDO UM
+p8 r13 y=565 | [x=21.0]TOTAL [x=451.4]26.137,88 [x=535.9]1.323,35
+p8 r14 y=544 | [x=17.0]DOAÇÕES EFETUADAS [x=493.5](Valores em Reais)
+p8 r15 y=522 | [x=17.0]CÓD. [x=57.5]NOME DO BENEFICIÁRIO [x=318.5]CPF/CNPJ DO [x=425.0]VALOR PAGO [x=505.3]PARC. NÃO
+p8 r16 y=510 | [x=316.7]BENEFICIÁRIO [x=504.8]DEDUTÍVEL
+p8 r17 y=489 | [x=17.0]80 [x=55.0]AJU DOA PESSOA FISICA [x=316.0]222.333.444-05 [x=447.0]7.101,41 [x=537.5]0,00
+p8 r18 y=470 | [x=17.0]81 [x=55.0]AJU DOA BEM DEPENDENTE [x=316.0]333.444.555-08 [x=447.0]8.102,42 [x=537.5]0,00
+p8 r19 y=451 | [x=17.0]40 [x=55.0]AJU DOA INCENTIVO [x=307.2]55.566.677/0001-83 [x=447.0]1.103,43 [x=537.5]0,00
+p8 r20 y=430 | [x=21.0]TOTAL [x=446.4]16.307,26 [x=539.4]0,00
+p8 r21 y=407 | [x=17.0]DECLARAÇÃO DE BENS E DIREITOS [x=485.0](Valores em Reais)
+p8 r22 y=386 | [x=21.0]Possui perdas a compensar de acordo com a Lei nº 14.754, de 2023 (art. 9º)? [x=342.2]Não
+p8 r23 y=361 | [x=23.3]BEM [x=53.0]GRUPO [x=95.0]CÓDIGO [x=137.0]DISCRIMINAÇÃO [x=435.4]SITUAÇÃO EM
+p8 r24 y=345 | [x=389.0]31/12/2024 [x=498.0]31/12/2025
+p8 r25 y=325 | [x=30.8]1 [x=65.5]01 [x=107.5]11 [x=137.0]AJU BEM IMOVEL APARTAMENTO SENTINELA, [x=401.2]0,00 [x=498.0]210.101,51
+p8 r26 y=314 | [x=137.0]ADQUIRIDO EM 15/05/2025, MATRICULA 11001,
+p8 r27 y=303 | [x=137.0]CARTORIO AJU, 50% DO TITULAR.
+p8 r28 y=288 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p8 r29 y=270 | [x=17.0]Inscrição Municipal (IPTU): AJU-IPTU-2101
+p8 r30 y=252 | [x=17.0]Logradouro: [x=66.0]AJU BEM IMOVEL [x=399.0]Nº: [x=415.0]2101
+p8 r31 y=240 | [x=17.0]Comp.: [x=48.0]APTO 21 [x=399.0]Bairro: [x=432.0]BAIRRO SENTINELA
+p8 r32 y=228 | [x=17.0]Município: SAO PAULO [x=399.0]UF: [x=421.0]SP [x=459.0]CEP: [x=483.0]01001-000
+p8 r33 y=215 | [x=17.0]Área Total: [x=63.0]71,2 m² [x=399.0]Data de Aquisição: [x=473.0]15/05/2025
+p8 r34 y=202 | [x=17.0]Registrado no Cartório: [x=107.0]Sim
+p8 r35 y=199 | [x=399.0]Nome Cartório: AJU CARTORIO
+p8 r36 y=189 | [x=17.0]Matrícula: 11001
+p8 r37 y=27 | [x=257.3]Página 8 de 41
+===== PAGINA 9 ===== (36 rows)
+p9 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p9 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p9 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p9 r3 y=766 | [x=17.0]DECLARAÇÃO DE BENS E DIREITOS [x=485.0](Valores em Reais)
+p9 r4 y=734 | [x=23.3]BEM [x=53.0]GRUPO [x=95.0]CÓDIGO [x=137.0]DISCRIMINAÇÃO [x=435.4]SITUAÇÃO EM
+p9 r5 y=718 | [x=389.0]31/12/2024 [x=498.0]31/12/2025
+p9 r6 y=698 | [x=30.8]2 [x=65.5]02 [x=107.5]01 [x=137.0]AJU BEM VEICULO MODELO SENTINELA ANO 2025 [x=401.2]0,00 [x=500.2]82.202,52
+p9 r7 y=687 | [x=137.0]COR AZUL; RENAVAM SINTETICO 26262603903
+p9 r8 y=676 | [x=137.0]USADO PORQUE O CAMPO RECUSOU TEXTO.
+p9 r9 y=661 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p9 r10 y=643 | [x=17.0]RENAVAM: 26262603903
+p9 r11 y=611 | [x=30.8]5 [x=65.5]03 [x=107.5]02 [x=137.0]AJU BEM PARTICIPACAO SOCIETARIA 1234 QUOTAS [x=391.2]50.507,57 [x=500.2]61.508,58
+p9 r12 y=595 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p9 r13 y=578 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Titular [x=219.0]CPF:
+p9 r14 y=563 | [x=17.0]CNPJ: 55.566.677/0001-83
+p9 r15 y=531 | [x=30.8]4 [x=65.5]04 [x=107.5]02 [x=137.0]AJU BEM APLICACAO RENDA FIXA SENTINELA [x=391.2]31.405,55 [x=500.2]42.406,56
+p9 r16 y=515 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p9 r17 y=498 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Titular [x=219.0]CPF:
+p9 r18 y=483 | [x=17.0]CNPJ: 55.566.677/0001-83
+p9 r19 y=451 | [x=30.8]7 [x=65.5]04 [x=107.5]02 [x=137.0]AJU BEM EXTERIOR LEI 14754 CONTA SENTINELA [x=391.2]11.711,61 [x=500.2]22.712,62
+p9 r20 y=435 | [x=17.0]249 - ESTADOS UNIDOS DA AMÉRICA [x=399.0]Bem com usufruto: Não
+p9 r21 y=418 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Titular [x=219.0]CPF:
+p9 r22 y=397 | [x=17.0]Aplicação Financeira (R$) [x=187.0]Lucros e Dividendos (R$)
+p9 r23 y=386 | [x=17.0]Rendimento ou Perda: [x=137.9]3.713,63 [x=187.0]Valor Recebido: [x=356.4]0,00
+p9 r24 y=373 | [x=17.0]Imposto Pago no Exterior: [x=144.5]314,64 [x=187.0]Imposto Pago Exterior/IRRF Brasil: [x=347.5]314,64
+p9 r25 y=345 | [x=30.8]3 [x=65.5]06 [x=107.5]01 [x=137.0]AJU BEM CONTA BANCARIA TITULAR AJU BANCO [x=391.2]12.303,53 [x=500.2]23.304,54
+p9 r26 y=334 | [x=137.0]SENTINELA
+p9 r27 y=319 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p9 r28 y=302 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Titular [x=219.0]CPF:
+p9 r29 y=287 | [x=17.0]CNPJ: 55.566.677/0001-83
+p9 r30 y=273 | [x=17.0]Banco: [x=59.7]Agência: 2303 [x=126.4]Conta: 240024-5 [x=346.0]Conta Pagamento? Não
+p9 r31 y=241 | [x=30.8]6 [x=65.5]06 [x=107.5]10 [x=137.0]AJU BEM NUMERARIO DEPENDENTE [x=393.4]1.609,59 [x=502.4]2.610,60
+p9 r32 y=225 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p9 r33 y=208 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Dependente [x=219.0]CPF: [x=239.0]333.444.555-08
+p9 r34 y=171 | [x=17.0]TOTAL [x=389.0]107.537,85 [x=498.0]444.846,93
+p9 r35 y=27 | [x=257.3]Página 9 de 41
+===== PAGINA 10 ===== (15 rows)
+p10 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p10 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p10 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p10 r3 y=768 | [x=17.0]DÍVIDAS E ÔNUS REAIS [x=493.5](Valores em Reais)
+p10 r4 y=752 | [x=23.0]CÓDIGO [x=114.8]DISCRIMINAÇÃO [x=292.9]SITUAÇÃO EM [x=384.6]SITUAÇÃO EM 31/12/2025 [x=518.8]VALOR PAGO
+p10 r5 y=741 | [x=300.5]31/12/2024 [x=529.0]EM 2025
+p10 r6 y=697 | [x=23.0]13 [x=72.0]CNPJ 55.566.677/0001-83 - AJU DIV FINANCIAMENTO [x=333.4]91.801,71 [x=446.4]72.802,72 [x=533.4]19.003,73
+p10 r7 y=686 | [x=72.0]SENTINELA
+p10 r8 y=671 | [x=23.0]14 [x=72.0]CPF 222.333.444-05 - AJU DIV EMPRESTIMO PESSOAL [x=333.4]10.804,74 [x=450.9]6.805,75 [x=537.9]3.998,99
+p10 r9 y=652 | [x=23.0]TOTAL [x=329.0]102.606,45 [x=443.4]79.608,47 [x=532.4]23.002,72
+p10 r10 y=631 | [x=17.0]DOAÇÕES A PARTIDOS POLÍTICOS E CANDIDATOS A CARGOS ELETIVOS [x=493.5](Valores em Reais)
+p10 r11 y=613 | [x=18.0]NOME [x=272.0]CNPJ [x=538.9]VALOR
+p10 r12 y=594 | [x=18.0]AJU ELEITORAL SENTINELA [x=272.0]55.566.677/0001-83 [x=534.9]1.201,44
+p10 r13 y=573 | [x=21.0]TOTAL [x=534.9]1.201,44
+p10 r14 y=27 | [x=252.9]Página 10 de 41
+===== PAGINA 11 ===== (50 rows)
+p11 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p11 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p11 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p11 r3 y=768 | [x=17.0]DEMONSTRATIVO DE ATIVIDADE RURAL - BRASIL
+p11 r4 y=752 | [x=17.0]DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - BRASIL
+p11 r5 y=732 | [x=20.8]CÓDIGO [x=67.7]PARTICIPAÇÃO [x=168.4]CONDIÇÃO [x=291.6]NOME E LOCALIZAÇÃO [x=448.1]ÁREA [x=521.8]CIB
+p11 r6 y=721 | [x=15.9]ATIVIDADE [x=91.3](%) [x=162.4]EXPLORAÇÃO [x=451.9](ha)
+p11 r7 y=703 | [x=32.5]11 [x=87.5]75,00 [x=189.3]2 [x=262.6]AJU RUR FAZENDA BRASIL SENTINELA, [x=449.0]123,4
+p11 r8 y=692 | [x=251.9]ESTRADA AJU RURAL KM 22 - UBERABA/MG -
+p11 r9 y=681 | [x=311.0]CEP 38000-000
+p11 r10 y=662 | [x=143.0]PARTICIPANTE(S)
+p11 r11 y=644 | [x=143.0]AJU RUR PARTICIPANTE UM (222.333.444-05) [x=457.0]Estrangeiro: Não
+p11 r12 y=615 | [x=17.0]RECEITAS E DESPESAS - BRASIL [x=496.5](Valores em Reais)
+p11 r13 y=596 | [x=36.8]MÊS [x=208.0]RECEITA BRUTA [x=408.5]DESPESAS DE CUSTEIO/INVESTIMENTO
+p11 r14 y=573 | [x=17.0]Janeiro [x=234.4]18.101,01 [x=526.4]11.205,05
+p11 r15 y=559 | [x=17.0]Fevereiro [x=234.4]19.104,04 [x=526.4]13.211,11
+p11 r16 y=545 | [x=17.0]Março [x=234.4]20.107,07 [x=526.4]15.217,17
+p11 r17 y=530 | [x=17.0]Abril [x=234.4]21.110,10 [x=526.4]17.223,23
+p11 r18 y=516 | [x=17.0]Maio [x=254.4]0,00 [x=546.4]0,00
+p11 r19 y=502 | [x=17.0]Junho [x=254.4]0,00 [x=546.4]0,00
+p11 r20 y=488 | [x=17.0]Julho [x=254.4]0,00 [x=546.4]0,00
+p11 r21 y=474 | [x=17.0]Agosto [x=254.4]0,00 [x=546.4]0,00
+p11 r22 y=460 | [x=17.0]Setembro [x=254.4]0,00 [x=546.4]0,00
+p11 r23 y=446 | [x=17.0]Outubro [x=254.4]0,00 [x=546.4]0,00
+p11 r24 y=432 | [x=17.0]Novembro [x=254.4]0,00 [x=546.4]0,00
+p11 r25 y=417 | [x=17.0]Dezembro [x=254.4]0,00 [x=546.4]0,00
+p11 r26 y=394 | [x=23.7]TOTAL [x=236.4]78.422,22 [x=526.4]56.856,56
+p11 r27 y=370 | [x=17.0]APURAÇÃO DO RESULTADO - BRASIL [x=499.5](Valores em Reais)
+p11 r28 y=354 | [x=15.0]INFORMAÇÃO DO EXERCÍCIO ANTERIOR
+p11 r29 y=339 | [x=15.0]Saldo de prejuízo(s) a compensar de exercício(s) anterior(es) [x=536.9]7.201,13
+p11 r30 y=322 | [x=16.0]APURAÇÃO DO RESULTADO TRIBUTÁVEL
+p11 r31 y=305 | [x=16.0]Receita bruta total [x=532.4]78.422,22
+p11 r32 y=292 | [x=16.0]Despesa de custeio e investimento total [x=532.4]56.856,56
+p11 r33 y=279 | [x=16.0]Resultado [x=532.4]21.565,66
+p11 r34 y=266 | [x=16.0]Limite de 20% sobre a receita bruta total [x=532.4]15.684,44
+p11 r35 y=254 | [x=16.0]Opção pela forma de apuração do resultado tributável [x=516.9]Pelo resultado
+p11 r36 y=238 | [x=16.0]Compensação de prejuízo(s) de exercício(s) anterior(es) [x=552.4]0,00
+p11 r37 y=224 | [x=16.0]RESULTADO TRIBUTÁVEL [x=532.4]21.565,66
+p11 r38 y=207 | [x=16.0]INFORMAÇÕES PARA O EXERCÍCIO SEGUINTE
+p11 r39 y=194 | [x=16.0]Saldo de prejuízo(s) a compensar [x=536.9]7.201,13
+p11 r40 y=174 | [x=16.0]APURAÇÃO DO RESULTADO NÃO TRIBUTÁVEL
+p11 r41 y=161 | [x=16.0]Adiantamento(s) recebido(s) em 2025 por conta de venda para entrega futura [x=552.4]0,00
+p11 r42 y=147 | [x=16.0]Adiantamento(s) recebido(s) até 2024 a ser(em) informado(s) como receita(s) de produto(s) entregue(s) em 2025 [x=552.4]0,00
+p11 r43 y=132 | [x=16.0]RESULTADO NÃO TRIBUTÁVEL [x=552.4]0,00
+p11 r44 y=112 | [x=17.0]MOVIMENTAÇÃO DO REBANHO - BRASIL
+p11 r45 y=96 | [x=15.0]ESPÉCIE [x=81.7]ESTOQUE INICIAL [x=190.2]AQUISIÇÕES [x=262.3]NASCIMENTOS CONSUMO E PERDAS [x=445.1]VENDAS [x=485.0]ESTOQUE FINAL
+p11 r46 y=79 | [x=15.0]Bovinos e bufalinos [x=126.5]101,00 [x=220.0]22,00 [x=301.0]13,00 [x=393.4]4,00 [x=458.0]26,00 [x=524.5]101,00
+p11 r47 y=66 | [x=15.0]Suínos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p11 r48 y=53 | [x=15.0]Caprinos e ovinos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p11 r49 y=27 | [x=252.9]Página 11 de 41
+===== PAGINA 12 ===== (21 rows)
+p12 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p12 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p12 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p12 r3 y=768 | [x=17.0]MOVIMENTAÇÃO DO REBANHO - BRASIL
+p12 r4 y=752 | [x=15.0]ESPÉCIE [x=81.7]ESTOQUE INICIAL [x=190.2]AQUISIÇÕES [x=262.3]NASCIMENTOS CONSUMO E PERDAS [x=445.1]VENDAS [x=485.0]ESTOQUE FINAL
+p12 r5 y=738 | [x=15.0]Asininos, equinos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p12 r6 y=727 | [x=15.0]e muares
+p12 r7 y=713 | [x=15.0]Outros [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p12 r8 y=682 | [x=17.0]BENS DA ATIVIDADE RURAL - BRASIL [x=498.5](Valores em Reais)
+p12 r9 y=665 | [x=15.0]CÓDIGO [x=66.0]DISCRIMINAÇÃO [x=341.4]SITUAÇÃO EM [x=469.9]SITUAÇÃO EM
+p12 r10 y=654 | [x=349.0]31/12/2024 [x=477.5]31/12/2025
+p12 r11 y=621 | [x=15.0]16 [x=67.0]AJU RUR BEM TRATOR SENTINELA SERIE 2601 [x=370.4]81.301,14 [x=513.4]92.302,15
+p12 r12 y=598 | [x=15.0]TOTAL [x=370.4]81.301,14 [x=514.4]92.302,15
+p12 r13 y=570 | [x=506.5](Valores em Reais)
+p12 r14 y=568 | [x=17.0]DÍVIDAS VINCULADAS À ATIVIDADE RURAL - BRASIL
+p12 r15 y=550 | [x=15.0]ITEM [x=46.0]DISCRIMINAÇÃO [x=251.4]SITUAÇÃO EM [x=374.9]SITUAÇÃO EM [x=483.6]VALOR PAGO EM 2025
+p12 r16 y=538 | [x=259.0]31/12/2024 [x=382.5]31/12/2025
+p12 r17 y=508 | [x=15.0]1 [x=46.0]CNPJ 55.566.677/0001-83 - AJU RUR DIVIDA [x=274.4]41.401,16 [x=414.4]32.402,17 [x=558.4]0,00
+p12 r18 y=497 | [x=46.0]CUSTEIO SENTINELA
+p12 r19 y=476 | [x=15.0]TOTAL [x=275.4]41.401,16 [x=414.4]32.402,17 [x=558.4]0,00
+p12 r20 y=27 | [x=252.9]Página 12 de 41
+===== PAGINA 13 ===== (46 rows)
+p13 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p13 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p13 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p13 r3 y=770 | [x=14.0]DEMONSTRATIVO DE ATIVIDADE RURAL - EXTERIOR
+p13 r4 y=754 | [x=17.0]DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - EXTERIOR
+p13 r5 y=734 | [x=20.8]CÓDIGO [x=67.7]PARTICIPAÇÃO [x=168.4]CONDIÇÃO [x=291.6]NOME E LOCALIZAÇÃO [x=448.1]ÁREA
+p13 r6 y=723 | [x=15.9]ATIVIDADE [x=91.3](%) [x=162.4]EXPLORAÇÃO [x=451.9](ha)
+p13 r7 y=705 | [x=32.5]11 [x=85.3]100,00 [x=189.3]1 [x=253.7]AJU RUE FARM EXTERIOR SENTINELA, 249 - [x=449.0]234,5
+p13 r8 y=694 | [x=253.0]ESTADOS UNIDOS - 2801 AUDIT FARM ROAD
+p13 r9 y=675 | [x=143.0]PARTICIPANTE(S)
+p13 r10 y=657 | [x=143.0]AJU RUR PARTICIPANTE UM (222.333.444-05) [x=457.0]Estrangeiro: Não
+p13 r11 y=628 | [x=17.0]RECEITAS E DESPESAS - EXTERIOR [x=493.5](Valores em Reais)
+p13 r12 y=609 | [x=21.3]CÓDIGO [x=113.7]NOME DO PAÍS [x=232.0]RECEITA BRUTA [x=322.8]DESPESAS DE [x=414.1]RESULTADO [x=496.1]RESULTADO
+p13 r13 y=598 | [x=21.3]DO PAÍS [x=251.1]TOTAL [x=312.1]CUSTEIO/INVESTIM. [x=403.6]MOEDA ORIGINAL [x=512.7]US$
+p13 r14 y=587 | [x=229.1]MOEDA ORIGINAL [x=338.1]TOTAL
+p13 r15 y=576 | [x=316.1]MOEDA ORIGINAL
+p13 r16 y=558 | [x=31.3]249 [x=81.2]ESTADOS UNIDOS DA AMÉRICA [x=266.4]58.005,45 [x=355.4]40.017,96 [x=439.4]17.987,49 [x=521.4]17.987,49
+p13 r17 y=534 | [x=17.0]TOTAL [x=521.4]17.987,49
+p13 r18 y=504 | [x=17.0]APURAÇÃO DO RESULTADO - EXTERIOR [x=499.5](Valores em Reais)
+p13 r19 y=489 | [x=16.0]INFORMAÇÃO DO EXERCÍCIO ANTERIOR
+p13 r20 y=476 | [x=16.0]Saldo de prejuízo(s) a compensar de exercício(s) anterior(es) - R$ [x=536.9]8.507,27
+p13 r21 y=461 | [x=16.0]APURAÇÃO DO RESULTADO TRIBUTÁVEL
+p13 r22 y=448 | [x=16.0]Resultado total - US$ [x=532.4]17.987,49
+p13 r23 y=434 | [x=16.0]Resultado total - (R$) (Resultado total - US$ multiplicado por 5,5018) [x=532.4]98.963,57
+p13 r24 y=420 | [x=16.0]Opção pela forma de apuração do resultado tributável [x=516.9]Pelo resultado
+p13 r25 y=407 | [x=16.0]Limite de 20% sobre a receita bruta total - R$ [x=552.4]0,00
+p13 r26 y=393 | [x=16.0]Compensação de prejuízo(s) de exercício(s) anterior(es) - R$ [x=552.4]0,00
+p13 r27 y=378 | [x=16.0]RESULTADO TRIBUTÁVEL - R$ [x=532.4]98.963,57
+p13 r28 y=354 | [x=16.0]INFORMAÇÕES PARA O EXERCÍCIO SEGUINTE
+p13 r29 y=339 | [x=16.0]Saldo de prejuízo(s) a compensar - R$ [x=536.9]8.507,27
+p13 r30 y=315 | [x=16.0]APURAÇÃO DO RESULTADO NÃO TRIBUTÁVEL
+p13 r31 y=300 | [x=16.0]Adiantamento(s) recebido(s) em 2025 por conta de venda para entrega futura - R$ [x=552.4]0,00
+p13 r32 y=285 | [x=16.0]Adiantamento(s) recebido(s) até 2024 a ser(em) informado(s) como receita(s) de produto(s) entregue(s) em 2025 - R$ [x=552.4]0,00
+p13 r33 y=270 | [x=16.0]RESULTADO NÃO TRIBUTÁVEL - R$ [x=552.4]0,00
+p13 r34 y=247 | [x=17.0]MOVIMENTAÇÃO DO REBANHO - EXTERIOR
+p13 r35 y=231 | [x=15.0]ESPÉCIE [x=81.7]ESTOQUE INICIAL [x=190.2]AQUISIÇÕES [x=259.3]NASCIMENTOS [x=324.5]CONSUMO E PERDAS [x=445.1]VENDAS [x=485.0]ESTOQUE FINAL
+p13 r36 y=214 | [x=15.0]Bovinos e bufalinos [x=131.0]51,00 [x=220.0]12,00 [x=305.4]8,00 [x=393.4]2,00 [x=458.0]16,00 [x=529.0]50,00
+p13 r37 y=201 | [x=15.0]Suínos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p13 r38 y=188 | [x=15.0]Caprinos e ovinos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p13 r39 y=175 | [x=15.0]Asininos, equinos [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p13 r40 y=164 | [x=15.0]e muares
+p13 r41 y=150 | [x=15.0]Outros [x=135.4]0,00 [x=224.4]0,00 [x=305.4]0,00 [x=393.4]0,00 [x=462.4]0,00 [x=533.4]0,00
+p13 r42 y=121 | [x=17.0]BENS DA ATIVIDADE RURAL - EXTERIOR [x=498.5](Valores em Reais)
+p13 r43 y=104 | [x=15.0]CÓDIGO [x=66.0]DISCRIMINAÇÃO [x=330.8]SITUAÇÃO EM 31/12/2024 [x=478.9]SITUAÇÃO EM
+p13 r44 y=93 | [x=486.5]31/12/2025
+p13 r45 y=27 | [x=252.9]Página 13 de 41
+===== PAGINA 14 ===== (35 rows)
+p14 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p14 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p14 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p14 r3 y=769 | [x=20.0]16 [x=76.0]AJU RUE BEM MAQUINA SENTINELA [x=377.4]51.508,28 [x=514.4]62.509,29
+p14 r4 y=758 | [x=76.0]249 - ESTADOS UNIDOS DA AMÉRICA
+p14 r5 y=735 | [x=16.0]TOTAL [x=378.4]51.508,28 [x=516.4]62.509,29
+p14 r6 y=718 | [x=506.5](Valores em Reais)
+p14 r7 y=716 | [x=17.0]DÍVIDAS VINCULADAS À ATIVIDADE RURAL - EXTERIOR
+p14 r8 y=698 | [x=15.0]ITEM [x=46.0]DISCRIMINAÇÃO [x=251.4]SITUAÇÃO EM [x=374.9]SITUAÇÃO EM [x=483.6]VALOR PAGO EM 2025
+p14 r9 y=686 | [x=259.0]31/12/2024 [x=382.5]31/12/2025
+p14 r10 y=656 | [x=15.0]1 [x=46.0]AJU RUE DIVIDA EXTERIOR SENTINELA [x=274.4]31.510,30 [x=414.4]24.511,31 [x=558.4]0,00
+p14 r11 y=633 | [x=15.0]TOTAL [x=275.4]31.510,30 [x=414.4]24.511,31 [x=558.4]0,00
+p14 r12 y=590 | [x=24.0]Demonstrativo da Apuração do Ganho de Capital - BENS IMÓVEIS
+p14 r13 y=586 | [x=468.5]CPF: 111.444.777-35
+p14 r14 y=573 | [x=24.0]DADOS DO IMÓVEL
+p14 r15 y=558 | [x=29.0]Especificação e endereço
+p14 r16 y=544 | [x=29.0]AJU GCI IMOVEL URBANO SENTINELA
+p14 r17 y=532 | [x=29.0]RUA [x=54.8]AJU GCI IMOVEL [x=127.7]2901, [x=156.6]APTO 29 [x=198.4]BAIRRO SENTINELA
+p14 r18 y=520 | [x=29.0]SAO PAULO [x=108.6]SP [x=152.6]01001000
+p14 r19 y=496 | [x=24.0]DADOS DA OPERAÇÃO
+p14 r20 y=481 | [x=29.0]Natureza da operação [x=261.0]Valor de Alienação - (R$)
+p14 r21 y=470 | [x=29.0]VENDA [x=316.0]160.602,42
+p14 r22 y=458 | [x=29.0]Data de Alienação [x=262.0]Custo de Corretagem - R$
+p14 r23 y=447 | [x=29.0]18/08/2025 [x=324.9]5.603,43
+p14 r24 y=421 | [x=24.0]PERGUNTAS
+p14 r25 y=405 | [x=30.0]A alienação foi a prazo/prestação? [x=511.7]Não
+p14 r26 y=386 | [x=30.0]Houve no imóvel alienado edificação, ampliação, reforma ou trata-se de imóvel adquirido em partes e em datas diferentes? [x=511.7]Não
+p14 r27 y=353 | [x=25.0]ADQUIRENTE
+p14 r28 y=338 | [x=36.0]CPF/CNPJ [x=187.0]Nome
+p14 r29 y=323 | [x=37.0]222.333.444-05 [x=187.0]AJU GCI ADQUIRENTE
+p14 r30 y=303 | [x=24.0]APURAÇÃO DO CUSTO DE AQUISIÇÃO
+p14 r31 y=287 | [x=38.0]Data de Aquisição: [x=115.0]18/08/2018
+p14 r32 y=272 | [x=38.0]Custo de aquisição (R$): [x=515.0]100.601,41
+p14 r33 y=257 | [x=38.0]Bem atualizado de acordo com a Lei 14.973/2024? [x=524.7]Não
+p14 r34 y=27 | [x=252.9]Página 14 de 41
+===== PAGINA 15 ===== (37 rows)
+p15 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p15 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p15 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p15 r3 y=756 | [x=25.0]APURAÇÃO DOS GANHOS DE CAPITAL
+p15 r4 y=742 | [x=40.0]Valor da Alienação [x=400.0](R$) [x=515.0]160.602,42
+p15 r5 y=728 | [x=40.0]Custo de Corretagem [x=400.0](R$) [x=523.9]5.603,43
+p15 r6 y=715 | [x=40.0]Valor Líquido da Alienação [x=400.0](R$) [x=515.0]154.998,99
+p15 r7 y=700 | [x=40.0]Custo de Aquisição [x=400.0](R$) [x=515.0]100.601,41
+p15 r8 y=685 | [x=40.0]Ganho de Capital - Resultado 1 [x=400.0](R$) [x=519.4]54.397,58
+p15 r9 y=669 | [x=40.0]Percentual de Redução (Lei n. 7.713, de 1988) [x=402.6](%) [x=521.6]0,000000
+p15 r10 y=654 | [x=40.0]Valor de Redução (Lei n. 7.713, de 1988) [x=399.0](R$) [x=539.4]0,00
+p15 r11 y=639 | [x=40.0]Ganho de Capital - Resultado 2 [x=400.0](R$) [x=519.4]54.397,58
+p15 r12 y=625 | [x=40.0]Percentual de Redução (Lei n. 11.196, de 2005 - FR1) [x=403.6](%) [x=521.6]0,000000
+p15 r13 y=609 | [x=40.0]Valor de Redução (Lei n. 11.196, de 2005 - FR1) [x=400.0](R$) [x=539.4]0,00
+p15 r14 y=594 | [x=40.0]Ganhos de Capital - Resultado 3 [x=400.0](R$) [x=519.4]54.397,58
+p15 r15 y=581 | [x=40.0]Percentual de Redução (Lei n. 11.196, de 2005 - FR2) [x=403.6](%) [x=521.6]0,000000
+p15 r16 y=565 | [x=40.0]Valor de Redução (Lei n. 11.196, de 2005 - FR2) [x=400.0](R$) [x=539.4]0,00
+p15 r17 y=549 | [x=40.0]Ganhos de Capital - Resultado 4 [x=400.0](R$) [x=519.4]54.397,58
+p15 r18 y=535 | [x=40.0]Percentual de Redução - Aplicação Outro Imóvel [x=403.6](%) [x=521.6]0,000000
+p15 r19 y=519 | [x=40.0]Valor de Redução - Aplicação Outro Imóvel [x=400.0](R$) [x=539.4]0,00
+p15 r20 y=504 | [x=40.0]Ganhos de Capital - Resultado 5 [x=400.0](R$) [x=519.4]54.397,58
+p15 r21 y=474 | [x=26.0]Já houve alienação parcial desse bem? [x=194.0]Sim ( ) [x=235.5]Não ( X )
+p15 r22 y=459 | [x=26.0]Soma dos Ganhos de Capital de alienações anteriores: [x=256.0]0,00
+p15 r23 y=440 | [x=25.0]Ganho de Capital da alienação atual: R$ [x=206.0]54.397,58
+p15 r24 y=421 | [x=342.6]Ganho de Capital Distribuído - (R$)
+p15 r25 y=407 | [x=58.5]Faixa de Ganho de Capital [x=203.2]Alíquota - (%) [x=297.2]TOTAL [x=390.4]Anterior [x=495.0]Atual
+p15 r26 y=393 | [x=29.0]Até R$ 5.000.000,00 [x=217.0]15 [x=318.4]54.397,58 [x=435.4]0,00 [x=518.4]54.397,58
+p15 r27 y=378 | [x=29.0]De R$ 5.000.000,01 Até R$ 10.000.000,00 [x=217.0]17,5 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p15 r28 y=362 | [x=29.0]De R$ 10.000.000,01 Até R$ 30.000.000,00 [x=217.0]20 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p15 r29 y=346 | [x=29.0]Acima de R$ 30.000.000,00 [x=217.0]22,5 [x=338.4]0,00 [x=435.4]0,00 [x=539.4]0,00
+p15 r30 y=330 | [x=165.3]TOTAL [x=318.4]54.397,58 [x=435.4]0,00 [x=519.4]54.397,58
+p15 r31 y=306 | [x=26.0]CÁLCULO DO IMPOSTO - ALIENAÇÃO À VISTA
+p15 r32 y=291 | [x=29.0]Ganho de Capital Total [x=447.4](R$) [x=517.4]54.397,58
+p15 r33 y=277 | [x=29.0]Alíquota Média [x=450.6](%) [x=515.2]15,000000
+p15 r34 y=262 | [x=29.0]Imposto Devido [x=447.4](R$) [x=521.9]8.159,63
+p15 r35 y=247 | [x=29.0]Imposto Pago [x=447.4](R$) [x=537.4]0,00
+p15 r36 y=27 | [x=252.9]Página 15 de 41
+===== PAGINA 16 ===== (18 rows)
+p16 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p16 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p16 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p16 r3 y=752 | [x=27.0]CONSOLIDAÇÃO DO BEM
+p16 r4 y=727 | [x=27.0]IMPOSTO A PAGAR
+p16 r5 y=712 | [x=39.0]Diferido de anos anteriores [x=438.0](R$) [x=538.4]0,00
+p16 r6 y=697 | [x=39.0]Referente à alienação em 2025 [x=438.0](R$) [x=522.9]8.159,63
+p16 r7 y=683 | [x=39.0]Total [x=438.0](R$) [x=522.9]8.159,63
+p16 r8 y=667 | [x=39.0]IR na fonte (Lei 11.033/2004) [x=438.0](R$) [x=538.4]0,00
+p16 r9 y=653 | [x=39.0]Devido em 2025 [x=438.0](R$) [x=522.9]8.159,63
+p16 r10 y=637 | [x=39.0]Diferido para anos posteriores [x=438.0](R$) [x=538.4]0,00
+p16 r11 y=611 | [x=24.0]IMPOSTO PAGO
+p16 r12 y=596 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p16 r13 y=571 | [x=24.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+p16 r14 y=556 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p16 r15 y=530 | [x=24.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+p16 r16 y=516 | [x=39.0]Total [x=438.0](R$) [x=518.4]54.397,58
+p16 r17 y=27 | [x=252.9]Página 16 de 41
+===== PAGINA 17 ===== (46 rows)
+p17 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p17 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p17 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p17 r3 y=754 | [x=24.0]Demonstrativo da Apuração do Ganho de Capital - BENS MÓVEIS
+p17 r4 y=750 | [x=471.5]CPF: 111.444.777-35
+p17 r5 y=736 | [x=24.0]DADOS DO MÓVEL
+p17 r6 y=722 | [x=30.0]Especificação [x=99.0]AJU GCM VEICULO SENTINELA
+p17 r7 y=704 | [x=24.0]DADOS DA AQUISIÇÃO
+p17 r8 y=690 | [x=30.0]Data de aquisição [x=245.0]Custo de Aquisição R$
+p17 r9 y=679 | [x=49.0]19/09/2022 [x=294.4]30.611,44
+p17 r10 y=651 | [x=24.0]DADOS DA OPERAÇÃO
+p17 r11 y=636 | [x=29.0]Natureza da operação [x=261.0]Valor de Alienação - (R$)
+p17 r12 y=625 | [x=29.0]VENDA [x=320.4]42.612,45
+p17 r13 y=613 | [x=29.0]Data de Alienação [x=262.0]Custo de Corretagem - R$
+p17 r14 y=602 | [x=29.0]19/09/2025 [x=324.9]1.613,46
+p17 r15 y=576 | [x=31.0]Sujeito a Registro Público? [x=514.7]Não
+p17 r16 y=560 | [x=32.0]A alienação foi a prazo/prestação? [x=515.1]Sim
+p17 r17 y=534 | [x=25.0]ADQUIRENTE
+p17 r18 y=519 | [x=36.0]CPF/CNPJ [x=187.0]Nome
+p17 r19 y=504 | [x=37.0]222.333.444-05 [x=187.0]AJU GCM ADQUIRENTE
+p17 r20 y=483 | [x=24.0]APURAÇÃO DO GANHO DE CAPITAL
+p17 r21 y=469 | [x=28.0]Valor de alienação [x=434.0](R$) [x=515.4]42.612,45
+p17 r22 y=455 | [x=28.0]Custo de corretagem [x=434.0](R$) [x=519.9]1.613,46
+p17 r23 y=440 | [x=28.0]Valor líquido de alienação [x=434.0](R$) [x=515.4]40.998,99
+p17 r24 y=426 | [x=27.0]Custo de aquisição [x=435.0](R$) [x=515.4]30.611,44
+p17 r25 y=410 | [x=28.0]Ganho de Capital [x=434.0](R$) [x=515.4]10.387,55
+p17 r26 y=378 | [x=26.0]Já houve alienação parcial desse bem? [x=194.0]Sim ( ) [x=235.5]Não ( X )
+p17 r27 y=363 | [x=26.0]Soma dos Ganhos de Capital de alienações anteriores: [x=256.0]0,00
+p17 r28 y=344 | [x=25.0]Ganho de Capital da alienação atual: R$ [x=206.0]10.387,55
+p17 r29 y=325 | [x=342.6]Ganho de Capital Distribuído - (R$)
+p17 r30 y=311 | [x=58.5]Faixa de Ganho de Capital [x=203.2]Alíquota - (%) [x=297.2]TOTAL [x=390.4]Anterior [x=495.0]Atual
+p17 r31 y=297 | [x=29.0]Até R$ 5.000.000,00 [x=217.0]15 [x=318.4]10.387,55 [x=435.4]0,00 [x=518.4]10.387,55
+p17 r32 y=282 | [x=29.0]De R$ 5.000.000,01 Até R$ 10.000.000,00 [x=217.0]17,5 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p17 r33 y=266 | [x=29.0]De R$ 10.000.000,01 Até R$ 30.000.000,00 [x=217.0]20 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p17 r34 y=250 | [x=29.0]Acima de R$ 30.000.000,00 [x=217.0]22,5 [x=338.4]0,00 [x=435.4]0,00 [x=539.4]0,00
+p17 r35 y=234 | [x=165.3]TOTAL [x=318.4]10.387,55 [x=435.4]0,00 [x=519.4]10.387,55
+p17 r36 y=207 | [x=27.0]CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO
+p17 r37 y=189 | [x=172.0]Custo de [x=348.9]Ganho de [x=401.9]% Alíquota
+p17 r38 y=184 | [x=94.5]Valor Recebido [x=225.6]Valor Líquido [x=295.0]Custo de [x=459.4]Imposto [x=514.4]Imposto
+p17 r39 y=179 | [x=31.0]Data Parcela [x=167.4]Corretagem [x=353.3]Capital [x=396.9]Média de Imp.
+p17 r40 y=174 | [x=113.2](R$) [x=241.2](R$) [x=293.3]Aquisição [x=452.8]Devido (R$) [x=511.3]Pago (R$)
+p17 r41 y=170 | [x=180.2](R$) [x=343.4]Proporcional [x=408.3]Devido
+p17 r42 y=154 | [x=34.0]19/09/2025 [x=112.4]13.666,33 [x=197.4]0,00 [x=240.4]13.666,33 [x=300.4]10.203,82 [x=359.9]3.462,51 [x=408.2]15,000000 [x=476.5]519,37 [x=540.4]0,00
+p17 r43 y=139 | [x=34.0]19/10/2025 [x=112.4]13.666,33 [x=197.4]0,00 [x=240.4]13.666,33 [x=300.4]10.203,82 [x=359.9]3.462,51 [x=408.2]15,000000 [x=476.5]519,37 [x=540.4]0,00
+p17 r44 y=124 | [x=34.0]19/11/2025 [x=112.4]13.666,33 [x=197.4]0,00 [x=240.4]13.666,33 [x=300.4]10.203,82 [x=359.9]3.462,51 [x=408.2]15,000000 [x=476.5]519,37 [x=540.4]0,00
+p17 r45 y=27 | [x=252.9]Página 17 de 41
+===== PAGINA 18 ===== (39 rows)
+p18 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p18 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p18 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p18 r3 y=762 | [x=172.0]Custo de [x=348.9]Ganho de [x=401.9]% Alíquota
+p18 r4 y=757 | [x=94.5]Valor Recebido [x=225.6]Valor Líquido [x=295.0]Custo de [x=459.4]Imposto [x=514.4]Imposto
+p18 r5 y=752 | [x=31.0]Data Parcela [x=167.4]Corretagem [x=353.3]Capital [x=396.9]Média de Imp.
+p18 r6 y=747 | [x=113.2](R$) [x=241.2](R$) [x=293.3]Aquisição [x=452.8]Devido (R$) [x=511.3]Pago (R$)
+p18 r7 y=743 | [x=180.2](R$) [x=343.4]Proporcional [x=408.3]Devido
+p18 r8 y=728 | [x=28.0]Total [x=112.4]40.998,99 [x=197.4]0,00 [x=241.4]40.998,99 [x=300.4]30.611,46 [x=355.4]10.387,53 [x=408.2]15,000000 [x=469.9]1.558,11 [x=540.4]0,00
+p18 r9 y=701 | [x=26.0]A prestação/parcela final foi recebida em 2025? [x=223.0]Sim ( X ) [x=270.5]Não ( [x=300.0]) [x=322.0]Data de Recebimento da Última Parcela [x=489.0]19/11/2025
+p18 r10 y=677 | [x=27.0]CÁLCULO DO IMPOSTO - ALIENAÇÃO A PRAZO - DETALHE DAS PARCELAS
+p18 r11 y=657 | [x=29.0]Data de Recebimento da Parcela: [x=159.0]19/09/2025 [x=227.0]Última Parcela? [x=291.0]Sim ( [x=316.3]) [x=330.1]Não ( X )
+p18 r12 y=642 | [x=28.0]Valor Recebido [x=434.0](R$) [x=515.4]13.666,33
+p18 r13 y=628 | [x=28.0]Custo de corretagem [x=434.0](R$) [x=535.4]0,00
+p18 r14 y=613 | [x=28.0]Valor líquido de alienação [x=434.0](R$) [x=515.4]13.666,33
+p18 r15 y=598 | [x=27.0]Custo de aquisição Proporcional [x=435.0](R$) [x=515.4]10.203,82
+p18 r16 y=583 | [x=28.0]Ganho de Capital [x=434.0](R$) [x=520.9]3.462,51
+p18 r17 y=568 | [x=30.0]Alíquota Média [x=435.0](%) [x=514.2]15,000000
+p18 r18 y=553 | [x=29.0]Imposto Devido [x=436.0](R$) [x=528.5]519,37
+p18 r19 y=538 | [x=29.0]Imposto Pago [x=436.0](R$) [x=538.4]0,00
+p18 r20 y=517 | [x=29.0]Data de Recebimento da Parcela: [x=159.0]19/10/2025 [x=227.0]Última Parcela? [x=291.0]Sim ( [x=316.3]) [x=330.1]Não ( X )
+p18 r21 y=502 | [x=28.0]Valor Recebido [x=434.0](R$) [x=515.4]13.666,33
+p18 r22 y=488 | [x=28.0]Custo de corretagem [x=434.0](R$) [x=535.4]0,00
+p18 r23 y=473 | [x=28.0]Valor líquido de alienação [x=434.0](R$) [x=515.4]13.666,33
+p18 r24 y=458 | [x=27.0]Custo de aquisição Proporcional [x=435.0](R$) [x=515.4]10.203,82
+p18 r25 y=443 | [x=28.0]Ganho de Capital [x=434.0](R$) [x=520.9]3.462,51
+p18 r26 y=428 | [x=30.0]Alíquota Média [x=435.0](%) [x=514.2]15,000000
+p18 r27 y=413 | [x=29.0]Imposto Devido [x=436.0](R$) [x=528.5]519,37
+p18 r28 y=398 | [x=29.0]Imposto Pago [x=436.0](R$) [x=538.4]0,00
+p18 r29 y=377 | [x=29.0]Data de Recebimento da Parcela: [x=159.0]19/11/2025 [x=227.0]Última Parcela? [x=291.0]Sim ( X ) [x=333.2]Não ( [x=359.5])
+p18 r30 y=362 | [x=28.0]Valor Recebido [x=434.0](R$) [x=515.4]13.666,33
+p18 r31 y=348 | [x=28.0]Custo de corretagem [x=434.0](R$) [x=535.4]0,00
+p18 r32 y=333 | [x=28.0]Valor líquido de alienação [x=434.0](R$) [x=515.4]13.666,33
+p18 r33 y=318 | [x=27.0]Custo de aquisição Proporcional [x=435.0](R$) [x=515.4]10.203,82
+p18 r34 y=303 | [x=28.0]Ganho de Capital [x=434.0](R$) [x=520.9]3.462,51
+p18 r35 y=288 | [x=30.0]Alíquota Média [x=435.0](%) [x=514.2]15,000000
+p18 r36 y=273 | [x=29.0]Imposto Devido [x=436.0](R$) [x=528.5]519,37
+p18 r37 y=258 | [x=29.0]Imposto Pago [x=436.0](R$) [x=538.4]0,00
+p18 r38 y=27 | [x=252.9]Página 18 de 41
+===== PAGINA 19 ===== (18 rows)
+p19 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p19 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p19 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p19 r3 y=757 | [x=27.0]CONSOLIDAÇÃO DO BEM
+p19 r4 y=732 | [x=27.0]IMPOSTO A PAGAR
+p19 r5 y=717 | [x=39.0]Diferido de anos anteriores [x=438.0](R$) [x=538.4]0,00
+p19 r6 y=702 | [x=39.0]Referente à alienação em 2025 [x=438.0](R$) [x=522.9]1.558,13
+p19 r7 y=688 | [x=39.0]Total [x=438.0](R$) [x=522.9]1.558,13
+p19 r8 y=672 | [x=39.0]IR na fonte (Lei 11.033/2004) [x=438.0](R$) [x=538.4]0,00
+p19 r9 y=658 | [x=39.0]Devido em 2025 [x=438.0](R$) [x=522.9]1.558,11
+p19 r10 y=642 | [x=39.0]Diferido para anos posteriores [x=438.0](R$) [x=538.4]0,00
+p19 r11 y=616 | [x=24.0]IMPOSTO PAGO
+p19 r12 y=601 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p19 r13 y=576 | [x=24.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+p19 r14 y=561 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p19 r15 y=535 | [x=24.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+p19 r16 y=521 | [x=39.0]Total [x=438.0](R$) [x=518.4]10.387,55
+p19 r17 y=27 | [x=252.9]Página 19 de 41
+===== PAGINA 20 ===== (46 rows)
+p20 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p20 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p20 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p20 r3 y=754 | [x=24.0]Demonstrativo da Apuração do Ganho de Capital - PARTICIPAÇÃO SOCIETÁRIA
+p20 r4 y=751 | [x=473.5]CPF: 111.444.777-35
+p20 r5 y=736 | [x=24.0]DADOS DA PARTICIPAÇÃO SOCIETÁRIA
+p20 r6 y=721 | [x=29.0]Nome da sociedade
+p20 r7 y=709 | [x=29.0]AJU GCP EMPRESA SENTINELA
+p20 r8 y=694 | [x=30.0]CNPJ da sociedade [x=180.0]Município [x=523.0]UF
+p20 r9 y=681 | [x=29.0]55.566.677/0001-83 [x=180.0]SAO PAULO [x=524.0]SP
+p20 r10 y=666 | [x=27.0]Data de Alienação [x=277.9]Valor de alienação - (R$) [x=420.0]Custo de Corretagem - (R$)
+p20 r11 y=653 | [x=27.0]20/10/2025 [x=337.4]70.622,48 [x=492.9]2.623,49
+p20 r12 y=635 | [x=29.0]Natureza [x=253.0]Espécie da participação
+p20 r13 y=623 | [x=29.0]ALIENAÇÕES, RESGATES E OUTRAS TRANSFERÊNCIAS [x=253.0]QUOTAS
+p20 r14 y=599 | [x=28.0]A alienação foi a prazo/prestação? [x=508.7]Não
+p20 r15 y=579 | [x=26.0]ADQUIRENTE
+p20 r16 y=564 | [x=37.0]CPF/CNPJ [x=188.0]Nome
+p20 r17 y=549 | [x=38.0]222.333.444-05 [x=188.0]AJU GCP ADQUIRENTE
+p20 r18 y=528 | [x=25.0]CUSTO DE AQUISIÇÃO
+p20 r19 y=515 | [x=43.0]Espécie de Participação Societária [x=227.7]Quantidade de [x=353.3]Custo médio [x=476.1]Custo total
+p20 r20 y=504 | [x=210.6]quotas/ações alienadas [x=341.1]pond./unitário - R$ [x=463.0]de aquisição - R$
+p20 r21 y=490 | [x=27.0]Quota [x=298.0]1.234 [x=396.2]32,918534 [x=521.4]40.621,47
+p20 r22 y=470 | [x=24.0]APURAÇÃO DOS GANHOS DE CAPITAL
+p20 r23 y=453 | [x=29.0]Valor de Alienação [x=393.2](R$) [x=516.4]70.622,48
+p20 r24 y=438 | [x=29.0]Custo de Corretagem [x=393.2](R$) [x=520.9]2.623,49
+p20 r25 y=424 | [x=29.0]Valor Líquido de Alienação [x=393.2](R$) [x=516.4]67.998,99
+p20 r26 y=410 | [x=29.0]Custo de Aquisição [x=393.2](R$) [x=516.4]40.621,47
+p20 r27 y=396 | [x=29.0]Ganhos de Capital [x=393.2](R$) [x=516.4]27.377,52
+p20 r28 y=372 | [x=26.0]Já houve alienação parcial desse bem? [x=194.0]Sim ( ) [x=235.5]Não ( X )
+p20 r29 y=357 | [x=26.0]Soma dos Ganhos de Capital de alienações anteriores: [x=256.0]0,00
+p20 r30 y=337 | [x=25.0]Ganho de Capital da alienação atual: R$ [x=206.0]27.377,52
+p20 r31 y=318 | [x=342.6]Ganho de Capital Distribuído - (R$)
+p20 r32 y=304 | [x=58.5]Faixa de Ganho de Capital [x=203.2]Alíquota - (%) [x=297.2]TOTAL [x=390.4]Anterior [x=495.0]Atual
+p20 r33 y=290 | [x=29.0]Até R$ 5.000.000,00 [x=217.0]15 [x=318.4]27.377,52 [x=435.4]0,00 [x=518.4]27.377,52
+p20 r34 y=275 | [x=29.0]De R$ 5.000.000,01 Até R$ 10.000.000,00 [x=217.0]17,5 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p20 r35 y=259 | [x=29.0]De R$ 10.000.000,01 Até R$ 30.000.000,00 [x=217.0]20 [x=338.4]0,00 [x=435.4]0,00 [x=538.4]0,00
+p20 r36 y=243 | [x=29.0]Acima de R$ 30.000.000,00 [x=217.0]22,5 [x=338.4]0,00 [x=435.4]0,00 [x=539.4]0,00
+p20 r37 y=227 | [x=165.3]TOTAL [x=318.4]27.377,52 [x=435.4]0,00 [x=519.4]27.377,52
+p20 r38 y=202 | [x=24.0]CÁLCULO DO IMPOSTO - ALIENAÇÃO À VISTA
+p20 r39 y=187 | [x=39.0]Ganho de Capital - (R$) [x=516.4]27.377,52
+p20 r40 y=171 | [x=39.0]Alíquota Média - (%) [x=514.2]15,000000
+p20 r41 y=156 | [x=39.0]Imposto devido - (R$) [x=520.9]4.106,62
+p20 r42 y=141 | [x=39.0]Imposto de renda na fonte (Lei nº 11.033, de 2004) - (R$) [x=536.4]0,00
+p20 r43 y=125 | [x=39.0]Imposto devido após compensação - (R$) [x=520.9]4.106,62
+p20 r44 y=110 | [x=39.0]Imposto pago - (R$) [x=536.4]0,00
+p20 r45 y=27 | [x=252.9]Página 20 de 41
+===== PAGINA 21 ===== (18 rows)
+p21 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p21 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p21 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p21 r3 y=752 | [x=27.0]CONSOLIDAÇÃO DA PARTICIPAÇÃO SOCIETÁRIA
+p21 r4 y=727 | [x=27.0]IMPOSTO A PAGAR
+p21 r5 y=712 | [x=39.0]Diferido de anos anteriores [x=438.0](R$) [x=538.4]0,00
+p21 r6 y=697 | [x=39.0]Referente à alienação em 2025 [x=438.0](R$) [x=522.9]4.106,62
+p21 r7 y=683 | [x=39.0]Total [x=438.0](R$) [x=522.9]4.106,62
+p21 r8 y=667 | [x=39.0]IR na fonte (Lei 11.033/2004) [x=438.0](R$) [x=538.4]0,00
+p21 r9 y=653 | [x=39.0]Devido em 2025 [x=438.0](R$) [x=522.9]4.106,62
+p21 r10 y=637 | [x=39.0]Diferido para anos posteriores [x=438.0](R$) [x=538.4]0,00
+p21 r11 y=611 | [x=24.0]IMPOSTO PAGO
+p21 r12 y=596 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p21 r13 y=571 | [x=24.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+p21 r14 y=556 | [x=39.0]Total [x=438.0](R$) [x=538.4]0,00
+p21 r15 y=530 | [x=24.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+p21 r16 y=516 | [x=39.0]Total [x=438.0](R$) [x=518.4]27.377,52
+p21 r17 y=27 | [x=252.9]Página 21 de 41
+===== PAGINA 22 ===== (36 rows)
+p22 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p22 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p22 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p22 r3 y=744 | [x=26.0]Demonstrativo da Apuração do Ganho de Capital - MOEDAS EM ESPÉCIE [x=471.5]CPF: 111.444.777-35
+p22 r4 y=710 | [x=25.0]Moeda Estrangeira
+p22 r5 y=696 | [x=25.0]DÓLAR (ESTADOS UNIDOS)
+p22 r6 y=676 | [x=30.0]CPF/CNPJ do Adquirente [x=187.0]Nome do Adquirente
+p22 r7 y=662 | [x=30.0]222.333.444-05 [x=187.0]AJU GCE ADQUIRENTE
+p22 r8 y=647 | [x=62.0]Data da Alienação [x=252.0]Quantidade [x=426.3]Valor da Alienação (R$)
+p22 r9 y=632 | [x=68.0]21/11/2025 [x=257.4]1.234,56 [x=458.9]8.632,51
+p22 r10 y=616 | [x=67.6]Custo Médio (R$) [x=231.0]Custo de Aquisição (R$) [x=426.7]Ganho de Capital (R$)
+p22 r11 y=603 | [x=90.6]5,371549 [x=266.9]6.631,49 [x=465.9]2.001,02
+p22 r12 y=574 | [x=25.0]TOTALIZAÇÃO
+p22 r13 y=543 | [x=45.7]Mês [x=91.0]Alienações em [x=169.0]Alienações [x=232.3]Ganhos de Capital [x=306.3]Ganhos de Capital [x=378.6]Alíquota Média [x=436.8]Imposto Devido [x=501.9]Imposto Pago
+p22 r14 y=534 | [x=96.4]Dólar (US$) [x=158.5]Consolidadas em [x=256.2](R$) [x=312.5]Tributável (R$) [x=398.1](%) [x=456.2](R$) [x=518.2](R$)
+p22 r15 y=524 | [x=168.4]Dólar (US$)
+p22 r16 y=505 | [x=40.5]Janeiro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r17 y=489 | [x=37.2]Fevereiro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r18 y=473 | [x=42.7]Março [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r19 y=457 | [x=45.0]Abril [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r20 y=441 | [x=45.0]Maio [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r21 y=425 | [x=42.5]Junho [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r22 y=409 | [x=43.7]Julho [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r23 y=393 | [x=41.0]Agosto [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r24 y=377 | [x=36.9]Setembro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r25 y=361 | [x=39.2]Outubro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r26 y=345 | [x=35.7]Novembro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r27 y=329 | [x=36.1]Dezembro [x=130.4]0,00 [x=207.4]0,00 [x=282.4]0,00 [x=356.4]0,00 [x=414.4]0,00 [x=474.4]0,00 [x=538.4]0,00
+p22 r28 y=304 | [x=24.0]CONSOLIDAÇÃO
+p22 r29 y=279 | [x=24.0]IMPOSTO PAGO
+p22 r30 y=263 | [x=29.0]Total [x=436.4](R$) [x=536.4]0,00
+p22 r31 y=237 | [x=24.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS
+p22 r32 y=221 | [x=29.0]Total [x=436.4](R$) [x=535.4]0,00
+p22 r33 y=194 | [x=24.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA
+p22 r34 y=177 | [x=29.0]Total [x=437.4](R$) [x=535.4]0,00
+p22 r35 y=27 | [x=252.9]Página 22 de 41
+===== PAGINA 23 ===== (36 rows)
+p23 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p23 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p23 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p23 r3 y=769 | [x=14.0]RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - TITULAR
+p23 r4 y=754 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JAN [x=499.5](Valores em Reais)
+p23 r5 y=734 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p23 r6 y=716 | [x=17.0]Mercado à Vista - Ações [x=405.9]2.600,60 [x=542.5]600,61
+p23 r7 y=701 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p23 r8 y=687 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p23 r9 y=672 | [x=17.0]Mercado de Opções - Ações [x=412.5]101,01 [x=542.5]101,01
+p23 r10 y=658 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p23 r11 y=643 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p23 r12 y=629 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p23 r13 y=614 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p23 r14 y=600 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p23 r15 y=585 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p23 r16 y=571 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p23 r17 y=556 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p23 r18 y=542 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p23 r19 y=527 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=405.9]2.701,61 [x=542.5]701,62
+p23 r20 y=513 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=551.4]0,00
+p23 r21 y=498 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=405.9]2.701,61 [x=542.5]701,62
+p23 r22 y=484 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=551.4]0,00
+p23 r23 y=470 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p23 r24 y=455 | [x=17.0]IMPOSTO DEVIDO [x=412.5]405,24 [x=542.5]140,32
+p23 r25 y=437 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p23 r26 y=422 | [x=79.0]Total do imposto devido [x=442.5]545,56
+p23 r27 y=407 | [x=79.0]IR fonte de day-trade do mês [x=442.5]140,64
+p23 r28 y=393 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p23 r29 y=379 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p23 r30 y=365 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=447.0]27,63
+p23 r31 y=351 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p23 r32 y=337 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p23 r33 y=323 | [x=79.0]Imposto a pagar [x=442.5]377,29
+p23 r34 y=310 | [x=79.0]Imposto pago [x=442.5]501,65
+p23 r35 y=27 | [x=252.9]Página 23 de 41
+===== PAGINA 24 ===== (35 rows)
+p24 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p24 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p24 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p24 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - FEV [x=499.5](Valores em Reais)
+p24 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p24 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=403.2]-1.803,67 [x=542.5]701,66
+p24 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p24 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p24 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=412.5]101,01 [x=542.5]101,01
+p24 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p24 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p24 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p24 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p24 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p24 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p24 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p24 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p24 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p24 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=403.2]-1.702,66 [x=542.5]802,67
+p24 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=551.4]0,00
+p24 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=542.5]802,67
+p24 r21 y=499 | [x=17.0]Prejuízo a compensar [x=405.9]1.702,66 [x=551.4]0,00
+p24 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p24 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=542.5]160,53
+p24 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p24 r25 y=437 | [x=79.0]Total do imposto devido [x=442.5]160,53
+p24 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=442.5]160,69
+p24 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p24 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,16
+p24 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=447.0]17,68
+p24 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p24 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=447.0]17,68
+p24 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p24 r33 y=325 | [x=79.0]Imposto pago [x=442.5]202,70
+p24 r34 y=27 | [x=252.9]Página 24 de 41
+===== PAGINA 25 ===== (35 rows)
+p25 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p25 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p25 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p25 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAR [x=499.5](Valores em Reais)
+p25 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p25 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=405.9]3.602,70 [x=533.2]-1.004,73
+p25 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p25 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p25 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=412.5]101,01 [x=542.5]101,01
+p25 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p25 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p25 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p25 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p25 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p25 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p25 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p25 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p25 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p25 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=405.9]3.703,71 [x=539.9]-903,72
+p25 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=405.9]1.702,66 [x=551.4]0,00
+p25 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=405.9]2.001,05 [x=551.4]0,00
+p25 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p25 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p25 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=412.5]300,15 [x=551.4]0,00
+p25 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p25 r25 y=437 | [x=79.0]Total do imposto devido [x=442.5]300,15
+p25 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=447.0]90,74
+p25 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,16
+p25 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p25 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=447.0]37,73
+p25 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=447.0]17,68
+p25 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p25 r32 y=338 | [x=79.0]Imposto a pagar [x=442.5]153,84
+p25 r33 y=325 | [x=79.0]Imposto pago [x=442.5]604,75
+p25 r34 y=27 | [x=252.9]Página 25 de 41
+===== PAGINA 26 ===== (35 rows)
+p26 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p26 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p26 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p26 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - ABR [x=499.5](Valores em Reais)
+p26 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p26 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p26 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p26 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p26 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p26 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p26 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p26 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p26 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p26 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p26 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p26 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p26 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p26 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p26 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p26 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p26 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p26 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p26 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p26 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p26 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p26 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p26 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p26 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p26 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p26 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p26 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p26 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p26 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p26 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p26 r34 y=27 | [x=252.9]Página 26 de 41
+===== PAGINA 27 ===== (35 rows)
+p27 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p27 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p27 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p27 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAI [x=499.5](Valores em Reais)
+p27 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p27 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p27 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p27 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p27 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p27 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p27 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p27 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p27 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p27 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p27 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p27 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p27 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p27 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p27 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p27 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p27 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p27 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p27 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p27 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p27 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p27 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p27 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p27 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p27 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p27 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p27 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p27 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p27 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p27 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p27 r34 y=27 | [x=252.9]Página 27 de 41
+===== PAGINA 28 ===== (35 rows)
+p28 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p28 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p28 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p28 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUN [x=499.5](Valores em Reais)
+p28 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p28 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p28 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p28 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p28 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p28 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p28 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p28 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p28 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p28 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p28 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p28 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p28 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p28 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p28 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p28 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p28 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p28 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p28 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p28 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p28 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p28 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p28 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p28 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p28 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p28 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p28 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p28 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p28 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p28 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p28 r34 y=27 | [x=252.9]Página 28 de 41
+===== PAGINA 29 ===== (35 rows)
+p29 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p29 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p29 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p29 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUL [x=499.5](Valores em Reais)
+p29 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p29 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p29 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p29 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p29 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p29 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p29 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p29 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p29 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p29 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p29 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p29 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p29 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p29 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p29 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p29 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p29 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p29 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p29 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p29 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p29 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p29 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p29 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p29 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p29 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p29 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p29 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p29 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p29 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p29 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p29 r34 y=27 | [x=252.9]Página 29 de 41
+===== PAGINA 30 ===== (35 rows)
+p30 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p30 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p30 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p30 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - AGO [x=499.5](Valores em Reais)
+p30 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p30 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p30 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p30 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p30 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p30 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p30 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p30 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p30 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p30 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p30 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p30 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p30 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p30 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p30 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p30 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p30 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p30 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p30 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p30 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p30 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p30 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p30 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p30 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p30 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p30 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p30 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p30 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p30 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p30 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p30 r34 y=27 | [x=252.9]Página 30 de 41
+===== PAGINA 31 ===== (35 rows)
+p31 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p31 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p31 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p31 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - SET [x=499.5](Valores em Reais)
+p31 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p31 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p31 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p31 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p31 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p31 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p31 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p31 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p31 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p31 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p31 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p31 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p31 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p31 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p31 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p31 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p31 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p31 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p31 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p31 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p31 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p31 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p31 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p31 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p31 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p31 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p31 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p31 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p31 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p31 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p31 r34 y=27 | [x=252.9]Página 31 de 41
+===== PAGINA 32 ===== (35 rows)
+p32 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p32 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p32 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p32 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - OUT [x=499.5](Valores em Reais)
+p32 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p32 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p32 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p32 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p32 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p32 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p32 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p32 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p32 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p32 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p32 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p32 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p32 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p32 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p32 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p32 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p32 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p32 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p32 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p32 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p32 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p32 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p32 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p32 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p32 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p32 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p32 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p32 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p32 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p32 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p32 r34 y=27 | [x=252.9]Página 32 de 41
+===== PAGINA 33 ===== (35 rows)
+p33 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p33 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p33 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p33 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - NOV [x=499.5](Valores em Reais)
+p33 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p33 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p33 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p33 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p33 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p33 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p33 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p33 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p33 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p33 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p33 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p33 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p33 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p33 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p33 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p33 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p33 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p33 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p33 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p33 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p33 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p33 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p33 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p33 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p33 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p33 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p33 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p33 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p33 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p33 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p33 r34 y=27 | [x=252.9]Página 33 de 41
+===== PAGINA 34 ===== (35 rows)
+p34 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p34 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p34 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p34 r3 y=769 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - DEZ [x=499.5](Valores em Reais)
+p34 r4 y=749 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p34 r5 y=731 | [x=17.0]Mercado à Vista - Ações [x=421.4]0,00 [x=551.4]0,00
+p34 r6 y=716 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p34 r7 y=702 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p34 r8 y=687 | [x=17.0]Mercado de Opções - Ações [x=421.4]0,00 [x=551.4]0,00
+p34 r9 y=673 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p34 r10 y=658 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p34 r11 y=644 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p34 r12 y=629 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p34 r13 y=615 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p34 r14 y=600 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p34 r15 y=586 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p34 r16 y=571 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p34 r17 y=557 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p34 r18 y=542 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=421.4]0,00 [x=551.4]0,00
+p34 r19 y=528 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=542.5]903,72
+p34 r20 y=513 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=421.4]0,00 [x=551.4]0,00
+p34 r21 y=499 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=542.5]903,72
+p34 r22 y=485 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p34 r23 y=470 | [x=17.0]IMPOSTO DEVIDO [x=421.4]0,00 [x=551.4]0,00
+p34 r24 y=452 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p34 r25 y=437 | [x=79.0]Total do imposto devido [x=451.4]0,00
+p34 r26 y=422 | [x=79.0]IR fonte de day-trade do mês [x=451.4]0,00
+p34 r27 y=408 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p34 r28 y=394 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p34 r29 y=380 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=451.4]0,00
+p34 r30 y=366 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p34 r31 y=352 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p34 r32 y=338 | [x=79.0]Imposto a pagar [x=451.4]0,00
+p34 r33 y=325 | [x=79.0]Imposto pago [x=451.4]0,00
+p34 r34 y=27 | [x=252.9]Página 34 de 41
+===== PAGINA 35 ===== (46 rows)
+p35 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p35 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p35 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p35 r3 y=769 | [x=17.0]RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - DEPENDENTES
+p35 r4 y=751 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JAN (CPF DEPENDENTE: 333.444.555-08)
+p35 r5 y=732 | [x=18.0]Sem Informações
+p35 r6 y=710 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - FEV (CPF DEPENDENTE: 333.444.555-08)
+p35 r7 y=691 | [x=18.0]Sem Informações
+p35 r8 y=669 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAR (CPF DEPENDENTE: 333.444.555-08)
+p35 r9 y=650 | [x=18.0]Sem Informações
+p35 r10 y=629 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - ABR (CPF DEPENDENTE: 333.444.555-08) [x=499.5](Valores em Reais)
+p35 r11 y=609 | [x=17.0]TIPO DE MERCADO/ATIVO [x=348.5]OPERAÇÕES COMUNS [x=467.9]OPERAÇÕES DAY-TRADE
+p35 r12 y=591 | [x=17.0]Mercado à Vista - Ações [x=405.9]1.610,75 [x=542.5]310,76
+p35 r13 y=576 | [x=17.0]Mercado à Vista - Ouro [x=421.4]0,00 [x=551.4]0,00
+p35 r14 y=562 | [x=17.0]Mercado à Vista - Ouro ativo financeiro fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p35 r15 y=547 | [x=17.0]Mercado de Opções - Ações [x=412.5]101,01 [x=542.5]101,01
+p35 r16 y=533 | [x=17.0]Mercado de Opções - Ouro [x=421.4]0,00 [x=551.4]0,00
+p35 r17 y=518 | [x=17.0]Mercado de Opções - Fora de bolsa [x=421.4]0,00 [x=551.4]0,00
+p35 r18 y=504 | [x=17.0]Mercado de Opções - Outros [x=421.4]0,00 [x=551.4]0,00
+p35 r19 y=489 | [x=17.0]Mercado Futuro - Dólar dos EUA [x=421.4]0,00 [x=551.4]0,00
+p35 r20 y=475 | [x=17.0]Mercado Futuro - Índices [x=421.4]0,00 [x=551.4]0,00
+p35 r21 y=460 | [x=17.0]Mercado Futuro - Juros [x=421.4]0,00 [x=551.4]0,00
+p35 r22 y=446 | [x=17.0]Mercado Futuro - Outros [x=421.4]0,00 [x=551.4]0,00
+p35 r23 y=431 | [x=17.0]Mercado a Termo - Ações/Ouro [x=421.4]0,00 [x=551.4]0,00
+p35 r24 y=417 | [x=17.0]Mercado a Termo - Outros [x=421.4]0,00 [x=551.4]0,00
+p35 r25 y=402 | [x=17.0]RESULTADO LÍQUIDO DO MÊS [x=405.9]1.711,76 [x=542.5]411,77
+p35 r26 y=388 | [x=17.0]Resultado negativo até o mês anterior [x=421.4]0,00 [x=551.4]0,00
+p35 r27 y=373 | [x=17.0]BASE DE CÁLCULO DO IMPOSTO [x=405.9]1.711,76 [x=542.5]411,77
+p35 r28 y=359 | [x=17.0]Prejuízo a compensar [x=421.4]0,00 [x=551.4]0,00
+p35 r29 y=345 | [x=17.0]Alíquota do imposto [x=421.0]15% [x=551.0]20%
+p35 r30 y=330 | [x=17.0]IMPOSTO DEVIDO [x=412.5]256,76 [x=547.0]82,35
+p35 r31 y=312 | [x=209.0]CONSOLIDAÇÃO DO MÊS
+p35 r32 y=297 | [x=79.0]Total do imposto devido [x=442.5]339,11
+p35 r33 y=282 | [x=79.0]IR fonte de day-trade do mês [x=447.0]82,79
+p35 r34 y=268 | [x=79.0]IR fonte de day-trade dos meses anteriores [x=451.4]0,00
+p35 r35 y=254 | [x=79.0]IR fonte de day-trade a compensar [x=451.4]0,00
+p35 r36 y=240 | [x=79.0]IR fonte (Lei nº 11.033/2004) no mês [x=447.0]17,78
+p35 r37 y=226 | [x=79.0]IR fonte (Lei nº 11.033/2004) nos meses anteriores [x=451.4]0,00
+p35 r38 y=212 | [x=79.0]IR fonte (Lei nº 11.033/2004) a compensar [x=451.4]0,00
+p35 r39 y=198 | [x=79.0]Imposto a pagar [x=442.5]238,54
+p35 r40 y=185 | [x=79.0]Imposto pago [x=442.5]303,80
+p35 r41 y=140 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAI (CPF DEPENDENTE: 333.444.555-08)
+p35 r42 y=121 | [x=18.0]Sem Informações
+p35 r43 y=99 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUN (CPF DEPENDENTE: 333.444.555-08)
+p35 r44 y=80 | [x=18.0]Sem Informações
+p35 r45 y=27 | [x=252.9]Página 35 de 41
+===== PAGINA 36 ===== (16 rows)
+p36 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p36 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p36 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p36 r3 y=768 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUL (CPF DEPENDENTE: 333.444.555-08)
+p36 r4 y=749 | [x=18.0]Sem Informações
+p36 r5 y=727 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - AGO (CPF DEPENDENTE: 333.444.555-08)
+p36 r6 y=708 | [x=18.0]Sem Informações
+p36 r7 y=686 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - SET (CPF DEPENDENTE: 333.444.555-08)
+p36 r8 y=667 | [x=18.0]Sem Informações
+p36 r9 y=645 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - OUT (CPF DEPENDENTE: 333.444.555-08)
+p36 r10 y=626 | [x=18.0]Sem Informações
+p36 r11 y=604 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - NOV (CPF DEPENDENTE: 333.444.555-08)
+p36 r12 y=585 | [x=18.0]Sem Informações
+p36 r13 y=563 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - DEZ (CPF DEPENDENTE: 333.444.555-08)
+p36 r14 y=544 | [x=18.0]Sem Informações
+p36 r15 y=27 | [x=252.9]Página 36 de 41
+===== PAGINA 37 ===== (46 rows)
+p37 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p37 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p37 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p37 r3 y=767 | [x=17.0]FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - TITULAR
+p37 r4 y=750 | [x=18.0]GANHOS LÍQUIDOS OU PERDAS [x=499.5](Valores em Reais)
+p37 r5 y=726 | [x=18.0]MÊS [x=161.9]Janeiro [x=229.1]Fevereiro [x=305.9]Março [x=380.0]Abril [x=450.3]Maio [x=523.1]Junho
+p37 r6 y=702 | [x=16.0]RESULTADO LÍQUIDO DO
+p37 r7 y=697 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=457.9]1.801,81 [x=536.9]-902,84
+p37 r8 y=691 | [x=16.0]MÊS
+p37 r9 y=673 | [x=16.0]RESULTADO NEGATIVO ATÉ
+p37 r10 y=668 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r11 y=662 | [x=16.0]O MÊS ANTERIOR
+p37 r12 y=644 | [x=16.0]BASE DE CÁLCULO DO
+p37 r13 y=639 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=457.9]1.801,81 [x=548.4]0,00
+p37 r14 y=633 | [x=16.0]IMPOSTO
+p37 r15 y=614 | [x=16.0]PREJUÍZO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=539.5]902,84
+p37 r16 y=593 | [x=16.0]ALÍQUOTA DO IMPOSTO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=469.0]20,00 [x=544.0]20,00
+p37 r17 y=572 | [x=16.0]IMPOSTO DEVIDO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=464.5]360,36 [x=548.4]0,00
+p37 r18 y=552 | [x=16.0]IMPOSTO RETIDO MESES
+p37 r19 y=547 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r20 y=541 | [x=16.0]ANTERIORES
+p37 r21 y=522 | [x=16.0]IMPOSTO RETIDO NO MÊS [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=469.0]18,82 [x=548.4]9,85
+p37 r22 y=501 | [x=16.0]IMPOSTO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]9,85
+p37 r23 y=479 | [x=16.0]IMPOSTO A PAGAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=464.5]341,54 [x=548.4]0,00
+p37 r24 y=457 | [x=16.0]IMPOSTO PAGO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=464.5]361,83 [x=548.4]0,00
+p37 r25 y=431 | [x=18.0]MÊS [x=165.4]Julho [x=233.6]Agosto [x=299.7]Setembro [x=373.6]Outubro [x=440.6]Novembro [x=515.5]Dezembro
+p37 r26 y=406 | [x=18.0]RESULTADO LÍQUIDO DO
+p37 r27 y=401 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r28 y=395 | [x=18.0]MÊS
+p37 r29 y=377 | [x=18.0]RESULTADO NEGATIVO ATÉ
+p37 r30 y=372 | [x=180.5]902,84 [x=251.5]902,84 [x=322.5]902,84 [x=393.5]902,84 [x=464.5]902,84 [x=539.5]902,84
+p37 r31 y=366 | [x=18.0]O MÊS ANTERIOR
+p37 r32 y=348 | [x=18.0]BASE DE CÁLCULO DO
+p37 r33 y=343 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r34 y=337 | [x=18.0]IMPOSTO
+p37 r35 y=318 | [x=18.0]PREJUÍZO A COMPENSAR [x=180.5]902,84 [x=251.5]902,84 [x=322.5]902,84 [x=393.5]902,84 [x=464.5]902,84 [x=539.5]902,84
+p37 r36 y=297 | [x=18.0]ALÍQUOTA DO IMPOSTO [x=185.0]20,00 [x=256.0]20,00 [x=327.0]20,00 [x=398.0]20,00 [x=469.0]20,00 [x=544.0]20,00
+p37 r37 y=276 | [x=18.0]IMPOSTO DEVIDO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r38 y=256 | [x=18.0]IMPOSTO RETIDO MESES
+p37 r39 y=251 | [x=189.4]9,85 [x=260.4]9,85 [x=331.4]9,85 [x=402.4]9,85 [x=473.4]9,85 [x=548.4]9,85
+p37 r40 y=245 | [x=18.0]ANTERIORES
+p37 r41 y=226 | [x=18.0]IMPOSTO RETIDO NO MÊS [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r42 y=205 | [x=18.0]IMPOSTO A COMPENSAR [x=189.4]9,85 [x=260.4]9,85 [x=331.4]9,85 [x=402.4]9,85 [x=473.4]9,85 [x=548.4]9,85
+p37 r43 y=183 | [x=18.0]IMPOSTO A PAGAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r44 y=162 | [x=18.0]IMPOSTO PAGO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p37 r45 y=27 | [x=252.9]Página 37 de 41
+===== PAGINA 38 ===== (51 rows)
+p38 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p38 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p38 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p38 r3 y=767 | [x=17.0]FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - DEPENDENTES
+p38 r4 y=747 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS (CPF DEPENDENTE: 333.444.555-08)
+p38 r5 y=744 | [x=499.5](Valores em Reais)
+p38 r6 y=723 | [x=18.0]MÊS [x=161.9]Janeiro [x=229.1]Fevereiro [x=305.9]Março [x=380.0]Abril [x=450.3]Maio [x=523.1]Junho
+p38 r7 y=699 | [x=16.0]RESULTADO LÍQUIDO DO
+p38 r8 y=694 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r9 y=688 | [x=16.0]MÊS
+p38 r10 y=670 | [x=16.0]RESULTADO NEGATIVO ATÉ
+p38 r11 y=665 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r12 y=659 | [x=16.0]O MÊS ANTERIOR
+p38 r13 y=641 | [x=16.0]BASE DE CÁLCULO DO
+p38 r14 y=636 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r15 y=630 | [x=16.0]IMPOSTO
+p38 r16 y=611 | [x=16.0]PREJUÍZO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r17 y=590 | [x=16.0]ALÍQUOTA DO IMPOSTO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r18 y=569 | [x=16.0]IMPOSTO DEVIDO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r19 y=549 | [x=16.0]IMPOSTO RETIDO MESES
+p38 r20 y=544 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r21 y=538 | [x=16.0]ANTERIORES
+p38 r22 y=519 | [x=16.0]IMPOSTO RETIDO NO MÊS [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r23 y=498 | [x=16.0]IMPOSTO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r24 y=477 | [x=16.0]IMPOSTO A PAGAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r25 y=456 | [x=16.0]IMPOSTO PAGO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r26 y=430 | [x=18.0]MÊS [x=165.4]Julho [x=233.6]Agosto [x=299.7]Setembro [x=373.6]Outubro [x=440.6]Novembro [x=515.5]Dezembro
+p38 r27 y=405 | [x=18.0]RESULTADO LÍQUIDO DO
+p38 r28 y=400 | [x=173.9]1.811,86 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r29 y=394 | [x=18.0]MÊS
+p38 r30 y=376 | [x=18.0]RESULTADO NEGATIVO ATÉ
+p38 r31 y=371 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r32 y=365 | [x=18.0]O MÊS ANTERIOR
+p38 r33 y=347 | [x=18.0]BASE DE CÁLCULO DO
+p38 r34 y=342 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r35 y=336 | [x=18.0]IMPOSTO
+p38 r36 y=317 | [x=18.0]PREJUÍZO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r37 y=296 | [x=18.0]ALÍQUOTA DO IMPOSTO [x=185.0]20,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r38 y=275 | [x=18.0]IMPOSTO DEVIDO [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r39 y=255 | [x=18.0]IMPOSTO RETIDO MESES
+p38 r40 y=250 | [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r41 y=244 | [x=18.0]ANTERIORES
+p38 r42 y=225 | [x=18.0]IMPOSTO RETIDO NO MÊS [x=185.0]18,87 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r43 y=203 | [x=18.0]IMPOSTO A COMPENSAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r44 y=182 | [x=18.0]IMPOSTO A PAGAR [x=189.4]0,00 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r45 y=160 | [x=18.0]IMPOSTO PAGO [x=180.5]362,88 [x=260.4]0,00 [x=331.4]0,00 [x=402.4]0,00 [x=473.4]0,00 [x=548.4]0,00
+p38 r46 y=133 | [x=17.0]DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - ECA [x=493.5](Valores em Reais)
+p38 r47 y=113 | [x=16.0]TIPO DE FUNDO [x=97.0]FUNDO [x=408.8]CNPJ [x=535.7]VALOR
+p38 r48 y=90 | [x=37.0]Municipal [x=97.0]SP - SÃO PAULO - SAO PAULO [x=380.2]97.537.776/0001-87 [x=542.5]301,45
+p38 r49 y=69 | [x=21.0]TOTAL [x=545.5]301,45
+p38 r50 y=27 | [x=252.9]Página 38 de 41
+===== PAGINA 39 ===== (22 rows)
+p39 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p39 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p39 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p39 r3 y=768 | [x=17.0]DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - PESSOA IDOSA [x=493.5](Valores em Reais)
+p39 r4 y=748 | [x=16.0]TIPO DE FUNDO [x=97.0]FUNDO [x=408.8]CNPJ [x=535.7]VALOR
+p39 r5 y=725 | [x=38.5]Estadual [x=97.0]SP - SÃO PAULO [x=380.2]17.087.890/0001-13 [x=542.5]302,46
+p39 r6 y=704 | [x=21.0]TOTAL [x=545.5]302,46
+p39 r7 y=676 | [x=14.0]DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023
+p39 r8 y=659 | [x=25.2]Demonstrativo de Apuração do Imposto de Renda Incidente sobre Rendimentos de Aplicações Financeiras no Exterior e sobre
+p39 r9 y=646 | [x=26.4]Lucros e Dividendos de Entidade Controlada no Exterior e de Compensação de Perdas em Aplicações Financeiras no Exterior
+p39 r10 y=627 | [x=290.1]Imposto Pago no
+p39 r11 y=622 | [x=31.8]Bem [x=72.6]Tipo [x=110.2]Ganho/Prejuízo [x=199.5]Imposto Devido [x=388.6]Base de Cálculo [x=513.1]Saldo
+p39 r12 y=616 | [x=292.9]Brasil / Exterior
+p39 r13 y=600 | [x=376.4]Prejuízo do ano anterior: [x=558.4]0,00
+p39 r14 y=585 | [x=38.3]7 [x=75.9]AF [x=147.9]3.713,63 [x=245.5]557,04 [x=340.5]314,64 [x=432.9]1.616,03 [x=542.9]1.616,03
+p39 r15 y=570 | [x=38.3]7 [x=75.9]LD [x=176.3]- [x=267.3]- [x=340.5]314,64 [x=448.4]0,00 [x=542.9]1.616,03
+p39 r16 y=555 | [x=399.5]Base de Cálculo: [x=542.9]1.616,03
+p39 r17 y=540 | [x=401.3]Imposto Devido: [x=549.5]242,40
+p39 r18 y=512 | [x=18.0]Legenda Tipo [x=133.0]Bem
+p39 r19 y=499 | [x=18.0]AF - Aplicação Financeira [x=133.0]A identificação do bem pode ser verificada na impressão da ficha de Bens e Direitos.
+p39 r20 y=488 | [x=18.0]LD - Lucros e Dividendos
+p39 r21 y=27 | [x=252.9]Página 39 de 41
+===== PAGINA 40 ===== (54 rows)
+p40 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p40 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p40 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p40 r3 y=769 | [x=17.0]RESUMO [x=171.5]TRIBUTAÇÃO UTILIZANDO AS DEDUÇÕES LEGAIS
+p40 r4 y=752 | [x=15.0]RENDIMENTOS TRIBUTÁVEIS
+p40 r5 y=739 | [x=20.0]Recebidos de Pessoa Jurídica pelo titular [x=532.4]51.101,11
+p40 r6 y=727 | [x=20.0]Recebidos de Pessoa Jurídica pelos dependentes [x=532.4]12.201,21
+p40 r7 y=715 | [x=20.0]Recebidos de Pessoa Física/Exterior pelo titular [x=532.4]14.239,58
+p40 r8 y=703 | [x=20.0]Recebidos de Pessoa Física/Exterior pelos dependentes [x=536.9]3.814,27
+p40 r9 y=691 | [x=20.0]Recebidos acumuladamente pelo titular [x=552.4]0,00
+p40 r10 y=679 | [x=20.0]Recebidos acumuladamente pelos dependentes [x=536.9]9.811,06
+p40 r11 y=667 | [x=20.0]Resultado tributável da Atividade Rural [x=528.0]120.529,23
+p40 r12 y=655 | [x=20.0]TOTAL [x=528.0]211.696,46
+p40 r13 y=636 | [x=15.0]DEDUÇÕES
+p40 r14 y=623 | [x=20.0]Contribuições às previdências oficial e complementar aberta ou fechada de que trata o § 15 do art. 40 da CF/1988 (até o limite [x=536.9]6.304,34
+p40 r15 y=612 | [x=20.0]do patrocinador)
+p40 r16 y=599 | [x=20.0]Contribuição à previdência oficial (Rendimentos recebidos acumuladamente) [x=543.5]812,07
+p40 r17 y=587 | [x=20.0]Contribuição à prev. complementar, inclusive o valor para as fechadas de que trata o § 15 do art. 40 da CF/1988 que exceder o [x=536.9]4.999,99
+p40 r18 y=576 | [x=20.0]limite do patrocinador
+p40 r19 y=562 | [x=20.0]Dependentes [x=536.9]2.275,08
+p40 r20 y=550 | [x=20.0]Despesas com instrução [x=536.9]3.561,50
+p40 r21 y=538 | [x=20.0]Despesas médicas [x=536.9]6.303,23
+p40 r22 y=526 | [x=20.0]Pensão alimentícia judicial [x=536.9]6.006,28
+p40 r23 y=514 | [x=20.0]Pensão alimentícia por escritura pública [x=552.4]0,00
+p40 r24 y=502 | [x=20.0]Pensão alimentícia judicial (Rendimentos recebidos acumuladamente) [x=543.5]313,08
+p40 r25 y=490 | [x=20.0]Livro caixa [x=536.9]3.020,40
+p40 r26 y=478 | [x=20.0]TOTAL [x=532.4]33.595,97
+p40 r27 y=456 | [x=15.0]IMPOSTO DEVIDO [x=323.0]IMPOSTO A RESTITUIR
+p40 r28 y=453 | [x=552.4]0,00
+p40 r29 y=443 | [x=20.0]Base de cálculo do imposto [x=252.0]178.100,49 [x=323.0]SALDO DE IMPOSTO A PAGAR [x=532.4]22.907,85
+p40 r30 y=430 | [x=20.0]Imposto devido [x=256.4]38.123,85
+p40 r31 y=419 | [x=20.0]Dedução de incentivo [x=260.9]1.707,34 [x=323.0]PARCELAMENTO
+p40 r32 y=407 | [x=20.0]Imposto devido I [x=256.4]36.416,51
+p40 r33 y=404 | [x=327.0]Valor da quota [x=532.4]22.907,85
+p40 r34 y=394 | [x=20.0]Imposto devido RRA [x=276.4]0,00 [x=327.0]Número de Quotas [x=563.5]1
+p40 r35 y=382 | [x=20.0]Imposto Lei 14.754/2023 [x=267.5]242,40
+p40 r36 y=370 | [x=20.0]Aliquota efetiva (%) [x=272.0]17,20
+p40 r37 y=357 | [x=20.0]Total do imposto devido [x=256.4]36.658,91
+p40 r38 y=330 | [x=323.0]INFORMAÇÕES BANCÁRIAS
+p40 r39 y=317 | [x=481.7]Débito automático: NÃO
+p40 r40 y=310 | [x=15.0]IMPOSTO PAGO
+p40 r41 y=298 | [x=20.0]Imposto retido na fonte do titular [x=259.9]4.104,14
+p40 r42 y=286 | [x=20.0]Imp. retido na fonte dos dependentes [x=259.9]1.818,33
+p40 r43 y=281 | [x=327.0]Banco
+p40 r44 y=274 | [x=20.0]Carnê-Leão do titular [x=266.5]918,80
+p40 r45 y=269 | [x=327.0]Agência (sem DV)
+p40 r46 y=262 | [x=20.0]Carnê-Leão dos dependentes [x=266.5]204,64
+p40 r47 y=257 | [x=327.0]Conta para débito
+p40 r48 y=250 | [x=20.0]Imposto complementar [x=259.9]1.901,11
+p40 r49 y=238 | [x=20.0]Imposto pago no exterior [x=275.4]0,00
+p40 r50 y=226 | [x=20.0]Imposto retido na fonte (Lei nº 11.033/2004) [x=275.4]0,00
+p40 r51 y=214 | [x=20.0]Imposto retido RRA [x=259.9]4.804,04
+p40 r52 y=202 | [x=20.0]Total do imposto pago [x=255.4]13.751,06
+p40 r53 y=27 | [x=252.9]Página 40 de 41
+===== PAGINA 41 ===== (24 rows)
+p41 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC AJUSTE
+p41 r1 y=800 | [x=19.0]CPF: [x=51.0]111.444.777-35 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p41 r2 y=786 | [x=19.0]DECLARAÇÃO DE AJUSTE ANUAL [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p41 r3 y=767 | [x=15.0]EVOLUÇÃO PATRIMONIAL
+p41 r4 y=755 | [x=20.0]Bens e direitos em 31/12/2024 [x=528.0]107.537,85
+p41 r5 y=743 | [x=20.0]Bens e direitos em 31/12/2025 [x=528.0]444.846,93
+p41 r6 y=731 | [x=20.0]Dívidas e ônus reais em 31/12/2024 [x=528.0]102.606,45
+p41 r7 y=719 | [x=20.0]Dívidas e ônus reais em 31/12/2025 [x=532.4]79.608,47
+p41 r8 y=702 | [x=15.0]OUTRAS INFORMAÇÕES
+p41 r9 y=690 | [x=20.0]Rendimentos isentos e não tributáveis [x=532.4]45.523,70
+p41 r10 y=678 | [x=20.0]Rendimentos sujeitos à tributação exclusiva/definitiva [x=528.0]142.197,69
+p41 r11 y=666 | [x=20.0]Rendimentos tributáveis - imposto com exigibilidade suspensa [x=532.4]26.413,87
+p41 r12 y=655 | [x=20.0]Depósitos judiciais do imposto [x=532.4]11.415,89
+p41 r13 y=644 | [x=20.0]Imposto pago sobre Ganhos de Capital [x=552.4]0,00
+p41 r14 y=633 | [x=20.0]Imposto pago Ganhos de Capital Moeda Estrangeira - Bens, direitos e Aplicações Financeiras [x=552.4]0,00
+p41 r15 y=622 | [x=20.0]Total do imposto retido na fonte (Lei nº11.033/2004), conforme dados informados pelo contribuinte [x=543.5]111,71
+p41 r16 y=610 | [x=20.0]Imposto pago sobre Renda Variável [x=536.9]1.670,93
+p41 r17 y=599 | [x=20.0]Doações a Partidos Políticos e Candidatos a Cargos Eletivos [x=536.9]1.201,44
+p41 r18 y=588 | [x=20.0]Imposto a pagar sobre o Ganho de Capital - Moeda Estrangeira em Espécie [x=552.4]0,00
+p41 r19 y=577 | [x=20.0]Imposto diferido dos Ganhos de Capital [x=552.4]0,00
+p41 r20 y=566 | [x=20.0]Imposto devido sobre Ganhos de Capital [x=532.4]13.824,36
+p41 r21 y=555 | [x=20.0]Imposto devido sobre ganhos líquidos em Renda Variável [x=543.5]862,82
+p41 r22 y=544 | [x=20.0]Imposto devido sobre Ganhos de Capital Moeda Estrangeira - Bens, direitos e aplic. financeiras [x=552.4]0,00
+p41 r23 y=27 | [x=252.9]Página 41 de 41

@@ -41,3 +41,15 @@ tmp/
 # Scripts descartáveis de auditoria, criados na raiz durante uma sessão e sem
 # nenhuma referência no projeto.
 *-audit-tmp.mjs
+
+# Registro local de declarações do programa da Receita, copiado junto com os
+# backups do preenchimento sintético. Lista as declarações REAIS existentes na
+# máquina (nome, CPF, recibo de transmissão) e não pode ser versionado.
+output/backup-irpf-sintetico/*/iddeclaracoes.*
+
+# Versões superadas dos PDFs de gabarito. Só os três canônicos (AJU-01,
+# ESP-01, SAI-01, sem sufixo) são referenciados por teste ou script.
+output/pdf/*-PRE-*.pdf
+output/pdf/*-33pag-*.pdf
+output/pdf/*-41pag-*.pdf
+output/pdf/*.microsoft-print-image-only-*.pdf

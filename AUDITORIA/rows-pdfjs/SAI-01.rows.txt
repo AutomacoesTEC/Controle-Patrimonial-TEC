@@ -1,0 +1,286 @@
+===== PAGINA 1 ===== (40 rows)
+p1 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p1 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p1 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p1 r3 y=767 | [x=19.0]IDENTIFICAÇÃO DO CONTRIBUINTE
+p1 r4 y=750 | [x=19.0]Nome: [x=157.0]AUDITORIA PDF TEC SAIDA [x=404.0]CPF: [x=465.0]999.000.111-12
+p1 r5 y=737 | [x=19.0]Data de Nascimento: [x=157.0]11/01/1980
+p1 r6 y=723 | [x=20.0]Raça/Cor: [x=158.0]Parda
+p1 r7 y=708 | [x=19.0]Possui cônjuge ou companheiro(a)? [x=157.0]Não
+p1 r8 y=691 | [x=19.0]Houve alteração de dados cadastrais? Sim
+p1 r9 y=677 | [x=19.0]Há declarante ou dependente com doença grave ou deficiência física ou mental? [x=318.0]Não
+p1 r10 y=655 | [x=19.0]Endereço: [x=144.0]AUDIT EXIT AVENUE [x=404.0]Número: [x=465.0]4201
+p1 r11 y=642 | [x=19.0]Complemento: [x=144.0]SUITE 42 [x=404.0]Bairro/Distrito: [x=465.0]DOWNTOWN
+p1 r12 y=629 | [x=19.0]Cidade: [x=144.0]SAO PAULO [x=404.0]Cód. Ext.: [x=465.0]294
+p1 r13 y=616 | [x=19.0]País: [x=144.0]249 - ESTADOS UNIDOS DA AMÉRICA
+p1 r14 y=603 | [x=19.0]Código Postal: [x=144.0]33101 [x=404.0]DDI/Telefone: [x=477.0](1) 3055554202
+p1 r15 y=589 | [x=19.0]E-mail: [x=144.0]SAI.AUDITORIA@EXAMPLE.INVALID
+p1 r16 y=569 | [x=19.0]Natureza da Ocupação: [x=144.0]12 - PROPRIETÁRIO DE EMPRESA OU DE FIRMA INDIVIDUAL OU EMPREGADOR-TITULAR
+p1 r17 y=556 | [x=19.0]Ocupação Principal: [x=144.0]391 - OUTROS TÉCNICOS DE NÍVEL MÉDIO
+p1 r18 y=542 | [x=19.0]Tipo de declaração: [x=144.0]Declaração de Saída Definitiva Original
+p1 r19 y=528 | [x=19.0]Nº do recibo da última declaração entregue do exercício de 2025:
+p1 r20 y=428 | [x=17.0]SAÍDA
+p1 r21 y=409 | [x=20.0]CPF do procurador: 101.202.303-64 [x=227.0]Nome do procurador: [x=308.0]SAI PROCURADOR SENTINELA
+p1 r22 y=396 | [x=20.0]Endereço do Procurador:4201 AUDIT EXIT AVENUE, SUITE 42, MIAMI/FL, 33101
+p1 r23 y=383 | [x=20.0]Data da caracterização da condição de não residente: [x=225.0]24/12/2025
+p1 r24 y=370 | [x=20.0]Data da caracterização da condição de residente no país:
+p1 r25 y=357 | [x=20.0]País de destino: [x=81.0]249 - ESTADOS UNIDOS DA AMÉRICA
+p1 r26 y=328 | [x=17.0]DEPENDENTES
+p1 r27 y=309 | [x=18.0]Sem Informações
+p1 r28 y=286 | [x=17.0]ALIMENTANDOS
+p1 r29 y=267 | [x=18.0]Sem Informações
+p1 r30 y=243 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR [x=493.5](Valores em Reais)
+p1 r31 y=226 | [x=16.0]NOME DA FONTE PAGADORA [x=178.8]REND. RECEBIDOS [x=269.1]CONTR. PREVID. [x=343.7]IMPOSTO RETIDO [x=436.3]13º SALÁRIO [x=496.1]IRRF SOBRE 13º
+p1 r32 y=215 | [x=182.3]DE PES. JURÍDICA [x=302.9]OFICIAL [x=372.6]NA FONTE [x=524.3]SALÁRIO
+p1 r33 y=196 | [x=16.0]SAI RPJ FONTE TITULAR [x=217.4]43.201,11 [x=302.9]4.202,12 [x=381.9]3.203,13 [x=453.9]3.604,14 [x=534.5]304,15
+p1 r34 y=180 | [x=16.0]CNPJ/CPF: [x=78.7]55.566.677/0001-83
+p1 r35 y=164 | [x=16.0]Data da comunicação da condição de não residente à fonte pagadora: 24/12/2025
+p1 r36 y=142 | [x=15.0]TOTAL [x=217.4]43.201,11 [x=302.9]4.202,12 [x=381.9]3.203,13 [x=453.9]3.604,14 [x=534.5]304,15
+p1 r37 y=117 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES
+p1 r38 y=98 | [x=18.0]Sem Informações
+p1 r39 y=27 | [x=257.3]Página 1 de 9
+===== PAGINA 2 ===== (37 rows)
+p2 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p2 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p2 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p2 r3 y=768 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELO TITULAR
+p2 r4 y=749 | [x=18.0]Sem Informações
+p2 r5 y=726 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA FÍSICA E DO EXTERIOR PELOS DEPENDENTES
+p2 r6 y=707 | [x=18.0]Sem Informações
+p2 r7 y=685 | [x=17.0]RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS [x=499.5](Valores em Reais)
+p2 r8 y=663 | [x=17.0]TOTAL [x=552.4]0,00
+p2 r9 y=639 | [x=17.0]RENDIMENTOS SUJEITOS À TRIBUTAÇÃO EXCLUSIVA / DEFINITIVA [x=499.5](Valores em Reais)
+p2 r10 y=615 | [x=17.0]01. 13º salário [x=525.9]3.604,14
+p2 r11 y=598 | [x=17.0]TOTAL [x=525.9]3.604,14
+p2 r12 y=558 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR (IMPOSTO COM EXIGIBILIDADE SUSPENSA)
+p2 r13 y=528 | [x=18.0]Sem Informações
+p2 r14 y=505 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES (IMPOSTO COM EXIGIBILIDADE
+p2 r15 y=493 | [x=17.0]SUSPENSA)
+p2 r16 y=475 | [x=18.0]Sem Informações
+p2 r17 y=452 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELO TITULAR
+p2 r18 y=433 | [x=18.0]Sem Informações
+p2 r19 y=410 | [x=17.0]RENDIMENTOS TRIBUTÁVEIS DE PESSOA JURÍDICA RECEBIDOS ACUMULADAMENTE PELOS DEPENDENTES
+p2 r20 y=391 | [x=18.0]Sem Informações
+p2 r21 y=369 | [x=17.0]IMPOSTO PAGO / RETIDO [x=499.5](Valores em Reais)
+p2 r22 y=349 | [x=17.0]01. Imposto complementar [x=553.4]0,00
+p2 r23 y=334 | [x=17.0]02. Imposto pago no exterior pelo titular e pelos dependentes [x=553.4]0,00
+p2 r24 y=319 | [x=28.0]Imposto devido com os rendimentos no exterior [x=553.4]0,00
+p2 r25 y=304 | [x=28.0]Imposto devido sem os rendimentos no exterior [x=553.4]0,00
+p2 r26 y=289 | [x=28.0]Diferença a ser considerada para cálculo do imposto (limite legal) [x=553.4]0,00
+p2 r27 y=274 | [x=17.0]03. Imposto sobre a renda na fonte (Lei 11.033/2004) [x=553.4]0,00
+p2 r28 y=259 | [x=17.0]04. Imposto retido na fonte do titular [x=537.9]3.203,13
+p2 r29 y=244 | [x=17.0]05. Imposto retido na fonte dos dependentes [x=553.4]0,00
+p2 r30 y=229 | [x=17.0]06. Carnê-Leão do titular [x=553.4]0,00
+p2 r31 y=214 | [x=17.0]07. Carnê-Leão dos dependentes [x=553.4]0,00
+p2 r32 y=185 | [x=17.0]PAGAMENTOS EFETUADOS
+p2 r33 y=166 | [x=18.0]Sem Informações
+p2 r34 y=143 | [x=17.0]DOAÇÕES EFETUADAS
+p2 r35 y=124 | [x=18.0]Sem Informações
+p2 r36 y=27 | [x=257.3]Página 2 de 9
+===== PAGINA 3 ===== (31 rows)
+p3 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p3 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p3 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p3 r3 y=766 | [x=17.0]DECLARAÇÃO DE BENS E DIREITOS [x=485.0](Valores em Reais)
+p3 r4 y=734 | [x=23.3]BEM [x=53.0]GRUPO [x=95.0]CÓDIGO [x=137.0]DISCRIMINAÇÃO [x=361.6]SITUAÇÃO EM 31/12/2024 [x=472.9]SITUAÇÃO NA DATA DA
+p3 r5 y=722 | [x=476.9]CARACTERIZAÇÃO DA
+p3 r6 y=711 | [x=488.0]CONDIÇÃO DE NÃO
+p3 r7 y=700 | [x=518.2]RESIDENTE
+p3 r8 y=678 | [x=30.8]1 [x=65.5]01 [x=107.5]11 [x=137.0]SAI BEM IMOVEL BRASIL SENTINELA, ADQUIRIDO EM [x=401.2]0,00 [x=498.0]144.401,41
+p3 r9 y=667 | [x=137.0]25/05/2025, MATRICULA 44001.
+p3 r10 y=652 | [x=17.0]105 - BRASIL [x=399.0]Bem com usufruto: Não
+p3 r11 y=634 | [x=17.0]Inscrição Municipal (IPTU): SAI-IPTU-4401
+p3 r12 y=616 | [x=17.0]Logradouro: [x=66.0]SAI BEM IMOVEL [x=399.0]Nº: [x=415.0]4401
+p3 r13 y=604 | [x=17.0]Comp.: [x=48.0]APTO 44 [x=399.0]Bairro: [x=432.0]BAIRRO SENTINELA
+p3 r14 y=592 | [x=17.0]Município: SAO PAULO [x=399.0]UF: [x=421.0]SP [x=459.0]CEP: [x=483.0]01001-000
+p3 r15 y=579 | [x=17.0]Área Total: [x=63.0]44,4 [x=399.0]Data de Aquisição: [x=473.0]25/05/2025
+p3 r16 y=566 | [x=17.0]Registrado no Cartório: [x=107.0]Sim
+p3 r17 y=563 | [x=399.0]Nome Cartório:
+p3 r18 y=553 | [x=17.0]Matrícula: 44001
+p3 r19 y=517 | [x=30.8]2 [x=65.5]04 [x=107.5]02 [x=137.0]SAI BEM EXTERIOR CONTA SENTINELA MOEDA USD [x=391.2]24.402,42 [x=500.2]35.403,43
+p3 r20 y=501 | [x=17.0]249 - ESTADOS UNIDOS DA AMÉRICA [x=399.0]Bem com usufruto: Não
+p3 r21 y=484 | [x=18.0]Bem ou direito pertencente ao: [x=134.0]Titular [x=219.0]CPF:
+p3 r22 y=463 | [x=17.0]Aplicação Financeira (R$) [x=187.0]Lucros e Dividendos (R$)
+p3 r23 y=452 | [x=17.0]Rendimento ou Perda: [x=137.9]2.404,44 [x=187.0]Valor Recebido: [x=356.4]0,00
+p3 r24 y=439 | [x=17.0]Imposto Pago no Exterior: [x=144.5]404,45 [x=187.0]Imposto Pago Exterior/IRRF Brasil: [x=356.4]0,00
+p3 r25 y=408 | [x=17.0]TOTAL [x=391.2]24.402,42 [x=498.0]179.804,84
+p3 r26 y=385 | [x=17.0]DÍVIDAS E ÔNUS REAIS
+p3 r27 y=366 | [x=18.0]Sem Informações
+p3 r28 y=344 | [x=17.0]DOAÇÕES A PARTIDOS POLÍTICOS E CANDIDATOS A CARGOS ELETIVOS
+p3 r29 y=325 | [x=18.0]Sem Informações
+p3 r30 y=27 | [x=257.3]Página 3 de 9
+===== PAGINA 4 ===== (17 rows)
+p4 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p4 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p4 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p4 r3 y=768 | [x=17.0]DEMONSTRATIVO DE ATIVIDADE RURAL - BRASIL
+p4 r4 y=752 | [x=17.0]DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - BRASIL
+p4 r5 y=733 | [x=18.0]Sem Informações
+p4 r6 y=711 | [x=17.0]RECEITAS E DESPESAS - BRASIL
+p4 r7 y=692 | [x=18.0]Sem Informações
+p4 r8 y=670 | [x=17.0]APURAÇÃO DO RESULTADO - BRASIL
+p4 r9 y=651 | [x=18.0]Sem Informações
+p4 r10 y=629 | [x=17.0]MOVIMENTAÇÃO DO REBANHO - BRASIL
+p4 r11 y=610 | [x=18.0]Sem Informações
+p4 r12 y=588 | [x=17.0]BENS DA ATIVIDADE RURAL - BRASIL
+p4 r13 y=569 | [x=18.0]Sem Informações
+p4 r14 y=547 | [x=17.0]DÍVIDAS VINCULADAS À ATIVIDADE RURAL - BRASIL
+p4 r15 y=528 | [x=18.0]Sem Informações
+p4 r16 y=27 | [x=257.3]Página 4 de 9
+===== PAGINA 5 ===== (19 rows)
+p5 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p5 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p5 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p5 r3 y=770 | [x=14.0]DEMONSTRATIVO DE ATIVIDADE RURAL - EXTERIOR
+p5 r4 y=754 | [x=17.0]DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - EXTERIOR
+p5 r5 y=735 | [x=18.0]Sem Informações
+p5 r6 y=713 | [x=17.0]RECEITAS E DESPESAS - EXTERIOR
+p5 r7 y=694 | [x=18.0]Sem Informações
+p5 r8 y=672 | [x=17.0]APURAÇÃO DO RESULTADO - EXTERIOR
+p5 r9 y=653 | [x=18.0]Sem Informações
+p5 r10 y=631 | [x=17.0]MOVIMENTAÇÃO DO REBANHO - EXTERIOR
+p5 r11 y=612 | [x=18.0]Sem Informações
+p5 r12 y=590 | [x=17.0]BENS DA ATIVIDADE RURAL - EXTERIOR
+p5 r13 y=571 | [x=18.0]Sem Informações
+p5 r14 y=549 | [x=17.0]DÍVIDAS VINCULADAS À ATIVIDADE RURAL - EXTERIOR
+p5 r15 y=530 | [x=18.0]Sem Informações
+p5 r16 y=508 | [x=17.0]DEMONSTRATIVO DA APURAÇÃO DOS GANHOS DE CAPITAL
+p5 r17 y=489 | [x=18.0]Sem Informações
+p5 r18 y=27 | [x=257.3]Página 5 de 9
+===== PAGINA 6 ===== (39 rows)
+p6 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p6 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p6 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p6 r3 y=769 | [x=14.0]RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - TITULAR
+p6 r4 y=753 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JAN
+p6 r5 y=734 | [x=18.0]Sem Informações
+p6 r6 y=712 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - FEV
+p6 r7 y=693 | [x=18.0]Sem Informações
+p6 r8 y=671 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAR
+p6 r9 y=652 | [x=18.0]Sem Informações
+p6 r10 y=630 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - ABR
+p6 r11 y=611 | [x=18.0]Sem Informações
+p6 r12 y=589 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - MAI
+p6 r13 y=570 | [x=18.0]Sem Informações
+p6 r14 y=548 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUN
+p6 r15 y=529 | [x=18.0]Sem Informações
+p6 r16 y=507 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - JUL
+p6 r17 y=488 | [x=18.0]Sem Informações
+p6 r18 y=466 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - AGO
+p6 r19 y=447 | [x=18.0]Sem Informações
+p6 r20 y=425 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - SET
+p6 r21 y=406 | [x=18.0]Sem Informações
+p6 r22 y=384 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - OUT
+p6 r23 y=365 | [x=18.0]Sem Informações
+p6 r24 y=343 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - NOV
+p6 r25 y=324 | [x=18.0]Sem Informações
+p6 r26 y=302 | [x=17.0]GANHOS LÍQUIDOS OU PERDAS - DEZ
+p6 r27 y=283 | [x=18.0]Sem Informações
+p6 r28 y=261 | [x=17.0]RENDA VARIÁVEL - OPERAÇÕES COMUNS/DAYTRADE - DEPENDENTES
+p6 r29 y=242 | [x=18.0]Sem Informações
+p6 r30 y=220 | [x=17.0]FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - TITULAR
+p6 r31 y=201 | [x=18.0]Sem Informações
+p6 r32 y=179 | [x=17.0]FUNDOS DE INVESTIMENTO IMOBILIÁRIO OU NAS CADEIAS PRODUTIVAS AGROINDUSTRIAIS - DEPENDENTES
+p6 r33 y=160 | [x=18.0]Sem Informações
+p6 r34 y=138 | [x=17.0]DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - ECA
+p6 r35 y=119 | [x=18.0]Sem Informações
+p6 r36 y=97 | [x=17.0]DOAÇÕES DIRETAMENTE NA DECLARAÇÃO - PESSOA IDOSA
+p6 r37 y=78 | [x=18.0]Sem Informações
+p6 r38 y=27 | [x=257.3]Página 6 de 9
+===== PAGINA 7 ===== (17 rows)
+p7 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p7 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p7 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p7 r3 y=760 | [x=14.0]DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023
+p7 r4 y=743 | [x=25.2]Demonstrativo de Apuração do Imposto de Renda Incidente sobre Rendimentos de Aplicações Financeiras no Exterior e sobre
+p7 r5 y=730 | [x=26.4]Lucros e Dividendos de Entidade Controlada no Exterior e de Compensação de Perdas em Aplicações Financeiras no Exterior
+p7 r6 y=711 | [x=290.1]Imposto Pago no
+p7 r7 y=706 | [x=31.8]Bem [x=72.6]Tipo [x=110.2]Ganho/Prejuízo [x=199.5]Imposto Devido [x=388.6]Base de Cálculo [x=513.1]Saldo
+p7 r8 y=700 | [x=292.9]Brasil / Exterior
+p7 r9 y=684 | [x=376.4]Prejuízo do ano anterior: [x=558.4]0,00
+p7 r10 y=669 | [x=38.3]2 [x=75.9]AF [x=147.9]2.404,44 [x=245.5]360,66 [x=340.5]404,45 [x=448.4]0,00 [x=571.3]-
+p7 r11 y=654 | [x=399.5]Base de Cálculo: [x=558.4]0,00
+p7 r12 y=639 | [x=401.3]Imposto Devido: [x=558.4]0,00
+p7 r13 y=611 | [x=18.0]Legenda Tipo [x=133.0]Bem
+p7 r14 y=598 | [x=18.0]AF - Aplicação Financeira [x=133.0]A identificação do bem pode ser verificada na impressão da ficha de Bens e Direitos.
+p7 r15 y=587 | [x=18.0]LD - Lucros e Dividendos
+p7 r16 y=27 | [x=257.3]Página 7 de 9
+===== PAGINA 8 ===== (53 rows)
+p8 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p8 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p8 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p8 r3 y=769 | [x=17.0]RESUMO [x=171.5]TRIBUTAÇÃO UTILIZANDO AS DEDUÇÕES LEGAIS
+p8 r4 y=752 | [x=15.0]RENDIMENTOS TRIBUTÁVEIS
+p8 r5 y=739 | [x=20.0]Recebidos de Pessoa Jurídica pelo titular [x=532.4]43.201,11
+p8 r6 y=727 | [x=20.0]Recebidos de Pessoa Jurídica pelos dependentes [x=552.4]0,00
+p8 r7 y=715 | [x=20.0]Recebidos de Pessoa Física/Exterior pelo titular [x=552.4]0,00
+p8 r8 y=703 | [x=20.0]Recebidos de Pessoa Física/Exterior pelos dependentes [x=552.4]0,00
+p8 r9 y=691 | [x=20.0]Recebidos acumuladamente pelo titular [x=552.4]0,00
+p8 r10 y=679 | [x=20.0]Recebidos acumuladamente pelos dependentes [x=552.4]0,00
+p8 r11 y=667 | [x=20.0]Resultado tributável da Atividade Rural [x=552.4]0,00
+p8 r12 y=655 | [x=20.0]TOTAL [x=532.4]43.201,11
+p8 r13 y=636 | [x=15.0]DEDUÇÕES
+p8 r14 y=623 | [x=20.0]Contribuições às previdências oficial e complementar aberta ou fechada de que trata o § 15 do art. 40 da CF/1988 (até o limite [x=536.9]4.202,12
+p8 r15 y=612 | [x=20.0]do patrocinador)
+p8 r16 y=599 | [x=20.0]Contribuição à previdência oficial (Rendimentos recebidos acumuladamente) [x=552.4]0,00
+p8 r17 y=587 | [x=20.0]Contribuição à prev. complementar, inclusive o valor para as fechadas de que trata o § 15 do art. 40 da CF/1988 que exceder o [x=552.4]0,00
+p8 r18 y=576 | [x=20.0]limite do patrocinador
+p8 r19 y=562 | [x=20.0]Dependentes [x=552.4]0,00
+p8 r20 y=550 | [x=20.0]Despesas com instrução [x=552.4]0,00
+p8 r21 y=538 | [x=20.0]Despesas médicas [x=552.4]0,00
+p8 r22 y=526 | [x=20.0]Pensão alimentícia judicial [x=552.4]0,00
+p8 r23 y=514 | [x=20.0]Pensão alimentícia por escritura pública [x=552.4]0,00
+p8 r24 y=502 | [x=20.0]Pensão alimentícia judicial (Rendimentos recebidos acumuladamente) [x=552.4]0,00
+p8 r25 y=490 | [x=20.0]Livro caixa [x=552.4]0,00
+p8 r26 y=478 | [x=20.0]TOTAL [x=536.9]4.202,12
+p8 r27 y=456 | [x=15.0]IMPOSTO DEVIDO [x=323.0]IMPOSTO A RESTITUIR
+p8 r28 y=453 | [x=536.9]2.032,33
+p8 r29 y=443 | [x=20.0]Base de cálculo do imposto [x=256.4]38.998,99 [x=323.0]SALDO DE IMPOSTO A PAGAR [x=552.4]0,00
+p8 r30 y=430 | [x=20.0]Imposto devido [x=260.9]1.170,80
+p8 r31 y=419 | [x=20.0]Dedução de incentivo [x=276.4]0,00 [x=323.0]QUOTA ÚNICA
+p8 r32 y=407 | [x=20.0]Imposto devido I [x=260.9]1.170,80
+p8 r33 y=404 | [x=327.0]Valor da quota [x=552.4]0,00
+p8 r34 y=394 | [x=20.0]Imposto devido RRA [x=276.4]0,00
+p8 r35 y=382 | [x=20.0]Aliquota efetiva (%) [x=276.4]2,71
+p8 r36 y=369 | [x=20.0]Total do imposto devido [x=260.9]1.170,80
+p8 r37 y=330 | [x=323.0]INFORMAÇÕES BANCÁRIAS
+p8 r38 y=310 | [x=15.0]IMPOSTO PAGO
+p8 r39 y=298 | [x=20.0]Imposto retido na fonte do titular [x=259.9]3.203,13
+p8 r40 y=293 | [x=327.0]Tipo de Conta [x=556.9]Pix
+p8 r41 y=286 | [x=20.0]Imp. retido na fonte dos dependentes [x=275.4]0,00
+p8 r42 y=281 | [x=327.0]Banco
+p8 r43 y=274 | [x=20.0]Carnê-Leão do titular [x=275.4]0,00
+p8 r44 y=269 | [x=327.0]Agência (sem DV)
+p8 r45 y=262 | [x=20.0]Carnê-Leão dos dependentes [x=275.4]0,00
+p8 r46 y=257 | [x=327.0]Conta para crédito
+p8 r47 y=250 | [x=20.0]Imposto complementar [x=275.4]0,00
+p8 r48 y=238 | [x=20.0]Imposto pago no exterior [x=275.4]0,00
+p8 r49 y=226 | [x=20.0]Imposto retido na fonte (Lei nº 11.033/2004) [x=275.4]0,00
+p8 r50 y=214 | [x=20.0]Imposto retido RRA [x=275.4]0,00
+p8 r51 y=202 | [x=20.0]Total do imposto pago [x=259.9]3.203,13
+p8 r52 y=27 | [x=257.3]Página 8 de 9
+===== PAGINA 9 ===== (24 rows)
+p9 r0 y=814 | [x=19.0]NOME: [x=63.0]AUDITORIA PDF TEC SAIDA
+p9 r1 y=800 | [x=19.0]CPF: [x=51.0]999.000.111-12 [x=330.0]IMPOSTO SOBRE A RENDA - PESSOA FÍSICA
+p9 r2 y=786 | [x=19.0]DECLARAÇÃO DE SAÍDA DEFINITIVA DO PAÍS [x=330.0]EXERCÍCIO 2026 [x=459.0]ANO-CALENDÁRIO 2025
+p9 r3 y=767 | [x=15.0]EVOLUÇÃO PATRIMONIAL
+p9 r4 y=755 | [x=20.0]Bens e direitos em 31/12/2024 [x=532.4]24.402,42
+p9 r5 y=743 | [x=20.0]Bens e direitos - situação na data da caracterização da condição de não residente [x=528.0]179.804,84
+p9 r6 y=731 | [x=20.0]Dívidas e ônus reais em 31/12/2024 [x=552.4]0,00
+p9 r7 y=719 | [x=20.0]Dívidas e ônus reais - situação na data da caracterização da condição de não residente [x=552.4]0,00
+p9 r8 y=702 | [x=15.0]OUTRAS INFORMAÇÕES
+p9 r9 y=690 | [x=20.0]Rendimentos isentos e não tributáveis [x=552.4]0,00
+p9 r10 y=678 | [x=20.0]Rendimentos sujeitos à tributação exclusiva/definitiva [x=536.9]3.604,14
+p9 r11 y=666 | [x=20.0]Rendimentos tributáveis - imposto com exigibilidade suspensa [x=552.4]0,00
+p9 r12 y=655 | [x=20.0]Depósitos judiciais do imposto [x=552.4]0,00
+p9 r13 y=644 | [x=20.0]Imposto pago sobre Ganhos de Capital [x=552.4]0,00
+p9 r14 y=633 | [x=20.0]Imposto pago Ganhos de Capital Moeda Estrangeira - Bens, direitos e Aplicações Financeiras [x=552.4]0,00
+p9 r15 y=622 | [x=20.0]Total do imposto retido na fonte (Lei nº11.033/2004), conforme dados informados pelo contribuinte [x=552.4]0,00
+p9 r16 y=610 | [x=20.0]Imposto pago sobre Renda Variável [x=552.4]0,00
+p9 r17 y=599 | [x=20.0]Doações a Partidos Políticos e Candidatos a Cargos Eletivos [x=552.4]0,00
+p9 r18 y=588 | [x=20.0]Imposto a pagar sobre o Ganho de Capital - Moeda Estrangeira em Espécie [x=552.4]0,00
+p9 r19 y=577 | [x=20.0]Imposto diferido dos Ganhos de Capital [x=552.4]0,00
+p9 r20 y=566 | [x=20.0]Imposto devido sobre Ganhos de Capital [x=552.4]0,00
+p9 r21 y=555 | [x=20.0]Imposto devido sobre ganhos líquidos em Renda Variável [x=552.4]0,00
+p9 r22 y=544 | [x=20.0]Imposto devido sobre Ganhos de Capital Moeda Estrangeira - Bens, direitos e aplic. financeiras [x=552.4]0,00
+p9 r23 y=27 | [x=257.3]Página 9 de 9
