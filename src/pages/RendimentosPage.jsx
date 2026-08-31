@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -154,7 +154,27 @@ export default function RendimentosPage() {
                       <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum rendimento nesta categoria.</td></tr>
                     ) : filtrados.map(r => (
                       <tr key={r.id}>
-                        <td>{describeRendimentoTipo(r.tipo)}</td>
+                        <td>
+                          {describeRendimentoTipo(r.tipo)}
+                          {/* O número que a pessoa procura na ficha em PAPEL. Ele
+                              diverge do código interno do arquivo desde que a Lei
+                              14.754/2023 e os prêmios de loteria renumeraram a
+                              ficha de tributação exclusiva. Ver codigosDoRendimento. */}
+                          {(() => {
+                            const c = codigosDoRendimento(r);
+                            if (!c) return null;
+                            return (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                Linha {c.naFichaImpressa} da ficha impressa
+                                {c.divergem && (
+                                  <span title="O arquivo da declaração grava um código interno diferente do número impresso na ficha. Os dois estão certos: procure pelo número impresso no papel.">
+                                    {` (código ${c.interno} no arquivo)`}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </td>
                         <td>{formatDate(r.data)}</td>
                         <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
                         <td>

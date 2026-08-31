@@ -232,6 +232,33 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// Número da LINHA na ficha impressa, quando ele é diferente do código interno
+// que o arquivo grava.
+//
+// Os dois divergiram quando a Lei 14.754/2023 e os prêmios de loteria da Lei
+// 14.790/2023 foram inseridos na ficha de tributação exclusiva: a ficha
+// impressa renumerou as linhas e o arquivo manteve o código interno. Quem
+// confere com a declaração em papel procura pelo número IMPRESSO, e a tela só
+// mostrava o interno.
+//
+// Zero à esquerda não é divergência: "0009" e "09" são a mesma linha. A
+// comparação é numérica de propósito, senão TODO rendimento apareceria como se
+// tivesse dois códigos diferentes.
+export function codigosDoRendimento(rendimento) {
+  const interno = String(rendimento?.codigo_rendimento || '').trim();
+  const impresso = String(rendimento?.codigo_impresso || '').trim();
+  if (!interno && !impresso) return null;
+  const mesmoNumero = interno !== '' && impresso !== ''
+    && Number.parseInt(interno, 10) === Number.parseInt(impresso, 10);
+  return {
+    interno,
+    impresso,
+    // O que a pessoa procura no papel. Sem código impresso, o interno é o que há.
+    naFichaImpressa: impresso || interno,
+    divergem: !mesmoNumero && interno !== '' && impresso !== '',
+  };
+}
+
 // Documento de um participante de imóvel rural explorado em condomínio ou
 // parceria. O participante pode ser ESTRANGEIRO e, nesse caso, a ficha o
 // imprime sem CPF: célula vazia ali parece dado perdido na importação, quando

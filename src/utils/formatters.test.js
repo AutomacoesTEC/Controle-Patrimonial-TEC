@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -276,5 +276,43 @@ describe('descreverDocumentoParticipante', () => {
   it('brasileiro sem CPF informado não vira estrangeiro', () => {
     expect(descreverDocumentoParticipante({ cpf: '', estrangeiro: false }))
       .toEqual({ estrangeiro: false, texto: '-' });
+  });
+});
+
+describe('codigosDoRendimento', () => {
+  it('zero à esquerda não é divergência', () => {
+    // "0009" no arquivo e "09" na ficha são a mesma linha. Tratar isso como
+    // divergência marcaria todo rendimento da declaração.
+    const c = codigosDoRendimento({ codigo_rendimento: '0009', codigo_impresso: '09' });
+    expect(c.divergem).toBe(false);
+    expect(c.naFichaImpressa).toBe('09');
+  });
+
+  it('marca a renumeração da Lei 14.754/2023, que é divergência de verdade', () => {
+    // AJU-01: o arquivo grava 0013 e a ficha imprime a linha 12.
+    const lei14754 = codigosDoRendimento({ codigo_rendimento: '0013', codigo_impresso: '12' });
+    expect(lei14754.divergem).toBe(true);
+    expect(lei14754.naFichaImpressa).toBe('12');
+    // E os prêmios de loteria, que herdaram a linha 13.
+    const premios = codigosDoRendimento({ codigo_rendimento: '0014', codigo_impresso: '13' });
+    expect(premios.divergem).toBe(true);
+  });
+
+  it('o código "Outros" também é renumerado na ficha', () => {
+    // Interno 0026 nos isentos e 0012 nos exclusivos, ambos impressos como 99.
+    expect(codigosDoRendimento({ codigo_rendimento: '0026', codigo_impresso: '99' }).divergem).toBe(true);
+    expect(codigosDoRendimento({ codigo_rendimento: '0012', codigo_impresso: '99' }).divergem).toBe(true);
+  });
+
+  it('sem código impresso, o interno é o que se procura, e não há divergência', () => {
+    const c = codigosDoRendimento({ codigo_rendimento: '0009' });
+    expect(c.naFichaImpressa).toBe('0009');
+    expect(c.divergem).toBe(false);
+  });
+
+  it('rendimento sem código nenhum não produz nada', () => {
+    // Tributável de PJ não tem código de ficha: a linha é a fonte pagadora.
+    expect(codigosDoRendimento({ tipo: 'tributavel_pj' })).toBeNull();
+    expect(codigosDoRendimento(null)).toBeNull();
   });
 });
