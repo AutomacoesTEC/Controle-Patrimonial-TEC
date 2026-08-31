@@ -168,3 +168,50 @@ Aviso de método, para quem continuar: durante a prova por reversão eu usei
 `git checkout` num arquivo para desfazer a reversão, e isso apagou junto a
 correção ainda não commitada do mesmo arquivo. Reaplicada e conferida por
 `grep`. Ao provar por reversão, guarde a cópia boa fora do git e restaure dela.
+
+## Ponto de retomada (31/08/2026, 18h10)
+
+Estado: HEAD limpo, suíte em 703 passando, `npx vite build` limpo.
+Branch `fix/auditoria-2026-08-24`.
+
+### Concluído nesta rodada
+
+1. Ataque aos nove módulos de montagem. Dois defeitos corrigidos: quadro sem
+   saldo e sem restituição produzia a linha inventada "Saldo de imposto a pagar
+   R$ 0,00"; valor que chegasse como texto sumia em silêncio em três módulos.
+   Provados por reversão.
+2. Ganhos de Capital virou uma tela só: a tabela é o índice e o demonstrativo
+   abre dentro da linha, fechado por padrão. A junção é por `id`, nunca pelo
+   nome do bem (a declaração real tem dois FIAT UNO que só se distinguem pela
+   placa, e a operação de participação societária chega sem nome).
+   `ganhoCapitalJuncao.test.js`, 10 casos. Verificado no navegador com a
+   declaração real importada pelo próprio fluxo do app: 13 asserções.
+3. Limpeza de dado pessoal do repositório e de todo o histórico. Os valores
+   esperados dos testes foram para `declaracoes-reais.local.json`, fora do
+   repositório, pelo `esperaPessoal` que o arquivo já usava.
+
+### O que falta, em ordem
+
+1. **Segunda passada de `filter-branch`** (PAUSADA a pedido da usuária).
+   Resíduo: a palavra `imoveisMesmoCib`, em MINÚSCULA, ainda está em 40 commits do
+   histórico, como nome de variável em `importParsers.test.js`. O regex da
+   primeira passada cobria `Pantaninho` e `PANTANINHO` e não a forma minúscula.
+   No HEAD já foi renomeada para `imoveisMesmoCib`. Fechar isso renumera os
+   hashes outra vez, por isso depende de autorização.
+2. **Citações de hash quebradas.** A reescrita mudou todos os hashes. Os
+   handoffs de 31/08 citam `a02dc49`, `6e8bd0b`, `ad2a1b8`, `bc6a711` e
+   `4ba2c5d`, que não existem mais. Corrigir junto com o item 1, senão o
+   trabalho é refeito.
+3. **Cinco PDFs de gabarito superados**: decidir se ficam versionados. Não
+   foram abertos ainda.
+4. **Instalador Windows**: depende da decisão sobre certificado de assinatura.
+5. **Participante rural estrangeiro (RUR-01)**: segue sem PDF que exercite a
+   extração. O caminho seguro é preencher a declaração à mão na interface do
+   programa da Receita. NÃO mexer no cadastro do PGD por script: duas
+   tentativas quebraram o IRPF 2026 (ver seção 1 deste documento).
+
+### Backup do repositório antes da reescrita
+
+`~/backups-cp-tec/cp-tec-antes-da-limpeza-2026-08-31.bundle`,
+`git-dir-antes-da-limpeza-2026-08-31.tar.gz` e `manifesto-antes.json`.
+O HEAD anterior à reescrita era `1fdcdf5`.
