@@ -532,7 +532,14 @@ export async function parseDBK(text, log = noop) {
   const registrosDbkNaoModelados = [];
   const avisosImportacao = [];
 
+  // Número do registro no arquivo, contado a partir de UM, que é a referência
+  // útil num arquivo de largura fixa (o equivalente da página e linha do PDF).
+  // Permite à interface apontar de onde o item veio, como já faz com o PDF.
+  let numeroRegistro = 0;
+  const origemDbk = () => ({ formato: 'dbk', registro: numeroRegistro });
+
   for (const line of lines) {
+    numeroRegistro += 1;
     const tipo = line.substring(0, 2);
 
     // Linha vazia (o arquivo termina com quebra de linha, e pode ter linha em
@@ -647,6 +654,7 @@ export async function parseDBK(text, log = noop) {
         const racaCorCodigo = field(line, 214, 1);
         dependentes.push({
           id: depId++,
+          origemDocumento: origemDbk(),
           nome,
           cpf,
           dataNascimento,
@@ -687,6 +695,7 @@ export async function parseDBK(text, log = noop) {
       const cnpjBem = normalizarCpfCnpj(field(line, 1082 + off27, 14));
       if (discriminacao || anterior || atual) {
         bens.push({
+          origemDocumento: origemDbk(),
           id: bemId++,
           grupo: grupo ? grupo.padStart(2, '0') : '99',
           codigo_bem: codigo,
@@ -718,6 +727,7 @@ export async function parseDBK(text, log = noop) {
       const valorPago = parseValorN13(field(line, 554, 13));
       if (discriminacao || anterior || atual) {
         dividas.push({
+          origemDocumento: origemDbk(),
           id: dividaId++,
           codigo,
           discriminacao: discriminacao.substring(0, 512), // ver registro 27 acima
@@ -999,6 +1009,7 @@ export async function parseDBK(text, log = noop) {
       const descricao = field(line, 147, 512);
       if (beneficiario || valorPago) {
         pagamentos.push({
+          origemDocumento: origemDbk(),
           id: pagId++,
           codigo,
           nome_beneficiario: beneficiario,

@@ -232,6 +232,16 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// Documento de um participante de imóvel rural explorado em condomínio ou
+// parceria. O participante pode ser ESTRANGEIRO e, nesse caso, a ficha o
+// imprime sem CPF: célula vazia ali parece dado perdido na importação, quando
+// na verdade é o documento que não existe.
+export function descreverDocumentoParticipante(participante) {
+  if (participante?.estrangeiro) return { estrangeiro: true, texto: 'Estrangeiro, sem CPF' };
+  const cpf = formatCpfCnpj(participante?.cpf);
+  return { estrangeiro: false, texto: cpf || '-' };
+}
+
 // De onde veio um item importado: formato do arquivo, página e linha.
 //
 // Todo item que o parser do PDF produz carrega `origemDocumento`, e nada

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -251,5 +251,30 @@ describe('descreverOrigemDocumento', () => {
   it('já entende o formato do arquivo eletrônico, para quando ele marcar origem', () => {
     expect(descreverOrigemDocumento({ origemDocumento: { formato: 'dbk', registro: 27 } }))
       .toBe('Arquivo da declaração, registro 27');
+  });
+});
+
+describe('descreverDocumentoParticipante', () => {
+  it('participante brasileiro aparece pelo CPF formatado', () => {
+    // AJU-01: o único participante do imóvel rural, CPF 222.333.444-05.
+    expect(descreverDocumentoParticipante({ cpf: '22233344405', estrangeiro: false }))
+      .toEqual({ estrangeiro: false, texto: '222.333.444-05' });
+  });
+
+  it('participante estrangeiro é marcado, e não deixa a célula vazia', () => {
+    // Nenhum dos três PDFs sintéticos tem participante sem CPF, então este é o
+    // caminho que só o teste exercita. Célula vazia pareceria dado perdido na
+    // importação, quando é o documento que não existe.
+    expect(descreverDocumentoParticipante({ cpf: '', estrangeiro: true }))
+      .toEqual({ estrangeiro: true, texto: 'Estrangeiro, sem CPF' });
+  });
+
+  it('a marca de estrangeiro vence um CPF que tenha sobrado no item', () => {
+    expect(descreverDocumentoParticipante({ cpf: '22233344405', estrangeiro: true }).estrangeiro).toBe(true);
+  });
+
+  it('brasileiro sem CPF informado não vira estrangeiro', () => {
+    expect(descreverDocumentoParticipante({ cpf: '', estrangeiro: false }))
+      .toEqual({ estrangeiro: false, texto: '-' });
   });
 });

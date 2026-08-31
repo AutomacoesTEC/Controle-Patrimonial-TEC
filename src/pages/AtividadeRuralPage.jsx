@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividadeRuralPeriodo } from '../store/demonstrativos';
-import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante} from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -264,9 +264,12 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
                     sem documento. Deixar a célula vazia faria parecer dado
                     faltando na importação. */}
                 <td>
-                  {p.estrangeiro
-                    ? <span className="badge badge-orange">Estrangeiro, sem CPF</span>
-                    : (formatCpfCnpj(p.cpf) || '-')}
+                  {(() => {
+                    const doc = descreverDocumentoParticipante(p);
+                    return doc.estrangeiro
+                      ? <span className="badge badge-orange">{doc.texto}</span>
+                      : doc.texto;
+                  })()}
                 </td>
                 {temVinculo && <td>{p.imovelNome || '-'}</td>}
               </tr>

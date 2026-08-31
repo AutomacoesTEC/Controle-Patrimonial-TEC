@@ -1914,8 +1914,15 @@ describe.skipIf(!temArquivos)('parsePDF: Dependentes, Resumo e Lei 14.754 batend
 
   it('a ficha de Dependentes sai idêntica pelos dois caminhos', async () => {
     const { rp, rd } = await lerAmbos();
-    const semProvenienciaPdf = rp.dependentes.map(({ origemDocumento, ...dependente }) => dependente);
-    expect(semProvenienciaPdf).toEqual(rd.dependentes);
+    // A proveniência é justamente o que DIFERE entre os dois caminhos (página e
+    // linha no PDF, número do registro no arquivo eletrônico), e por isso sai
+    // da comparação dos dois lados. O que tem que ser idêntico é a ficha.
+    const semProveniencia = (lista) => lista.map(({ origemDocumento, ...dependente }) => dependente);
+    expect(semProveniencia(rp.dependentes)).toEqual(semProveniencia(rd.dependentes));
+    // E cada caminho tem que dizer de onde tirou o dependente, no formato dele.
+    expect(rp.dependentes[0].origemDocumento).toMatchObject({ formato: 'pdf' });
+    expect(rd.dependentes[0].origemDocumento).toMatchObject({ formato: 'dbk' });
+    expect(rd.dependentes[0].origemDocumento.registro).toBeGreaterThan(0);
     expect(rp.dependentes).toHaveLength(1);
     // O código de parentesco vai cru nos dois, sem tradução (ver registro 25).
     expect(rp.dependentes[0].parentesco).toBe('11');

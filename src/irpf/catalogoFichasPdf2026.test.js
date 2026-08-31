@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   CATALOGO_FICHAS_PDF_2026,
   FICHAS_PDF_2026_POR_PARAMETRO_JRXML,
@@ -58,7 +59,17 @@ describe('catálogo oficial de fichas do PDF IRPF 2026', () => {
   });
 });
 
-const diretorioJrxml = process.env.IRPF_JRXML_DIR;
+// O relatório oficial de impressão (DIRPF2026.jasper, dentro do
+// irpf-impressao.jar do programa da Receita) fica fora do repositório por ser
+// artefato proprietário, no mesmo lugar das declarações de referência. Este
+// cross-check é o que denuncia DERIVA do catálogo contra a fonte oficial: ficha
+// nova ou renomeada pela Receita quebra aqui, e a falha é achado, não defeito
+// do teste.
+//
+// Sem o arquivo, o bloco pula, como os testes que dependem das declarações
+// reais. IRPF_JRXML_DIR permite apontá-lo para outro lugar.
+const PASTA_JRXML_PADRAO = fileURLToPath(new URL('../../../impressao-irpf2026/jrxml/', import.meta.url));
+const diretorioJrxml = process.env.IRPF_JRXML_DIR || PASTA_JRXML_PADRAO;
 describe.skipIf(!diretorioJrxml || !existsSync(join(diretorioJrxml, 'DIRPF2026.jrxml')))(
   'catálogo confrontado com o relatório oficial DIRPF2026.jrxml',
   () => {
