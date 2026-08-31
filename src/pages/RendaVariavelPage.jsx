@@ -4,6 +4,9 @@ import { formatCurrency } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
+import {
+  linhasAnualRendaVariavel, linhasAnualFiiFiagro, ehDerivadoDosMeses, AVISO_DERIVADO,
+} from '../store/anualRendaVariavel';
 
 // Renda Variável, exatamente as duas fichas do menu do programa da Receita:
 // "Operações Comuns / Day-Trade" e "Operações em FII ou Fiagro".
@@ -262,16 +265,27 @@ export default function RendaVariavelPage() {
 
         {anual && (
           <div className="card" style={{ marginBottom: '20px' }}>
-            <div className="card-header"><h3 className="card-title">Consolidação anual: operações comuns/day-trade</h3></div>
+            <div className="card-header">
+              <h3 className="card-title">Consolidação anual: operações comuns/day-trade</h3>
+              {/* A ficha impressa de renda variável é MENSAL: não existe quadro
+                  anual na declaração. Estes totais são soma do app, e dizer isso
+                  evita que a pessoa procure no papel algo que não está lá. */}
+              {ehDerivadoDosMeses(anual)
+                ? <span className="badge badge-orange" title={AVISO_DERIVADO}>Somado pelo app</span>
+                : <span className="badge badge-blue" title="Lido do arquivo importado">Da declaração original</span>}
+            </div>
+            {ehDerivadoDosMeses(anual) && (
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
+            )}
             <div className="table-container">
               <table>
                 <tbody>
-                  <tr><td>Resultado líquido do ano</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.resultadoLiquido)}</td></tr>
-                  <tr><td>Resultado negativo de meses anteriores</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.resultadoNegativoMesesAnteriores)}</td></tr>
-                  <tr><td>Base de cálculo</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.baseCalculo)}</td></tr>
-                  <tr><td>Prejuízo a compensar</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.prejuizoACompensar)}</td></tr>
-                  <tr><td>Imposto devido</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.impostoDevido)}</td></tr>
-                  <tr><td>Imposto a pagar (consolidação)</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(anual.consolidacaoImpostoAPagar)}</td></tr>
+                  {linhasAnualRendaVariavel(anual).map(l => (
+                    <tr key={l.rotulo}>
+                      <td>{l.rotulo}</td>
+                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -309,16 +323,24 @@ export default function RendaVariavelPage() {
 
         {fiiAnual && (
           <div className="card" style={{ marginBottom: '20px' }}>
-            <div className="card-header"><h3 className="card-title">Consolidação anual: FII ou Fiagro</h3></div>
+            <div className="card-header">
+              <h3 className="card-title">Consolidação anual: FII ou Fiagro</h3>
+              {ehDerivadoDosMeses(fiiAnual)
+                ? <span className="badge badge-orange" title={AVISO_DERIVADO}>Somado pelo app</span>
+                : <span className="badge badge-blue" title="Lido do arquivo importado">Da declaração original</span>}
+            </div>
+            {ehDerivadoDosMeses(fiiAnual) && (
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
+            )}
             <div className="table-container">
               <table>
                 <tbody>
-                  <tr><td>Resultado líquido do ano</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.resultadoLiquido)}</td></tr>
-                  <tr><td>Base de cálculo</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.baseCalculoImposto)}</td></tr>
-                  <tr><td>Prejuízo a compensar</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.prejuizoCompensar)}</td></tr>
-                  <tr><td>Imposto devido</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.impostoDevido)}</td></tr>
-                  <tr><td>Imposto retido (Lei 11.033/2004)</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.impostoRetidoLei11033)}</td></tr>
-                  <tr><td>Imposto a pagar</td><td style={{ textAlign: 'right' }} className="currency">{formatCurrency(fiiAnual.impostoAPagar)}</td></tr>
+                  {linhasAnualFiiFiagro(fiiAnual).map(l => (
+                    <tr key={l.rotulo}>
+                      <td>{l.rotulo}</td>
+                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
