@@ -3,6 +3,7 @@ import { useData } from '../store/DataContext';
 import { formatCurrency } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
+import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
 
 // Renda Variável, exatamente as duas fichas do menu do programa da Receita:
 // "Operações Comuns / Day-Trade" e "Operações em FII ou Fiagro".
@@ -210,18 +211,44 @@ export default function RendaVariavelPage() {
                       {mesAberto === `${grupo.nome}-${linha.mes}` && (
                         <tr>
                           <td colSpan={LINHAS_APURACAO.length + 5}>
-                            <table style={{ width: '100%' }}>
-                              <thead><tr><th>Tipo de mercado/ativo</th><th style={{ textAlign: 'right' }}>Operações comuns</th><th style={{ textAlign: 'right' }}>Day-trade</th></tr></thead>
-                              <tbody>
-                                {MERCADOS.map(([rotulo, campo]) => (
-                                  <tr key={rotulo}>
-                                    <td>{rotulo}</td>
-                                    <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.comuns?.[campo] || 0)}</td>
-                                    <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.daytrade?.[campo] || 0)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
+                              <table style={{ width: '100%' }}>
+                                <thead><tr><th>Tipo de mercado/ativo</th><th style={{ textAlign: 'right' }}>Operações comuns</th><th style={{ textAlign: 'right' }}>Day-trade</th></tr></thead>
+                                <tbody>
+                                  {MERCADOS.map(([rotulo, campo]) => (
+                                    <tr key={rotulo}>
+                                      <td>{rotulo}</td>
+                                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.comuns?.[campo] || 0)}</td>
+                                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.daytrade?.[campo] || 0)}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              {/* CONSOLIDAÇÃO DO MÊS, como a declaração a imprime. É
+                                  aqui que se vê POR QUE o imposto a pagar é menor que
+                                  o devido: as duas retenções na fonte, a de day-trade
+                                  e a da Lei nº 11.033/2004, são abatidas do mês. */}
+                              {linhasConsolidacaoMes(linha.consolidacao).length > 0 && (
+                                <div>
+                                  <table style={{ width: '100%' }}>
+                                    <thead><tr><th colSpan={2}>Consolidação do mês</th></tr></thead>
+                                    <tbody>
+                                      {linhasConsolidacaoMes(linha.consolidacao).map(l => (
+                                        <tr key={l.campo}>
+                                          <td>{l.rotulo}</td>
+                                          <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                  {conferenciaConsolidacaoMes(linha.consolidacao) && (
+                                    <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', fontSize: '12px' }}>
+                                      {conferenciaConsolidacaoMes(linha.consolidacao)}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       )}
