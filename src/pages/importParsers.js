@@ -1116,10 +1116,10 @@ export async function parseDBK(text, log = noop) {
     if (tipo === '50') {
       // NM_IMOVEL (23,60) e NM_LOCAL (83,55) são campos SEPARADOS no layout
       // oficial. A leitura anterior pegava os 114 caracteres de uma vez, o que
-      // colava os dois sem pontuação ("NOME DA FAZENDA MUNICIPIO") e
-      // fazia o `.DBK` divergir do PDF, que imprime "NOME DA FAZENDA,
-      // MUNICIPIO". Lendo separado, os dois caminhos passam a produzir o
-      // mesmo texto.
+      // colava os dois sem pontuação ("NOME DA FAZENDA MUNICIPIO") e fazia o
+      // `.DBK` divergir do PDF, que imprime "NOME DA FAZENDA, MUNICIPIO".
+      // Lendo separado, os dois caminhos passam a produzir o mesmo texto.
+      // O caso concreto está no manifesto local, em `imovelMirandasNomeLocalizacao`.
       const nomeImovel = field(line, 23, 60);
       const localizacao = field(line, 83, 55);
       const nomeLocalizacao = [nomeImovel, localizacao].filter(Boolean).join(', ').replace(/\s+/g, ' ').trim();
@@ -4618,7 +4618,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
             //    sem o rótulo ao lado, e por isso nenhum regex pegava: a
             //    localização ("105 - BRASIL", x≈17), a resposta de "Bem com
             //    usufruto" ("Não", x≈470) e a continuação do nome do cartório
-            //    ("MUNICIPIO", x≈399) entravam como se fossem descrição
+            //    (o nome do município, x≈399) entravam como se fossem descrição
             //    do bem. Nenhum deles mora na coluna de discriminação.
             // 2. Texto REAL que era descartado inteiro por terminar num rótulo
             //    ("... SPE LTDA CNPJ:"), agora preservado, porque a coluna diz
@@ -4925,8 +4925,8 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
               // isso como impossível pelo `.DBK`). A chave é o `id` do imóvel,
               // e NÃO o CIB: numa das declarações de referência dois imóveis
               // diferentes compartilham o CIB 2639188-0 (duas partes da mesma
-              // mesma fazenda, uma de 147 ha e outra de 105,3 ha, com
-              // condições de exploração diferentes). O CIB identifica o imóvel
+              // fazenda, uma de 147 ha e outra de 105,3 ha, com condições de
+              // exploração diferentes). O CIB identifica o imóvel
               // no cadastro da Receita, não a linha da ficha.
               imovelId: ultimoImovelRural ? ultimoImovelRural.id : null,
               imovelCib: ultimoImovelRural ? ultimoImovelRural.cib : '',

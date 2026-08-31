@@ -36,6 +36,11 @@ const esperaPessoal = (recebido, chave) => {
   expect(recebido).toBe(valor);
 };
 
+// Para BUSCAR por um valor pessoal (nome de imóvel, município). Sem a chave no
+// manifesto a busca não acha nada e o teste falha com um nome que diz o motivo,
+// em vez de passar por engano comparando undefined com undefined.
+const buscaPessoal = (chave) => pessoal(chave) ?? `__CHAVE_AUSENTE_NO_MANIFESTO_${chave}__`;
+
 const DBK_PATH = arq('dbk');
 const PDF_PATH = arq('pdf');
 // Segundo contribuinte, SEM .DBK, usado para provar que o parser não depende
@@ -84,7 +89,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     esperaPessoal(r.contribuinte.cpf, 'titularCpf');
     expect(r.contribuinte.dataNascimento).toBe('1952-06-10');
     esperaPessoal(r.contribuinte.cpfConjuge, 'conjugeCpf');
-    expect(r.contribuinte.municipio).toBe('MUNICIPIO');
+    esperaPessoal(r.contribuinte.municipio, 'titularMunicipio');
     expect(r.contribuinte.uf).toBe('MG');
     expect(r.contribuinte.ocupacaoCodigo).toBe('120');
     expect(r.documentoFonte.formato).toBe('dbk');
@@ -232,7 +237,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(r.imoveisRurais).toHaveLength(24);
     expect(r.bensRurais).toHaveLength(60);
 
-    const olaria = r.imoveisRurais.find(i => i.nomeLocalizacao.includes('NOME DA FAZENDA'));
+    const olaria = r.imoveisRurais.find(i => i.nomeLocalizacao.includes(buscaPessoal('imovelOlariaNome')));
     expect(olaria.area).toBeCloseTo(147.4, 1);
     expect(olaria.participacao).toBeCloseTo(100, 2);
     expect(olaria.condicaoExploracao).toBe('1');
@@ -694,10 +699,10 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // no registro 50 (posição 164) e no 57 (posição 89).
     expect(r.participantesRuraisOficial.every(p => p.imovelId != null)).toBe(true);
     const osires = r.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
-    expect(osires.imovelNome).toBe('NOME DA FAZENDA, MUNICIPIO');
+    esperaPessoal(osires.imovelNome, 'imovelMirandasNomeLocalizacao');
     // Três participantes da MESMA fazenda, que é o caso que prova que a chave
     // não é um índice sequencial disfarçado.
-    const barreiras = r.participantesRuraisOficial.filter(p => p.imovelNome.startsWith('NOME DA FAZENDA'));
+    const barreiras = r.participantesRuraisOficial.filter(p => p.imovelNome.startsWith(buscaPessoal('imovelBarreirasPrefixo')));
     expect(barreiras).toHaveLength(3);
     expect(barreiras.map(p => p.imovelId).every(id => id === barreiras[0].imovelId)).toBe(true);
   });
@@ -707,9 +712,9 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // NM_IMOVEL (23,60) e NM_LOCAL (83,55). A leitura antiga pegava os 114 de
     // uma vez e colava os dois sem pontuação, fazendo o .DBK divergir do PDF.
     const olaria = r.imoveisRurais[0];
-    expect(olaria.nomeImovel).toBe('NOME DA FAZENDA');
-    expect(olaria.localizacao).toBe('MUNICIPIO');
-    expect(olaria.nomeLocalizacao).toBe('NOME DA FAZENDA, MUNICIPIO');
+    esperaPessoal(olaria.nomeImovel, 'imovelOlariaNome');
+    esperaPessoal(olaria.localizacao, 'imovelOlariaLocalizacao');
+    esperaPessoal(olaria.nomeLocalizacao, 'imovelOlariaNomeLocalizacao');
   });
 
   // Registro 22: rendimentos de PESSOA FÍSICA e do EXTERIOR (carnê-leão). É a
@@ -799,7 +804,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     // O beneficiário destas duas fichas não é uma pessoa e sim um FUNDO,
     // identificado por esfera (N/E/M), UF e município — não há campo de nome.
     const eca = '91' + '11144477735' + 'M' + 'MG' + pad('MINAS GERAIS', 30) +
-      pad('MUNICIPIO', 40) + N13(1000) + pad('26459474000190', 14) + '0000000001';
+      pad('CIDADE EXEMPLO', 40) + N13(1000) + pad('26459474000190', 14) + '0000000001';
     const idoso = '92' + '11144477735' + 'E' + 'MG' + pad('MINAS GERAIS', 30) +
       pad('', 40) + N13(750) + pad('11222333000144', 14) + '0000000002';
     const r = await parseDBK(`${await readFile(DBK_PATH, 'latin1')}\n${eca}\n${idoso}\n`);
@@ -810,7 +815,7 @@ describe.skipIf(!temArquivos)('parseDBK (arquivo real)', () => {
     expect(doEca.cpf_cnpj).toBe('26459474000190');
     expect(doEca.esferaFundo).toBe('Municipal');
     expect(doEca.nome_beneficiario).toContain('Municipal');
-    expect(doEca.nome_beneficiario).toContain('MUNICIPIO');
+    expect(doEca.nome_beneficiario).toContain('CIDADE EXEMPLO');
     // Sem município (fundo estadual), o nome cai para a UF, sem sobrar
     // separador solto.
     const doIdoso = r.doacoesEcaIdosoOficial.find(d => d.categoria === 'idoso');
@@ -1743,7 +1748,7 @@ describe.skipIf(!temArquivos)('parsePDF: imóveis rurais, participantes e rebanh
     // (nome e localização) concatenados sem pontuação, e no PDF é o texto
     // impresso, com a vírgula. O do PDF é o mais fiel à declaração.
     const olaria = rp.imoveisRurais.find(x => x.cib === '1330217-5');
-    expect(olaria.nomeLocalizacao).toBe('NOME DA FAZENDA, MUNICIPIO');
+    esperaPessoal(olaria.nomeLocalizacao, 'imovelOlariaNomeLocalizacao');
     expect(olaria.area).toBeCloseTo(147.4, 1);
     expect(olaria.participacao).toBeCloseTo(100, 2);
   }, 30000);
@@ -1770,7 +1775,7 @@ describe.skipIf(!temArquivos)('parsePDF: imóveis rurais, participantes e rebanh
     const osires = rp.participantesRuraisOficial.find(p => p.cpf === pessoal('participante1Cpf'));
     esperaPessoal(osires.nome, 'participante1Nome');
     expect(osires.imovelCib).toBe('2211420-3');
-    expect(osires.imovelNome).toBe('NOME DA FAZENDA, MUNICIPIO');
+    esperaPessoal(osires.imovelNome, 'imovelMirandasNomeLocalizacao');
     // O vínculo é pelo `id` do imóvel, e não pelo CIB, porque o CIB se repete
     // nesta declaração. Todo id citado existe mesmo na lista de imóveis, e
     // aponta para o imóvel cujo CIB e nome o participante carrega.

@@ -195,7 +195,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
                     <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
                   </div>
                 )}
-                <div className="form-group"><label>Nome e Localização</label><input className="form-control" value={form.nomeLocalizacao} onChange={e => upd('nomeLocalizacao', e.target.value)} placeholder="Ex: nome da fazenda, Cidade Exemplo" /></div>
+                <div className="form-group"><label>Nome e Localização</label><input className="form-control" value={form.nomeLocalizacao} onChange={e => upd('nomeLocalizacao', e.target.value)} placeholder="Ex: Fazenda Santa Rita, Uberaba" /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Área (ha)</label><input className="form-control" type="number" step="0.01" value={form.area} onChange={e => upd('area', e.target.value)} /></div>
                   <div className="form-group"><label>Participação (%)</label><input className="form-control" type="number" step="0.01" value={form.participacao} onChange={e => upd('participacao', e.target.value)} /></div>
