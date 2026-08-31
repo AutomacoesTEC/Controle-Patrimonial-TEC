@@ -106,11 +106,20 @@ export function blocosOperacaoGanhoCapital(op) {
     linha('Imposto pago', op.calculoImposto.impostoPago),
   ]) : null;
 
+  // A consolidação fecha a operação e diz PARA ONDE o ganho vai: as duas
+  // últimas linhas são os valores que esta operação transfere para a ficha de
+  // rendimentos isentos e para a de tributação exclusiva/definitiva. Sem elas,
+  // o elo entre o demonstrativo e aquelas fichas fica invisível.
   const consolidacao = op.consolidacaoBem ? bloco('consolidacao', 'Consolidação do bem', [
     linha('Imposto diferido de anos anteriores', op.consolidacaoBem.impostoDiferidoAnosAnteriores),
     linha('Imposto do exercício', op.consolidacaoBem.impostoDoExercicio),
+    linha('Imposto devido no exercício', op.consolidacaoBem.impostoDevidoNoExercicio),
+    linha('Imposto diferido para anos posteriores', op.consolidacaoBem.impostoDiferidoAnosPosteriores),
     linha('Imposto total', op.consolidacaoBem.impostoTotal),
     linha('IR na fonte (Lei nº 11.033/2004)', op.consolidacaoBem.irFonteLei11033),
+    linha('Imposto pago', op.consolidacaoBem.impostoPago),
+    linha('Vai para rendimentos isentos e não tributáveis', op.consolidacaoBem.rendimentoIsento),
+    linha('Vai para rendimentos de tributação definitiva', op.consolidacaoBem.rendimentoExclusivo),
   ]) : null;
 
   const anteriores = bloco('anteriores', 'Alienações anteriores', [
@@ -143,6 +152,24 @@ export function faixasDaOperacao(op) {
     { rotulo: 'Acima de R$ 30.000.000,00', aliquota: ALIQUOTAS_FAIXA_GC[3], ...tabela.faixa4 },
     { rotulo: 'TOTAL', aliquota: '', total: tabela.total.total, anterior: tabela.total.anterior, atual: tabela.total.atual, ehTotal: true },
   ];
+}
+
+// Conferência ENTRE FICHAS, que é a mais forte que esta declaração permite
+// aqui: o que as operações de ganho de capital transferem para a tributação
+// definitiva tem que ser o mesmo valor que a ficha de rendimentos exclusivos
+// informa no código 02, "Ganhos de capital na alienação de bens e/ou direitos".
+//
+// O código 04, de moeda estrangeira em espécie, fica FORA de propósito: ele
+// vem da ficha de moedas, que tem apuração própria e não sai destas operações.
+export function conferenciaGanhoCapitalContraFichaExclusiva(operacoes = [], rendimentos = []) {
+  const transferido = (operacoes || [])
+    .reduce((s, op) => s + (op?.consolidacaoBem?.rendimentoExclusivo || 0), 0);
+  const naFicha = (rendimentos || [])
+    .filter(r => r?.tipo === 'exclusivo_0002')
+    .reduce((s, r) => s + (Number(r.valor) || 0), 0);
+  if (transferido === 0 && naFicha === 0) return null;
+  if (Math.abs(transferido - naFicha) < 0.02) return null;
+  return `As operações de ganho de capital transferem ${transferido.toFixed(2)} para a tributação definitiva, e a ficha de rendimentos exclusivos informa ${naFicha.toFixed(2)} no código 02.`;
 }
 
 // Conferências que a própria declaração permite. Divergência vira aviso, e

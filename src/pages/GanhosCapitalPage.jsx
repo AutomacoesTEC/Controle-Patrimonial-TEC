@@ -6,7 +6,7 @@ import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
-  conferenciasGanhoCapital, NOME_FICHA_GC,
+  conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
 } from '../store/ganhoCapitalDetalhe';
 
 // Ganhos de Capital não tem cadastro próprio: é calculado a partir das
@@ -75,7 +75,13 @@ export default function GanhosCapitalPage() {
   const gcOficial = dados?.ganhosCapitalOficial || null;
   const moedaEspecie = gcOficial?.moedaEspecie || { operacoes: [], mensal: [] };
   const operacoesDetalhadas = gcOficial?.operacoes || [];
-  const avisosGc = conferenciasGanhoCapital(operacoesDetalhadas);
+  const avisosGc = [
+    ...conferenciasGanhoCapital(operacoesDetalhadas),
+    // Conferência ENTRE FICHAS: o que estas operações transferem para a
+    // tributação definitiva tem que ser o mesmo valor do código 02 da ficha de
+    // rendimentos exclusivos. É o elo entre dois quadros da mesma declaração.
+    conferenciaGanhoCapitalContraFichaExclusiva(operacoesDetalhadas, dados?.rendimentos),
+  ].filter(Boolean);
   const moedaMensalComMovimento = (moedaEspecie.mensal || []).filter(
     m => (m.alienacaoDolar || 0) !== 0 || (m.ganhoCapital || 0) !== 0 || (m.impostoDevido || 0) !== 0
   );

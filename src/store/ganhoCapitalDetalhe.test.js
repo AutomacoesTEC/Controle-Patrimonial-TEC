@@ -6,7 +6,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
-  conferenciasGanhoCapital, NOME_FICHA_GC,
+  conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
 } from './ganhoCapitalDetalhe';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
@@ -135,5 +135,52 @@ describe('conferências do demonstrativo', () => {
     expect(faixasDaOperacao(null)).toEqual([]);
     expect(conferenciasGanhoCapital([])).toEqual([]);
     expect(NOME_FICHA_GC.imovel).toBe('Bens imóveis');
+  });
+});
+
+describe.skipIf(!aju)('a consolidação diz para onde o ganho vai', () => {
+  it('as duas linhas de destino aparecem, com os valores impressos (AJU-01 p16 r13 a r16)', () => {
+    const b = bloco(blocosOperacaoGanhoCapital(doTipo('imovel')), 'consolidacao');
+    // p16 r14: RENDIMENTOS ISENTOS E NÃO TRIBUTÁVEIS, total 0,00.
+    expect(valorDe(b, 'Vai para rendimentos isentos e não tributáveis')).toBe(0);
+    // p16 r16: RENDIMENTOS SUJEITOS À TRIBUTAÇÃO DEFINITIVA, total 54.397,58.
+    expect(valorDe(b, 'Vai para rendimentos de tributação definitiva')).toBeCloseTo(54397.58, 2);
+    // p16 r10 e r12, que também não apareciam.
+    expect(valorDe(b, 'Imposto diferido para anos posteriores')).toBe(0);
+    expect(valorDe(b, 'Imposto pago')).toBe(0);
+  });
+
+  it('o que as operações transferem bate com a ficha de rendimentos exclusivos', () => {
+    // Conferência entre fichas: 54.397,58 do imóvel mais 10.387,55 do móvel
+    // mais 27.377,52 da participação dão 92.162,65, que é exatamente o valor do
+    // código 02 da ficha de tributação exclusiva.
+    const soma = ops.reduce((s, op) => s + op.consolidacaoBem.rendimentoExclusivo, 0);
+    expect(soma).toBeCloseTo(92162.65, 2);
+    expect(conferenciaGanhoCapitalContraFichaExclusiva(ops, aju.rendimentos)).toBeNull();
+  });
+
+  it('a moeda estrangeira fica fora dessa conta', () => {
+    // O código 04 (2.001,02 no AJU-01) vem da ficha de moedas em espécie, com
+    // apuração própria. Somá-lo aqui faria a conferência acusar divergência
+    // onde não há.
+    const moeda = aju.rendimentos.find(r => r.tipo === 'exclusivo_0004');
+    expect(moeda.valor).toBeCloseTo(2001.02, 2);
+    expect(conferenciaGanhoCapitalContraFichaExclusiva(ops, aju.rendimentos)).toBeNull();
+  });
+});
+
+describe('conferência entre o ganho de capital e a ficha de exclusivos', () => {
+  it('avisa quando os dois lados não fecham', () => {
+    const aviso = conferenciaGanhoCapitalContraFichaExclusiva(
+      [{ consolidacaoBem: { rendimentoExclusivo: 1000 } }],
+      [{ tipo: 'exclusivo_0002', valor: 400 }],
+    );
+    expect(aviso).toContain('1000.00');
+    expect(aviso).toContain('400.00');
+  });
+
+  it('declaração sem ganho de capital e sem a ficha não gera aviso', () => {
+    expect(conferenciaGanhoCapitalContraFichaExclusiva([], [])).toBeNull();
+    expect(conferenciaGanhoCapitalContraFichaExclusiva()).toBeNull();
   });
 });
