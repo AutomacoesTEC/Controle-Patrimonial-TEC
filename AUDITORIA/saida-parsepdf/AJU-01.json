@@ -1351,6 +1351,8 @@
         "categoria": "idoso"
       }
     ],
+    "espolioOficial": null,
+    "saidaDefinitivaOficial": null,
     "rendaVariavelMensalOficial": [
       {
         "mes": 1,
@@ -2924,7 +2926,7 @@
         "estado": "ausente",
         "formato": "pdf",
         "presenca": "ausente",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
         "motivo": "Esta ficha não foi impressa no documento selecionado",
@@ -2934,7 +2936,7 @@
         "estado": "ausente",
         "formato": "pdf",
         "presenca": "ausente",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
         "motivo": "Esta ficha não foi impressa no documento selecionado",
@@ -2968,7 +2970,7 @@
         "estado": "ausente",
         "formato": "pdf",
         "presenca": "ausente",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
         "motivo": "Esta ficha não foi impressa no documento selecionado",

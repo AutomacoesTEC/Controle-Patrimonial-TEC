@@ -13,11 +13,11 @@ const ficha = (id, titulo, suporte, padroes = [titulo]) => Object.freeze({
 
 export const CATALOGO_FICHAS_PDF_2026 = Object.freeze([
   ficha('identificacao-contribuinte', 'Identificação do contribuinte', 'estruturada', ['IDENTIFICAÇÃO DO CONTRIBUINTE']),
-  ficha('inventariante', 'Espólio, inventariante e partilha', 'nao_suportada', ['ESPÓLIO', 'INVENTARIANTE', 'PARTILHA', 'SOBREPARTILHA']),
-  ficha('saida-definitiva', 'Saída definitiva do país', 'nao_suportada', ['SAÍDA DEFINITIVA DO PAÍS', 'SAÍDA']),
+  ficha('inventariante', 'Espólio, inventariante e partilha', 'estruturada', ['ESPÓLIO', 'INVENTARIANTE', 'PARTILHA', 'SOBREPARTILHA']),
+  ficha('saida-definitiva', 'Saída definitiva do país', 'estruturada', ['SAÍDA DEFINITIVA DO PAÍS', 'SAÍDA']),
   ficha('dependentes', 'Dependentes', 'estruturada', ['DEPENDENTES']),
   ficha('alimentandos', 'Alimentandos', 'nao_suportada', ['ALIMENTANDOS']),
-  ficha('herdeiros', 'Herdeiros', 'nao_suportada', ['HERDEIROS', 'HERDEIROS / MEEIRO']),
+  ficha('herdeiros', 'Herdeiros', 'estruturada', ['HERDEIROS', 'HERDEIROS / MEEIRO']),
 
   ficha('rendimentos-pj-titular', 'Rendimentos tributáveis de PJ do titular', 'estruturada', ['RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELO TITULAR']),
   ficha('rendimentos-pj-dependentes', 'Rendimentos tributáveis de PJ dos dependentes', 'estruturada', ['RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOAS JURÍDICAS PELOS DEPENDENTES', 'RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOA JURÍDICA PELOS DEPENDENTES']),

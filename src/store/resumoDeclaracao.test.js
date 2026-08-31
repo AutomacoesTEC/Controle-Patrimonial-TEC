@@ -97,6 +97,9 @@ describe.skipIf(!aju)('blocos do RESUMO a partir da declaração de ajuste anual
 
   it('evolução patrimonial e outras informações (p41 r4 a r22)', () => {
     const ev = bloco(blocos, 'evolucao');
+    // O título precisa dizer que o número é o DECLARADO: a mesma tela mostra,
+    // logo abaixo, a evolução que o app calcula dos bens importados.
+    expect(ev.titulo).toBe('Evolução patrimonial informada na declaração');
     expect(valorDe(ev, 'Bens e direitos na situação anterior')).toBeCloseTo(107537.85, 2);
     expect(valorDe(ev, 'Bens e direitos na situação atual')).toBeCloseTo(444846.93, 2);
     expect(valorDe(ev, 'Dívidas e ônus reais na situação anterior')).toBeCloseTo(102606.45, 2);

@@ -894,3 +894,80 @@ describe.skipIf(!temPdfs)('PDF sintético: detecção das fichas antes lidas com
     expect(sai.fichasPdfObservadas.herdeiros).toBeFalsy();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Modalidades que não são declaração de ajuste anual. Até aqui o app importava
+// ESP-01 e SAI-01 e as exibia como se fossem ajuste anual comum: partilha,
+// inventariante, herdeiros e condição de não residente eram detectados e
+// jogados fora. Isso é erro de classificação fiscal, não de acabamento.
+// Rows de prova: ESP-01 p1 r18 a r32 e p2 r3 a r6; SAI-01 p1 r20 a r25.
+describe.skipIf(!temPdfs)('quadros de espólio e de saída definitiva', () => {
+  let esp, sai, aju;
+  beforeAll(async () => {
+    esp = await extrair('ESP');
+    sai = await extrair('SAI');
+    aju = await extrair('AJU');
+  });
+
+  it('espólio: modalidade, ano do óbito e se ainda há bens a inventariar (ESP-01 p1 r19/r20)', () => {
+    expect(esp.espolioOficial).toBeTruthy();
+    expect(esp.espolioOficial.modalidade).toBe('Partilha');
+    expect(esp.espolioOficial.anoObito).toBe('2025');
+    expect(esp.espolioOficial.aindaHaBensAInventariar).toBe('Não');
+  });
+
+  it('espólio: a decisão judicial da partilha, com as duas datas (ESP-01 p1 r23 a r26)', () => {
+    const e = esp.espolioOficial;
+    expect(e.numeroProcessoJudicial).toBe('ESP-PROC-4101');
+    expect(e.comarca).toBe('SAO PAULO');
+    expect(e.varaCivel).toBe('41 V');
+    expect(e.uf).toBe('SP');
+    expect(e.dataDecisaoPartilha).toBe('22/12/2025');
+    // O rótulo do trânsito em julgado quebra em duas linhas visuais e o valor
+    // cai na segunda (p1 r26). Ler só a primeira perderia a data.
+    expect(e.dataTransitoJulgado).toBe('23/12/2025');
+  });
+
+  it('espólio: inventariante e as três respostas do quadro do cônjuge (ESP-01 p1 r28 a r32)', () => {
+    const e = esp.espolioOficial;
+    expect(e.inventarianteCpf).toBe('666.777.888-30');
+    expect(e.inventarianteNome).toBe('ESP INVENTARIANTE SENTINELA');
+    expect(e.obitoAmbosConjuges).toBe('Não');
+    expect(e.conjugeMeeiro).toBe('Não');
+    expect(e.inventarioConjunto).toBe('Não');
+  });
+
+  it('espólio: a lista de herdeiros da declaração (ESP-01 p2 r5/r6)', () => {
+    expect(esp.espolioOficial.herdeiros).toEqual([
+      { cpf_cnpj: '77788899941', nome: 'ESP HERDEIRO UM' },
+      { cpf_cnpj: '88899900078', nome: 'ESP HERDEIRO DOIS' },
+    ]);
+  });
+
+  it('saída definitiva: procurador, data da condição de não residente e país (SAI-01 p1 r21 a r25)', () => {
+    const s = sai.saidaDefinitivaOficial;
+    expect(s).toBeTruthy();
+    // r21 traz "CPF do procurador: 101.202.303-64" numa célula só, com rótulo
+    // e valor juntos, e o nome do procurador no par seguinte.
+    expect(s.procuradorCpf).toBe('101.202.303-64');
+    expect(s.procuradorNome).toBe('SAI PROCURADOR SENTINELA');
+    expect(s.procuradorEndereco).toBe('4201 AUDIT EXIT AVENUE, SUITE 42, MIAMI/FL, 33101');
+    expect(s.dataNaoResidente).toBe('24/12/2025');
+    expect(s.paisDestino).toBe('249 - ESTADOS UNIDOS DA AMÉRICA');
+  });
+
+  it('saída definitiva: campo em branco não vira campo preenchido (SAI-01 p1 r24)', () => {
+    // "Data da caracterização da condição de residente no país" vem vazia. Se
+    // virasse string vazia, a tela afirmaria que a pessoa voltou a ser
+    // residente, que é o oposto do que a declaração diz.
+    expect(sai.saidaDefinitivaOficial.dataResidente).toBeUndefined();
+  });
+
+  it('cada modalidade só aparece na declaração que é dela', () => {
+    expect(esp.saidaDefinitivaOficial).toBeNull();
+    expect(sai.espolioOficial).toBeNull();
+    // A declaração de ajuste anual não é nenhuma das duas.
+    expect(aju.espolioOficial).toBeNull();
+    expect(aju.saidaDefinitivaOficial).toBeNull();
+  });
+});

@@ -152,6 +152,34 @@
     "movimentacaoRebanhoOficial": [],
     "demonstrativoExteriorOficial": [],
     "doacoesEcaIdosoOficial": [],
+    "espolioOficial": {
+      "origem": "pdf",
+      "modalidade": "Partilha",
+      "anoObito": "2025",
+      "aindaHaBensAInventariar": "Não",
+      "numeroProcessoJudicial": "ESP-PROC-4101",
+      "comarca": "SAO PAULO",
+      "varaCivel": "41 V",
+      "uf": "SP",
+      "dataDecisaoPartilha": "22/12/2025",
+      "dataTransitoJulgado": "23/12/2025",
+      "inventarianteCpf": "666.777.888-30",
+      "inventarianteNome": "ESP INVENTARIANTE SENTINELA",
+      "obitoAmbosConjuges": "Não",
+      "conjugeMeeiro": "Não",
+      "inventarioConjunto": "Não",
+      "herdeiros": [
+        {
+          "cpf_cnpj": "77788899941",
+          "nome": "ESP HERDEIRO UM"
+        },
+        {
+          "cpf_cnpj": "88899900078",
+          "nome": "ESP HERDEIRO DOIS"
+        }
+      ]
+    },
+    "saidaDefinitivaOficial": null,
     "rendaVariavelMensalOficial": [],
     "rendaVariavelAnualOficial": null,
     "ganhosCapitalOficial": null,
@@ -171,13 +199,13 @@
         "linhaInicio": 4
       },
       "pdf:inventariante": {
-        "estado": "nao_suportada",
+        "estado": "erro",
         "formato": "pdf",
         "presenca": "indeterminada",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral",
+        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
         "titulo": "Espólio, inventariante e partilha",
         "paginaInicio": 1,
         "linhaInicio": 19
@@ -186,7 +214,7 @@
         "estado": "ausente",
         "formato": "pdf",
         "presenca": "ausente",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
         "motivo": "Esta ficha não foi impressa no documento selecionado",
@@ -215,13 +243,13 @@
         "linhaInicio": 36
       },
       "pdf:herdeiros": {
-        "estado": "nao_suportada",
+        "estado": "erro",
         "formato": "pdf",
         "presenca": "indeterminada",
-        "suporte": "nao_suportada",
+        "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "Ficha impressa preservada no documento-fonte, mas ainda sem extração estruturada integral",
+        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
         "titulo": "Herdeiros",
         "paginaInicio": 2,
         "linhaInicio": 4

@@ -1426,8 +1426,12 @@ describe.skipIf(!temArquivos || !temSegundoPdf)('catálogo de fichas observado n
       expect(r.totalFichasPdfCatalogadas).toBeGreaterThan(40);
       expect(Object.keys(r.estadoFichas).filter(id => id.startsWith('pdf:')).length)
         .toBeGreaterThanOrEqual(r.totalFichasPdfCatalogadas);
+      // A ficha de saída definitiva passou a ser ESTRUTURADA (o parser lê
+      // procurador, país e a data da condição de não residente), mas numa
+      // declaração de ajuste anual ela não é impressa: o que se afirma aqui é
+      // a AUSÊNCIA no documento, não a falta de suporte do app.
       expect(r.estadoFichas['pdf:saida-definitiva']).toEqual(expect.objectContaining({
-        estado: 'ausente', presenca: 'ausente', suporte: 'nao_suportada',
+        estado: 'ausente', presenca: 'ausente', suporte: 'estruturada',
       }));
       expect(r.estadoFichas['pdf:alimentandos']).toEqual(expect.objectContaining({
         estado: 'vazia', presenca: 'vazia', suporte: 'nao_suportada',

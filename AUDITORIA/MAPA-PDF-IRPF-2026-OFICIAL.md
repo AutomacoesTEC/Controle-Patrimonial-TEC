@@ -50,11 +50,11 @@ Legenda de suporte:
 | ID | Ficha | Suporte | Campos estruturados ou que precisam ser fechados | Evidência |
 |---|---|---|---|---|
 | `identificacao-contribuinte` | Identificação do contribuinte | Estruturada | nome, CPF, nascimento, título eleitoral, endereço completo, telefone, e-mail, ocupação, natureza da ocupação, cônjuge, tipo de declaração, recibo e indicadores cadastrais impressos | A/B pág. 1 |
-| `inventariante` | Inventariante e partilha/sobrepartilha | Não suportada | tipo e situação do espólio, inventariante, decisão judicial ou escritura, datas, processo, vara, comarca, cartório e partilha | Sem amostra real preenchida |
-| `saida-definitiva` | Saída definitiva do país | Não suportada | data da saída, residente no exterior, procurador, CPF, endereço e país | Sem amostra real preenchida |
+| `inventariante` | Inventariante e partilha/sobrepartilha | Estruturada | modalidade, ano do óbito, bens a inventariar, processo, vara, comarca, UF, data da decisão e do trânsito em julgado, CPF e nome do inventariante, três respostas do quadro do cônjuge | ESP-01 pág. 1, linhas 19 a 32 |
+| `saida-definitiva` | Saída definitiva do país | Estruturada | CPF, nome e endereço do procurador, data da caracterização da condição de não residente e país de destino | SAI-01 pág. 1, linhas 21 a 25 |
 | `dependentes` | Dependentes | Estruturada | tipo, nome, CPF, nascimento, raça/cor, telefone, e-mail e mora com titular | A/B pág. 1 |
 | `alimentandos` | Alimentandos | Não suportada | nome, CPF, nascimento, residência, processo ou escritura e parcelas vinculadas | A/B vazia, pág. 1 |
-| `herdeiros` | Herdeiros | Não suportada | nome, CPF, percentual, bem e vínculo com partilha | Sem amostra real preenchida |
+| `herdeiros` | Herdeiros | Estruturada | CPF/CNPJ e nome de cada herdeiro do espólio; o percentual por BEM já vinha em bens[].herdeiros | ESP-01 pág. 2, linhas 5 e 6 |
 | `conjuge` | Informações do cônjuge ou companheiro | Não suportada | identificação e bases/totais próprios impressos | Sem amostra real preenchida |
 
 ### Rendimentos e imposto

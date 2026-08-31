@@ -69,6 +69,13 @@ export const initialState = {
   rendaVariavelAnualOficial: null,
   fiiFiagroMensalOficial: [],
   fiiFiagroAnualOficial: null,
+  // Quadros das duas modalidades que não são ajuste anual, lidos da própria
+  // declaração: espólio (partilha, decisão judicial, inventariante e
+  // herdeiros) e saída definitiva (procurador, país de destino e a data que
+  // caracteriza a condição de não residente). null = a declaração importada
+  // não é dessa modalidade.
+  espolioOficial: null,
+  saidaDefinitivaOficial: null,
   dependentes: [],
   bens: [],
   dividas: [],
@@ -168,6 +175,8 @@ export const snapshotYear = (state) => ({
   // e voltar perdia os dependentes cadastrados, porque nunca eram
   // arquivados no snapshot).
   dependentes: state.dependentes,
+  espolioOficial: state.espolioOficial,
+  saidaDefinitivaOficial: state.saidaDefinitivaOficial,
   imoveisRurais: state.imoveisRurais,
   bensRurais: state.bensRurais,
   dividasRurais: state.dividasRurais,
@@ -210,6 +219,7 @@ export const hasWorkingData = (state = {}) =>
   [
     'impostoDevido', 'ganhosCapitalOficial', 'rendaVariavelAnualOficial',
     'fiiFiagroAnualOficial', 'apuracaoResultadoRuralOficial',
+    'espolioOficial', 'saidaDefinitivaOficial',
   ].some(campo => temQuadro(state[campo])) ||
   Number(state.prejuizoRuralAcompensar || 0) !== 0 ||
   !!state.contribuinte;
@@ -230,6 +240,7 @@ export const blankYear = {
   estadoFichas: {}, fichasPdfObservadas: {}, totalFichasPdfCatalogadas: 0,
   versaoCatalogoFichasPdf: null, avisosImportacao: [], registrosDbkNaoModelados: [],
   bens: [], dividas: [], rendimentos: [], pagamentos: [], contribuinte: null, impostoDevido: null, apuracaoGanhoCapital: [], dependentes: [],
+  espolioOficial: null, saidaDefinitivaOficial: null,
   bensRurais: [], dividasRurais: [], lancamentosRurais: [], pagamentosDiversos: [],
   receitasDespesasRuraisOficial: [], apuracaoResultadoRuralOficial: null,
   movimentacaoRebanhoOficial: [], participantesRuraisOficial: [], demonstrativoExteriorOficial: [],
@@ -523,6 +534,13 @@ export function reducer(state, action) {
         // ficha não zerar em silêncio o que o outro tinha trazido.
         ganhosCapitalOficial: action.payload.ganhosCapitalOficial
           ? action.payload.ganhosCapitalOficial : base.ganhosCapitalOficial,
+        // Quadros de modalidade: só o caminho PDF os produz hoje, e uma
+        // declaração de ajuste anual devolve null nos dois. Mesmo critério dos
+        // demais quadros: valor novo manda, ausente preserva o que havia.
+        espolioOficial: action.payload.espolioOficial
+          ? action.payload.espolioOficial : base.espolioOficial,
+        saidaDefinitivaOficial: action.payload.saidaDefinitivaOficial
+          ? action.payload.saidaDefinitivaOficial : base.saidaDefinitivaOficial,
         rendaVariavelAnualOficial: action.payload.rendaVariavelAnualOficial
           ? action.payload.rendaVariavelAnualOficial : base.rendaVariavelAnualOficial,
         fiiFiagroMensalOficial: (action.payload.fiiFiagroMensalOficial && action.payload.fiiFiagroMensalOficial.length > 0)

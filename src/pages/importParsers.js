@@ -3689,10 +3689,74 @@ const preencherIdentificacaoPdf = (textoPagina, contribuinte) => {
   contribuinte.reciboUltimaDeclaracao = valor(/N[º°o]\s*do recibo da última declaração entregue do exercício de \d{4}:\s*([\d.-]+)/i).replace(/\D/g, '');
 };
 
+// Rótulo de TEXTO (não monetário) e o valor dele, numa linha da ficha. Duas
+// formas convivem no mesmo formulário, e as duas aparecem no SAI-01:
+//   "CPF do procurador: 101.202.303-64"        (rótulo e valor na MESMA célula)
+//   "Nome do procurador:" | "SAI PROCURADOR..." (rótulo numa célula, valor na seguinte)
+// paresRotuloValor não serve aqui: ele só aceita valor monetário.
+const paresRotuloTexto = (row) => {
+  const pares = [];
+  const cells = row.cells.map(c => c.text.trim()).filter(Boolean);
+  for (let i = 0; i < cells.length; i++) {
+    const t = cells[i];
+    const corte = t.indexOf(':');
+    if (corte === -1) continue;
+    const rotulo = normSpace(t.slice(0, corte + 1));
+    const naMesma = normSpace(t.slice(corte + 1));
+    if (naMesma) { pares.push({ rotulo, valor: naMesma }); continue; }
+    const seguinte = cells[i + 1];
+    // A célula seguinte só é valor se ela mesma não for outro rótulo.
+    if (seguinte && !seguinte.trim().endsWith(':')) { pares.push({ rotulo, valor: normSpace(seguinte) }); i++; }
+    else pares.push({ rotulo, valor: '' });
+  }
+  return pares;
+};
+
+// ESPÓLIO (ESP-01 p1 r19 a r32). Rótulos conferidos na impressão oficial.
+const ESPOLIO_CAMPOS = {
+  'Ainda há bens a inventariar:': 'aindaHaBensAInventariar',
+  'Número do processo judicial:': 'numeroProcessoJudicial',
+  'Comarca:': 'comarca',
+  'Identificação da vara cível:': 'varaCivel',
+  'UF:': 'uf',
+  'Data da decisão judicial da partilha:': 'dataDecisaoPartilha',
+  // O rótulo do trânsito em julgado quebra em duas linhas visuais; o valor cai
+  // na segunda, ao lado do pedaço final do rótulo.
+  'da decisão judicial da partilha:': 'dataTransitoJulgado',
+  'CPF:': 'inventarianteCpf',
+  'Nome:': 'inventarianteNome',
+  'Trata-se de óbito de ambos os cônjuges ou companheiros(as)?': 'obitoAmbosConjuges',
+  'O cônjuge ou companheiro(a) é meeiro(a)?': 'conjugeMeeiro',
+  'Trata-se de um inventário conjunto?': 'inventarioConjunto',
+};
+
+// SAÍDA DEFINITIVA (SAI-01 p1 r21 a r25).
+const SAIDA_CAMPOS = {
+  'CPF do procurador:': 'procuradorCpf',
+  'Nome do procurador:': 'procuradorNome',
+  'Endereço do Procurador:': 'procuradorEndereco',
+  'Data da caracterização da condição de não residente:': 'dataNaoResidente',
+  'Data da caracterização da condição de residente no país:': 'dataResidente',
+  'País de destino:': 'paisDestino',
+};
+
+// As perguntas do quadro do cônjuge terminam em "?" e não em ":". O
+// paresRotuloTexto casa por ":", então elas entram por este caminho.
+const ESPOLIO_PERGUNTAS = [
+  ['Trata-se de óbito de ambos os cônjuges ou companheiros(as)?', 'obitoAmbosConjuges'],
+  ['O cônjuge ou companheiro(a) é meeiro(a)?', 'conjugeMeeiro'],
+  ['Trata-se de um inventário conjunto?', 'inventarioConjunto'],
+];
+
 export async function parsePDF(pdf, log = noop, onProgress = noop, options = {}) {
   log(`PDF aberto, ${pdf.numPages} páginas`, 'success');
 
   const contribuinte = { cpf: '', nome: '' };
+  // Quadros das duas modalidades que não são ajuste anual. Nascem null e só
+  // viram objeto quando um valor é lido de verdade: ficha vazia não pode
+  // aparecer como preenchida (mesmo critério de estadoFichas).
+  let espolioOficial = null;
+  let saidaDefinitivaOficial = null;
   const paginasTexto = [];
   const bens = [];
   const dividas = [];
@@ -4227,6 +4291,26 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         if (row.cells.some(c => /DEDUÇÕES LEGAIS/i.test(c.text))) impostoDevido.modeloDeclaracao = 'completa';
         else if (row.cells.some(c => /DESCONTO SIMPLIFICADO/i.test(c.text))) impostoDevido.modeloDeclaracao = 'simplificada';
         resumoBloco = null;
+        continue;
+      }
+      // Modalidades que não são a declaração de ajuste anual. Os quadros ficam
+      // na primeira página, logo abaixo da identificação, e simplesmente não
+      // existem numa declaração comum. Tratar espólio e saída definitiva como
+      // ajuste anual é erro de classificação fiscal: partilha e condição de
+      // não residente mudam a leitura do patrimônio.
+      if (rowHasCell(row, 'ESPÓLIO')) {
+        flushAllCurrent();
+        section = 'espolio';
+        continue;
+      }
+      if (rowHasCell(row, 'HERDEIROS / MEEIRO') || rowHasCell(row, 'HERDEIROS')) {
+        flushAllCurrent();
+        section = 'herdeirosEspolio';
+        continue;
+      }
+      if (rowHasCell(row, 'SAÍDA')) {
+        flushAllCurrent();
+        section = 'saida';
         continue;
       }
       if (rowHasCell(row, 'DEPENDENTES')) {
@@ -5378,6 +5462,53 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         continue;
       }
 
+      if (section === 'espolio') {
+        // "Final de Espólio" e "Ano do óbito" são rótulos numa linha com os
+        // valores na de BAIXO (ESP-01 p1 r19/r20), diferente do resto do
+        // quadro, que é rótulo e valor na mesma linha.
+        if (row.cells.some(c => /^Final de Espólio/.test(c.text.trim()))) {
+          const abaixo = (rows[ri + 1]?.cells || []).map(c => c.text.trim()).filter(Boolean);
+          if (abaixo[0]) { espolioOficial = espolioOficial || { origem: 'pdf' }; espolioOficial.modalidade = abaixo[0]; }
+          if (abaixo[1]) { espolioOficial = espolioOficial || { origem: 'pdf' }; espolioOficial.anoObito = abaixo[1]; }
+        }
+        for (const { rotulo, valor } of paresRotuloTexto(row)) {
+          const campo = ESPOLIO_CAMPOS[rotulo];
+          if (campo && valor) { espolioOficial = espolioOficial || { origem: 'pdf' }; espolioOficial[campo] = valor; }
+        }
+        for (const [pergunta, campo] of ESPOLIO_PERGUNTAS) {
+          const i = row.cells.findIndex(c => normSpace(c.text) === pergunta);
+          if (i < 0) continue;
+          const resposta = row.cells.slice(i + 1).map(c => c.text.trim()).find(Boolean);
+          if (resposta) { espolioOficial = espolioOficial || { origem: 'pdf' }; espolioOficial[campo] = resposta; }
+        }
+        continue;
+      }
+
+      if (section === 'herdeirosEspolio') {
+        if (rowHasCell(row, 'CPF / CNPJ') || rowHasCell(row, 'NOME')) continue;
+        // Herdeiro do ESPÓLIO, que é a lista da declaração inteira. Não
+        // confundir com bem.herdeiros, que é o rateio de UM bem na partilha.
+        const doc = row.cells.map(c => c.text.trim()).find(t => /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(t));
+        if (doc) {
+          const nome = row.cells.map(c => c.text.trim()).filter(t => t && t !== doc).join(' ');
+          espolioOficial = espolioOficial || { origem: 'pdf' };
+          espolioOficial.herdeiros = espolioOficial.herdeiros || [];
+          espolioOficial.herdeiros.push({ cpf_cnpj: normalizarCpfCnpj(doc), nome: normSpace(nome) });
+        }
+        continue;
+      }
+
+      if (section === 'saida') {
+        for (const { rotulo, valor } of paresRotuloTexto(row)) {
+          const campo = SAIDA_CAMPOS[rotulo];
+          // Valor vazio não vira campo: no SAI-01 a "data da caracterização da
+          // condição de residente" vem em branco, e gravá-la como string vazia
+          // faria a tela afirmar que a pessoa voltou a ser residente.
+          if (campo && valor) { saidaDefinitivaOficial = saidaDefinitivaOficial || { origem: 'pdf' }; saidaDefinitivaOficial[campo] = valor; }
+        }
+        continue;
+      }
+
       if (section === 'dependentes') {
         if (rowHasCell(row, 'CÓDIGO') && rowHasCell(row, 'NOME')) continue;
         // "TOTAL DE DEDUÇÃO COM DEPENDENTES" fecha a ficha; o valor dele é a
@@ -6119,6 +6250,8 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
     movimentacaoRebanhoOficial,
     demonstrativoExteriorOficial,
     doacoesEcaIdosoOficial: doacoesEcaIdoso,
+    espolioOficial,
+    saidaDefinitivaOficial,
     // Mesma chave que o .DBK preenche pelo registro 76, mas aqui com os
     // valores de cada mês, que o .DBK não permite decifrar. Quem consome
     // precisa continuar aceitando as entradas só com `mes` vindas do .DBK.

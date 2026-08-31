@@ -104,7 +104,12 @@ export function blocosResumoDeclaracao(imposto) {
   }
   const resultado = bloco('resultado', 'Resultado da declaração', linhasResultado);
 
-  const evolucao = bloco('evolucao', 'Evolução patrimonial', [
+  // O título diz "informada na declaração" de propósito: a tela Relatório tem
+  // um card "Evolução Patrimonial" logo abaixo, calculado pelo app a partir
+  // dos bens importados. São duas medidas diferentes do mesmo fato, e ver os
+  // dois títulos iguais na mesma tela levaria a pessoa a achar que um deles
+  // está errado. Confirmado no navegador: os dois aparecem juntos.
+  const evolucao = bloco('evolucao', 'Evolução patrimonial informada na declaração', [
     linha('Bens e direitos na situação anterior', imposto.bensAnteriorOficial),
     linha('Bens e direitos na situação atual', imposto.bensAtualOficial),
     linha('Dívidas e ônus reais na situação anterior', imposto.dividasAnteriorOficial),
