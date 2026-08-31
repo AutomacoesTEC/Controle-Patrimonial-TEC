@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatarAliquotaFicha } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
@@ -52,6 +52,12 @@ const LINHAS_FII = [
   ['Resultado negativo até o mês anterior', 'resultadoNegativoMesAnterior'],
   ['Base de cálculo do imposto', 'baseCalculoImposto'],
   ['Prejuízo a compensar', 'prejuizoCompensar'],
+  // A ficha imprime a alíquota entre o prejuízo a compensar e o imposto
+  // devido (AJU-01 p37 r16, "ALÍQUOTA DO IMPOSTO"), e a tabela pulava a
+  // linha. Sem ela não há como conferir que o imposto devido é a base vezes a
+  // alíquota, que é a única conta desta ficha. Vem como texto do PDF e como
+  // número do .DBK, por isso tem formato próprio.
+  ['Alíquota do imposto', 'aliquota', 'aliquota'],
   ['Imposto devido', 'impostoDevido'],
   ['Imposto retido no mês', 'impostoRetidoNoMes'],
   ['Imposto retido em meses anteriores', 'impostoRetidoMesesAnteriores'],
@@ -310,8 +316,10 @@ export default function RendaVariavelPage() {
                   {grupo.linhas.map(linha => (
                     <tr key={`fii-${grupo.nome}-${linha.mes}`}>
                       <td>{nomeMes(linha.mes)}</td>
-                      {LINHAS_FII.map(([rotulo, campo]) => (
-                        <td key={rotulo} style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha[campo] || 0)}</td>
+                      {LINHAS_FII.map(([rotulo, campo, formato]) => (
+                        <td key={rotulo} style={{ textAlign: 'right' }} className="currency">
+                          {formato === 'aliquota' ? formatarAliquotaFicha(linha[campo]) : formatCurrency(linha[campo] || 0)}
+                        </td>
                       ))}
                     </tr>
                   ))}

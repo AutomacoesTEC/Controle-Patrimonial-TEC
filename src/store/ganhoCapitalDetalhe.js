@@ -135,13 +135,34 @@ export function blocosOperacaoGanhoCapital(op) {
     linha('Vai para rendimentos de tributação definitiva', op.consolidacaoBem.rendimentoExclusivo),
   ]) : null;
 
+  // As perguntas que a ficha imprime, com a resposta que a declaração deu.
+  //
+  // Elas não são preenchimento de formulário: cada uma CONDICIONA a apuração
+  // que aparece nos outros blocos. "Bem atualizado de acordo com a Lei nº
+  // 14.973/2024?" diz se o custo de aquisição é o valor atualizado com
+  // tributação definitiva, e a resposta muda o ganho apurado. "Houve
+  // edificação, ampliação ou reforma?" diz se existe a tabela de custos
+  // acrescidos. "A prestação final foi recebida no ano?" fecha a alienação a
+  // prazo. Nada disso aparecia na tela, e nenhuma delas é dedutível dos
+  // números: a resposta só existe porque está escrita no documento.
+  //
+  // Conferidas no AJU-01: p14 r25/r26/r33 e p15 r21 (imóvel), p17 r15/r16/r26
+  // e p18 r9 (móvel), p20 r14 e r28 (participação).
+  const perguntas = (Array.isArray(op.perguntasImpressas) ? op.perguntasImpressas : [])
+    .filter(q => q && q.pergunta && q.resposta);
+  const blocoPerguntas = perguntas.length > 0
+    ? { id: 'perguntas', titulo: 'Perguntas da ficha', linhas: perguntas.map(q => ({ rotulo: q.pergunta, valor: q.resposta, formato: 'texto' })) }
+    : null;
+
   const anteriores = bloco('anteriores', 'Alienações anteriores', [
-    texto('Já houve alienação parcial deste bem', op.houveAlienacaoParcialAnterior === true ? 'Sim'
+    // Quando as perguntas impressas vieram, esta linha já está entre elas: o
+    // caminho .DBK não as traz, e é para ele que a linha continua existindo.
+    blocoPerguntas ? null : texto('Já houve alienação parcial deste bem', op.houveAlienacaoParcialAnterior === true ? 'Sim'
       : op.houveAlienacaoParcialAnterior === false ? 'Não' : ''),
     linha('Soma dos ganhos de alienações anteriores', op.ganhoAlienacoesAnteriores),
   ]);
 
-  return [identificacao, apuracao, calculo, consolidacao, anteriores].filter(Boolean);
+  return [identificacao, apuracao, blocoPerguntas, calculo, consolidacao, anteriores].filter(Boolean);
 }
 
 // Parcelas da alienação a prazo. Cada uma tem ganho e imposto PROPORCIONAIS,

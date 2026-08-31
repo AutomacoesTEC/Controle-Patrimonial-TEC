@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { parsePDF } from '../pages/importParsers';
 import { blocosOperacaoGanhoCapital } from './ganhoCapitalDetalhe';
-import { colunasDaFontePagadora, descreverTipoDemonstrativoExterior } from '../utils/formatters';
+import { colunasDaFontePagadora, descreverTipoDemonstrativoExterior, formatarAliquotaFicha } from '../utils/formatters';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 const PDFS = {
@@ -206,5 +206,86 @@ describe.skipIf(!temPdfs)('Identificação: as duas perguntas que a tela não mo
     expect(sai.contribuinte.retornoPais).toBeNull();
     expect(esp.contribuinte.alteracaoDadosCadastrais).toBe(true);
     expect(sai.contribuinte.alteracaoDadosCadastrais).toBe(true);
+  });
+});
+
+describe.skipIf(!temPdfs)('FII e Fiagro: a alíquota do imposto', () => {
+  let aju;
+  beforeAll(async () => { aju = await extrair('AJU'); });
+
+  // AJU-01 p37 r16, "ALÍQUOTA DO IMPOSTO": 20,00 em maio e em junho do
+  // titular. A linha era extraída e a tabela do app não a mostrava, então o
+  // imposto devido (p37 r17, 360,36 em maio) aparecia sem a alíquota que o
+  // produz sobre a base de 1.801,81 (p37 r13).
+  it('entrega a alíquota do mês e ela formata como a ficha imprime', () => {
+    const maio = aju.fiiFiagroMensalOficial.find(m => m.titular && m.mes === 5);
+    expect(formatarAliquotaFicha(maio.aliquota)).toBe('20,00%');
+    expect(maio.baseCalculoImposto).toBe(1801.81);
+    expect(maio.impostoDevido).toBe(360.36);
+    // A conta que a alíquota permite conferir, e que era invisível na tela.
+    expect(Math.round(maio.baseCalculoImposto * 0.2 * 100) / 100).toBe(maio.impostoDevido);
+  });
+
+  it('não escreve alíquota onde a declaração não informou nenhuma', () => {
+    expect(formatarAliquotaFicha(undefined)).toBe('');
+    expect(formatarAliquotaFicha('')).toBe('');
+    expect(formatarAliquotaFicha('nao é numero')).toBe('');
+    // Zero impresso continua sendo zero impresso.
+    expect(formatarAliquotaFicha('0,00')).toBe('0,00%');
+    expect(formatarAliquotaFicha(20)).toBe('20,00%');
+  });
+});
+
+describe.skipIf(!temPdfs)('Ganho de capital: as perguntas impressas na ficha', () => {
+  let aju;
+  beforeAll(async () => { aju = await extrair('AJU'); });
+
+  const perguntas = (op) => {
+    const bl = blocosOperacaoGanhoCapital(op).find(b => b.id === 'perguntas');
+    return Object.fromEntries((bl?.linhas || []).map(l => [l.rotulo, l.valor]));
+  };
+
+  // AJU-01 p14 r25, r26 e r33 e p15 r21. A pergunta da Lei nº 14.973/2024 é a
+  // que mais pesa: respondida "Sim", o custo de aquisição do imóvel passa a
+  // ser o valor atualizado com tributação definitiva, e o ganho apurado nos
+  // outros blocos sai de outra conta. Nenhuma delas aparecia na tela.
+  it('mostra as quatro perguntas da ficha de imóvel, inclusive a da Lei 14.973/2024', () => {
+    const imovel = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'imovel');
+    expect(perguntas(imovel)).toEqual({
+      'A alienação foi a prazo/prestação?': 'Não',
+      'Houve no imóvel alienado edificação, ampliação, reforma ou trata-se de imóvel adquirido em partes e em datas diferentes?': 'Não',
+      'Bem atualizado de acordo com a Lei 14.973/2024?': 'Não',
+      'Já houve alienação parcial desse bem?': 'Não',
+    });
+  });
+
+  // AJU-01 p17 r15/r16/r26 e p18 r9: o bem móvel é o único a prazo, e a ficha
+  // dele pergunta se a parcela final foi recebida no ano.
+  it('mostra as perguntas próprias da alienação a prazo do bem móvel', () => {
+    const movel = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'movel');
+    expect(perguntas(movel)).toEqual({
+      'Sujeito a Registro Público?': 'Não',
+      'A alienação foi a prazo/prestação?': 'Sim',
+      'Já houve alienação parcial desse bem?': 'Não',
+      'A prestação/parcela final foi recebida em 2025?': 'Sim',
+    });
+  });
+
+  // Sem perguntas impressas (é o caso do caminho .DBK), a linha da alienação
+  // parcial continua no bloco de alienações anteriores, para o dado não sumir.
+  it('preserva a alienação parcial anterior quando não há perguntas impressas', () => {
+    const semPerguntas = { tipo: 'movel', houveAlienacaoParcialAnterior: false, ganhoAlienacoesAnteriores: 0 };
+    const blocos = blocosOperacaoGanhoCapital(semPerguntas);
+    expect(blocos.find(b => b.id === 'perguntas')).toBeUndefined();
+    const anteriores = blocos.find(b => b.id === 'anteriores');
+    expect(anteriores.linhas.find(l => l.rotulo === 'Já houve alienação parcial deste bem').valor).toBe('Não');
+  });
+
+  // E com perguntas impressas ela NÃO é repetida: a mesma pergunta em dois
+  // blocos da mesma tela é ruído.
+  it('não repete a alienação parcial quando a ficha já a imprimiu', () => {
+    const imovel = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'imovel');
+    const anteriores = blocosOperacaoGanhoCapital(imovel).find(b => b.id === 'anteriores');
+    expect(anteriores.linhas.map(l => l.rotulo)).toEqual(['Soma dos ganhos de alienações anteriores']);
   });
 });

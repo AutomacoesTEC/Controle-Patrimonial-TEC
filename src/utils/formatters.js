@@ -312,6 +312,21 @@ export function colunasDaFontePagadora(rendimento) {
   return colunas;
 }
 
+// Alíquota como a ficha a imprime. O parser devolve a célula do PDF do jeito
+// que ela está no papel ("20,00"), e o caminho .DBK devolve número. Os dois
+// entram aqui e saem no mesmo formato.
+//
+// Célula vazia devolve string vazia, e não "0,00%": a ficha de FII e Fiagro
+// imprime 0,00 nos meses sem movimento, mas mês que a declaração não trouxe
+// não tem alíquota nenhuma, e escrever zero ali seria afirmar uma alíquota
+// que o documento não afirma.
+export function formatarAliquotaFicha(valor) {
+  if (valor === null || valor === undefined || valor === '') return '';
+  const numero = typeof valor === 'number' ? valor : Number(String(valor).trim().replace(/\./g, '').replace(',', '.'));
+  if (!Number.isFinite(numero)) return '';
+  return `${numero.toFixed(2).replace('.', ',')}%`;
+}
+
 // A coluna "Tipo" do Demonstrativo de Apuração da Lei nº 14.754/2023, com a
 // legenda que a própria ficha imprime logo abaixo da tabela (AJU-01 p39 r11,
 // r14, r15 e r18 a r20).
