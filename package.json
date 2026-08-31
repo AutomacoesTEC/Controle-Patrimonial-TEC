@@ -1,48 +1,26 @@
 {
   "name": "controle-patrimonial",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "electron:start": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
-    "electron:dev": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"npm run electron:start\"",
-    "electron:build": "npm run build && electron-builder"
+    "test:full": "cross-env IRPF_FIXTURES_REQUIRED=1 vitest run"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.5",
-    "concurrently": "^10.0.5",
     "cross-env": "^10.1.0",
-    "electron": "^43.4.0",
-    "electron-builder": "^26.15.3",
-    "typescript": "~6.0.2",
     "vite": "^8.2.1",
-    "vitest": "^4.1.10",
-    "wait-on": "^9.1.0"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "pdfjs-dist": "^6.2.108",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "recharts": "^3.10.1",
-    "xlsx": "^0.18.5"
-  },
-  "main": "main.js",
-  "build": {
-    "appId": "com.automacaotec.controlepatrimonial",
-    "productName": "Controle de Variação Patrimonial",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "main.js"
-    ],
-    "win": {
-      "target": "nsis"
-    }
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
