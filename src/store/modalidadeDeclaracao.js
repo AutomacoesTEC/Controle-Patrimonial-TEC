@@ -110,7 +110,9 @@ export function blocosSaida(saida) {
 // espólio inteiro vem no quadro (espolioOficial.herdeiros): são coisas
 // diferentes e a tela mostra as duas.
 export function bensDaPartilha(bens = []) {
-  return (bens || []).filter(b => b?.ehPartilha);
+  // `|| []` não basta: um objeto vazio é truthy e passa direto, e o .filter
+  // seguinte lança "não é função", derrubando a tela. Só array serve aqui.
+  return (Array.isArray(bens) ? bens : []).filter(b => b?.ehPartilha);
 }
 
 // Conferência do rateio: os percentuais dos herdeiros de um bem partilhado têm

@@ -135,7 +135,7 @@ export function blocosOperacaoGanhoCapital(op) {
 // porque no parcelado o imposto é devido conforme o recebimento, e não de uma
 // vez na data da alienação.
 export function parcelasDaOperacao(op) {
-  return (op?.parcelas || []).map((p, i) => ({ ...p, numero: i + 1 }));
+  return (Array.isArray(op?.parcelas) ? op.parcelas : []).map((p, i) => ({ ...p, numero: i + 1 }));
 }
 
 // Faixas de tributação do ganho, na forma que a declaração imprime: quatro
@@ -143,7 +143,7 @@ export function parcelasDaOperacao(op) {
 export const ALIQUOTAS_FAIXA_GC = ['15%', '17,5%', '20%', '22,5%'];
 
 export function faixasDaOperacao(op) {
-  const tabela = (op?.faixasTributacao || [])[0];
+  const tabela = (Array.isArray(op?.faixasTributacao) ? op.faixasTributacao : [])[0];
   if (!tabela) return [];
   return [
     { rotulo: 'Até R$ 5.000.000,00', aliquota: ALIQUOTAS_FAIXA_GC[0], ...tabela.faixa1 },
@@ -162,9 +162,10 @@ export function faixasDaOperacao(op) {
 // O código 04, de moeda estrangeira em espécie, fica FORA de propósito: ele
 // vem da ficha de moedas, que tem apuração própria e não sai destas operações.
 export function conferenciaGanhoCapitalContraFichaExclusiva(operacoes = [], rendimentos = []) {
-  const transferido = (operacoes || [])
-    .reduce((s, op) => s + (op?.consolidacaoBem?.rendimentoExclusivo || 0), 0);
-  const naFicha = (rendimentos || [])
+  const lista = (v) => (Array.isArray(v) ? v : []);
+  const transferido = lista(operacoes)
+    .reduce((s, op) => s + (Number(op?.consolidacaoBem?.rendimentoExclusivo) || 0), 0);
+  const naFicha = lista(rendimentos)
     .filter(r => r?.tipo === 'exclusivo_0002')
     .reduce((s, r) => s + (Number(r.valor) || 0), 0);
   if (transferido === 0 && naFicha === 0) return null;
@@ -177,7 +178,11 @@ export function conferenciaGanhoCapitalContraFichaExclusiva(operacoes = [], rend
 export function conferenciasGanhoCapital(operacoes = []) {
   const avisos = [];
   const perto = (a, b) => Math.abs(a - b) < 0.02;
-  for (const op of operacoes) {
+  // `= []` no parâmetro só cobre undefined. Um `null` chegando aqui, vindo de
+  // estado antigo ou de um quadro sem operações, lançava "operacoes is not
+  // iterable" e derrubava a tela inteira de Ganhos de Capital, levando junto os
+  // números que estavam certos. Achado no ataque de 31/08/2026.
+  for (const op of (Array.isArray(operacoes) ? operacoes : [])) {
     const nome = op.especificacao || NOME_FICHA_GC[op.tipo] || 'operação';
     const ap = op.apuracao;
     if (ap && ehNumero(ap.valorAlienacao) && ehNumero(ap.custoCorretagem) && ehNumero(ap.valorLiquido)
