@@ -63,5 +63,36 @@ if (-not $iscc) {
 & $iscc setup.iss
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup falhou" }
 
+# Assinatura digital (opcional, mas é o que tira o aviso de editor desconhecido).
+#
+# Sem assinatura, o SmartScreen do Windows mostra "O Windows protegeu o
+# computador" e o editor aparece como desconhecido. O instalador funciona, mas
+# quem recebe precisa clicar em "Mais informações" e "Executar assim mesmo".
+#
+# Para assinar, defina as duas variáveis de ambiente antes de rodar este
+# script, apontando para um certificado de assinatura de código (Code Signing),
+# que NÃO é o mesmo certificado e-CNPJ A1 usado para nota fiscal:
+#   $env:CP_TEC_CERT_PFX   = 'C:\caminho\certificado.pfx'
+#   $env:CP_TEC_CERT_SENHA = 'senha do pfx'
+$pfx = $env:CP_TEC_CERT_PFX
+$instalador = Join-Path $root 'installer\ControlePatrimonial_Setup.exe'
+if ($pfx -and (Test-Path $pfx)) {
+    Write-Host "==> Assinando o instalador" -ForegroundColor Cyan
+    $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+    if (-not $signtool) {
+        Write-Host "signtool.exe não encontrado (Windows SDK). Instalador NÃO assinado." -ForegroundColor Yellow
+    } else {
+        & $signtool.FullName sign /f $pfx /p $env:CP_TEC_CERT_SENHA /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $instalador
+        if ($LASTEXITCODE -ne 0) { throw "assinatura falhou" }
+        Write-Host "Instalador assinado." -ForegroundColor Green
+    }
+} else {
+    Write-Host ""
+    Write-Host "ATENÇÃO: instalador NÃO assinado digitalmente." -ForegroundColor Yellow
+    Write-Host "O Windows vai mostrar aviso de editor desconhecido para quem instalar." -ForegroundColor Yellow
+    Write-Host "Para assinar, defina CP_TEC_CERT_PFX e CP_TEC_CERT_SENHA e rode de novo." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Pronto: installer\ControlePatrimonial_Setup.exe" -ForegroundColor Green
