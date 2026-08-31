@@ -142,3 +142,29 @@ importação de PDF foi conferida no BUILD DE PRODUÇÃO, não só no dev.
 
 O vitest deste projeto engole `console.log` e `console.error`, inclusive os do
 arquivo de teste. Para depurar, grave em arquivo de dentro do teste.
+
+## Ataque aos módulos de montagem (commit 6e8bd0b)
+
+Depois do ataque às conferências (a02dc49), o mesmo tratamento nos nove
+montadores: `blocosResumoDeclaracao`, `blocosEspolio`, `blocosSaida`,
+`blocosOperacaoGanhoCapital`, `parcelasDaOperacao`, `faixasDaOperacao`,
+`linhasConsolidacaoMes`, `linhasAnualRendaVariavel`, `linhasAnualFiiFiagro`.
+Arquivo: `src/store/montagem.adversarial.test.js`.
+
+Achado 1, de mérito fiscal. Quadro que não informa saldo a pagar nem imposto a
+restituir produzia a linha "Saldo de imposto a pagar R$ 0,00". A tela afirmava
+um resultado que a declaração não tem. Corrigido: o bloco de resultado exige
+que ao menos um dos dois campos tenha sido informado.
+
+Achado 2. Valor que chegasse como texto sumia em silêncio nos três módulos que
+montam linha por linha, deixando o quadro exibido menor que o da declaração sem
+aviso. Passaram a aceitar texto que seja número; texto que não é número segue
+fora, para não pôr "R$ NaN" na tela. Defesa, não bug observado: o parser hoje
+devolve número em todos esses campos.
+
+Ambos provados por reversão. Suíte em 693 passando, 0 puladas, 0 falhas.
+
+Aviso de método, para quem continuar: durante a prova por reversão eu usei
+`git checkout` num arquivo para desfazer a reversão, e isso apagou junto a
+correção ainda não commitada do mesmo arquivo. Reaplicada e conferida por
+`grep`. Ao provar por reversão, guarde a cópia boa fora do git e restaure dela.
