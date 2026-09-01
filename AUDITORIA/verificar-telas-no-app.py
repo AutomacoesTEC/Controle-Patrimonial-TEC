@@ -80,6 +80,25 @@ with sync_playwright() as p:
     ok("ALÍQUOTA DO IMPOSTO" in t, "Renda variável: coluna da alíquota do FII")
     ok("20,00%" in t, "Renda variável: alíquota de 20,00%")
 
+    # Rastreabilidade: página e linha da declaração impressa, nas telas que
+    # ainda não a mostravam. Os endereços são os do AJU-01, conferidos no dump
+    # AUDITORIA/rows-pdfjs/AJU-01.rows.txt.
+    t = ir("Dívidas e Ônus")
+    ok("PDF, PÁGINA 10, LINHA 7" in t, "Dívidas: página e linha da declaração")
+
+    t = ir("Titular e Dependentes")
+    ok("PDF, PÁGINA 1, LINHA 23" in t, "Dependentes: página e linha da declaração")
+
+    t = ir("Ganhos de Capital")
+    ok("PDF, PÁGINA 14, LINHA 13" in t, "Ganhos de capital: página e linha da apuração")
+
+    t = ir("Atividade Rural")
+    ok("PDF, PÁGINA 11, LINHA 8" in t, "Atividade rural: página e linha do imóvel")
+
+    t = ir("Renda Variável")
+    ok("PDF, PÁGINA 23, LINHA 5" in t, "Renda variável: página e linha do mês")
+    ok("PDF, PÁGINA 37, LINHA 9" in t, "FII e Fiagro: página e linha do mês")
+
     t = ir("Relatório IRPF")
     ok("APLICAÇÃO FINANCEIRA" in t and "LUCROS E DIVIDENDOS" in t, "Relatório: legenda AF e LD do demonstrativo do exterior")
     ok("PARCELA NÃO DEDUTÍVEL" in t, "Relatório: coluna de parcela não dedutível")

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCpfCnpj, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia} from '../utils/formatters';
+import { formatCpfCnpj, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import DateInput from '../components/DateInput';
@@ -160,7 +160,12 @@ export default function TitularPage() {
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dependente cadastrado.</td></tr>
                 ) : dependentes.map(d => (
                   <tr key={d.id}>
-                    <td>{d.nome}</td>
+                    <td>
+                      {d.nome}
+                      {descreverOrigemDocumento(d) && (
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(d)}</div>
+                      )}
+                    </td>
                     <td>{formatCpfCnpj(d.cpf)}</td>
                     <td>{formatDate(d.dataNascimento)}</td>
                     {/* O código sozinho não permite conferir nada: a dedução

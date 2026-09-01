@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatarAliquotaFicha } from '../utils/formatters';
+import { formatCurrency, formatarAliquotaFicha, descreverOrigemDocumento } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
@@ -199,7 +199,14 @@ export default function RendaVariavelPage() {
                     // ela abre), e é dele que o React precisa da identidade.
                     <Fragment key={`${grupo.nome}-${linha.mes}`}>
                       <tr>
-                        <td>{nomeMes(linha.mes)}</td>
+                        <td>
+                          {nomeMes(linha.mes)}
+                          {/* Cada mês é um quadro próprio na ficha impressa, e
+                              a página muda de um mês para o outro. */}
+                          {descreverOrigemDocumento(linha) && (
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(linha)}</div>
+                          )}
+                        </td>
                         {LINHAS_APURACAO.map(([rotulo, campo]) => (
                           <td key={rotulo} style={{ textAlign: 'right' }} className="currency">
                             {formatCurrency(linha.comuns?.[campo] || 0)}
@@ -315,7 +322,12 @@ export default function RendaVariavelPage() {
                 <tbody>
                   {grupo.linhas.map(linha => (
                     <tr key={`fii-${grupo.nome}-${linha.mes}`}>
-                      <td>{nomeMes(linha.mes)}</td>
+                      <td>
+                        {nomeMes(linha.mes)}
+                        {descreverOrigemDocumento(linha) && (
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(linha)}</div>
+                        )}
+                      </td>
                       {LINHAS_FII.map(([rotulo, campo, formato]) => (
                         <td key={rotulo} style={{ textAlign: 'right' }} className="currency">
                           {formato === 'aliquota' ? formatarAliquotaFicha(linha[campo]) : formatCurrency(linha[campo] || 0)}

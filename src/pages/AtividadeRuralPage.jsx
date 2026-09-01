@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividadeRuralPeriodo } from '../store/demonstrativos';
-import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante} from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante, descreverOrigemDocumento} from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -168,7 +168,12 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
               <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum imóvel cadastrado.</td></tr>
             ) : imoveisRurais.map(i => (
               <tr key={i.id}>
-                <td>{i.nomeLocalizacao}</td>
+                <td>
+                  {i.nomeLocalizacao}
+                  {descreverOrigemDocumento(i) && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(i)}</div>
+                  )}
+                </td>
                 <td>{i.area}</td>
                 <td>{i.participacao}</td>
                 <td>{i.condicaoExploracao}</td>
@@ -259,7 +264,12 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
           <tbody>
             {participantesRuraisOficial.map((p, i) => (
               <tr key={i}>
-                <td>{p.nome}</td>
+                <td>
+                  {p.nome}
+                  {descreverOrigemDocumento(p) && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(p)}</div>
+                  )}
+                </td>
                 {/* Participante estrangeiro não tem CPF, e a ficha o imprime
                     sem documento. Deixar a célula vazia faria parecer dado
                     faltando na importação. */}
@@ -352,7 +362,12 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
             ) : bensRuraisVisiveis.map(bem => (
               <tr key={bem.id}>
                 <td>{bem.codigo}</td>
-                <td style={{ maxWidth: '400px' }}>{(bem.discriminacao || '').substring(0, 100)}</td>
+                <td style={{ maxWidth: '400px' }}>
+                  {(bem.discriminacao || '').substring(0, 100)}
+                  {descreverOrigemDocumento(bem) && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(bem)}</div>
+                  )}
+                </td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_anterior)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(bem.situacao_atual)}</td>
                 <td>
@@ -457,7 +472,12 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
               <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma dívida cadastrada.</td></tr>
             ) : dividasRurais.map(d => (
               <tr key={d.id}>
-                <td style={{ maxWidth: '400px' }}>{(d.discriminacao || '').substring(0, 100)}</td>
+                <td style={{ maxWidth: '400px' }}>
+                  {(d.discriminacao || '').substring(0, 100)}
+                  {descreverOrigemDocumento(d) && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(d)}</div>
+                  )}
+                </td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_anterior)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_atual)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor_pago)}</td>
@@ -887,7 +907,12 @@ function RebanhoSection({ movimentacaoRebanhoOficial }) {
           <tbody>
             {movimentacaoRebanhoOficial.map((m, i) => (
               <tr key={i}>
-                <td>{nomeDaEspecie(m)}</td>
+                <td>
+                  {nomeDaEspecie(m)}
+                  {descreverOrigemDocumento(m) && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(m)}</div>
+                  )}
+                </td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.estoqueInicial)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.aquisicoes)}</td>
                 <td style={{ textAlign: 'right' }} className="currency">{formatCabecas(m.nascimentos)}</td>

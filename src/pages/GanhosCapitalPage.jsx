@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, Fragment } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
@@ -447,6 +447,13 @@ export default function GanhosCapitalPage() {
                             {d?.alienacaoAPrazo && <span className="badge badge-orange" style={{ marginLeft: '8px' }}>A prazo</span>}
                             {resultado && resultado.tipo !== 'ganho' && (
                               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{resultado.texto}</div>
+                            )}
+                            {/* Página e linha da tabela de apuração impressa,
+                                que é a linha desta tabela. O demonstrativo
+                                detalhado começa em outra página, e quem abre a
+                                linha vê os números dele, não este endereço. */}
+                            {descreverOrigemDocumento(l.resumo) && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(l.resumo)}</div>
                             )}
                           </td>
                           <td>{FICHA_GC[tipo] || FICHA_GC.movel}</td>

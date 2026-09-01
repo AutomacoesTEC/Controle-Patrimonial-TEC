@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
+import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
@@ -110,7 +110,14 @@ export default function DividasPage({ onVoltar } = {}) {
               ) : dividas.map(d => (
                 <tr key={d.id}>
                   <td><span className="badge badge-red">{d.codigo}</span></td>
-                  <td>{(d.discriminacao || '').substring(0, 100)}</td>
+                  <td>
+                    {(d.discriminacao || '').substring(0, 100)}
+                    {/* Página e linha da declaração impressa, mesmo tratamento
+                        que Bens, Rendimentos e Pagamentos já tinham. */}
+                    {descreverOrigemDocumento(d) && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(d)}</div>
+                    )}
+                  </td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_anterior)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.situacao_atual)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor_pago)}</td>
