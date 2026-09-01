@@ -215,3 +215,110 @@ Branch `fix/auditoria-2026-08-24`.
 `~/backups-cp-tec/cp-tec-antes-da-limpeza-2026-08-31.bundle`,
 `git-dir-antes-da-limpeza-2026-08-31.tar.gz` e `manifesto-antes.json`.
 O HEAD anterior à reescrita era `1fdcdf5`.
+
+
+## Sessão de 31/08/2026, noite: das telas ao fluxo real
+
+Estado: suíte em 730 passando, 0 falhas. `npx vite build` limpo.
+`AUDITORIA/verificar-telas-no-app.py` em 32 asserções, todas verdes, contra o
+app de PRODUÇÃO com as três declarações sintéticas importadas pelo próprio
+fluxo. Cinco commits, de `87c1f7e` a `74d6bd1`, na `fix/auditoria-2026-08-24`.
+
+### O achado que muda a leitura do resto
+
+A declaração final de espólio e a de saída definitiva NÃO CONSEGUIAM ENTRAR
+NO APP. O botão "Usar esta declaração" da revisão da importação nasce
+desabilitado quando alguma ficha ficou em estado de erro, e o ESP-01 tinha
+quatro fichas em erro, o SAI-01 duas. Todo o trabalho anterior nas telas de
+espólio e de saída definitiva, com partilha, herdeiros, inventariante,
+procurador e condição de não residente, estava inalcançável pelo fluxo real.
+
+A suíte estava verde o tempo todo. O defeito só apareceu ao DIRIGIR o app.
+
+Duas causas: as fichas de saída definitiva, de inventariante e de herdeiros
+não constavam do mapa de "esta ficha tem dados", embora o parser as estruture
+desde sempre; e as fichas de rendimentos isentos e de tributação exclusiva,
+quando vazias, imprimem só "TOTAL 0,00", sem a expressão "Sem Informações"
+que o detector de ficha vazia procurava. As duas corrigidas e provadas por
+reversão. As três declarações entram agora sem nenhuma ficha em erro.
+
+### O que passou a aparecer na tela
+
+Levantamento novo, campo a campo, do que os parsers põem no estado contra o
+que a camada de apresentação consome. O que estava desligado e agora está
+ligado, em ordem de peso fiscal:
+
+1. As cinco colunas da ficha de rendimentos de pessoa jurídica. Faltavam a
+   contribuição previdenciária oficial, o 13º salário e o IRRF sobre o 13º.
+   Cada uma com a sua nota: a previdência é dedução da base do ajuste, o 13º é
+   tributação exclusiva e já está lançado à parte no código 01 da ficha de
+   exclusivos. Um teste fixa que o 13º não pode ser somado ao tributável.
+2. Ganho de capital: o IR na fonte da Lei nº 11.033/2004 e o IMPOSTO DEVIDO
+   APÓS COMPENSAÇÃO, que é o que a pessoa de fato deve, mais a corretagem e o
+   líquido das parcelas na alienação a prazo.
+3. As PERGUNTAS IMPRESSAS da ficha de ganho de capital, com destaque para
+   "Bem atualizado de acordo com a Lei 14.973/2024?": respondida "Sim", o
+   custo de aquisição passa a ser o valor atualizado com tributação
+   definitiva, e o ganho sai de outra conta.
+4. A coluna Tipo do demonstrativo da Lei 14.754/2023. As duas linhas do AJU-01
+   são do mesmo bem 7 e só a sigla as separa: AF é aplicação financeira,
+   tributada na realização; LD é lucro de entidade controlada, tributado em
+   31 de dezembro.
+5. A coluna "parcela não dedutível" das doações efetuadas.
+6. "Era residente no exterior e passou a ser residente no Brasil" e "Houve
+   alteração de dados cadastrais", na identificação.
+7. A alíquota do imposto na ficha de FII e Fiagro, que permite conferir que o
+   imposto devido é a base vezes a alíquota.
+8. A data da comunicação da condição de não residente à FONTE PAGADORA, que
+   não era nem extraída. É dessa data que a fonte deixa de aplicar a tabela do
+   residente, e ela é distinta da data de caracterização da condição de não
+   residente.
+9. Rastreabilidade (página e linha do PDF) em Dívidas, Dependentes, Ganhos de
+   Capital, Atividade Rural e Renda Variável, que antes só existia em Bens,
+   Rendimentos e Pagamentos.
+
+Dois selos "Da declaração original" diziam que o dado vinha do arquivo .DBK. O
+demonstrativo do exterior e as fichas rurais vêm pelos dois caminhos.
+
+### Ferramenta nova, e por que ela precisava existir
+
+`AUDITORIA/verificar-telas-no-app.py`. Os testes deste projeto rodam em Node
+puro, sem DOM: provam o módulo que a tela chama, não a tela. Uma ligação
+esquecida no .jsx passa verde na suíte inteira, e foi o que aconteceu com a
+alíquota do FII na primeira tentativa de prova por reversão. O script sobe o
+build de produção, cria três perfis importando AJU-01, SAI-01 e ESP-01 pelo
+fluxo do app e confere o texto na tela.
+
+Duas armadilhas registradas nele: o Chromium devolve o texto JÁ com o
+text-transform aplicado, então cabeçalho de tabela chega em MAIÚSCULA; e a
+moeda em pt-BR usa espaço não separável depois do "R$". E o botão do modal de
+revisão nasce desabilitado enquanto o PDF é lido, então esperar só pelo texto
+pega o botão ainda inerte.
+
+### Achados que NÃO foram corrigidos, porque a decisão é da usuária
+
+1. **O caminho PDF inventa dois campos do dependente.** `importParsers.js`
+   grava `saidaComDeclarante: false` e `nitPisPasep: ''` fixos, e a ficha
+   impressa de DEPENDENTES não traz nenhum dos dois (AJU-01 p1 r20 a r25). São
+   defaults, não dados lidos. Hoje o dano é nulo, porque nenhuma tela os
+   mostra, e foi por isso que não os exibi. O correto seria `null` no caminho
+   PDF, e é uma mudança de contrato da extração, que está dada como concluída.
+
+2. **O traço da ficha vira zero.** No demonstrativo da Lei 14.754/2023, a
+   linha LD do AJU-01 (p39 r15) imprime "-" em ganho/prejuízo e em imposto
+   devido, e o parser grava 0. Traço e zero não são a mesma afirmação. Mexer
+   nisso também é mudança de contrato da extração.
+
+### Continua aberto, do que já estava
+
+Nada aqui foi tocado, tudo depende de autorização sua:
+
+1. Segunda passada de `filter-branch` (resíduo "imoveisMesmoCib" em 40 commits).
+   Segue PAUSADA. As citações de hash dos handoffs continuam quebradas e
+   devem ser corrigidas junto, senão o trabalho é refeito.
+2. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
+   versionados.
+3. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+4. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
+   extração. Preencher à mão na interface do programa da Receita é o caminho
+   seguro: NÃO mexer no cadastro do PGD por script.
