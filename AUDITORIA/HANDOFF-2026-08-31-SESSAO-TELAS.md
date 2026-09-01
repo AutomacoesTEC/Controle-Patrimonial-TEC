@@ -190,6 +190,17 @@ Branch `fix/auditoria-2026-08-24`.
    esperados dos testes foram para `declaracoes-reais.local.json`, fora do
    repositório, pelo `esperaPessoal` que o arquivo já usava.
 
+### Em andamento agora (01/09/2026, 01h50)
+
+Auditoria final de interface pedida pela usuária: workflow em segundo plano
+(task `wdnr0snlo`, run `wf_49997bc2-536`) revisando as 29 telas React
+(`src/pages/*.jsx`, `src/components/*.jsx`) em 8 grupos paralelos, atrás de
+emoji/travessão/"·"/data errada/texto quebrado, com verificação adversarial
+de cada achado antes de aplicar. Quando terminar: aplicar as correções dos
+achados com `real=true`, rodar `npx vitest run` inteiro, commitar. NÃO disparar
+um novo workflow para a mesma tarefa enquanto este não terminar ou não
+constar como morto — conferir `journal.jsonl` da run antes de duplicar.
+
 ### O que falta, em ordem
 
 1. ~~Segunda passada de `filter-branch`~~ **CONCLUÍDA em 31/08/2026, 21h53,
