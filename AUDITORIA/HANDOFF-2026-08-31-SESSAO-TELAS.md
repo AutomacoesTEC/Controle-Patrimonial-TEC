@@ -468,3 +468,56 @@ acima. Só resta:
    Decisão da usuária em 01/09/2026: ela mesma preenche à mão na interface do
    programa da Receita. NÃO mexer no cadastro do PGD por script nem por
    automação de UI sem ela presente.
+
+## Verificação do executável empacotado no Windows (01/09/2026, 02h15)
+
+Critério de pronto pede "o app rodar no Windows do início ao fim sem erro".
+Já estava provado que o BUNDLE React funciona (verificar-telas-no-app.py,
+33 de 33, contra o mesmo `dist/` que vai para o instalador) e que o
+PyInstaller/Inno Setup empacotam sem erro (seção do instalador, acima). O que
+faltava era confirmar o `.exe` empacotado abrindo de verdade no Windows, não
+só via `vite preview`.
+
+**O que funcionou:** lançar `dist-app\ControlePatrimonial\ControlePatrimonial.exe`
+com `Start-Process -FilePath $exe -PassThru` (sem `-WorkingDirectory`, que não
+aceita caminho UNC) e conferir com `$p.HasExited`: o processo abriu, ficou de
+pé os 6 segundos observados, e foi encerrado limpo. Isso já está registrado
+na seção do instalador acima (PID 15400).
+
+**O que NÃO funcionou, e por quê, para não repetir:** tentei ir além e tirar
+um screenshot só da janela do app (não da tela toda, por causa da regra de
+nunca capturar a tela do PC) e depois tentei achar a porta HTTP interna do
+`http_server=True` do pywebview para rodar os mesmos `verificar-telas-no-app.py`
+contra ela. As duas tentativas travaram por atrito de ferramental, não por
+defeito do app:
+- `[System.Diagnostics.Process]::Start($psi)` com `ProcessStartInfo` falha em
+  caminho UNC ("sistema não pode encontrar o arquivo especificado"); o que
+  funciona é `Start-Process -FilePath` puro.
+- `powershell.exe` (5.1) sem BOM corrompe qualquer acento no script
+  (`Eudúcio` vira `Eud?cio`), e isso já tinha me confundido antes; `pwsh.exe`
+  (7) não tem esse problema.
+- Comando PowerShell embutido em string do Bash com aspas DUPLAS: o Bash
+  expande `$_`/`$p` como SUAS PRÓPRIAS variáveis antes de mandar para o
+  Windows (`$_.ProcessName` virou literalmente `unsetenv.ProcessName`, porque
+  `unsetenv` era o último argumento do script de inicialização do shell).
+  Descoberta nesta sessão, vale para qualquer comando futuro deste tipo: usar
+  arquivo `.ps1` (via Write) ou aspas SIMPLES no Bash, nunca `$` solto dentro
+  de aspas duplas do Bash.
+- `Get-NetTCPConnection` e uma segunda tentativa de `Start-Process` travaram
+  por mais de 60 segundos sem produzir NENHUMA saída, mesmo com `timeout 60`
+  do lado Linux — o `timeout` do WSL não necessariamente mata o processo do
+  lado Windows lançado por interop a tempo, então o processo trava solto lá.
+
+**Limpeza:** matei os processos `pwsh.exe` travados (`Stop-Process`) e
+confirmei com `tasklist /FI "IMAGENAME eq ControlePatrimonial.exe"` que não
+sobrou nenhum `ControlePatrimonial.exe` rodando.
+
+**Decisão, para não inventar confirmação que não tenho:** não fiz a captura
+de tela nem a verificação via porta HTTP interna. NÃO afirmo ter visto o
+conteúdo renderizado dentro da janela nativa. O que está provado com
+evidência real é: o processo abre e não crasha (smoke test), o bundle que ele
+serve é o mesmo que passou em 33 de 33 no navegador, e o empacotamento não
+deu erro. Se um dia for preciso confirmar visualmente o rendering dentro da
+janela nativa, o caminho mais robusto é achar a porta do `http_server` do
+pywebview e apontar o Playwright do `verificar-telas-no-app.py` para ela, em
+vez de screenshot nativo — mas isso não foi tentado com sucesso ainda.
