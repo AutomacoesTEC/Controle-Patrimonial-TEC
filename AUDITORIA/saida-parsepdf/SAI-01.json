@@ -105,7 +105,8 @@
         "contribuicaoPrevidenciaria": 4202.12,
         "irrf": 3203.13,
         "decimoTerceiro": 3604.14,
-        "irrfDecimoTerceiro": 304.15
+        "irrfDecimoTerceiro": 304.15,
+        "dataComunicacaoNaoResidente": "2025-12-24"
       },
       {
         "tipo": "exclusivo_0001",
@@ -253,13 +254,13 @@
         "titulo": "Espólio, inventariante e partilha"
       },
       "pdf:saida-definitiva": {
-        "estado": "erro",
+        "estado": "parcial",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "preenchida",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
         "titulo": "Saída definitiva do país",
         "paginaInicio": 1,
         "linhaInicio": 21
@@ -342,13 +343,12 @@
         "linhaInicio": 6
       },
       "pdf:rendimentos-isentos": {
-        "estado": "erro",
+        "estado": "vazia",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "vazia",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
         "titulo": "Rendimentos isentos e não tributáveis",
         "paginaInicio": 2,
         "linhaInicio": 8
@@ -804,7 +804,7 @@
         "titulo": "Saída definitiva do país",
         "paginaInicio": 1,
         "linhaInicio": 21,
-        "presenca": "indeterminada"
+        "presenca": "preenchida"
       },
       "dependentes": {
         "id": "dependentes",
@@ -853,7 +853,7 @@
         "titulo": "Rendimentos isentos e não tributáveis",
         "paginaInicio": 2,
         "linhaInicio": 8,
-        "presenca": "indeterminada"
+        "presenca": "vazia"
       },
       "rendimentos-tributacao-exclusiva": {
         "id": "rendimentos-tributacao-exclusiva",

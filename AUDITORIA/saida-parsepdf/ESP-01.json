@@ -198,13 +198,13 @@
         "linhaInicio": 4
       },
       "pdf:inventariante": {
-        "estado": "erro",
+        "estado": "parcial",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "preenchida",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
         "titulo": "Espólio, inventariante e partilha",
         "paginaInicio": 1,
         "linhaInicio": 19
@@ -242,13 +242,13 @@
         "linhaInicio": 36
       },
       "pdf:herdeiros": {
-        "estado": "erro",
+        "estado": "parcial",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "preenchida",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
+        "motivo": "Dados estruturados, mas a ficha ainda não concluiu o gate de auditoria independente",
         "titulo": "Herdeiros",
         "paginaInicio": 2,
         "linhaInicio": 4
@@ -298,25 +298,23 @@
         "linhaInicio": 14
       },
       "pdf:rendimentos-isentos": {
-        "estado": "erro",
+        "estado": "vazia",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "vazia",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
         "titulo": "Rendimentos isentos e não tributáveis",
         "paginaInicio": 2,
         "linhaInicio": 16
       },
       "pdf:rendimentos-tributacao-exclusiva": {
-        "estado": "erro",
+        "estado": "vazia",
         "formato": "pdf",
-        "presenca": "indeterminada",
+        "presenca": "vazia",
         "suporte": "estruturada",
         "derivado": false,
         "completudeAuditada": false,
-        "motivo": "A ficha foi localizada no PDF, mas o parser não comprovou que estava vazia nem estruturou conteúdo",
         "titulo": "Rendimentos sujeitos à tributação exclusiva ou definitiva",
         "paginaInicio": 2,
         "linhaInicio": 18
@@ -760,7 +758,7 @@
         "titulo": "Espólio, inventariante e partilha",
         "paginaInicio": 1,
         "linhaInicio": 19,
-        "presenca": "indeterminada"
+        "presenca": "preenchida"
       },
       "conjuge": {
         "id": "conjuge",
@@ -788,7 +786,7 @@
         "titulo": "Herdeiros",
         "paginaInicio": 2,
         "linhaInicio": 4,
-        "presenca": "indeterminada"
+        "presenca": "preenchida"
       },
       "rendimentos-pj-titular": {
         "id": "rendimentos-pj-titular",
@@ -823,14 +821,14 @@
         "titulo": "Rendimentos isentos e não tributáveis",
         "paginaInicio": 2,
         "linhaInicio": 16,
-        "presenca": "indeterminada"
+        "presenca": "vazia"
       },
       "rendimentos-tributacao-exclusiva": {
         "id": "rendimentos-tributacao-exclusiva",
         "titulo": "Rendimentos sujeitos à tributação exclusiva ou definitiva",
         "paginaInicio": 2,
         "linhaInicio": 18,
-        "presenca": "indeterminada"
+        "presenca": "vazia"
       },
       "rendimentos-exigibilidade-titular": {
         "id": "rendimentos-exigibilidade-titular",
