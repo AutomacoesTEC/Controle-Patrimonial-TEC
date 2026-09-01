@@ -81,7 +81,7 @@ fechar a extração do participante estrangeiro com teste.
 
 ## 2. O que foi entregue nesta sessão
 
-Vinte e três commits, de `bc6a711` a `ad2a1b8`. Suíte final: 657 aprovados, 0
+Vinte e três commits, de `7cd9764` a `b494adf`. Suíte final: 657 aprovados, 0
 pulados, 0 falhas. Build de produção limpo. Working tree limpo.
 
 ### Higiene do repositório (P0)
@@ -192,16 +192,31 @@ Branch `fix/auditoria-2026-08-24`.
 
 ### O que falta, em ordem
 
-1. **Segunda passada de `filter-branch`** (PAUSADA a pedido da usuária).
-   Resíduo: a palavra `imoveisMesmoCib`, em MINÚSCULA, ainda está em 40 commits do
-   histórico, como nome de variável em `importParsers.test.js`. O regex da
-   primeira passada cobria `Pantaninho` e `PANTANINHO` e não a forma minúscula.
-   No HEAD já foi renomeada para `imoveisMesmoCib`. Fechar isso renumera os
-   hashes outra vez, por isso depende de autorização.
-2. **Citações de hash quebradas.** A reescrita mudou todos os hashes. Os
-   handoffs de 31/08 citam `a02dc49`, `6e8bd0b`, `ad2a1b8`, `bc6a711` e
-   `4ba2c5d`, que não existem mais. Corrigir junto com o item 1, senão o
-   trabalho é refeito.
+1. ~~Segunda passada de `filter-branch`~~ **CONCLUÍDA em 31/08/2026, 21h53,
+   autorizada pela usuária.** A palavra `pantaninho`, em minúscula, estava em
+   50 commits do histórico (contagem real por `git grep` árvore a árvore, não
+   os 40 estimados aqui antes). Reescrita com `git filter-branch
+   --tree-filter` substituindo por `imoveisMesmoCib` nas duas branches
+   (`master` e `fix/auditoria-2026-08-24`), seguida de exclusão das refs de
+   backup (`refs/original/*`) e `git gc --prune=now --aggressive` — sem isso a
+   string continua recuperável no banco de objetos. Verificado por `git grep`
+   objeto a objeto em toda a árvore acessível: zero ocorrências restantes.
+   Suíte rodada de novo depois da reescrita: 733 passando, 0 falhas — sem
+   regressão de conteúdo. Backup fresco antes de rodar, em
+   `~/backups-cp-tec/cp-tec-antes-filterbranch2-2026-08-31.bundle` e
+   `git-dir-antes-filterbranch2-2026-08-31/` (o backup anterior, de 17h31, era
+   de ANTES dos últimos 4 commits do dia e não bastava mais).
+2. ~~Citações de hash quebradas~~ **CONCLUÍDA junto com o item 1.** A segunda
+   reescrita mudou de novo todos os hashes do repositório. Os dez hashes
+   citados nos handoffs (`a02dc49`, `6e8bd0b`, `ad2a1b8`, `bc6a711`, `4ba2c5d`,
+   `1fdcdf5`, `c149341`, `74d6bd1`, `87c1f7e` e, no `HANDOFF-2026-08-19.md`,
+   `726c00c`) foram resolvidos consultando os bundles de backup de ANTES de
+   cada reescrita (que preservam os hashes antigos intactos) e casando pela
+   MENSAGEM do commit, que `filter-branch` nunca altera — nunca por
+   suposição. As três faixas de commits citadas em texto ("vinte e três
+   commits", "cinco commits", "oito commits") foram conferidas por contagem
+   real na sequência nova e batem exatamente. Todas as citações trocadas para
+   os hashes atuais; conferido que os dez hashes novos existem no repositório.
 3. **Cinco PDFs de gabarito superados**: decidir se ficam versionados. Não
    foram abertos ainda.
 4. **Instalador Windows**: depende da decisão sobre certificado de assinatura.
@@ -214,7 +229,7 @@ Branch `fix/auditoria-2026-08-24`.
 
 `~/backups-cp-tec/cp-tec-antes-da-limpeza-2026-08-31.bundle`,
 `git-dir-antes-da-limpeza-2026-08-31.tar.gz` e `manifesto-antes.json`.
-O HEAD anterior à reescrita era `1fdcdf5`.
+O HEAD anterior à reescrita era `f90994d`.
 
 
 ## Sessão de 31/08/2026, noite: das telas ao fluxo real
@@ -222,7 +237,7 @@ O HEAD anterior à reescrita era `1fdcdf5`.
 Estado: suíte em 730 passando, 0 falhas. `npx vite build` limpo.
 `AUDITORIA/verificar-telas-no-app.py` em 32 asserções, todas verdes, contra o
 app de PRODUÇÃO com as três declarações sintéticas importadas pelo próprio
-fluxo. Cinco commits, de `87c1f7e` a `74d6bd1`, na `fix/auditoria-2026-08-24`.
+fluxo. Cinco commits, de `b187b5a` a `a706ddc`, na `fix/auditoria-2026-08-24`.
 
 ### O achado que muda a leitura do resto
 
@@ -311,25 +326,25 @@ pega o botão ainda inerte.
 
 ### Continua aberto, do que já estava
 
-Nada aqui foi tocado, tudo depende de autorização sua:
+Item da segunda passada de `filter-branch` (resíduo "pantaninho" minúsculo) e
+o de citações de hash: CONCLUÍDOS em 31/08/2026 21h53, autorizados pela
+usuária — ver "O que falta, em ordem" acima. O que segue depende de
+autorização:
 
-1. Segunda passada de `filter-branch` (resíduo "imoveisMesmoCib" em 40 commits).
-   Segue PAUSADA. As citações de hash dos handoffs continuam quebradas e
-   devem ser corrigidas junto, senão o trabalho é refeito.
-2. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
+1. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
    versionados.
-3. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-4. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
+2. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+3. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
    extração. Preencher à mão na interface do programa da Receita é o caminho
    seguro: NÃO mexer no cadastro do PGD por script.
 
 
 ## Ponto de retomada (31/08/2026, 21h30) — PAUSADO a pedido da usuária
 
-Estado: HEAD limpo em `c149341`, branch `fix/auditoria-2026-08-24`. Suíte em
+Estado: HEAD limpo em `ba3dec9`, branch `fix/auditoria-2026-08-24`. Suíte em
 733 passando, 0 falhas. `npx vite build` limpo.
 `AUDITORIA/verificar-telas-no-app.py` em 33 asserções, todas verdes.
-Oito commits nesta sessão, de `87c1f7e` a `c149341`. O repositório NÃO tem
+Oito commits nesta sessão, de `b187b5a` a `ba3dec9`. O repositório NÃO tem
 remoto: não há PR nem nada a sincronizar.
 
 ### Como retomar
@@ -367,20 +382,18 @@ ainda não usa, conferidos em AUDITORIA/saida-parsepdf/ e rows-pdfjs/:
 
 ### Achados que continuam esperando decisão sua
 
-Repetidos aqui para não se perderem, os dois desta sessão e os quatro
-anteriores. Nada disso foi tocado:
+Repetidos aqui para não se perderem. Os itens de filter-branch e citações de
+hash, que estavam aqui, foram CONCLUÍDOS em 31/08/2026 21h53 (ver "O que
+falta, em ordem", acima) — o restante segue intocado:
 
 1. O caminho PDF grava `saidaComDeclarante: false` e `nitPisPasep: ''` fixos no
    dependente, e a ficha impressa não traz nenhum dos dois. São defaults, não
    dados lidos. Corrigir para `null` é mudança de contrato da extração.
 2. No demonstrativo da Lei 14.754/2023, a linha LD imprime "-" e o parser
    grava 0. Traço e zero não afirmam a mesma coisa.
-3. Segunda passada de `filter-branch` (resíduo "imoveisMesmoCib"), PAUSADA. As
-   citações de hash dos handoffs continuam quebradas e devem ser corrigidas
-   junto.
-4. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
+3. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
    versionados.
-5. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-6. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
+4. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+5. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
    Preencher à mão na interface do programa da Receita. NÃO mexer no cadastro
    do PGD por script.
