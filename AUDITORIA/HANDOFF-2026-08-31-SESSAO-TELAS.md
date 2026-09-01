@@ -1,5 +1,22 @@
 # Handoff da sessão de 31/08/2026: das telas ao build, e um incidente no PGD
 
+## ESTADO ATUAL, leia antes de tudo (01/09/2026, 02h16)
+
+`grep -c "^- \[ \]" AUDITORIA/MAPA-RESOLUCAO.md` dá 0. Todos os itens de
+"O que falta, em ordem" (mais abaixo) estão CONCLUÍDOS. Só resta UM item
+aberto, e é bloqueado pela usuária, não técnico: RUR-01 (participante rural
+estrangeiro), que ela mesma vai preencher à mão no programa da Receita
+quando tiver tempo (ver seção "Achados que continuam esperando decisão sua").
+
+**Para quem retomar por um /loop automático sem item novo:** rodar
+`npx vitest run` (deve dar verde, hoje 735/735) e conferir o grep acima é
+suficiente para confirmar que nada mudou. Não é preciso inventar verificação
+nova a cada rodada só para preencher a regra "não descansar com problema
+aberto" - a regra vale para problema que EXISTE, e não existe nenhum aqui
+agora. Registrar "conferido, sem novidade" e encerrar a iteração é a coisa
+certa a fazer nesse caso, até que a usuária traga um PDF/DBK/.DEC novo, decida
+algo pendente, ou RUR-01 seja resolvido.
+
 Escrito a pedido, para encerrar a sessão com tudo registrado. Duas partes: o
 INCIDENTE no programa da Receita, que é o mais urgente de ler, e o registro do
 trabalho.
