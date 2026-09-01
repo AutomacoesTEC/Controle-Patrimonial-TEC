@@ -232,6 +232,31 @@ export function descreverTitularidade(pagamento) {
   return nome ? `${rotulo}: ${nome}` : rotulo;
 }
 
+// De QUEM é o rendimento, quando ele é de um dependente.
+//
+// A coluna "Beneficiário" da tela mostrava só "Titular" ou "Dependente". Numa
+// declaração com mais de um dependente, e são a maioria, "Dependente" sozinho
+// não permite dizer de quem é o rendimento. O CPF vem no próprio lançamento
+// (`cpf_dependente`), lido tanto do PDF quanto do .DBK, e nunca era mostrado.
+//
+// RIGOR FISCAL: a atribuição importa. O rendimento do dependente entra na
+// declaração do titular, mas continua sendo rendimento DAQUELE dependente, e é
+// o que decide, por exemplo, se compensa mantê-lo como dependente ou declarar
+// em separado. Confundir de quem é o rendimento erra essa conta.
+//
+// Quando o CPF não casa com nenhum dependente cadastrado no ano, mostra o CPF
+// e não um nome: o lançamento pode ser de um dependente que saiu da lista, e
+// inventar o nome de outro seria pior que não ter nome.
+export function descreverBeneficiarioRendimento(rendimento, dependentes = []) {
+  const rotulo = rendimento?.beneficiario || '';
+  const cpf = String(rendimento?.cpf_dependente || '').replace(/\D/g, '');
+  if (!cpf) return { rotulo, detalhe: '' };
+  const lista = Array.isArray(dependentes) ? dependentes : [];
+  const achado = lista.find(d => String(d?.cpf || '').replace(/\D/g, '') === cpf);
+  const nome = (achado?.nome || '').trim();
+  return { rotulo, detalhe: nome ? `${nome} (${formatCpfCnpj(cpf)})` : formatCpfCnpj(cpf) };
+}
+
 // Número da LINHA na ficha impressa, quando ele é diferente do código interno
 // que o arquivo grava.
 //

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -88,6 +88,7 @@ export default function RendimentosPage() {
       ['CNPJ Fonte', r => formatCpfCnpj(r.cnpj_fonte)],
       ['Nome Fonte Pagadora', r => r.nome_fonte || ''],
       ['Beneficiário', r => r.beneficiario || 'Titular'],
+      ['CPF do dependente', r => formatCpfCnpj(r.cpf_dependente) || ''],
       ['Valor', r => r.valor || 0],
       ['IRRF', r => r.irrf || 0],
       // As três colunas restantes da ficha de pessoa jurídica. Só ela as tem,
@@ -195,7 +196,19 @@ export default function RendimentosPage() {
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(r)}</div>
                           )}
                         </td>
-                        <td>{r.beneficiario}</td>
+                        <td>
+                          {(() => {
+                            const b = descreverBeneficiarioRendimento(r, state.dependentes);
+                            return (
+                              <>
+                                {b.rotulo}
+                                {b.detalhe && (
+                                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{b.detalhe}</div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </td>
                         <td style={{ textAlign: 'right' }} className="currency">
                           {formatCurrency(r.valor)}
                           {/* As outras colunas da ficha de pessoa jurídica.

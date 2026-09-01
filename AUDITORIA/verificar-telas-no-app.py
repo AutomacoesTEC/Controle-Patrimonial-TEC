@@ -79,6 +79,8 @@ with sync_playwright() as p:
     ok("IRRF SOBRE O 13º SALÁRIO: R$ 505,16" in t, "Rendimentos: IRRF do 13º do titular")
     ok("13º SALÁRIO: R$ 1.205,25" in t, "Rendimentos: 13º do dependente")
     ok("IRRF SOBRE O 13º SALÁRIO: R$ 105,26" in t, "Rendimentos: IRRF do 13º do dependente")
+    ok("AJU PES DEPENDENTE UM (333.444.555-08)" in t,
+       "Rendimentos: de qual dependente é o rendimento")
 
     t = ir("Titular e Dependentes")
     ok("ERA RESIDENTE NO EXTERIOR E PASSOU A SER RESIDENTE NO BRASIL" in t, "Titular: pergunta da condição de residência")

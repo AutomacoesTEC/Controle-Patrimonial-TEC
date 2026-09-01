@@ -17,7 +17,7 @@ import { blocosOperacaoGanhoCapital } from './ganhoCapitalDetalhe';
 import { resumirImportacao } from '../utils/importacaoDeclaracao';
 import {
   colunasDaFontePagadora, descreverTipoDemonstrativoExterior, formatarAliquotaFicha,
-  descreverComunicacaoNaoResidente,
+  descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento,
 } from '../utils/formatters';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
@@ -385,5 +385,40 @@ describe.skipIf(!temPdfs)('Importação: espólio e saída definitiva não podem
     expect(sai.estadoFichas['pdf:rendimentos-tributacao-exclusiva'].estado).toBe('parcial');
     expect(sai.rendimentos.find(r => r.tipo === 'exclusivo_0001').valor).toBe(3604.14);
     expect(aju.estadoFichas['pdf:rendimentos-isentos'].estado).toBe('parcial');
+  });
+});
+
+describe.skipIf(!temPdfs)('Rendimentos: de qual dependente é o rendimento', () => {
+  let aju;
+  beforeAll(async () => { aju = await extrair('AJU'); });
+
+  // AJU-01: três lançamentos são de dependente, um em cada ficha (pessoa
+  // jurídica p2 r13, isentos p5 r22 e tributação exclusiva p6 r22), todos com
+  // o CPF 333.444.555-08, que é o do único dependente da declaração (p1 r22).
+  // A tela mostrava só a palavra "Dependente".
+  it('casa o CPF do lançamento com o dependente cadastrado no ano', () => {
+    const doDependente = aju.rendimentos.filter(r => r.cpf_dependente);
+    expect(doDependente.length).toBe(3);
+    for (const r of doDependente) {
+      const b = descreverBeneficiarioRendimento(r, aju.dependentes);
+      expect(b.rotulo).toBe('Dependente');
+      expect(b.detalhe).toBe('AJU PES DEPENDENTE UM (333.444.555-08)');
+    }
+  });
+
+  // Sem dependente cadastrado com aquele CPF, mostra o CPF e não um nome: o
+  // lançamento pode ser de alguém que saiu da lista, e apontar outro nome
+  // erraria a atribuição do rendimento.
+  it('mostra o CPF quando o dependente não está na lista do ano', () => {
+    const r = aju.rendimentos.find(x => x.cpf_dependente);
+    expect(descreverBeneficiarioRendimento(r, []).detalhe).toBe('333.444.555-08');
+    expect(descreverBeneficiarioRendimento(r, null).detalhe).toBe('333.444.555-08');
+  });
+
+  // Rendimento do titular não ganha linha nenhuma.
+  it('não escreve nada no rendimento do titular', () => {
+    const titular = aju.rendimentos.find(r => r.nome_fonte === 'AJU RPJ FONTE TITULAR');
+    expect(descreverBeneficiarioRendimento(titular, aju.dependentes))
+      .toEqual({ rotulo: 'Titular', detalhe: '' });
   });
 });
