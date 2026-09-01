@@ -14,7 +14,11 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { parsePDF } from '../pages/importParsers';
 import { blocosOperacaoGanhoCapital } from './ganhoCapitalDetalhe';
-import { colunasDaFontePagadora, descreverTipoDemonstrativoExterior, formatarAliquotaFicha } from '../utils/formatters';
+import { resumirImportacao } from '../utils/importacaoDeclaracao';
+import {
+  colunasDaFontePagadora, descreverTipoDemonstrativoExterior, formatarAliquotaFicha,
+  descreverComunicacaoNaoResidente,
+} from '../utils/formatters';
 
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 const PDFS = {
@@ -287,5 +291,99 @@ describe.skipIf(!temPdfs)('Ganho de capital: as perguntas impressas na ficha', (
     const imovel = aju.ganhosCapitalOficial.operacoes.find(o => o.tipo === 'imovel');
     const anteriores = blocosOperacaoGanhoCapital(imovel).find(b => b.id === 'anteriores');
     expect(anteriores.linhas.map(l => l.rotulo)).toEqual(['Soma dos ganhos de alienações anteriores']);
+  });
+});
+
+describe.skipIf(!temPdfs)('Saída definitiva: a comunicação à fonte pagadora', () => {
+  let aju; let sai;
+  beforeAll(async () => { aju = await extrair('AJU'); sai = await extrair('SAI'); });
+
+  // SAI-01 p1 r35: "Data da comunicação da condição de não residente à fonte
+  // pagadora: 24/12/2025". A linha é impressa DENTRO da ficha de rendimentos
+  // de pessoa jurídica, logo abaixo do CNPJ da fonte, e não era lida.
+  //
+  // RIGOR FISCAL: é dessa data em diante que a fonte deixa de aplicar a tabela
+  // do residente. É distinta da data de caracterização da condição de não
+  // residente, do quadro de saída definitiva (p1 r23), e as duas podem não
+  // coincidir. Nesta declaração coincidem, as duas em 24/12/2025.
+  it('lê a data e a leva à linha da fonte pagadora', () => {
+    const fonte = sai.rendimentos.find(r => r.nome_fonte === 'SAI RPJ FONTE TITULAR');
+    expect(fonte.dataComunicacaoNaoResidente).toBe('2025-12-24');
+    expect(descreverComunicacaoNaoResidente(fonte))
+      .toBe('Condição de não residente comunicada a esta fonte em 24/12/2025');
+    expect(sai.saidaDefinitivaOficial.dataNaoResidente).toBe('24/12/2025');
+  });
+
+  // A linha só existe na declaração de saída definitiva. No ajuste anual o
+  // campo não pode nascer, nem vazio: a tela mostraria um aviso de condição de
+  // não residente para quem nunca deixou o país.
+  it('não cria o campo na declaração de ajuste anual', () => {
+    for (const r of aju.rendimentos.filter(x => x.tipo === 'tributavel_pj')) {
+      expect(r.dataComunicacaoNaoResidente).toBeUndefined();
+      expect(descreverComunicacaoNaoResidente(r)).toBe('');
+    }
+  });
+
+  // E não pode contaminar o valor das colunas nem o número de rendimentos
+  // lidos: a linha da comunicação não é item da ficha.
+  it('não vira rendimento nem mexe nas colunas da fonte', () => {
+    const pj = sai.rendimentos.filter(r => r.tipo === 'tributavel_pj');
+    expect(pj).toHaveLength(1);
+    expect(pj[0].valor).toBe(43201.11);
+    expect(pj[0].irrf).toBe(3203.13);
+  });
+});
+
+describe.skipIf(!temPdfs)('Importação: espólio e saída definitiva não podem ficar bloqueados', () => {
+  let aju; let esp; let sai;
+  beforeAll(async () => {
+    aju = await extrair('AJU'); esp = await extrair('ESP'); sai = await extrair('SAI');
+  });
+
+  // O botão "Usar esta declaração" da revisão da importação fica DESABILITADO
+  // quando alguma ficha está em estado de erro (resumirImportacao.temBloqueio,
+  // usado em RevisaoImportacaoModal.jsx). Enquanto isso acontecia, nenhuma
+  // declaração final de espólio e nenhuma de saída definitiva podia entrar no
+  // app, e as telas próprias dessas modalidades eram inalcançáveis pelo fluxo
+  // real. Achado dirigindo o app de produção, não pela suíte.
+  //
+  // Duas causas, as duas corrigidas: as fichas de saída definitiva, de
+  // inventariante e de herdeiros não constavam do mapa de "esta ficha tem
+  // dados", embora o parser as estruture; e as fichas de rendimentos isentos e
+  // de tributação exclusiva vazias imprimem só "TOTAL 0,00", sem a expressão
+  // "Sem Informações" que o detector de ficha vazia procurava.
+  it('nenhuma das três declarações sintéticas bloqueia a importação', () => {
+    for (const [nome, r] of [['AJU-01', aju], ['ESP-01', esp], ['SAI-01', sai]]) {
+      const resumo = resumirImportacao(r);
+      const emErro = resumo.fichas.filter(f => f.estado === 'erro').map(f => f.id);
+      expect(emErro, `${nome} tem ficha em erro`).toEqual([]);
+      expect(resumo.temBloqueio, `${nome} bloqueia a importação`).toBe(false);
+    }
+  });
+
+  // SAI-01 p1 r21 a r25 e ESP-01 p1 r19 a r32 e p2 r4 a r6: o conteúdo está
+  // estruturado, então a ficha é "parcial" (dados lidos), nunca "erro".
+  it('as fichas próprias da modalidade constam como estruturadas', () => {
+    expect(sai.estadoFichas['pdf:saida-definitiva'].estado).toBe('parcial');
+    expect(sai.saidaDefinitivaOficial.dataNaoResidente).toBe('24/12/2025');
+    expect(esp.estadoFichas['pdf:inventariante'].estado).toBe('parcial');
+    expect(esp.estadoFichas['pdf:herdeiros'].estado).toBe('parcial');
+    expect(esp.espolioOficial.herdeiros).toHaveLength(2);
+  });
+
+  // SAI-01 p2 r7/r8 e ESP-01 p2 r15/r16: título e, logo abaixo, "TOTAL 0,00".
+  it('ficha cujo único conteúdo é o total zerado conta como vazia', () => {
+    expect(sai.estadoFichas['pdf:rendimentos-isentos'].estado).toBe('vazia');
+    expect(esp.estadoFichas['pdf:rendimentos-isentos'].estado).toBe('vazia');
+    expect(esp.estadoFichas['pdf:rendimentos-tributacao-exclusiva'].estado).toBe('vazia');
+  });
+
+  // E a regra NÃO pode engolir ficha com conteúdo: no SAI-01 a de tributação
+  // exclusiva traz o 13º salário de 3.604,14 (p2 r10) antes do total, e
+  // continua como estruturada.
+  it('não marca como vazia a ficha que tem item impresso antes do total', () => {
+    expect(sai.estadoFichas['pdf:rendimentos-tributacao-exclusiva'].estado).toBe('parcial');
+    expect(sai.rendimentos.find(r => r.tipo === 'exclusivo_0001').valor).toBe(3604.14);
+    expect(aju.estadoFichas['pdf:rendimentos-isentos'].estado).toBe('parcial');
   });
 });

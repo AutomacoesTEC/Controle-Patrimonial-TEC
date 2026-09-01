@@ -21,6 +21,7 @@ from playwright.sync_api import sync_playwright
 
 RAIZ = str(Path(__file__).resolve().parent.parent)
 PDF = f"{RAIZ}/output/pdf/AJU-01-DECLARACAO-COMPLETA-IRPF-2026.pdf"
+PDF_SAIDA = f"{RAIZ}/output/pdf/SAI-01-DECLARACAO-SAIDA-DEFINITIVA-IRPF-2026.pdf"
 achados = []
 
 def norm(t):
@@ -32,6 +33,17 @@ def norm(t):
 def ok(cond, msg):
     achados.append(("OK  " if cond else "FALHA", msg))
 
+def confirmar_importacao(pg):
+    # O botão do modal de revisão NASCE DESABILITADO e só habilita quando a
+    # leitura do PDF termina. Esperar só pelo texto pega o botão ainda inerte.
+    botao = pg.get_by_role("button", name="Usar esta declaração")
+    botao.wait_for(state="visible", timeout=180000)
+    for _ in range(180):
+        if botao.is_enabled(): break
+        pg.wait_for_timeout(1000)
+    botao.click()
+    pg.wait_for_selector("text=Preenchido a partir de", timeout=60000)
+
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1600, "height": 1200})
@@ -39,10 +51,8 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: erros.append(str(e)))
     pg.goto("http://localhost:4173/", wait_until="networkidle")
     pg.set_input_files("input[type=file]", PDF)
-    pg.wait_for_selector("text=Usar esta declaração", timeout=180000)
-    pg.get_by_role("button", name="Usar esta declaração").click()
-    pg.wait_for_selector("text=Preenchido a partir de", timeout=60000)
-    pg.fill("input.form-control >> nth=0", "TESTE AJU 01")
+    confirmar_importacao(pg)
+    pg.locator("form input.form-control").first.fill("TESTE AJU 01")
     pg.get_by_role("button", name="Criar e Entrar").click()
     pg.wait_for_timeout(2500)
 
@@ -102,6 +112,26 @@ with sync_playwright() as p:
     t = ir("Relatório IRPF")
     ok("APLICAÇÃO FINANCEIRA" in t and "LUCROS E DIVIDENDOS" in t, "Relatório: legenda AF e LD do demonstrativo do exterior")
     ok("PARCELA NÃO DEDUTÍVEL" in t, "Relatório: coluna de parcela não dedutível")
+
+    # Segundo perfil, com a declaração de SAÍDA DEFINITIVA: é a única que
+    # imprime a comunicação da condição de não residente à fonte pagadora.
+    pg.get_by_role("button", name=re.compile("Trocar Perfil")).first.click()
+    pg.wait_for_timeout(1200)
+    pg.get_by_role("button", name=re.compile("Novo Perfil")).first.click()
+    pg.wait_for_timeout(600)
+    pg.set_input_files("input[type=file]", PDF_SAIDA)
+    confirmar_importacao(pg)
+    pg.locator("form input.form-control").first.fill("TESTE SAI 01")
+    pg.get_by_role("button", name="Criar e Entrar").click()
+    pg.wait_for_timeout(2500)
+
+    t = ir("Rendimentos")
+    ok("CONDIÇÃO DE NÃO RESIDENTE COMUNICADA A ESTA FONTE EM 24/12/2025" in t,
+       "Saída definitiva: comunicação à fonte pagadora na linha do rendimento")
+
+    t = ir("Saída Definitiva|Modalidade|Final de Espólio")
+    ok("DATA DA CARACTERIZAÇÃO DA CONDIÇÃO DE NÃO RESIDENTE" in t,
+       "Saída definitiva: quadro da condição de residência")
 
     ok(not erros, f"Sem erro de JavaScript ({erros[:2]})")
     if len(sys.argv) > 1: pg.screenshot(path=sys.argv[1], full_page=True)

@@ -327,6 +327,22 @@ export function formatarAliquotaFicha(valor) {
   return `${numero.toFixed(2).replace('.', ',')}%`;
 }
 
+// A data em que a condição de não residente foi comunicada à FONTE PAGADORA,
+// impressa dentro da ficha de rendimentos de pessoa jurídica da declaração de
+// saída definitiva (SAI-01 p1 r35).
+//
+// RIGOR FISCAL: é dessa data em diante que a fonte deixa de aplicar a tabela
+// progressiva do residente. Ela é distinta da data de caracterização da
+// condição de não residente, que fica no quadro da saída definitiva, e as duas
+// podem não coincidir. Aparece na linha da fonte pagadora, que é a quem a
+// comunicação foi feita.
+export function descreverComunicacaoNaoResidente(rendimento) {
+  const iso = rendimento?.dataComunicacaoNaoResidente;
+  if (!iso) return '';
+  const data = formatDate(iso);
+  return data ? `Condição de não residente comunicada a esta fonte em ${data}` : '';
+}
+
 // A coluna "Tipo" do Demonstrativo de Apuração da Lei nº 14.754/2023, com a
 // legenda que a própria ficha imprime logo abaixo da tabela (AJU-01 p39 r11,
 // r14, r15 e r18 a r20).

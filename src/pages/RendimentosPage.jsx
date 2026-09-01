@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -186,6 +186,11 @@ export default function RendimentosPage() {
                         <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
                         <td>
                           {(r.nome_fonte || '').substring(0, 50)}
+                          {descreverComunicacaoNaoResidente(r) && (
+                            <div style={{ fontSize: '11px', color: 'var(--accent-warning)' }} title="A partir dessa data a fonte pagadora deixa de aplicar a tabela do residente. Não é a mesma data da caracterização da condição de não residente, que fica no quadro da saída definitiva.">
+                              {descreverComunicacaoNaoResidente(r)}
+                            </div>
+                          )}
                           {descreverOrigemDocumento(r) && (
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(r)}</div>
                           )}

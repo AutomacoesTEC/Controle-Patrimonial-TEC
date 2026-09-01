@@ -3063,6 +3063,9 @@ const rvSepararLinha = (row) => separarRotuloEValores(row, RV_ALIQUOTA);
 // tabela atravessa páginas (no segundo contribuinte ela começa na página 1 e
 // termina na 2) e fecha em "TOTAL".
 const RPJ_COLUNAS = ['valor', 'contribuicaoPrevidenciaria', 'irrf', 'decimoTerceiro', 'irrfDecimoTerceiro'];
+// A linha que só existe na declaração de saída definitiva, dentro da ficha de
+// rendimentos de pessoa jurídica (SAI-01 p1 r35).
+const RPJ_COMUNICACAO_NAO_RESIDENTE = /Data da comunica[çc][ãa]o da condi[çc][ãa]o de n[ãa]o residente [àa] fonte pagadora:\s*(\d{2}\/\d{2}\/\d{4})/i;
 const RPJ_TITULO = /^RENDIMENTOS TRIBUTÁVEIS RECEBIDOS DE PESSOAS? JURÍDICAS? PEL(O TITULAR|OS DEPENDENTES)$/;
 const RPJ_CABECALHO = 'NOME DA FONTE PAGADORA';
 const RPJ_CPF_DEPENDENTE = /^CPF DO DEPENDENTE:$/;
@@ -4171,6 +4174,34 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
       }
       if (fichaPdfAtual && row.cells.some(c => /^Sem Informações$/i.test(c.text.trim()))) {
         fichasPdfObservadas[fichaPdfAtual].presenca = 'vazia';
+      }
+      // Nem toda ficha vazia imprime "Sem Informações". As de RENDIMENTOS
+      // ISENTOS e de TRIBUTAÇÃO EXCLUSIVA, quando não têm nenhum código
+      // preenchido, imprimem só a linha "TOTAL 0,00" logo abaixo do título:
+      // SAI-01 p2 r7/r8 e ESP-01 p2 r15/r16 e r17/r18.
+      //
+      // Isso não era acabamento: sem dados estruturados e sem prova de que
+      // estava vazia, a ficha era classificada como ERRO, e uma única ficha em
+      // erro DESABILITA o botão "Usar esta declaração" na revisão da
+      // importação (resumirImportacao.temBloqueio). O efeito era que nenhuma
+      // declaração final de espólio e nenhuma de saída definitiva podia ser
+      // importada pelo app, e as telas próprias dessas modalidades ficavam
+      // inalcançáveis pelo fluxo real.
+      //
+      // A regra é estreita de propósito: só vale quando o TOTAL é a PRIMEIRA
+      // linha depois do título da ficha, na mesma página. Ficha que lista
+      // itens antes do total não é tocada, mesmo que o total seja zero, e
+      // conteúdo estruturado continua prevalecendo sobre esta marca (ver
+      // `if (temDados) observada.presenca = 'preenchida'`).
+      const observadaAtual = fichaPdfAtual ? fichasPdfObservadas[fichaPdfAtual] : null;
+      if (observadaAtual && observadaAtual.presenca === 'indeterminada'
+        && observadaAtual.paginaInicio === pageNum && ri + 1 === observadaAtual.linhaInicio + 1) {
+        const textos = row.cells.map(c => normSpace(c.text));
+        const ehTotal = textos.some(t => /^TOTAL$/i.test(t));
+        const valores = textos.filter(t => RV_VALOR.test(t));
+        if (ehTotal && valores.length > 0 && valores.every(t => parseMoneyBR(t) === 0)) {
+          observadaAtual.presenca = 'vazia';
+        }
       }
 
       if (!contribuinte.nome && rowHasCell(row, 'NOME:')) {
@@ -5741,6 +5772,23 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         if (rowHasCell(row, RPJ_CABECALHO)) { flushRpj(); continue; }
         if (rowHasCell(row, 'TOTAL')) { flushRpj(); continue; }
 
+        // "Data da comunicação da condição de não residente à fonte pagadora"
+        // (SAI-01 p1 r35). A ficha só a imprime na declaração de SAÍDA
+        // DEFINITIVA, e ela vem DEPOIS da linha do CNPJ, que já fechou o item:
+        // por isso a data é gravada no último rendimento emitido, e não no
+        // item corrente.
+        //
+        // RIGOR FISCAL: é a partir dessa comunicação que a fonte pagadora
+        // passa a tratar quem declara como NÃO RESIDENTE, e a retenção deixa
+        // de seguir a tabela progressiva. A data da saída e a data da
+        // comunicação são coisas diferentes e podem não coincidir.
+        const comunicacao = RPJ_COMUNICACAO_NAO_RESIDENTE.exec(normSpace(row.cells.map(c => c.text).join(' ')));
+        if (comunicacao) {
+          const alvoRpj = currentRpj || [...rendimentos].reverse().find(r => r.tipo === 'tributavel_pj');
+          if (alvoRpj) alvoRpj.dataComunicacaoNaoResidente = dataDDMMAAAAparaIso(comunicacao[1].replace(/\D/g, ''));
+          continue;
+        }
+
         // Linha "CNPJ/CPF: <doc>" fecha o item e traz os documentos. Na ficha
         // dos dependentes ela traz DOIS documentos: o da fonte pagadora
         // primeiro e, depois de "CPF DO DEPENDENTE:", o do dependente. É por
@@ -6209,6 +6257,14 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
     'fii-fiagro-titular': fiiComDados.some(item => item.titular),
     'fii-fiagro-dependentes': fiiComDados.some(item => !item.titular),
     'lei-14754': demonstrativoExteriorOficial.length > 0,
+    // As três fichas próprias das modalidades que NÃO são ajuste anual. O
+    // parser estrutura as três desde sempre, e o mapa não as registrava: a
+    // ficha era dada como localizada e sem conteúdo, virava ERRO, e o erro
+    // bloqueava a importação inteira da declaração final de espólio e da de
+    // saída definitiva. Ver o comentário do TOTAL zerado, acima.
+    'saida-definitiva': Boolean(saidaDefinitivaOficial),
+    inventariante: Boolean(espolioOficial),
+    herdeiros: (espolioOficial?.herdeiros || []).length > 0,
     resumo: Boolean(impostoDevido),
   };
 
