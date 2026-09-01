@@ -514,6 +514,27 @@ describe.skipIf(!temPdfs)('PDF sintético: metadados dos Bens e Direitos', () =>
     expect(aju.demonstrativoExteriorOficial.every(d => d.bem === 7)).toBe(true);
   });
 
+  // Demonstrativo Lei 14.754/2023: o "-" impresso em Ganho/Prejuízo e Imposto
+  // Devido da linha LD (AJU-01 p39 r15) não é zero, é "não se aplica" (LD é
+  // tributado em 31/dez, não na realização) — tem que virar null, nunca 0.
+  it('linha LD do demonstrativo da Lei 14.754/2023 grava null onde a ficha imprime "-"', () => {
+    const af = aju.demonstrativoExteriorOficial.find(d => d.tipo === 'AF');
+    const ld = aju.demonstrativoExteriorOficial.find(d => d.tipo === 'LD');
+    expect(af).toBeTruthy();
+    expect(ld).toBeTruthy();
+    // AF (p39 r14): todas as colunas vêm com número real, nenhuma é "-".
+    expect(af.ganhoPrejuizo).toBeCloseTo(3713.63, 2);
+    expect(af.impostoDevido).toBeCloseTo(557.04, 2);
+    // LD (p39 r15): "-" nestas duas colunas vira null, não 0.
+    expect(ld.ganhoPrejuizo).toBeNull();
+    expect(ld.impostoDevido).toBeNull();
+    // As outras três colunas da mesma linha LD são número real, inclusive um
+    // 0,00 genuíno em baseCalculo — que continua 0, não null.
+    expect(ld.impostoPagoBrasilExterior).toBeCloseTo(314.64, 2);
+    expect(ld.baseCalculo).toBe(0);
+    expect(ld.saldo).toBeCloseTo(1616.03, 2);
+  });
+
   // bens-07: Inscrição Municipal (IPTU), Matrícula, RENAVAM.
   it('extrai Inscrição Municipal, Matrícula e RENAVAM quando impressos', () => {
     const imovel = aju.bens.find(b => b.matricula === '11001');
@@ -994,6 +1015,17 @@ describe.skipIf(!temPdfs)('origem de cada item no documento', () => {
       expect(r.origemDocumento.pagina).toBeGreaterThan(0);
       expect(r.origemDocumento.pagina).toBeLessThanOrEqual(41);
       expect(r.origemDocumento.linha).toBeGreaterThan(0);
+    }
+  });
+
+  it('dependente pelo PDF grava null em saidaComDeclarante/nitPisPasep, nunca false/vazio', () => {
+    // A ficha impressa de DEPENDENTES não traz nenhum dos dois campos (só o
+    // .DBK, registro 25, os lê de verdade). Gravar false/'' afirmaria um dado
+    // que o PDF não tem; null é "não lido".
+    expect(aju.dependentes.length).toBeGreaterThan(0);
+    for (const dep of aju.dependentes) {
+      expect(dep.saidaComDeclarante).toBeNull();
+      expect(dep.nitPisPasep).toBeNull();
     }
   });
 

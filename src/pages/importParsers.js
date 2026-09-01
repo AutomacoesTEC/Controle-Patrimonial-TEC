@@ -3608,9 +3608,15 @@ const gcNormalizaRotulo = (t) => normSpace(t).replace(/\s*-?\s*\((R\$|%|US\$)\)\
 // Ficha "DEMONSTRATIVO DE APURAÇÃO - LEI 14.754/2023": uma linha por bem, com
 // as colunas Bem | Tipo | Ganho/Prejuízo | Imposto Devido | Imposto Pago
 // Brasil/Exterior | Base de Cálculo | Saldo. Mesmo formato de saída do registro
-// 37 do `.DBK`. A coluna de imposto pago vem impressa como "-" quando é zero,
-// e não como "0,00" — daí o tratamento explícito do hífen.
+// 37 do `.DBK`. Nas colunas de valor (Imposto Pago Brasil/Exterior, Base de
+// Cálculo, Saldo) o "-" impresso é zero de verdade (AJU-01, bem 7 tipo AF:
+// Imposto Pago Brasil/Exterior "-"), então vira 0. Já em Ganho/Prejuízo e
+// Imposto Devido, o "-" só aparece na linha do tipo LD (lucro de entidade
+// controlada, tributado em 31/dez, não na realização) e afirma outra coisa:
+// não é zero, é "não se aplica a este tipo de bem" — por isso essas duas
+// colunas viram null, nunca 0, quando vier "-".
 const EXT_COLUNAS = ['ganhoPrejuizo', 'impostoDevido', 'impostoPagoBrasilExterior', 'baseCalculo', 'saldo'];
+const EXT_COLUNAS_NAO_APLICAVEL_VIRA_NULL = new Set(['ganhoPrejuizo', 'impostoDevido']);
 const EXT_TIPO = /^(AF|LD)$/;
 
 const RIE_AGREGADA = /^(\d{1,2})\s*[.\-]\s*(.*)$/;
@@ -5472,6 +5478,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
           const item = { bem: parseInt(cells[0], 10), tipo: cells[1] };
           EXT_COLUNAS.forEach((chave, i) => {
             const t = valores[i];
+            if (t === '-' && EXT_COLUNAS_NAO_APLICAVEL_VIRA_NULL.has(chave)) { item[chave] = null; return; }
             item[chave] = t === undefined || t === '-' ? 0 : parseMoneyBR(t);
           });
           demonstrativoExteriorOficial.push(item);
@@ -5611,8 +5618,11 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
           dataNascimento: data ? dataDDMMAAAAparaIso(data.replace(/\D/g, '')) : '',
           // Código cru, igual ao que o .DBK entrega (ver registro 25).
           parentesco: cells[0].padStart(2, '0'),
-          saidaComDeclarante: false,
-          nitPisPasep: '',
+          // A ficha impressa não traz nenhum dos dois campos (só o .DBK lê,
+          // em field(line,100,1) e field(line,101,11)): null é "não lido",
+          // não "não" / "vazio" — que afirmariam um dado que o PDF não tem.
+          saidaComDeclarante: null,
+          nitPisPasep: null,
           moraComTitular: null,
           email: '',
           dddCelular: '',

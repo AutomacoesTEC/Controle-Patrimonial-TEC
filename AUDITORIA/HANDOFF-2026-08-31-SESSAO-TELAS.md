@@ -217,8 +217,13 @@ Branch `fix/auditoria-2026-08-24`.
    commits", "cinco commits", "oito commits") foram conferidas por contagem
    real na sequência nova e batem exatamente. Todas as citações trocadas para
    os hashes atuais; conferido que os dez hashes novos existem no repositório.
-3. **Cinco PDFs de gabarito superados**: decidir se ficam versionados. Não
-   foram abertos ainda.
+3. ~~Cinco PDFs de gabarito superados~~ **FECHADA em 31/08/2026, 22h10.** Não
+   era decisão em aberto: o `.gitignore` já tem regra específica para cada um
+   dos cinco (`output/pdf/*-PRE-*.pdf`, `*-33pag-*.pdf`, `*-41pag-*.pdf`,
+   `*.microsoft-print-image-only-*.pdf`), conferido com `git check-ignore -v`
+   arquivo por arquivo. Ficam de fora do versionamento (só locais, como prova
+   de auditoria citada por SHA-256 em `OCORRENCIAS-PREENCHIMENTO-IRPF-2026.md`
+   e `AUDITORIA-EXTRACAO-PDF-IRPF-2026.md`), e nenhum deles está commitado.
 4. **Instalador Windows**: depende da decisão sobre certificado de assinatura.
 5. **Participante rural estrangeiro (RUR-01)**: segue sem PDF que exercite a
    extração. O caminho seguro é preencher a declaração à mão na interface do
@@ -326,15 +331,12 @@ pega o botão ainda inerte.
 
 ### Continua aberto, do que já estava
 
-Item da segunda passada de `filter-branch` (resíduo "pantaninho" minúsculo) e
-o de citações de hash: CONCLUÍDOS em 31/08/2026 21h53, autorizados pela
-usuária — ver "O que falta, em ordem" acima. O que segue depende de
-autorização:
+Itens da segunda passada de `filter-branch`, citações de hash e PDFs de
+gabarito superados: CONCLUÍDOS em 31/08/2026, autorizados pela usuária — ver
+"O que falta, em ordem" acima. O que segue depende de autorização:
 
-1. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
-   versionados.
-2. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-3. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
+1. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+2. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
    extração. Preencher à mão na interface do programa da Receita é o caminho
    seguro: NÃO mexer no cadastro do PGD por script.
 
@@ -382,18 +384,16 @@ ainda não usa, conferidos em AUDITORIA/saida-parsepdf/ e rows-pdfjs/:
 
 ### Achados que continuam esperando decisão sua
 
-Repetidos aqui para não se perderem. Os itens de filter-branch e citações de
-hash, que estavam aqui, foram CONCLUÍDOS em 31/08/2026 21h53 (ver "O que
-falta, em ordem", acima) — o restante segue intocado:
+Repetidos aqui para não se perderem. Os itens de filter-branch, citações de
+hash e PDFs de gabarito, que estavam aqui, foram CONCLUÍDOS em 31/08/2026 (ver
+"O que falta, em ordem", acima) — o restante segue intocado:
 
 1. O caminho PDF grava `saidaComDeclarante: false` e `nitPisPasep: ''` fixos no
    dependente, e a ficha impressa não traz nenhum dos dois. São defaults, não
    dados lidos. Corrigir para `null` é mudança de contrato da extração.
 2. No demonstrativo da Lei 14.754/2023, a linha LD imprime "-" e o parser
    grava 0. Traço e zero não afirmam a mesma coisa.
-3. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
-   versionados.
-4. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-5. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
+3. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+4. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
    Preencher à mão na interface do programa da Receita. NÃO mexer no cadastro
    do PGD por script.

@@ -1921,8 +1921,14 @@ describe.skipIf(!temArquivos)('parsePDF: Dependentes, Resumo e Lei 14.754 batend
     const { rp, rd } = await lerAmbos();
     // A proveniência é justamente o que DIFERE entre os dois caminhos (página e
     // linha no PDF, número do registro no arquivo eletrônico), e por isso sai
-    // da comparação dos dois lados. O que tem que ser idêntico é a ficha.
-    const semProveniencia = (lista) => lista.map(({ origemDocumento, ...dependente }) => dependente);
+    // da comparação dos dois lados. saidaComDeclarante/nitPisPasep também: a
+    // ficha impressa não traz nenhum dos dois (só o .DBK, registro 25), então
+    // o PDF grava null (não lido) e o .DBK grava o que leu de fato - aqui,
+    // false/"" são valor real do arquivo, não default do PDF. O que tem que
+    // ser idêntico é o resto da ficha.
+    const semProveniencia = (lista) => lista.map(
+      ({ origemDocumento, saidaComDeclarante, nitPisPasep, ...dependente }) => dependente,
+    );
     expect(semProveniencia(rp.dependentes)).toEqual(semProveniencia(rd.dependentes));
     // E cada caminho tem que dizer de onde tirou o dependente, no formato dele.
     expect(rp.dependentes[0].origemDocumento).toMatchObject({ formato: 'pdf' });
@@ -1932,6 +1938,12 @@ describe.skipIf(!temArquivos)('parsePDF: Dependentes, Resumo e Lei 14.754 batend
     // O código de parentesco vai cru nos dois, sem tradução (ver registro 25).
     expect(rp.dependentes[0].parentesco).toBe('11');
     expect(rp.dependentes[0].dataNascimento).toBe('1955-01-19');
+    // Contrato novo: PDF nunca lê estes dois campos (ficha impressa não os
+    // traz); .DBK lê de verdade, e aqui o valor real é false/"".
+    expect(rp.dependentes[0].saidaComDeclarante).toBeNull();
+    expect(rp.dependentes[0].nitPisPasep).toBeNull();
+    expect(rd.dependentes[0].saidaComDeclarante).toBe(false);
+    expect(rd.dependentes[0].nitPisPasep).toBe('');
   }, 30000);
 
   it('o título "DEPENDENTES" não captura as fichas que só terminam nessa palavra', async () => {

@@ -377,8 +377,8 @@ export default function RelatorioPage() {
                           );
                         })()}
                       </td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.ganhoPrejuizo)}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.impostoDevido)}</td>
+                      <td style={{ textAlign: 'right' }} className="currency">{d.ganhoPrejuizo === null ? '-' : formatCurrency(d.ganhoPrejuizo)}</td>
+                      <td style={{ textAlign: 'right' }} className="currency">{d.impostoDevido === null ? '-' : formatCurrency(d.impostoDevido)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.impostoPagoBrasilExterior)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.baseCalculo)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.saldo)}</td>

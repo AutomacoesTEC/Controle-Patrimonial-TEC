@@ -762,8 +762,8 @@
         "cpf": "33344455508",
         "dataNascimento": "2015-02-12",
         "parentesco": "21",
-        "saidaComDeclarante": false,
-        "nitPisPasep": "",
+        "saidaComDeclarante": null,
+        "nitPisPasep": null,
         "moraComTitular": false,
         "email": "AJU.PES.DEP1@EXAMPLE.INVALID",
         "dddCelular": "11",
@@ -1400,8 +1400,8 @@
       {
         "bem": 7,
         "tipo": "LD",
-        "ganhoPrejuizo": 0,
-        "impostoDevido": 0,
+        "ganhoPrejuizo": null,
+        "impostoDevido": null,
         "impostoPagoBrasilExterior": 314.64,
         "baseCalculo": 0,
         "saldo": 1616.03
