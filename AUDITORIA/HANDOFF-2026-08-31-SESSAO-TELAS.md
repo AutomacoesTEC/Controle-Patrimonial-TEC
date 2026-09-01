@@ -322,3 +322,65 @@ Nada aqui foi tocado, tudo depende de autorização sua:
 4. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
    extração. Preencher à mão na interface do programa da Receita é o caminho
    seguro: NÃO mexer no cadastro do PGD por script.
+
+
+## Ponto de retomada (31/08/2026, 21h30) — PAUSADO a pedido da usuária
+
+Estado: HEAD limpo em `c149341`, branch `fix/auditoria-2026-08-24`. Suíte em
+733 passando, 0 falhas. `npx vite build` limpo.
+`AUDITORIA/verificar-telas-no-app.py` em 33 asserções, todas verdes.
+Oito commits nesta sessão, de `87c1f7e` a `c149341`. O repositório NÃO tem
+remoto: não há PR nem nada a sincronizar.
+
+### Como retomar
+
+1. Ler a seção "Sessão de 31/08/2026, noite: das telas ao fluxo real", acima.
+   Ela tem o levantamento, o que foi ligado e por quê.
+2. Antes de mexer em tela, rodar a prova no app real, que é o que pega ligação
+   esquecida no .jsx (a suíte não pega):
+
+       npx vite build
+       npx vite preview --port 4173 --strictPort &
+       ~/emails-tools/venv/bin/python AUDITORIA/verificar-telas-no-app.py
+
+   Ele cria três perfis, importando AJU-01, SAI-01 e ESP-01 pelo próprio fluxo
+   do app. Esperado: "TOTAL 33 de 33".
+3. `npx vitest run` a cada passo. Falha isolada pode ser flake de carregamento
+   de fonte do pdfjs; o estado estável é verde.
+
+### Fila do que sobrou no levantamento, por peso fiscal
+
+Nenhum destes foi feito. Todos são campos que a extração entrega e a interface
+ainda não usa, conferidos em AUDITORIA/saida-parsepdf/ e rows-pdfjs/:
+
+1. `numeroOperacao` do ganho de capital. Vem vazio nas três declarações
+   sintéticas, então hoje não há dado que exercite a exibição.
+2. `descricao_ficha` dos rendimentos isentos e exclusivos. É a descrição que a
+   ficha imprime ("Lucros e dividendos recebidos"), hoje substituída pelo
+   rótulo próprio do app. Pode ser redundante: avaliar antes de exibir.
+3. `imovelCib` dos participantes rurais. Vazio no AJU-01.
+4. `esferaFundo` das doações de ECA e pessoa idosa. NÃO é lacuna real: o
+   parser já concatena a esfera no `nome_beneficiario` ("Municipal - SP - SÃO
+   PAULO"), e é isso que a tela mostra.
+5. `ordemDeclaracao`, `chaveImportacao`, `movimentacoes`, `temDados` e
+   `origem`: infraestrutura interna, não são dado da declaração. Ficam fora.
+
+### Achados que continuam esperando decisão sua
+
+Repetidos aqui para não se perderem, os dois desta sessão e os quatro
+anteriores. Nada disso foi tocado:
+
+1. O caminho PDF grava `saidaComDeclarante: false` e `nitPisPasep: ''` fixos no
+   dependente, e a ficha impressa não traz nenhum dos dois. São defaults, não
+   dados lidos. Corrigir para `null` é mudança de contrato da extração.
+2. No demonstrativo da Lei 14.754/2023, a linha LD imprime "-" e o parser
+   grava 0. Traço e zero não afirmam a mesma coisa.
+3. Segunda passada de `filter-branch` (resíduo "imoveisMesmoCib"), PAUSADA. As
+   citações de hash dos handoffs continuam quebradas e devem ser corrigidas
+   junto.
+4. Os cinco PDFs de gabarito superados, ainda por decidir se ficam
+   versionados.
+5. Instalador Windows, dependente da decisão sobre certificado de assinatura.
+6. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
+   Preencher à mão na interface do programa da Receita. NÃO mexer no cadastro
+   do PGD por script.
