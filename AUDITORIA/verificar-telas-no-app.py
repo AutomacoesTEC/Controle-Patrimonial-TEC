@@ -22,6 +22,7 @@ from playwright.sync_api import sync_playwright
 RAIZ = str(Path(__file__).resolve().parent.parent)
 PDF = f"{RAIZ}/output/pdf/AJU-01-DECLARACAO-COMPLETA-IRPF-2026.pdf"
 PDF_SAIDA = f"{RAIZ}/output/pdf/SAI-01-DECLARACAO-SAIDA-DEFINITIVA-IRPF-2026.pdf"
+PDF_ESPOLIO = f"{RAIZ}/output/pdf/ESP-01-DECLARACAO-FINAL-ESPOLIO-IRPF-2026.pdf"
 achados = []
 
 def norm(t):
@@ -32,6 +33,17 @@ def norm(t):
 
 def ok(cond, msg):
     achados.append(("OK  " if cond else "FALHA", msg))
+
+def novo_perfil(pg, pdf, nome):
+    pg.get_by_role("button", name=re.compile("Trocar Perfil")).first.click()
+    pg.wait_for_timeout(1200)
+    pg.get_by_role("button", name=re.compile("Novo Perfil")).first.click()
+    pg.wait_for_timeout(600)
+    pg.set_input_files("input[type=file]", pdf)
+    confirmar_importacao(pg)
+    pg.locator("form input.form-control").first.fill(nome)
+    pg.get_by_role("button", name="Criar e Entrar").click()
+    pg.wait_for_timeout(2500)
 
 def confirmar_importacao(pg):
     # O botão do modal de revisão NASCE DESABILITADO e só habilita quando a
@@ -115,15 +127,7 @@ with sync_playwright() as p:
 
     # Segundo perfil, com a declaração de SAÍDA DEFINITIVA: é a única que
     # imprime a comunicação da condição de não residente à fonte pagadora.
-    pg.get_by_role("button", name=re.compile("Trocar Perfil")).first.click()
-    pg.wait_for_timeout(1200)
-    pg.get_by_role("button", name=re.compile("Novo Perfil")).first.click()
-    pg.wait_for_timeout(600)
-    pg.set_input_files("input[type=file]", PDF_SAIDA)
-    confirmar_importacao(pg)
-    pg.locator("form input.form-control").first.fill("TESTE SAI 01")
-    pg.get_by_role("button", name="Criar e Entrar").click()
-    pg.wait_for_timeout(2500)
+    novo_perfil(pg, PDF_SAIDA, "TESTE SAI 01")
 
     t = ir("Rendimentos")
     ok("CONDIÇÃO DE NÃO RESIDENTE COMUNICADA A ESTA FONTE EM 24/12/2025" in t,
@@ -132,6 +136,18 @@ with sync_playwright() as p:
     t = ir("Saída Definitiva|Modalidade|Final de Espólio")
     ok("DATA DA CARACTERIZAÇÃO DA CONDIÇÃO DE NÃO RESIDENTE" in t,
        "Saída definitiva: quadro da condição de residência")
+
+    # Terceiro perfil, com a DECLARAÇÃO FINAL DE ESPÓLIO. Nem ela nem a de
+    # saída definitiva conseguiam entrar no app antes de 31/08/2026: as fichas
+    # próprias da modalidade caíam em estado de erro e o erro desabilitava o
+    # botão da revisão da importação.
+    novo_perfil(pg, PDF_ESPOLIO, "TESTE ESP 01")
+
+    t = ir("Final de Espólio|Saída Definitiva|Modalidade")
+    ok("ESP INVENTARIANTE SENTINELA" in t, "Espólio: inventariante da partilha")
+    ok("ESP HERDEIRO UM" in t and "ESP HERDEIRO DOIS" in t, "Espólio: herdeiros e meeiro")
+    ok("BENS TRANSFERIDOS NA PARTILHA" in t, "Espólio: bens transferidos na partilha")
+    ok("R$ 123.401,41" in t, "Espólio: valor de transferência do bem partilhado")
 
     ok(not erros, f"Sem erro de JavaScript ({erros[:2]})")
     if len(sys.argv) > 1: pg.screenshot(path=sys.argv[1], full_page=True)
