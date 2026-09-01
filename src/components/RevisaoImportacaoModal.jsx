@@ -40,6 +40,7 @@ export default function RevisaoImportacaoModal({
   const resumo = resumirImportacao(resultado);
   const fonte = resultado.documentoFonte || {};
   const cpf = resultado.contribuinte?.cpf || '';
+  const totalItens = resumo.colecoes.reduce((soma, item) => soma + item.quantidade, 0);
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="revisao-importacao-titulo">
@@ -75,7 +76,7 @@ export default function RevisaoImportacaoModal({
             <small>
               {fonte.totalPaginas
                 ? `${fonte.totalPaginas} página(s), ${Number(fonte.caracteresExtraidos || 0).toLocaleString('pt-BR')} caracteres extraídos.`
-                : `${fonte.totalRegistros || 0} registro(s) preservados.`}
+                : `${fonte.totalRegistros || 0} registro(s) preservado(s).`}
               {' '}O arquivo binário não é salvo no navegador.
             </small>
           </section>
@@ -84,7 +85,7 @@ export default function RevisaoImportacaoModal({
             <div className="import-review-section-title">
               <h4>Dados estruturados encontrados</h4>
               <span>
-                {resumo.colecoes.reduce((soma, item) => soma + item.quantidade, 0)} itens
+                {totalItens} {totalItens === 1 ? 'item' : 'itens'}
                 {resumo.quadros.length > 0 ? `, ${resumo.quadros.length} quadro(s)` : ''}
               </span>
             </div>
@@ -116,7 +117,7 @@ export default function RevisaoImportacaoModal({
           <section>
             <div className="import-review-section-title">
               <h4>Cobertura das fichas</h4>
-              <span>{resumo.fichas.length} fichas classificadas</span>
+              <span>{resumo.fichas.length} {resumo.fichas.length === 1 ? 'ficha classificada' : 'fichas classificadas'}</span>
             </div>
             <div className="import-review-state-summary">
               {Object.entries(ROTULOS_ESTADO).map(([estado, rotulo]) => (
@@ -124,7 +125,7 @@ export default function RevisaoImportacaoModal({
               ))}
             </div>
             <details className="import-review-details" open={resumo.alertas.length > 0}>
-              <summary>{resumo.alertas.length > 0 ? `${resumo.alertas.length} ficha(s) exigem atenção` : 'Ver classificação por ficha'}</summary>
+              <summary>{resumo.alertas.length > 0 ? `${resumo.alertas.length} ${resumo.alertas.length === 1 ? 'ficha exige' : 'fichas exigem'} atenção` : 'Ver classificação por ficha'}</summary>
               <div className="import-review-fichas">
                 {resumo.fichas.map(ficha => (
                   <div key={ficha.id} className="import-review-ficha">

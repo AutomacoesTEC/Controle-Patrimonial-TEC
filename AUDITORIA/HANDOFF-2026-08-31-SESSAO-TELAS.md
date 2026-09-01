@@ -190,16 +190,58 @@ Branch `fix/auditoria-2026-08-24`.
    esperados dos testes foram para `declaracoes-reais.local.json`, fora do
    repositório, pelo `esperaPessoal` que o arquivo já usava.
 
-### Em andamento agora (01/09/2026, 01h50)
+### Auditoria final de interface — CONCLUÍDA (01/09/2026, 02h05)
 
-Auditoria final de interface pedida pela usuária: workflow em segundo plano
-(task `wdnr0snlo`, run `wf_49997bc2-536`) revisando as 29 telas React
-(`src/pages/*.jsx`, `src/components/*.jsx`) em 8 grupos paralelos, atrás de
-emoji/travessão/"·"/data errada/texto quebrado, com verificação adversarial
-de cada achado antes de aplicar. Quando terminar: aplicar as correções dos
-achados com `real=true`, rodar `npx vitest run` inteiro, commitar. NÃO disparar
-um novo workflow para a mesma tarefa enquanto este não terminar ou não
-constar como morto — conferir `journal.jsonl` da run antes de duplicar.
+Pedido da usuária: nada estranho na interface. Workflow em segundo plano
+(task `wdnr0snlo`, run `wf_49997bc2-536`) revisou as 29 telas React em 8
+grupos paralelos contra as regras 8 (emoji/travessão/"·") e mais texto
+quebrado em geral, com verificação adversarial de cada achado (17 agentes,
+9 achados brutos, 9 confirmados `real=true`, 0 falsos positivos). Nenhuma
+violação das regras 8 propriamente ditas (emoji/travessão/"·"/data errada)
+foi encontrada — os achados foram todos de concordância gramatical e de
+truncamento de texto sem indicação, que também tornam a interface estranha.
+
+**Concordância número/verbal quebrada (plural fixo em substantivo irregular
+ou verbo não flexionado), 6 achados do workflow + 4 achados extras pelo
+mesmo padrão, achados por grep em busca de todo caso igual (regra 2: tratar
+TODOS os casos, não só os amostrados):**
+- `RevisaoImportacaoModal.jsx`: "1 itens" (linha 87), "1 fichas classificadas"
+  (119), "ficha(s) exigem" sem o singular "exige" (127), "registro(s)
+  preservados" sem o singular "preservado(s)" (78).
+- `ReconciliacaoRetificadoraModal.jsx`: "1 rendimentos"/"1 pagamentos" (106).
+- `DividasPage.jsx`, `BensPage.jsx`, `RelatorioPage.jsx`,
+  `AtividadeRuralPage.jsx` (2x): mesmo "1 itens" fixo em cinco cabeçalhos de
+  página/badge que o workflow não cobriu (arquivos revisados em lotes
+  diferentes) — achados por `grep` do mesmo padrão em todo o `src/pages`.
+- `PagamentosPage.jsx`, `RendimentosPage.jsx`, `ImportPage.jsx`: "registros"
+  fixo (sem "(s)") em três cabeçalhos/mensagens de log, mesmo padrão.
+
+**Truncamento de texto sem indicação nenhuma de corte (usuário via a frase
+interrompida sem saber que faltava texto e sem como ver o valor completo),
+3 achados do workflow + 6 achados extras pelo mesmo padrão:**
+- `ReconciliacaoRetificadoraModal.jsx` (199, 248), `RendimentosPage.jsx`
+  (189): achados pelo workflow.
+- `Dashboard.jsx` (2x), `PagamentosPage.jsx` (2x), `DoacoesPage.jsx` (2x),
+  `RelatorioPage.jsx`, `GanhosCapitalPage.jsx`, `AtividadeRuralPage.jsx`
+  (2x), `BensPage.jsx`: mesmo padrão achado por `grep '.substring(0,'` em
+  todo `src/pages` e `src/components`, comparado achado a achado contra o
+  que já tinha `title=` e o que não tinha.
+- **Corrigido com um helper novo**, `truncarComReticencias(texto, max)` em
+  `src/utils/formatters.js`: corta e acrescenta "..." quando corta, sempre
+  combinado com `title={textoCompleto}` no elemento que envolve, para o
+  texto integral aparecer ao passar o mouse.
+- **Fora do escopo, de propósito**: truncamento em `confirm()` de exclusão
+  (`BensPage.jsx:95`, `AtividadeRuralPage.jsx:325/437`, `DividasPage.jsx:66`),
+  numa frase de aviso já concatenada com `.join('; ')`
+  (`GanhosCapitalPage.jsx:561`) e dentro de `<option>` de `<select>` nativo
+  (`ReconciliacaoRetificadoraModal.jsx:214`) — contextos onde reticências/
+  `title` não fazem sentido do mesmo jeito (diálogo nativo do navegador,
+  mensagem já concatenada, option sem tooltip confiável entre navegadores).
+
+**Verificação:** `npx vitest run` 735/735 (uma falha isolada num run é o
+flake conhecido de fonte do pdfjs já documentado; rerun deu 735/735 limpo).
+`npx vite build` limpo. `verificar-telas-no-app.py` contra o build de
+produção: 33 de 33, sem erro de JavaScript.
 
 ### O que falta, em ordem
 

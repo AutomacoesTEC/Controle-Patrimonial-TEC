@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -80,7 +80,7 @@ export default function PagamentosPage() {
   return (
     <>
       <div className="page-header">
-        <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}, total {formatCurrency(totalPago)}</p></div>
+        <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registro(s){state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}, total {formatCurrency(totalPago)}</p></div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Pagamento</button>
@@ -102,8 +102,8 @@ export default function PagamentosPage() {
                     )}
                   </td>
                   <td>{formatDate(p.data)}</td>
-                  <td>
-                    {(p.nome_beneficiario || '').substring(0, 40)}
+                  <td title={p.nome_beneficiario || ''}>
+                    {truncarComReticencias(p.nome_beneficiario, 40)}
                     {descreverOrigemDocumento(p) && (
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(p)}</div>
                     )}
@@ -114,7 +114,7 @@ export default function PagamentosPage() {
                   <td>{formatCpfCnpj(p.cpf_cnpj)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor_pago)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.parcela_nao_dedutivel)}</td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{(p.descricao || '').substring(0, 40)}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: '12px' }} title={p.descricao || ''}>{truncarComReticencias(p.descricao, 40)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(p)}>Editar</button>

@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividadeRuralPeriodo } from '../store/demonstrativos';
-import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante, descreverOrigemDocumento} from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -347,7 +347,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{bensRuraisVisiveis.length} itens, total {formatCurrency(totalAtual)}</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{bensRuraisVisiveis.length} {bensRuraisVisiveis.length === 1 ? 'item' : 'itens'}, total {formatCurrency(totalAtual)}</p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Bem</button>
@@ -362,8 +362,8 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
             ) : bensRuraisVisiveis.map(bem => (
               <tr key={bem.id}>
                 <td>{bem.codigo}</td>
-                <td style={{ maxWidth: '400px' }}>
-                  {(bem.discriminacao || '').substring(0, 100)}
+                <td style={{ maxWidth: '400px' }} title={bem.discriminacao || ''}>
+                  {truncarComReticencias(bem.discriminacao, 100)}
                   {descreverOrigemDocumento(bem) && (
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(bem)}</div>
                   )}
@@ -458,7 +458,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{dividasRurais.length} itens</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{dividasRurais.length} {dividasRurais.length === 1 ? 'item' : 'itens'}</p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Dívida</button>
@@ -472,8 +472,8 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
               <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma dívida cadastrada.</td></tr>
             ) : dividasRurais.map(d => (
               <tr key={d.id}>
-                <td style={{ maxWidth: '400px' }}>
-                  {(d.discriminacao || '').substring(0, 100)}
+                <td style={{ maxWidth: '400px' }} title={d.discriminacao || ''}>
+                  {truncarComReticencias(d.discriminacao, 100)}
                   {descreverOrigemDocumento(d) && (
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(d)}</div>
                   )}

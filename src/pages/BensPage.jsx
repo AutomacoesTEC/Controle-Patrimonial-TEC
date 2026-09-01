@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
-import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem, descreverOrigemDocumento} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
@@ -105,7 +105,7 @@ export default function BensPage({ onVoltar } = {}) {
         <div className="page-header-left">
           {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
           <h2>Bens e Direitos</h2>
-          <p>{filtered.length} itens{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totals.atual)}</p>
+          <p>{filtered.length} {filtered.length === 1 ? 'item' : 'itens'}{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totals.atual)}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={() => exportBensToXlsx(filtered, anoCalendario)}>
@@ -163,8 +163,8 @@ export default function BensPage({ onVoltar } = {}) {
                     <td><span className={`badge badge-${GRUPOS_BENS.find(g => g.codigo === bem.grupo)?.cor || 'blue'}`}>{bem.grupo}</span></td>
                     <td>{bem.codigo_bem}</td>
                     <td style={{ maxWidth: '400px' }}>
-                      <div style={{ fontWeight: 500, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {(bem.discriminacao || '').substring(0, 80)}
+                      <div style={{ fontWeight: 500, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={bem.discriminacao || ''}>
+                        {bem.discriminacao || ''}
                       </div>
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}

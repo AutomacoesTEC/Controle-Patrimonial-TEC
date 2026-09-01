@@ -114,7 +114,7 @@ export default function ImportPage() {
         log(`Arquivo selecionado: ${file.name} (${ext.toUpperCase()})`);
         const text = await file.text();
         const integridade = validarIntegridadeArquivoIrpf(text, ext);
-        log(`Integridade eletrônica validada: ${integridade.registros.length} registros, trailer e contagens conferidos.`, 'success');
+        log(`Integridade eletrônica validada: ${integridade.registros.length} registro(s), trailer e contagens conferidos.`, 'success');
         result = await parseDBK(text, log);
       } else if (ext === 'pdf') {
         log(`Arquivo selecionado: ${file.name} (PDF)`);

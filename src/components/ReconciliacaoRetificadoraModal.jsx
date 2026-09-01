@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import Modal from './Modal';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, truncarComReticencias } from '../utils/formatters';
 import { sugerirVinculos } from '../utils/reconciliacaoRetificadora';
 import { payloadRetificadoraCompleto } from '../utils/importacaoDeclaracao';
 
@@ -103,8 +103,8 @@ export default function ReconciliacaoRetificadoraModal({
             <div className="card-header"><h3 className="card-title">Rendimentos e Pagamentos</h3></div>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '0 16px 16px' }}>
               São lançamentos do período, não saldo acumulado: os que vieram de uma importação anterior para{' '}
-              {anoDestino} são substituídos pelos desta declaração ({rendimentosNovos?.length || 0} rendimentos,{' '}
-              {pagamentosNovos?.length || 0} pagamentos). O que foi cadastrado manualmente continua intacto.
+              {anoDestino} são substituídos pelos desta declaração ({rendimentosNovos?.length || 0} rendimento(s),{' '}
+              {pagamentosNovos?.length || 0} pagamento(s)). O que foi cadastrado manualmente continua intacto.
             </p>
           </div>
         )}
@@ -195,8 +195,8 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                 const opcoesDisponiveis = (antigos || []).filter(a => a.id === idSelecionado || !antigosUsados.has(a.id));
                 return (
                   <tr key={i}>
-                    <td>
-                      <span className="badge badge-blue">{novo[campoCodigo]}</span> {descricao(novo).substring(0, 80)}
+                    <td title={descricao(novo)}>
+                      <span className="badge badge-blue">{novo[campoCodigo]}</span> {truncarComReticencias(descricao(novo), 80)}
                     </td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(novo.situacao_anterior)}</td>
                     <td>
@@ -245,7 +245,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                   const temMovimentacao = (a.movimentacoes || []).length > 0;
                   return (
                     <tr key={a.id}>
-                      <td><span className="badge badge-blue">{a[campoCodigo]}</span> {descricao(a).substring(0, 80)}</td>
+                      <td title={descricao(a)}><span className="badge badge-blue">{a[campoCodigo]}</span> {truncarComReticencias(descricao(a), 80)}</td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(a.situacao_atual)}</td>
                       <td>
                         {temMovimentacao

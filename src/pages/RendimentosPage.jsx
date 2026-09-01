@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -105,7 +105,7 @@ export default function RendimentosPage() {
   return (
     <>
       <div className="page-header">
-        <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registros{state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}</p></div>
+        <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registro(s){state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}</p></div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Rendimento</button>
@@ -185,8 +185,8 @@ export default function RendimentosPage() {
                         </td>
                         <td>{formatDate(r.data)}</td>
                         <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
-                        <td>
-                          {(r.nome_fonte || '').substring(0, 50)}
+                        <td title={r.nome_fonte || ''}>
+                          {truncarComReticencias(r.nome_fonte, 50)}
                           {descreverComunicacaoNaoResidente(r) && (
                             <div style={{ fontSize: '11px', color: 'var(--accent-warning)' }} title="A partir dessa data a fonte pagadora deixa de aplicar a tabela do residente. Não é a mesma data da caracterização da condição de não residente, que fica no quadro da saída definitiva.">
                               {descreverComunicacaoNaoResidente(r)}

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento } from '../utils/formatters';
+import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
@@ -93,7 +93,7 @@ export default function DividasPage({ onVoltar } = {}) {
         <div className="page-header-left">
           {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
           <h2>Dívidas e Ônus Reais</h2>
-          <p>{dividas.length} itens{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totalAtual)}</p>
+          <p>{dividas.length} {dividas.length === 1 ? 'item' : 'itens'}{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totalAtual)}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
@@ -110,8 +110,8 @@ export default function DividasPage({ onVoltar } = {}) {
               ) : dividas.map(d => (
                 <tr key={d.id}>
                   <td><span className="badge badge-red">{d.codigo}</span></td>
-                  <td>
-                    {(d.discriminacao || '').substring(0, 100)}
+                  <td title={d.discriminacao || ''}>
+                    {truncarComReticencias(d.discriminacao, 100)}
                     {/* Página e linha da declaração impressa, mesmo tratamento
                         que Bens, Rendimentos e Pagamentos já tinham. */}
                     {descreverOrigemDocumento(d) && (

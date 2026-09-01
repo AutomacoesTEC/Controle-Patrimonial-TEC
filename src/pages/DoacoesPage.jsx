@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, truncarComReticencias } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
@@ -132,10 +132,10 @@ export default function DoacoesPage() {
                 <tr key={d.id}>
                   <td>{d.codigo}</td>
                   {aba.comCategoria && <td>{d.categoria === 'idoso' ? 'Pessoa Idosa' : 'ECA'}</td>}
-                  <td>{(d.nome_beneficiario || '').substring(0, 80)}</td>
+                  <td title={d.nome_beneficiario || ''}>{truncarComReticencias(d.nome_beneficiario, 80)}</td>
                   <td>{formatCpfCnpj(d.cpf_cnpj)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor)}</td>
-                  <td>{(d.descricao || '').substring(0, 60)}</td>
+                  <td title={d.descricao || ''}>{truncarComReticencias(d.descricao, 60)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(d)}>Editar</button>

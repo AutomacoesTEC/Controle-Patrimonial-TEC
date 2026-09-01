@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS, descreverTipoDemonstrativoExterior } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS, descreverTipoDemonstrativoExterior, truncarComReticencias } from '../utils/formatters';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { totaisEvolucaoPatrimonial } from '../store/demonstrativos';
@@ -444,7 +444,7 @@ export default function RelatorioPage() {
             <div className="card" style={{ marginBottom: '16px' }} key={g}>
               <div className="card-header">
                 <h3 className="card-title">{grupo ? `${grupo.codigo} - ${grupo.nome}` : `Grupo ${g}`}</h3>
-                <span className="badge badge-blue">{data.items.length} itens</span>
+                <span className="badge badge-blue">{data.items.length} {data.items.length === 1 ? 'item' : 'itens'}</span>
               </div>
               <div className="table-container">
                 <table>
@@ -455,7 +455,7 @@ export default function RelatorioPage() {
                       return (
                         <tr key={b.id} style={temMovimentacao ? { background: 'rgba(59,130,246,0.06)' } : undefined}>
                           <td>{b.codigo_bem}</td>
-                          <td>{(b.discriminacao || '').substring(0, 80)}</td>
+                          <td title={b.discriminacao || ''}>{truncarComReticencias(b.discriminacao, 80)}</td>
                           <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(b.situacao_anterior)}</td>
                           <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(b.situacao_atual)}</td>
                           <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>

@@ -1,3 +1,15 @@
+// Corta um texto para caber numa célula de tabela, mas sem esconder que foi
+// cortado: acrescenta reticências, para quem usar o valor com `title={texto}`
+// no elemento que envolve o resultado, para o texto completo aparecer ao
+// passar o mouse. Achado na auditoria de interface de 01/09/2026: várias
+// telas cortavam discriminação/descrição/nome com `.substring(0, N)` puro,
+// sem reticências nem `title`, e o usuário via a frase interrompida no meio
+// sem nenhum indício de que faltava texto nem como ver o valor completo.
+export function truncarComReticencias(texto, max) {
+  const s = String(texto || '');
+  return s.length > max ? `${s.slice(0, max)}...` : s;
+}
+
 export function formatCurrency(value) {
   if (value === null || value === undefined || isNaN(value)) return 'R$ 0,00';
   // Normaliza o zero negativo antes de formatar. O Intl formata -0 como

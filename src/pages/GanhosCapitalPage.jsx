@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, Fragment } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento, truncarComReticencias } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
@@ -597,7 +597,7 @@ export default function GanhosCapitalPage() {
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma venda com valor de venda registrado ainda.</td></tr>
               ) : vendas.map(v => (
                 <tr key={v.id}>
-                  <td style={{ maxWidth: '300px' }}>{(v.bem || '').substring(0, 80)}</td>
+                  <td style={{ maxWidth: '300px' }} title={v.bem || ''}>{truncarComReticencias(v.bem, 80)}</td>
                   <td>{v.origem}</td>
                   <td>{formatDate(v.data)}</td>
                   <td>{v.tipoVenda}</td>

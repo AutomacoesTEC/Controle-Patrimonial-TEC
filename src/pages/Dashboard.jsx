@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
@@ -675,8 +675,8 @@ export default function Dashboard({ onNavigate } = {}) {
                       nesta lista.
                       <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
                         {demo.pendenciasAlienacao.slice(0, 6).map((p, i) => (
-                          <div key={i}>
-                            {(p.discriminacao || 'Bem sem descrição').substring(0, 70)}: baixou {formatCurrency(p.reducao)}
+                          <div key={i} title={p.discriminacao || ''}>
+                            {truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou {formatCurrency(p.reducao)}
                             {p.vendaForaDoPeriodo && ` (a discriminação diz que a venda foi em ${formatDate(p.vendaForaDoPeriodo)}, fora deste período: o ganho pertence ao ano da alienação)`}
                           </div>
                         ))}
@@ -703,8 +703,8 @@ export default function Dashboard({ onNavigate } = {}) {
                       instituição.
                       <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
                         {demo.aplicacoesSemRendimento.slice(0, 6).map((a, i) => (
-                          <div key={i} style={{ marginBottom: '6px' }}>
-                            {(a.discriminacao || 'Bem sem descrição').substring(0, 70)} (CNPJ {formatCpfCnpj(a.cnpj)}): resgatado {formatCurrency(a.valorResgatado)}.
+                          <div key={i} style={{ marginBottom: '6px' }} title={a.discriminacao || ''}>
+                            {truncarComReticencias(a.discriminacao || 'Bem sem descrição', 70)} (CNPJ {formatCpfCnpj(a.cnpj)}): resgatado {formatCurrency(a.valorResgatado)}.
                             {' '}Esperado em: {a.onde}.
                             {a.outrosDaMesmaFonte.length > 0 && (
                               <div>
@@ -926,7 +926,7 @@ export default function Dashboard({ onNavigate } = {}) {
                     <tr key={i}>
                       <td>{formatDate(m.data)}</td>
                       <td>{CATEGORIA_VARIACAO[detalheCategoria || 'bens'].tipos[m.tipo]?.label || m.tipo}</td>
-                      <td style={{ maxWidth: '320px' }}>{(m.discriminacao || '').substring(0, 100)}</td>
+                      <td style={{ maxWidth: '320px' }} title={m.discriminacao || ''}>{truncarComReticencias(m.discriminacao, 100)}</td>
                       <td className="currency">{formatCurrency(m.valor)}</td>
                     </tr>
                   ))}
