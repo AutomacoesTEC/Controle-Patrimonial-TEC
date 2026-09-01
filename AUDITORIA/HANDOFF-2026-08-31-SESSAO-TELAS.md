@@ -224,11 +224,33 @@ Branch `fix/auditoria-2026-08-24`.
    arquivo por arquivo. Ficam de fora do versionamento (só locais, como prova
    de auditoria citada por SHA-256 em `OCORRENCIAS-PREENCHIMENTO-IRPF-2026.md`
    e `AUDITORIA-EXTRACAO-PDF-IRPF-2026.md`), e nenhum deles está commitado.
-4. **Instalador Windows**: depende da decisão sobre certificado de assinatura.
-5. **Participante rural estrangeiro (RUR-01)**: segue sem PDF que exercite a
-   extração. O caminho seguro é preencher a declaração à mão na interface do
-   programa da Receita. NÃO mexer no cadastro do PGD por script: duas
-   tentativas quebraram o IRPF 2026 (ver seção 1 deste documento).
+4. ~~Instalador Windows~~ **CONCLUÍDO em 01/09/2026, 00h20.** Decisão da
+   usuária: gerar sem certificado de assinatura, aceitando o aviso de editor
+   desconhecido do SmartScreen. Rodado `build-windows.ps1` de verdade (via
+   interop WSL/PowerShell 7, a partir do caminho `\\wsl.localhost\...`, com
+   `dist/` recém-gerado incluindo os fixes desta sessão): PyInstaller e Inno
+   Setup concluíram sem erro, gerando `installer\ControlePatrimonial_Setup.exe`
+   (13.649.575 bytes) e `dist-app\ControlePatrimonial\ControlePatrimonial.exe`
+   (5.260.818 bytes). Teste de fumaça real: o executável empacotado foi aberto
+   (PID 15400), ficou rodando os 6 segundos observados sem sair sozinho, e foi
+   encerrado normalmente — não travou nem crashou na inicialização. Nota de
+   ambiente: `powershell.exe` (Windows PowerShell 5.1) corrompe o caminho por
+   causa do acento em "Eudúcio" (falta BOM UTF-8 no script), o que fez
+   `Test-Path` mentir que o executável não existia; `pwsh.exe` (PowerShell 7)
+   não tem esse problema — usar sempre PowerShell 7 quando o caminho tiver
+   acento. `Start-Process -WorkingDirectory` também não aceita caminho UNC
+   (usar sem esse parâmetro, ou `[System.Diagnostics.Process]::Start`).
+   Instalador NÃO assinado, como decidido: quem instalar vai ver o aviso do
+   Windows e precisa clicar em "Mais informações" → "Executar assim mesmo".
+5. **Participante rural estrangeiro (RUR-01)**: pendente pela terceira vez, e
+   por decisão explícita da usuária em 01/09/2026 (perguntado de novo depois
+   do incidente registrado na seção 1 deste documento, que já quebrou o
+   IRPF2026 duas vezes por intervenção programática): ELA MESMA vai preencher
+   a declaração à mão na interface do programa da Receita quando tiver tempo.
+   NÃO tentar de novo por script nem por automação de UI sem ela presente e
+   sabendo. A declaração já preenchida está guardada fora do programa em
+   `output/backup-irpf-sintetico/2026-08-31-rur01-declaracao/`, pronta para
+   ela usar quando for a vez dela.
 
 ### Backup do repositório antes da reescrita
 
@@ -331,14 +353,14 @@ pega o botão ainda inerte.
 
 ### Continua aberto, do que já estava
 
-Itens da segunda passada de `filter-branch`, citações de hash e PDFs de
-gabarito superados: CONCLUÍDOS em 31/08/2026, autorizados pela usuária — ver
-"O que falta, em ordem" acima. O que segue depende de autorização:
+Itens da segunda passada de `filter-branch`, citações de hash, PDFs de
+gabarito superados e instalador Windows: CONCLUÍDOS (31/08 e 01/09/2026),
+autorizados pela usuária — ver "O que falta, em ordem" acima. Só resta:
 
-1. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-2. Participante rural estrangeiro (RUR-01), que segue sem PDF que exercite a
-   extração. Preencher à mão na interface do programa da Receita é o caminho
-   seguro: NÃO mexer no cadastro do PGD por script.
+1. Participante rural estrangeiro (RUR-01), sem PDF que exercite a extração.
+   Decisão explícita da usuária em 01/09/2026: ELA MESMA preenche à mão na
+   interface do programa da Receita quando puder. NÃO tentar de novo por
+   script nem por automação de UI sem ela presente.
 
 
 ## Ponto de retomada (31/08/2026, 21h30) — PAUSADO a pedido da usuária
@@ -384,16 +406,12 @@ ainda não usa, conferidos em AUDITORIA/saida-parsepdf/ e rows-pdfjs/:
 
 ### Achados que continuam esperando decisão sua
 
-Repetidos aqui para não se perderem. Os itens de filter-branch, citações de
-hash e PDFs de gabarito, que estavam aqui, foram CONCLUÍDOS em 31/08/2026 (ver
-"O que falta, em ordem", acima) — o restante segue intocado:
+Todos os itens que estavam aqui (filter-branch, citações de hash, PDFs de
+gabarito, os dois ajustes de contrato da extração e o instalador Windows)
+foram CONCLUÍDOS entre 31/08 e 01/09/2026 — ver "O que falta, em ordem",
+acima. Só resta:
 
-1. O caminho PDF grava `saidaComDeclarante: false` e `nitPisPasep: ''` fixos no
-   dependente, e a ficha impressa não traz nenhum dos dois. São defaults, não
-   dados lidos. Corrigir para `null` é mudança de contrato da extração.
-2. No demonstrativo da Lei 14.754/2023, a linha LD imprime "-" e o parser
-   grava 0. Traço e zero não afirmam a mesma coisa.
-3. Instalador Windows, dependente da decisão sobre certificado de assinatura.
-4. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
-   Preencher à mão na interface do programa da Receita. NÃO mexer no cadastro
-   do PGD por script.
+1. RUR-01, sem PDF que exercite a extração do participante estrangeiro.
+   Decisão da usuária em 01/09/2026: ela mesma preenche à mão na interface do
+   programa da Receita. NÃO mexer no cadastro do PGD por script nem por
+   automação de UI sem ela presente.
