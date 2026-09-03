@@ -1,9 +1,10 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, mascaraCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
@@ -17,7 +18,9 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
   return acc;
 }, {});
 
-const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: new Date().toISOString().slice(0, 10) };
+// Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
+// forçaria trocar de ano ao salvar num exercício de trabalho diferente.
+const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: '' };
 
 export default function RendimentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
@@ -28,19 +31,22 @@ export default function RendimentosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
   const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  // Ano-calendário = ano da DATA do rendimento (campo separado tirado em
+  // 03/09/2026). Lê os 4 primeiros caracteres do <input type="date">.
+  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
     if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (r) => {
     setEditingId(r.id);
-    setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || new Date().toISOString().slice(0, 10) });
+    setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || '' });
     setModalOpen(true);
   };
 
@@ -154,7 +160,7 @@ export default function RendimentosPage() {
                 <h3 className="card-title">{categoriaFilter === 'all' ? 'Todos os Rendimentos' : CATEGORIAS_RENDIMENTO[categoriaFilter].label}</h3>
                 <span className={`badge badge-${categoriaFilter === 'all' ? 'blue' : CATEGORIAS_RENDIMENTO[categoriaFilter].cor}`}>{formatCurrency(totalPorCategoria(filtrados))}</span>
               </div>
-              <div className="table-container">
+              <TabelaRedimensionavel>
                 <table>
                   <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
                   <tbody>
@@ -235,7 +241,7 @@ export default function RendimentosPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </TabelaRedimensionavel>
             </div>
           </>
         )}
@@ -244,11 +250,6 @@ export default function RendimentosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Rendimento' : 'Novo Rendimento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
@@ -270,11 +271,17 @@ export default function RendimentosPage() {
                   </div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>CNPJ Fonte Pagadora</label><input className="form-control" value={form.cnpj_fonte} onChange={e => upd('cnpj_fonte', e.target.value)} /></div>
+                  <div className="form-group"><label>CNPJ Fonte Pagadora</label><input className="form-control" inputMode="numeric" placeholder="00.000.000/0000-00" value={mascaraCnpj(form.cnpj_fonte)} onChange={e => upd('cnpj_fonte', mascaraCnpj(e.target.value))} /></div>
                   <div className="form-group"><label>Nome Fonte Pagadora</label><input className="form-control" value={form.nome_fonte} onChange={e => upd('nome_fonte', e.target.value)} /></div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    {!editingId && anoCadastro != null && (
+                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
+                    )}
+                  </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>IRRF</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
                 </div>

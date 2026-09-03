@@ -13,7 +13,9 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 
 const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '', dataAquisicao: '' };
-const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: new Date().toISOString().slice(0, 10), valor: '', descricao: '' };
+// Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
+// forçaria trocar de ano ao salvar num exercício de trabalho diferente.
+const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: '', valor: '', descricao: '' };
 const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 // Mesmo critério de BensPage.jsx (ver comentário lá): um bem da Atividade Rural que já entrou no
@@ -556,12 +558,15 @@ function LancamentosRuraisSection({
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_LANCAMENTO_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
   const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_LANCAMENTO_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  // Ano-calendário = ano da DATA do lançamento (campo separado tirado em
+  // 03/09/2026). Lê os 4 primeiros caracteres do <input type="date">.
+  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : anoCalendario;
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_LANCAMENTO_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
     if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
@@ -713,11 +718,6 @@ function LancamentosRuraisSection({
             <div className="modal-header"><h3>{editingId ? 'Editar Lançamento' : 'Novo Lançamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
@@ -725,7 +725,13 @@ function LancamentosRuraisSection({
                       <option value="despesa">Despesa de Custeio/Investimento</option>
                     </select>
                   </div>
-                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    {!editingId && anoCadastro != null && (
+                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
+                    )}
+                  </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
                 <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: venda de milho, adubo, combustível..." /></div>

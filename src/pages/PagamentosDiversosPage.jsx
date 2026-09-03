@@ -4,10 +4,14 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
-const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: new Date().toISOString().slice(0, 10) };
+// Data começa vazia: o ano-calendário do lançamento sai dela, e pré-preencher
+// "hoje" forçaria trocar de ano ao salvar quando o exercício de trabalho é
+// outro. Enquanto vazia, o lançamento entra no ano-calendário ativo.
+const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: '' };
 
 export default function PagamentosDiversosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
@@ -15,12 +19,18 @@ export default function PagamentosDiversosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
   const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  // O ano-calendário do lançamento é o ANO DA DATA informada — a usuária pediu
+  // (03/09/2026) para tirar o campo "Ano-calendário" separado, que só duplicava
+  // o que a data já diz e podia divergir dela. Lê os 4 primeiros caracteres do
+  // <input type="date"> (sempre YYYY-MM-DD) em vez de new Date().getFullYear(),
+  // que num fuso negativo joga 01/01 para o ano anterior.
+  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
     if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
@@ -80,7 +90,7 @@ export default function PagamentosDiversosPage() {
         </div>
       </div>
       <div className="page-body animate-in">
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
             <tbody>
@@ -111,21 +121,22 @@ export default function PagamentosDiversosPage() {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Despesa' : 'Nova Despesa'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
                 <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: Cartão de crédito Nubank" /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>
-                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    {!editingId && anoCadastro != null && (
+                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
+                    )}
+                  </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
               </div>
