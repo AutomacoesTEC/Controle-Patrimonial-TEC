@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useData } from '../store/DataContext';
 import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store/reducer';
 import ConfirmarDependentesModal from './ConfirmarDependentesModal';
+import NavIcon from './NavIcons';
 import { MODALIDADES, NOME_CURTO_MODALIDADE, modalidadeDaDeclaracao } from '../store/modalidadeDeclaracao';
 
 const navItems = [
@@ -86,11 +87,12 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
             <div key={item.id}>
               {showSection && <div className="nav-section-label">{item.section}</div>}
               <button
-                className={`nav-item ${activeView === item.id ? 'active' : ''}`}
+                className={`nav-item ${collapsed ? 'nav-item-icone' : ''} ${activeView === item.id ? 'active' : ''}`}
                 onClick={() => onNavigate(item.id)}
                 title={collapsed ? item.label : undefined}
+                aria-label={collapsed ? item.label : undefined}
               >
-                {collapsed ? item.short : item.label}
+                {collapsed ? <NavIcon id={item.id} /> : item.label}
               </button>
             </div>
           );
