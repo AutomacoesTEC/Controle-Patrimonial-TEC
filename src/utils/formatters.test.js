@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, mascaraCpf, mascaraCnpj, mascaraCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento, nomeCurtoBem, CODIGOS_DIVIDA, describeDividaCodigo, CODIGOS_DEPENDENCIA } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -17,6 +17,49 @@ describe('formatCpfCnpj', () => {
   it('vazio devolve vazio', () => {
     expect(formatCpfCnpj('')).toBe('');
     expect(formatCpfCnpj(null)).toBe('');
+  });
+});
+
+describe('máscaras progressivas de CPF/CNPJ (digitação)', () => {
+  it('mascaraCpf formata conforme os dígitos vão entrando', () => {
+    expect(mascaraCpf('123')).toBe('123');
+    expect(mascaraCpf('1234')).toBe('123.4');
+    expect(mascaraCpf('1234567')).toBe('123.456.7');
+    expect(mascaraCpf('12345678909')).toBe('123.456.789-09');
+    expect(mascaraCpf('123.456.789-09')).toBe('123.456.789-09');
+    // não passa de 11 dígitos
+    expect(mascaraCpf('123456789091111')).toBe('123.456.789-09');
+  });
+  it('mascaraCnpj idem, até 14 dígitos', () => {
+    expect(mascaraCnpj('22')).toBe('22');
+    expect(mascaraCnpj('229087')).toBe('22.908.7');
+    expect(mascaraCnpj('22908713000190')).toBe('22.908.713/0001-90');
+    expect(mascaraCnpj('22.908.713/0001-90')).toBe('22.908.713/0001-90');
+  });
+  it('mascaraCpfCnpj escolhe pelo tamanho: até 11 é CPF, de 12 em diante é CNPJ', () => {
+    expect(mascaraCpfCnpj('12345678909')).toBe('123.456.789-09');
+    expect(mascaraCpfCnpj('123456789091')).toBe('12.345.678/9091');
+    expect(mascaraCpfCnpj('22908713000190')).toBe('22.908.713/0001-90');
+    expect(mascaraCpfCnpj('')).toBe('');
+  });
+  it('o valor mascarado ainda é reconhecido por formatCpfCnpj (que os testes de exibição usam)', () => {
+    expect(formatCpfCnpj(mascaraCpf('12345678909'))).toBe('123.456.789-09');
+    expect(formatCpfCnpj(mascaraCnpj('22908713000190'))).toBe('22.908.713/0001-90');
+  });
+});
+
+describe('tabelas de código da Receita para o SeletorCodigo', () => {
+  it('CODIGOS_DIVIDA é a tabela oficial tipoDividas.xml (11 a 16)', () => {
+    expect(CODIGOS_DIVIDA.map(c => c.codigo)).toEqual(['11', '12', '13', '14', '15', '16']);
+    expect(describeDividaCodigo('14')).toBe('Pessoas físicas');
+    expect(describeDividaCodigo('16')).toBe('Outras dívidas e ônus reais');
+    expect(describeDividaCodigo('99')).toBe('');
+  });
+  it('CODIGOS_DEPENDENCIA sai de RELACAO_DEPENDENCIA, com a redação curta', () => {
+    expect(CODIGOS_DEPENDENCIA.map(c => c.codigo)).toEqual(['11', '21', '22', '23', '24', '25', '26', '31', '41', '51']);
+    const c11 = CODIGOS_DEPENDENCIA.find(c => c.codigo === '11');
+    expect(c11.nome).toBe(describeRelacaoDependencia('11'));
+    expect(c11.nome).toBe('Companheiro(a) ou cônjuge');
   });
 });
 
@@ -314,5 +357,49 @@ describe('codigosDoRendimento', () => {
     // Tributável de PJ não tem código de ficha: a linha é a fonte pagadora.
     expect(codigosDoRendimento({ tipo: 'tributavel_pj' })).toBeNull();
     expect(codigosDoRendimento(null)).toBeNull();
+  });
+});
+
+describe('nomeCurtoBem', () => {
+  // Discriminações REAIS de veículos importados (perfil da usuária), com o
+  // texto de aquisição e às vezes o preço de compra logo na frente. O rótulo
+  // "PERDA APURADA NA VENDA DE <isto>" ficava sem sentido e o preço de COMPRA
+  // parecia o da venda. Ver o comentário da função.
+  it('tira "AQUISIÇÃO DE UM VEÍCULO" e o preço de compra, sobra a identificação', () => {
+    expect(nomeCurtoBem('AQUISICAO DE UM VEICULO Q3-AUDI, 2023/2024, PRETO, POR R$ 353.690,00, DE SALVACAR COM DE VEICULOS LTDA, 10.476.080/0001-00, EM 11/04/2024. VENDIDO EM 27/11/2025 POR R$ 226.200,00'))
+      .toBe('Q3-AUDI');
+    expect(nomeCurtoBem('AQUISICAO DE UM VEICULO RAMPAGE TDD2H22, DE FCA FIAT CHRYSLER AUTOMOVEIS, EM 28/11/2024, MAIS ACESSORIOS. VENDIDA EM 15/12/2025 POR R$ 220.000,00'))
+      .toBe('RAMPAGE TDD2H22');
+  });
+
+  it('mantém marca, modelo e placa quando vêm juntos antes da primeira vírgula', () => {
+    expect(nomeCurtoBem('AQUISICAO DE UM VEICULO FIAT/UNO PLACA LPX9E43, 2011/2012, AZUL, DE ANTONIO VIEIRA ROCHA 359.441.968-15, EM 16/10/23. VENDIDO EM 01/03/2025'))
+      .toBe('FIAT/UNO PLACA LPX9E43');
+    expect(nomeCurtoBem('AQUISICAO DE UM VEICULO FIAT UNO MILLE WAY HJT-9373, EM 16/09/2014 DE DALVA AP MACHADO'))
+      .toBe('FIAT UNO MILLE WAY HJT-9373');
+  });
+
+  it('lida com a variante "AQUISIÇÃO EM dd/mm/aaaa, DE UM VEÍCULO ..."', () => {
+    expect(nomeCurtoBem('AQUISICAO EM 30/06/2023, DE UM VEICULO BYD YUAN PLUS GL 310EV, 2023/2024, BRANCO, PLACA SIF6C72'))
+      .toBe('BYD YUAN PLUS GL 310EV');
+    expect(nomeCurtoBem('AQUISICAO EM 25/11/2025 DE UM VEICULO VOLVO XC60 T8PLUS 2025/2026, PELO VR R$ 419.950,00'))
+      .toBe('VOLVO XC60 T8PLUS 2025/2026');
+  });
+
+  it('tira o prefixo de co-propriedade "NN% -" junto com o de aquisição', () => {
+    expect(nomeCurtoBem('50% - AQUISICAO DE UM VEICULO CAMINHAO/C. FECHADA , VW, PLACA GTR6988, 1995/1996, BRANCO'))
+      .toBe('CAMINHAO/C. FECHADA');
+  });
+
+  it('sem o padrão de veículo, corta no primeiro separador de detalhe', () => {
+    expect(nomeCurtoBem('APARTAMENTO 101, EDIFICIO CENTRAL, RUA DAS FLORES 50, CENTRO')).toBe('APARTAMENTO 101');
+    // Resumo curto que já vem da Apuração do Ganho de Capital passa intacto.
+    expect(nomeCurtoBem('FIAT UNO MILLE HJT9373')).toBe('FIAT UNO MILLE HJT9373');
+  });
+
+  it('não estoura o tamanho, e vazio devolve vazio', () => {
+    expect(nomeCurtoBem('').length).toBe(0);
+    expect(nomeCurtoBem(null)).toBe('');
+    expect(nomeCurtoBem('X'.repeat(200)).length).toBeLessThanOrEqual(51);
   });
 });

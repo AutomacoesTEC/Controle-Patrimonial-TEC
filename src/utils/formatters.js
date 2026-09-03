@@ -10,6 +10,31 @@ export function truncarComReticencias(texto, max) {
   return s.length > max ? `${s.slice(0, max)}...` : s;
 }
 
+// Nome curto e legível de um bem, para rótulos onde a discriminação inteira
+// não cabe e ATRAPALHA. A discriminação dos veículos importados começa sempre
+// com "AQUISIÇÃO DE UM VEÍCULO ..." e muitas vezes já traz o preço de compra
+// logo em seguida ("... POR R$ 353.690,00 ..."). Jogada crua num rótulo como
+// "PERDA APURADA NA VENDA DE ..." a frase fica sem pé nem cabeça e o usuário lê
+// o valor de COMPRA como se fosse o da venda (achado de 03/09/2026: a usuária
+// apontou "se ele comprou 2 veículos, por que os valores estão negativos?").
+// Tira o trecho de aquisição e devolve marca/modelo/placa. Fora do padrão de
+// veículo, corta no primeiro separador de detalhe. SEMPRE combinar com
+// title={discriminacaoCompleta} no elemento, para o texto integral aparecer ao
+// passar o mouse.
+export function nomeCurtoBem(discriminacao) {
+  const bruto = String(discriminacao || '').trim();
+  if (!bruto) return '';
+  const semAquisicao = bruto.replace(
+    /^\s*(?:\d+\s*%\s*[-–]\s*)?AQUISI[ÇC][ÃA]O\b[\s\S]*?\bDE\s+UM\s+(?:VE[IÍ]CULO|IM[OÓ]VEL|BEM)\s+/i,
+    ''
+  );
+  const base = semAquisicao || bruto;
+  // Corta no primeiro separador que introduz detalhe (vírgula) ou no termo que
+  // não faz parte da identificação do bem (preço, verbo de venda, data).
+  const corte = base.split(/\s*,|\s+(?:POR|PELO|VENDID[OA]|EM)\s+/i)[0].trim();
+  return truncarComReticencias(corte || base, 48);
+}
+
 export function formatCurrency(value) {
   if (value === null || value === undefined || isNaN(value)) return 'R$ 0,00';
   // Normaliza o zero negativo antes de formatar. O Intl formata -0 como
@@ -44,6 +69,34 @@ export function formatCpfCnpj(valor) {
   if (nums.length === 11) return formatCPF(nums);
   if (nums.length === 14) return formatCNPJ(nums);
   return valor;
+}
+
+// Máscaras PROGRESSIVAS, para digitação em <input>. O formatCpfCnpj acima só
+// formata quando o número está completo (11 ou 14 dígitos); enquanto a pessoa
+// digita, ela via o valor cru. A usuária pediu (03/09/2026) máscara em TODO
+// campo de CPF/CNPJ do app. Guardar o valor JÁ mascarado é seguro: todo lugar
+// que compara documento faz .replace(/\D/g,'') antes, e o app nunca reescreve a
+// declaração.
+export function mascaraCpf(valor) {
+  const d = String(valor || '').replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+export function mascaraCnpj(valor) {
+  const d = String(valor || '').replace(/\D/g, '').slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+}
+// CPF ou CNPJ conforme a quantidade de dígitos: até 11 formata como CPF, de 12
+// em diante como CNPJ — o mesmo ponto de virada que o programa da Receita usa.
+export function mascaraCpfCnpj(valor) {
+  const d = String(valor || '').replace(/\D/g, '');
+  return d.length <= 11 ? mascaraCpf(d) : mascaraCnpj(d);
 }
 
 export function parseBRLCurrency(str) {
@@ -217,6 +270,22 @@ export const CODIGOS_PAGAMENTO = [
 // produziu o erro de rótulo da Lei 14.754, corrigido na ATUALIZAÇÃO 56.
 export function describePagamentoCodigo(codigo) {
   return CODIGOS_PAGAMENTO.find(c => c.codigo === codigo)?.nome || '';
+}
+
+// Código do credor na ficha "Dívidas e Ônus Reais". Lista oficial da Receita
+// (tabelas-irpf2026/tipoDividas.xml, mesma que o programa do IRPF mostra).
+// Antes o campo era texto livre com o placeholder "Ex: 11, 12, 13".
+export const CODIGOS_DIVIDA = [
+  { codigo: '11', nome: 'Estabelecimento bancário comercial' },
+  { codigo: '12', nome: 'Sociedades de crédito, financiamento e investimento' },
+  { codigo: '13', nome: 'Outras pessoas jurídicas' },
+  { codigo: '14', nome: 'Pessoas físicas' },
+  { codigo: '15', nome: 'Empréstimos contraídos no exterior' },
+  { codigo: '16', nome: 'Outras dívidas e ônus reais' },
+];
+
+export function describeDividaCodigo(codigo) {
+  return CODIGOS_DIVIDA.find(c => c.codigo === String(codigo || '').trim())?.nome || '';
 }
 
 // A quem o pagamento se refere. A ficha imprime isso como um marcador que
@@ -457,6 +526,13 @@ export const RELACAO_DEPENDENCIA = {
   '41': { curto: 'Menor pobre, até 21 (vinte e um) anos, com guarda judicial', oficial: "Menor pobre, até 21 (vinte e um) anos, que o contribuinte crie e eduque e do qual detenha a guarda judicial." },
   '51': { curto: 'Tutor ou Curador de pessoa absolutamente incapaz', oficial: "A pessoa absolutamente incapaz, da qual o contribuinte seja tutor ou curador." },
 };
+
+// Lista [{ codigo, nome }] para o SeletorCodigo da tela Titular e Dependentes.
+// Mesma fonte de RELACAO_DEPENDENCIA (tabelas-irpf2026/dependencias.xml); o
+// `nome` é a redação curta.
+export const CODIGOS_DEPENDENCIA = Object.entries(RELACAO_DEPENDENCIA).map(
+  ([codigo, { curto }]) => ({ codigo, nome: curto })
+);
 
 export function describeRelacaoDependencia(codigo) {
   return RELACAO_DEPENDENCIA[String(codigo || '').trim()]?.curto || '';
