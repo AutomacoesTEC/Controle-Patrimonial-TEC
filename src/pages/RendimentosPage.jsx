@@ -23,7 +23,7 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
 const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: '' };
 
 export default function RendimentosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { rendimentos } = state;
   // Aba por categoria (mesmo padrão de BensPage: "Todos" + uma por grupo) —
   // pedido da usuária pra não ficar uma lista contínua de cards empilhados.
@@ -60,8 +60,9 @@ export default function RendimentosPage() {
       dispatch({ type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
       addToast('Rendimento atualizado!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_RENDIMENTO', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_RENDIMENTO', payload });
       addToast('Rendimento cadastrado!', 'success');
     }
     setModalOpen(false);

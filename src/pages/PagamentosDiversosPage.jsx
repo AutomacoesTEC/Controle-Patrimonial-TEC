@@ -14,7 +14,7 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: '' };
 
 export default function PagamentosDiversosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { pagamentosDiversos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -51,8 +51,9 @@ export default function PagamentosDiversosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
       addToast('Despesa atualizada!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_PAGAMENTO_DIVERSO', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_PAGAMENTO_DIVERSO', payload });
       addToast('Despesa cadastrada!', 'success');
     }
     setModalOpen(false);

@@ -1124,6 +1124,38 @@ export function reducer(state, action) {
       }
       return { ...state, historico };
     }
+    // Item G do HANDOFF-2026-09-03.md: grava um lançamento no ano da SUA
+    // data sem trocar a visão. `action` é a ação normal (ADD_PAGAMENTO,
+    // ADD_PAGAMENTO_DIVERSO, ADD_LANCAMENTO_RURAL etc.) que seria despachada
+    // se o ano da data fosse o ativo; aqui ela roda sobre o snapshot do
+    // ano-alvo dentro de `historico`, nunca sobre o `state` top-level —
+    // reaproveita o próprio reducer() para não duplicar a regra de inserção
+    // de cada coleção (ver descreverAcao mais abaixo para o desdobramento no
+    // histórico de alterações).
+    case 'ADD_EM_ANO': {
+      const { ano, action: acaoInterna } = action.payload;
+      // Mesmo ano ativo: nenhuma razão para desviar do caminho direto —
+      // delega ao próprio reducer(), resultado idêntico a despachar
+      // `acaoInterna` sozinha.
+      if (ano === state.anoCalendario) return reducer(state, acaoInterna);
+      // Ano diferente: aplica a ação sobre o snapshot desse ano dentro de
+      // `historico`, criando-o primeiro se ainda não existir — mesma base
+      // de blankYear usada em ROLLOVER_ANO/SWITCH_ANO ao visitar um ano
+      // genuinamente novo, incluindo os dois campos que "atravessam anos"
+      // (imoveisRurais, prejuizoRuralAcompensar — ver comentário de
+      // blankYear), herdados do valor corrente do state.
+      const snapshotAnoAlvo = state.historico[ano] || {
+        ...blankYear,
+        imoveisRurais: state.imoveisRurais,
+        prejuizoRuralAcompensar: state.prejuizoRuralAcompensar,
+        origem: null,
+        savedAt: new Date().toISOString(),
+      };
+      return {
+        ...state,
+        historico: { ...state.historico, [ano]: reducer(snapshotAnoAlvo, acaoInterna) },
+      };
+    }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, action.payload] };
     case 'CLOSE_TOAST':
@@ -1209,6 +1241,18 @@ function descreverAcao(state, action) {
     case 'UPDATE_MOVIMENTACAO_BEM_RURAL': return `Editou movimentação no bem rural: ${itemLabel('bensRurais', buscar(state, 'bensRurais', p.bemId))}`;
     case 'UPDATE_MOVIMENTACAO_DIVIDA': return `Editou movimentação na dívida: ${itemLabel('dividas', buscar(state, 'dividas', p.bemId))}`;
     case 'AJUSTAR_PREJUIZO_RURAL': return `Ajustou o prejuízo da atividade rural a compensar`;
+    // Desdobra a ação interna em vez de descrever "ADD_EM_ANO" cru — quem lê
+    // o histórico de alterações precisa ver "Cadastrou pagamento: X", não o
+    // nome do mecanismo de infraestrutura. `buscar()`/`itemLabel()` dentro
+    // da chamada recursiva precisam olhar o snapshot do ANO-ALVO (não o
+    // `state` ativo) quando o ano é diferente, senão UPDATE/DELETE nesse ano
+    // nunca acham o item para descrever.
+    case 'ADD_EM_ANO': {
+      const { ano, action: interna } = p;
+      const baseParaDescricao = ano === state.anoCalendario ? state : (state.historico[ano] || blankYear);
+      const descricaoInterna = descreverAcao(baseParaDescricao, interna);
+      return descricaoInterna ? `${descricaoInterna}, no ano-calendário ${ano}` : null;
+    }
     case 'IMPORT_DECLARACAO': return `Importou declaração${p.anoCalendario ? ` do ano-calendário ${p.anoCalendario}` : ''}`;
     case 'RECONCILIAR_IMPORTACAO': return `Reimportou declaração retificadora do ano-calendário ${p.anoCalendario}, com conciliação item a item`;
     case 'ROLLOVER_ANO': return `Avançou o ano-calendário para ${p}`;

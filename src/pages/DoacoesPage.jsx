@@ -22,7 +22,7 @@ const ABAS = {
 const FORM_VAZIO = { codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
 
 export default function DoacoesPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const [subView, setSubView] = useState('efetuadas');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -64,8 +64,9 @@ export default function DoacoesPage() {
       dispatch({ type: aba.updateAction, payload: { ...payload, id: editingId } });
       addToast('Doação atualizada!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: aba.addAction, payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: aba.addAction, payload });
       addToast('Doação cadastrada!', 'success');
     }
     setModalOpen(false);

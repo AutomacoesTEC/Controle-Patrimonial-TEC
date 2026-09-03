@@ -17,7 +17,7 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: '' };
 
 export default function PagamentosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { pagamentos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -51,8 +51,9 @@ export default function PagamentosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });
       addToast('Pagamento atualizado!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_PAGAMENTO', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_PAGAMENTO', payload });
       addToast('Pagamento cadastrado!', 'success');
     }
     setModalOpen(false);

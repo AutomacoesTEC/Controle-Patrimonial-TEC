@@ -17,7 +17,7 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 // neste ano, e a usuária ainda precisa conferir isso na declaração corrente.
 
 export default function BensPage({ onVoltar } = {}) {
-  const { state, dispatch, addToast, confirmar } = useData();
+  const { state, dispatch, addToast, despacharEmAno, confirmar } = useData();
   const { bens, anoCalendario } = state;
   const [grupoFilter, setGrupoFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -80,12 +80,12 @@ export default function BensPage({ onVoltar } = {}) {
     return { anterior, atual, variacao: atual - anterior };
   }, [filtered]);
 
-  const handleSave = (bem) => {
+  const handleSave = (bem, anoAlvo) => {
     if (editingBem) {
       dispatch({ type: 'UPDATE_BEM', payload: bem });
       addToast('Bem atualizado com sucesso!', 'success');
     } else {
-      dispatch({ type: 'ADD_BEM', payload: bem });
+      despacharEmAno(anoAlvo, { type: 'ADD_BEM', payload: bem });
       addToast('Bem cadastrado com sucesso!', 'success');
     }
     setModalOpen(false);

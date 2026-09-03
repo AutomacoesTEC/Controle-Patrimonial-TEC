@@ -589,6 +589,106 @@ describe('SWITCH_ANO (seletor de ano da sidebar)', () => {
   });
 });
 
+// Infraestrutura do item G do HANDOFF-2026-09-03.md ("gravar em ano
+// diferente sem trocar a visão"): envelope genérico que aplica QUALQUER
+// ação de coleção (ADD_*, e por extensão UPDATE_*/DELETE_*) sobre o
+// snapshot do ano-alvo dentro de `historico`, reaproveitando o próprio
+// `reducer()` em vez de duplicar a regra de inserção por coleção. Usado por
+// `garantirAnoCadastro`/`despacharEmAno` em DataContext.jsx.
+describe('ADD_EM_ANO (grava num ano que pode não ser o ativo, sem trocar a visão)', () => {
+  it('com o ano igual ao ativo, se comporta como o ADD_* direto (delega, não duplica lógica)', () => {
+    const acaoInterna = { type: 'ADD_PAGAMENTO', payload: { codigo: '21', valor_pago: 200 } };
+    const estadoBase = { ...initialState, anoCalendario: 2026 };
+    const direto = reducer(estadoBase, acaoInterna);
+    const viaEnvelope = reducer(estadoBase, { type: 'ADD_EM_ANO', payload: { ano: 2026, action: acaoInterna } });
+
+    expect(viaEnvelope.anoCalendario).toBe(direto.anoCalendario);
+    expect(viaEnvelope.historico).toEqual(direto.historico); // nenhum dos dois arquiva nada
+    expect(viaEnvelope.pagamentos).toHaveLength(1);
+    // novoId() avança um contador global entre as duas chamadas de reducer()
+    // acima, então os ids DIVERGEM por construção — compara todo o resto.
+    const { id: _d, ...pagamentoDireto } = direto.pagamentos[0];
+    const { id: _e, ...pagamentoEnvelope } = viaEnvelope.pagamentos[0];
+    expect(pagamentoEnvelope).toEqual(pagamentoDireto);
+  });
+
+  it('com ano diferente e histórico já existente, insere só no ano-alvo; ano ativo e coleções ativas saem intactos', () => {
+    const historicoAnoAlvo = { ...blankYear, pagamentos: [{ id: 5, codigo: '10', valor_pago: 999 }], savedAt: 'x' };
+    const estadoAntes = {
+      ...initialState, anoCalendario: 2026,
+      pagamentos: [{ id: 1, codigo: '21', valor_pago: 100 }],
+      bens: [{ ...bemBase }],
+      historico: { 2025: historicoAnoAlvo },
+    };
+    const state = reducer(estadoAntes, {
+      type: 'ADD_EM_ANO',
+      payload: { ano: 2025, action: { type: 'ADD_PAGAMENTO', payload: { codigo: '30', valor_pago: 300 } } },
+    });
+
+    expect(state.anoCalendario).toBe(2026);
+    expect(state.historico[2025].pagamentos).toHaveLength(2);
+    expect(state.historico[2025].pagamentos[0]).toEqual(historicoAnoAlvo.pagamentos[0]);
+    expect(state.historico[2025].pagamentos[1].valor_pago).toBe(300);
+    // Comparação profunda do resto do estado ativo (fora `historico`): nada
+    // muda no ano em exibição, nem os campos que o Demonstrativo/saldos
+    // compensáveis leem dele (ver AUDITORIA/ESTUDO-VARIACAO-PATRIMONIAL...).
+    const { historico: _h1, ...restoAntes } = estadoAntes;
+    const { historico: _h2, ...restoDepois } = state;
+    expect(restoDepois).toEqual(restoAntes);
+  });
+
+  it('com ano diferente e sem histórico ainda, cria o ano em branco (mesma base do ROLLOVER_ANO/blankYear) e insere só nele', () => {
+    const estadoAntes = {
+      ...initialState, anoCalendario: 2026,
+      pagamentosDiversos: [{ id: 1, descricao: 'Cartão', valor: 100 }],
+      imoveisRurais: [{ id: 9, nomeLocalizacao: 'Fazenda X' }],
+      prejuizoRuralAcompensar: 500,
+      historico: {},
+    };
+    const state = reducer(estadoAntes, {
+      type: 'ADD_EM_ANO',
+      payload: { ano: 2027, action: { type: 'ADD_PAGAMENTO_DIVERSO', payload: { descricao: 'Seguro', valor: 50 } } },
+    });
+
+    expect(state.anoCalendario).toBe(2026);
+    expect(state.pagamentosDiversos).toEqual(estadoAntes.pagamentosDiversos); // ano ativo intocado
+    expect(state.historico[2027]).toBeTruthy();
+    expect(state.historico[2027].pagamentosDiversos).toHaveLength(1);
+    expect(state.historico[2027].pagamentosDiversos[0].descricao).toBe('Seguro');
+    // Coleções do ano nascem vazias, mesma base de blankYear usada no ROLLOVER_ANO...
+    expect(state.historico[2027].bens).toEqual([]);
+    expect(state.historico[2027].contribuinte).toBeNull();
+    // ...mas os dois campos que "atravessam anos" (ver comentário de
+    // blankYear) entram com o valor corrente do state, mesmo critério do
+    // ROLLOVER_ANO/SWITCH_ANO ao visitar um ano genuinamente novo.
+    expect(state.historico[2027].imoveisRurais).toEqual(estadoAntes.imoveisRurais);
+    expect(state.historico[2027].prejuizoRuralAcompensar).toBe(500);
+  });
+
+  it('funciona para coleções diferentes sem lógica duplicada por coleção (pagamentos e despesas gerais no mesmo ano-alvo)', () => {
+    let state = { ...initialState, anoCalendario: 2026, historico: {} };
+    state = reducer(state, { type: 'ADD_EM_ANO', payload: { ano: 2025, action: { type: 'ADD_PAGAMENTO', payload: { codigo: '21', valor_pago: 100 } } } });
+    state = reducer(state, { type: 'ADD_EM_ANO', payload: { ano: 2025, action: { type: 'ADD_PAGAMENTO_DIVERSO', payload: { descricao: 'IPVA', valor: 80 } } } });
+
+    expect(state.anoCalendario).toBe(2026);
+    expect(state.historico[2025].pagamentos).toHaveLength(1);
+    expect(state.historico[2025].pagamentosDiversos).toHaveLength(1);
+    // A 2ª chamada reaproveitou o MESMO snapshot criado pela 1ª (não recriou
+    // do zero, o que perderia o pagamento já gravado).
+    expect(state.historico[2025].pagamentos[0].valor_pago).toBe(100);
+  });
+
+  it('o histórico de alterações (reducerComHistorico) descreve a ação interna, não "ADD_EM_ANO" cru', () => {
+    let state = { ...initialState, anoCalendario: 2026, historico: {} };
+    state = reducerComHistorico(state, {
+      type: 'ADD_EM_ANO',
+      payload: { ano: 2025, action: { type: 'ADD_PAGAMENTO_DIVERSO', payload: { descricao: 'IPTU', valor: 400 } } },
+    });
+    expect(state.alteracoes[0].descricao).toMatch(/despesa geral/i);
+    expect(state.alteracoes[0].descricao).toMatch(/2025/);
+  });
+});
+
 describe('Ganhos de Capital: valorVenda na movimentação de bem', () => {
   it('venda parcial/total guarda valorVenda junto da movimentação, sem afetar o cálculo de situacao_atual', () => {
     let state = { ...initialState, bens: [{ ...bemBase }] };

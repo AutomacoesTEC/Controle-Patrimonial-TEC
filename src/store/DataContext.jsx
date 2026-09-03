@@ -199,11 +199,20 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
 
   // O ano-calendário ativo NÃO trava o que pode ser cadastrado — ele é só o
   // contexto que "Novo X" assume por padrão. Se a pessoa escolher um ano
-  // diferente do ativo no campo de ano do próprio modal de cadastro, isso
-  // troca (ou inicia, se for um ano novo) o ano ativo antes de gravar o
-  // registro ali — mesma mecânica testada de SWITCH_ANO/ROLLOVER_ANO, só que
-  // disparada a partir do formulário de cadastro em vez de um botão à parte
-  // na sidebar. Recusar o aviso cancela a troca (e o cadastro).
+  // diferente do ativo no campo de ano (ou a data) do próprio formulário de
+  // cadastro, o registro é gravado no ano dela, mas a TELA CONTINUA
+  // mostrando o ano ativo (pedido da usuária em 03/09/2026, item G do
+  // HANDOFF-2026-09-03.md — antes disparava SWITCH_ANO/ROLLOVER_ANO e a tela
+  // pulava de ano). Quem chama precisa despachar a gravação com
+  // `despacharEmAno` (não com `dispatch` direto), que é o que realmente leva
+  // o item ao ano certo sem tocar no ano em exibição — ver ADD_EM_ANO no
+  // reducer. Recusar o aviso cancela o cadastro.
+  //
+  // Exceção: sem NENHUM ano-calendário ativo ainda (`state.anoCalendario ==
+  // null`, onboarding — primeiro titular/bem/dependente de um perfil novo),
+  // não há "visão" nenhuma para preservar, então este é o único caso em que
+  // `garantirAnoCadastro` ainda troca de verdade (SWITCH_ANO/ROLLOVER_ANO),
+  // exatamente como sempre fez — é o que estabelece o ano ativo pela 1ª vez.
   // Confirmação própria (modal "Atenção"), no lugar do confirm() nativo.
   // `confirmar(opcoes)` devolve Promise<boolean>. Ver ConfirmacaoModal.jsx.
   const [confirmState, setConfirmState] = useState(null);
@@ -219,18 +228,37 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
     r?.(ok);
   }, []);
 
+  // Devolve o ano-alvo (truthy, para gravar com despacharEmAno) ou `null`
+  // se a pessoa cancelou o aviso. Deixou de devolver um boolean "trocou de
+  // ano" porque, fora do onboarding, não troca mais nada.
   const garantirAnoCadastro = useCallback(async (anoEscolhido) => {
-    if (anoEscolhido === state.anoCalendario) return true;
+    if (anoEscolhido === state.anoCalendario) return anoEscolhido;
+    const semAnoAtivo = state.anoCalendario == null;
     const ok = await confirmar({
       titulo: 'Gravar em outro ano-calendário?',
-      texto: `O ano-calendário ativo é ${state.anoCalendario} e o que você está cadastrando é de ${anoEscolhido}. Para gravar em ${anoEscolhido}, o app passa a mostrar esse ano. Confirma?`,
+      texto: semAnoAtivo
+        ? `Você ainda não tem nenhum ano-calendário ativo. Os dados serão gravados em ${anoEscolhido} e o app passa a exibir esse ano. Confirma?`
+        : `O ano-calendário ativo é ${state.anoCalendario} e o que você está cadastrando é de ${anoEscolhido}. Será gravado em ${anoEscolhido}; a tela continua mostrando ${state.anoCalendario}. Confirma?`,
       textoConfirmar: `Gravar em ${anoEscolhido}`,
     });
-    if (!ok) return false;
-    const existe = snapshotHasData(state.historico[anoEscolhido]);
-    dispatch({ type: existe ? 'SWITCH_ANO' : 'ROLLOVER_ANO', payload: anoEscolhido });
-    return true;
+    if (!ok) return null;
+    if (semAnoAtivo) {
+      const existe = snapshotHasData(state.historico[anoEscolhido]);
+      dispatch({ type: existe ? 'SWITCH_ANO' : 'ROLLOVER_ANO', payload: anoEscolhido });
+    }
+    return anoEscolhido;
   }, [state, confirmar]);
+
+  // Sempre envolve em ADD_EM_ANO, mesmo quando `ano` já é o ativo: o reducer
+  // trata os dois casos de forma idêntica a um dispatch direto (ver
+  // reducer.test.js), então quem chama não precisa comparar com
+  // state.anoCalendario — inclusive porque, num handler que já disparou
+  // outro dispatch antes (ex.: o SWITCH_ANO do onboarding acima), o `state`
+  // capturado neste closure já estaria desatualizado para essa comparação;
+  // o reducer sempre roda contra o estado real no momento do processamento.
+  const despacharEmAno = useCallback((ano, acao) => {
+    dispatch({ type: 'ADD_EM_ANO', payload: { ano, action: acao } });
+  }, [dispatch]);
 
   return (
     <DataContext.Provider value={{
@@ -241,6 +269,7 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
       persistencia,
       addToast,
       garantirAnoCadastro,
+      despacharEmAno,
       confirmar,
       perfilProtegido: !!chave,
     }}>

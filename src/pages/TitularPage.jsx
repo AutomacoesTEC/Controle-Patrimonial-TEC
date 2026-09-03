@@ -16,7 +16,7 @@ const FORM_DEPENDENTE_VAZIO = { nome: '', cpf: '', dataNascimento: '', parentesc
 // mais rápido de preencher isso, mas nem toda situação começa por um
 // arquivo — daí esta tela para cadastrar ou corrigir à mão.
 export default function TitularPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { contribuinte, dependentes, anoCalendario } = state;
 
   const [formTitular, setFormTitular] = useState({ nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
@@ -43,8 +43,9 @@ export default function TitularPage() {
     // preenchido.
     const falta = primeiroCampoVazio([['Nome Completo', formTitular.nome]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    if (!(await garantirAnoCadastro(ano))) return;
-    dispatch({ type: 'SET_CONTRIBUINTE', payload: { nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
+    const anoAlvo = await garantirAnoCadastro(ano);
+    if (!anoAlvo) return;
+    despacharEmAno(anoAlvo, { type: 'SET_CONTRIBUINTE', payload: { nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
     addToast('Titular atualizado!', 'success');
   };
   const handleSalvarTitular = (e) => {
@@ -75,8 +76,9 @@ export default function TitularPage() {
       dispatch({ type: 'UPDATE_DEPENDENTE', payload: { ...formDependente, id: editingId } });
       addToast('Dependente atualizado!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_DEPENDENTE', payload: formDependente });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_DEPENDENTE', payload: formDependente });
       addToast('Dependente cadastrado!', 'success');
     }
     setModalOpen(false);

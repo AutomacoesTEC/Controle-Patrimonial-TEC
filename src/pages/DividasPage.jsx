@@ -13,7 +13,7 @@ import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 export default function DividasPage({ onVoltar } = {}) {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { dividas, anoCalendario } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -57,8 +57,9 @@ export default function DividasPage({ onVoltar } = {}) {
       dispatch({ type: 'UPDATE_DIVIDA', payload: { ...payload, id: editingId, situacao_anterior: liveDivida.situacao_anterior, situacao_atual: liveDivida.situacao_atual, movimentacoes: liveDivida.movimentacoes } });
       addToast('Dívida atualizada!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_DIVIDA', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_DIVIDA', payload });
       addToast('Dívida cadastrada!', 'success');
     }
     setModalOpen(false);

@@ -50,13 +50,21 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código', form.codigo], ['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    if (!isEditing && !(await garantirAnoCadastro(anoCadastro))) return;
+    // Em edição não há ano-alvo (a movimentação/UPDATE não muda de ano); em
+    // cadastro novo, o pai (BensRuraisSection) precisa do ano confirmado
+    // aqui para gravar com despacharEmAno em vez de dispatch direto — ver
+    // item G do HANDOFF-2026-09-03.md.
+    let anoAlvo = null;
+    if (!isEditing) {
+      anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+    }
     onSave({
       ...form,
       situacao_anterior: isEditing ? liveBem.situacao_anterior : (parseFloat(form.situacao_anterior) || 0),
       situacao_atual: isEditing ? liveBem.situacao_atual : (parseFloat(form.situacao_atual) || 0),
       movimentacoes: isEditing ? liveBem.movimentacoes : undefined,
-    });
+    }, anoAlvo);
   };
 
   return (

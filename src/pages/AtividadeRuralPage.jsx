@@ -25,7 +25,7 @@ const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situ
 // baixado justamente NESTE ano, que continua aparecendo.
 
 export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
-  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const {
     imoveisRurais, bensRurais, dividasRurais, lancamentosRurais, prejuizoRuralAcompensar, anoCalendario,
     receitasDespesasRuraisOficial, apuracaoResultadoRuralOficial, movimentacaoRebanhoOficial,
@@ -73,16 +73,16 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
         {subView === 'imoveis' && (
           <ImoveisRuraisSection
             imoveisRurais={imoveisRurais} dispatch={dispatch} addToast={addToast}
-            anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro}
+            anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro} despacharEmAno={despacharEmAno}
           />
         )}
-        {subView === 'bens' && <BensRuraisSection bensRurais={bensRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} />}
+        {subView === 'bens' && <BensRuraisSection bensRurais={bensRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} despacharEmAno={despacharEmAno} />}
         {subView === 'dividas' && <DividasRuraisSection dividasRurais={dividasRurais} dispatch={dispatch} addToast={addToast} anoCalendario={anoCalendario} />}
         {subView === 'lancamentos' && (
           <LancamentosRuraisSection
             lancamentosRurais={lancamentosRurais} dispatch={dispatch} addToast={addToast}
             receitaTotal={receitaTotal} despesaTotal={despesaTotal} resultadoDoAno={resultadoDoAno}
-            anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro}
+            anoCalendario={anoCalendario} garantirAnoCadastro={garantirAnoCadastro} despacharEmAno={despacharEmAno}
             receitasDespesasRuraisOficial={receitasDespesasRuraisOficial}
             origemRural={origemRural} resultadoConsolidado={resultadoConsolidado}
           />
@@ -101,7 +101,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
   );
 }
 
-function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario, garantirAnoCadastro }) {
+function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario, garantirAnoCadastro, despacharEmAno }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_IMOVEL_VAZIO);
@@ -129,8 +129,9 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
       dispatch({ type: 'UPDATE_IMOVEL_RURAL', payload: { ...payload, id: editingId } });
       addToast('Imóvel atualizado!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_IMOVEL_RURAL', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_IMOVEL_RURAL', payload });
       addToast('Imóvel cadastrado!', 'success');
     }
     setModalOpen(false);
@@ -293,7 +294,7 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
   );
 }
 
-function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
+function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, despacharEmAno }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
@@ -311,12 +312,12 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario }) {
     [bensRurais]
   );
 
-  const handleSave = (bemPayload) => {
+  const handleSave = (bemPayload, anoAlvo) => {
     if (editingBem) {
       dispatch({ type: 'UPDATE_BEM_RURAL', payload: bemPayload });
       addToast('Bem atualizado com sucesso!', 'success');
     } else {
-      dispatch({ type: 'ADD_BEM_RURAL', payload: bemPayload });
+      despacharEmAno(anoAlvo, { type: 'ADD_BEM_RURAL', payload: bemPayload });
       addToast('Bem cadastrado com sucesso!', 'success');
     }
     setModalOpen(false);
@@ -551,7 +552,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
 
 function LancamentosRuraisSection({
   lancamentosRurais, dispatch, addToast, receitaTotal, despesaTotal, resultadoDoAno,
-  anoCalendario, garantirAnoCadastro, receitasDespesasRuraisOficial = [],
+  anoCalendario, garantirAnoCadastro, despacharEmAno, receitasDespesasRuraisOficial = [],
   origemRural = { temOficial: false, mesesSubstituidos: [], mesesOficiaisMantidos: [] },
   resultadoConsolidado = 0,
 }) {
@@ -586,8 +587,9 @@ function LancamentosRuraisSection({
       dispatch({ type: 'UPDATE_LANCAMENTO_RURAL', payload: { ...payload, id: editingId } });
       addToast('Lançamento atualizado!', 'success');
     } else {
-      if (!(await garantirAnoCadastro(anoCadastro))) return;
-      dispatch({ type: 'ADD_LANCAMENTO_RURAL', payload });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'ADD_LANCAMENTO_RURAL', payload });
       addToast('Lançamento cadastrado!', 'success');
     }
     setModalOpen(false);
