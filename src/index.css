@@ -275,6 +275,10 @@ table.rv-anual td{padding:8px 14px;border-bottom:1px solid var(--border-color)}
 table.rv-anual tr:last-child td{border-bottom:none}
 table.rv-anual td:first-child{color:var(--text-secondary)}
 .rv-zero{color:var(--text-muted)}
+/* Mês sem movimento (preenchido para completar os 12): fica mais apagado que
+   um mês com dado zero, para o olho separar "não teve" de "teve e deu zero". */
+.rv-mes-vazio td{color:var(--text-muted);background:rgba(var(--accent-primary-rgb),0.02)}
+.rv-mes-vazio td:first-child{font-style:italic}
 .rv-total-imposto{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 18px;margin-bottom:16px;border:1px solid var(--border-color);border-radius:var(--radius-md);background:var(--bg-card)}
 .rv-total-imposto span{font-size:12px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted)}
 .rv-total-imposto strong{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}

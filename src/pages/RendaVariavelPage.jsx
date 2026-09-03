@@ -68,6 +68,30 @@ const LINHAS_FII = [
   ['Imposto pago', 'impostoPago'],
 ];
 
+// A ficha da declaração só grava os meses COM movimento, mas o quadro tem que
+// mostrar os 12 meses de janeiro a dezembro, como o programa do IRPF (a usuária
+// pediu em 03/09/2026). Preenche os meses que faltam: resultado zero, e o
+// prejuízo a compensar só passa adiante (mês vazio não compensa nada).
+function completar12Meses(linhasReais, ficha) {
+  const porMes = new Map(linhasReais.map(l => [l.mes, l]));
+  const out = [];
+  let prejuizoAnterior = 0;
+  for (let m = 1; m <= 12; m++) {
+    const real = porMes.get(m);
+    if (real) {
+      out.push(real);
+      prejuizoAnterior = ficha === 'fii'
+        ? (real.prejuizoCompensar || 0)
+        : (real.comuns?.prejuizoCompensar || 0);
+    } else if (ficha === 'fii') {
+      out.push({ mes: m, mesVazio: true, resultadoLiquidoMes: 0, resultadoNegativoMesAnterior: prejuizoAnterior, baseCalculoImposto: 0, prejuizoCompensar: prejuizoAnterior, aliquota: null, impostoDevido: 0, impostoRetidoNoMes: 0, impostoRetidoMesesAnteriores: 0, impostoACompensar: 0, impostoAPagar: 0, impostoPago: 0 });
+    } else {
+      out.push({ mes: m, mesVazio: true, comuns: { resultadoLiquidoMes: 0, resultadoNegativoMesAnterior: prejuizoAnterior, baseCalculoImposto: 0, prejuizoCompensar: prejuizoAnterior, impostoDevido: 0 }, daytrade: { resultadoLiquidoMes: 0 }, consolidacao: {} });
+    }
+  }
+  return out;
+}
+
 // R$ 0,00 sai apagado: num quadro de 12 meses em que a maioria é zero, isso é
 // o que deixa o olho achar o mês que teve movimento.
 function Valor({ n, formato }) {
@@ -286,7 +310,7 @@ export default function RendaVariavelPage() {
           <div className="card" style={{ marginBottom: '20px' }} key={`rv-${grupo.chave}`}>
             <div className="card-header">
               <h3 className="card-title">Operações Comuns / Day-Trade: {grupo.nome}</h3>
-              <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
+              <span className="badge badge-blue">{(() => { const n = grupo.linhas.filter(l => (l.comuns?.resultadoLiquidoMes || 0) !== 0 || (l.daytrade?.resultadoLiquidoMes || 0) !== 0).length; return n === 1 ? "1 mês com movimento" : `${n} meses com movimento`; })()}</span>
             </div>
             <ResumoFicha itens={resumoComuns(grupo.linhas)} />
             <TabelaRedimensionavel className="altura-natural">
@@ -302,12 +326,12 @@ export default function RendaVariavelPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {grupo.linhas.map(linha => (
+                  {completar12Meses(grupo.linhas, 'comuns').map(linha => (
                     // A key vai no Fragment, e não no <tr>: quem está na lista
                     // é o fragmento (a linha do mês mais a linha de detalhe que
                     // ela abre), e é dele que o React precisa da identidade.
                     <Fragment key={`${grupo.chave}-${linha.mes}`}>
-                      <tr>
+                      <tr className={linha.mesVazio ? 'rv-mes-vazio' : undefined}>
                         <td>
                           {nomeMes(linha.mes)}
                           {/* Cada mês é um quadro próprio na ficha impressa, e
@@ -325,12 +349,14 @@ export default function RendaVariavelPage() {
                         <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.consolidacao?.impostoPagar} /></td>
                         <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.consolidacao?.impostoPago} /></td>
                         <td>
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => setMesAberto(mesAberto === `${grupo.chave}-${linha.mes}` ? null : `${grupo.chave}-${linha.mes}`)}
-                          >
-                            {mesAberto === `${grupo.chave}-${linha.mes}` ? 'Fechar' : 'Mercados'}
-                          </button>
+                          {!linha.mesVazio && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => setMesAberto(mesAberto === `${grupo.chave}-${linha.mes}` ? null : `${grupo.chave}-${linha.mes}`)}
+                            >
+                              {mesAberto === `${grupo.chave}-${linha.mes}` ? 'Fechar' : 'Mercados'}
+                            </button>
+                          )}
                         </td>
                       </tr>
                       {mesAberto === `${grupo.chave}-${linha.mes}` && (
@@ -431,7 +457,7 @@ export default function RendaVariavelPage() {
           <div className="card" style={{ marginBottom: '20px' }} key={`fii-${grupo.chave}`}>
             <div className="card-header">
               <h3 className="card-title">Operações em FII ou Fiagro: {grupo.nome}</h3>
-              <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
+              <span className="badge badge-blue">{(() => { const n = grupo.linhas.filter(l => (l.resultadoLiquidoMes || 0) !== 0).length; return n === 1 ? "1 mês com movimento" : `${n} meses com movimento`; })()}</span>
             </div>
             <ResumoFicha itens={resumoFii(grupo.linhas)} />
             <TabelaRedimensionavel className="altura-natural">
@@ -443,8 +469,8 @@ export default function RendaVariavelPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {grupo.linhas.map(linha => (
-                    <tr key={`fii-${grupo.chave}-${linha.mes}`}>
+                  {completar12Meses(grupo.linhas, 'fii').map(linha => (
+                    <tr key={`fii-${grupo.chave}-${linha.mes}`} className={linha.mesVazio ? 'rv-mes-vazio' : undefined}>
                       <td>
                         {nomeMes(linha.mes)}
                         {descreverOrigemDocumento(linha) && (
