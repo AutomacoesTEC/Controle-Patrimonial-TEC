@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useData } from '../store/DataContext';
 import DateInput from '../components/DateInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 
 // Data/hora no padrão brasileiro (dd/mm/aaaa HH:mm), sempre com zero à
 // esquerda.
@@ -78,7 +79,7 @@ export default function HistoricoPage() {
             </p>
           </div>
         ) : (
-          <div className="table-container">
+          <TabelaRedimensionavel>
             <table>
               <thead>
                 <tr>
@@ -97,7 +98,7 @@ export default function HistoricoPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TabelaRedimensionavel>
         )}
       </div>
     </>

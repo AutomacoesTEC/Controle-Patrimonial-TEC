@@ -5,6 +5,7 @@ import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { totaisEvolucaoPatrimonial } from '../store/demonstrativos';
 import { blocosResumoDeclaracao, conferenciasResumo } from '../store/resumoDeclaracao';
+import Ajuda from '../components/Ajuda';
 
 // As 3 tabelas de Doações compartilham o mesmo aviso: diferente dos demais
 // cards "Da declaração original" deste arquivo (bens/pagamentos/renda
@@ -290,11 +291,13 @@ export default function RelatorioPage() {
             </div>
 
             {avisosResumo.length > 0 && (
-              <div style={{ padding: '12px 14px', marginBottom: '16px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--accent-warning)' }}>Conferência do quadro</div>
-                {avisosResumo.map((aviso, i) => (
-                  <div key={i} style={{ fontSize: '12px', marginTop: '4px' }}>{aviso}</div>
-                ))}
+              <div style={{ marginBottom: '16px' }}>
+                <Ajuda
+                  tom="ressalva"
+                  rotulo={`Conferência do quadro (${avisosResumo.length})`}
+                  titulo="Conferência do quadro"
+                  texto={avisosResumo.join('\n\n')}
+                />
               </div>
             )}
 
@@ -371,7 +374,7 @@ export default function RelatorioPage() {
                             <>
                               {t.sigla}
                               {t.descricao && (
-                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t.descricao}</div>
+                                <span style={{ color: 'var(--text-muted)' }}>{` - ${t.descricao}`}</span>
                               )}
                             </>
                           );

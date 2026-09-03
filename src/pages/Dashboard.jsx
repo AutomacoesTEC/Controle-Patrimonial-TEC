@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
+import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosCompensaveis';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
 import Modal from '../components/Modal';
@@ -170,6 +171,22 @@ export default function Dashboard({ onNavigate } = {}) {
     [state, de, ate]
   );
 
+  // Saldos que ATRAVESSAM o exercício (prejuízos compensáveis) e
+  // Disponibilidades — dois recortes do estudo de variação patrimonial, lidos
+  // do fim do período (o snapshot do ano da data "até"). Ver saldosCompensaveis.js.
+  const dadosFimPeriodo = useMemo(
+    () => (ate ? dadosDoAno(state, Number(ate.slice(0, 4))) : null),
+    [state, ate]
+  );
+  const saldosAtravessam = useMemo(
+    () => saldosQueAtravessam(dadosFimPeriodo),
+    [dadosFimPeriodo]
+  );
+  const disponibilidades = useMemo(
+    () => (ate ? disponibilidadesEmData(dadosFimPeriodo, ate) : { total: 0, porGrupo: [] }),
+    [dadosFimPeriodo, ate]
+  );
+
   // Anos do período consultado cuja declaração veio do PDF. O caminho PDF só
   // lê 4 fichas (Bens e Direitos, Dívidas e Ônus Reais, Pagamentos Efetuados
   // e Doações); Rendimentos, Atividade Rural, Ganho de Capital, Imposto
@@ -233,6 +250,62 @@ export default function Dashboard({ onNavigate } = {}) {
         && (dados.rendimentos || []).length === 0;
     });
   }, [state, demo]);
+
+  // Avisos ESTRUTURAIS: os que dizem que o número desta tela pode estar errado
+  // ou incompleto (parte da declaração não lida; ano importado sem rendimento).
+  // Não são ressalva de conferência (essas viraram o "?" discreto): aqui a
+  // pessoa PRECISA ficar ciente antes de confiar no demonstrativo, então
+  // aparecem numa janela própria ao abrir o Dashboard, que ela fecha no OK ou
+  // Esc. Depois de fechada, ficam acessíveis pelo "?" ao lado do título.
+  const avisosEstruturais = useMemo(() => {
+    const lista = [];
+    if (anosImportadosPorPdf.length === 0 && anosImportadosSemRendimento.length > 0) {
+      lista.push({
+        chave: 'semRendimento',
+        titulo: 'Sem rendimentos lançados',
+        texto: (anosImportadosSemRendimento.length === 1
+          ? `O ano-calendário ${anosImportadosSemRendimento[0]} veio de uma declaração importada, tem bens cadastrados e nenhum rendimento.`
+          : `Os anos-calendário ${anosImportadosSemRendimento.join(', ')} vieram de declarações importadas, têm bens cadastrados e nenhum rendimento.`)
+          + ' O demonstrativo confronta a variação do patrimônio com os rendimentos do período, então sem eles o Saldo de Caixa fica muito negativo mesmo que a declaração tenha renda. Reimporte o arquivo .DBK da mesma declaração em Importar Declaração, ou cadastre os rendimentos à mão.',
+      });
+    }
+    if (fichasNaoLidas.length > 0) {
+      const temDecOnly = fichasNaoLidas.some(f => /ACUMULADAMENTE|PESSOA FÍSICA E DO EXTERIOR/.test(f));
+      lista.push({
+        chave: 'naoImportada',
+        titulo: 'Parte da declaração não foi importada',
+        grave: true,
+        texto: 'A declaração importada tem informação nestas fichas, que o app ainda não lê:\n\n'
+          + fichasNaoLidas.map(f => `• ${f}`).join('\n')
+          + '\n\nOs valores dessas fichas não entram em nenhum número desta tela. Confira-os na declaração original, ou cadastre-os à mão, antes de usar o demonstrativo.'
+          + (temDecOnly ? '\n\nEstas fichas o arquivo .DEC/.DBK importa: se você tiver o arquivo eletrônico desta mesma declaração, importe por ele em Importar Declaração e os valores entram sozinhos.' : ''),
+      });
+    }
+    // Período: resposta ao filtro de datas. Marca discreta fica no próprio
+    // card de período (onde as datas são editadas), e o texto também entra na
+    // janela de abertura.
+    if (demo && demo.anosCobertos.length === 0) {
+      lista.push({ chave: 'semPeriodo', local: 'periodo', titulo: 'Não há dados neste período', texto: 'Ajuste as datas, ou importe a declaração do ano correspondente na aba Importar Declaração.' });
+    } else if (demo && demo.anosSemDado.length > 0) {
+      lista.push({ chave: 'anosSemDado', local: 'periodo', titulo: `Sem dados de ${demo.anosSemDado.join(', ')}`, texto: 'Esses anos ficam de fora das contas e dos gráficos.' });
+    }
+    return lista;
+  }, [demo, anosImportadosPorPdf, anosImportadosSemRendimento, fichasNaoLidas]);
+  const avisosDemonstrativo = avisosEstruturais.filter(a => a.local !== 'periodo');
+  const avisosPeriodo = avisosEstruturais.filter(a => a.local === 'periodo');
+
+  const assinaturaAviso = avisosEstruturais.map(a => a.chave).join('|');
+  const [avisoVisto, setAvisoVisto] = useState(true);
+  useEffect(() => {
+    if (!assinaturaAviso) { setAvisoVisto(true); return; }
+    let jaViu = false;
+    try { jaViu = sessionStorage.getItem('cp-aviso-estrutural') === assinaturaAviso; } catch { /* sessionStorage indisponível */ }
+    setAvisoVisto(jaViu);
+  }, [assinaturaAviso]);
+  const fecharAviso = () => {
+    try { sessionStorage.setItem('cp-aviso-estrutural', assinaturaAviso); } catch { /* ignore */ }
+    setAvisoVisto(true);
+  };
 
   // Anos do período cujo resultado da Atividade Rural veio da APURAÇÃO
   // IMPORTADA da declaração, e não de lançamento no livro-caixa do app (ver
@@ -355,80 +428,35 @@ export default function Dashboard({ onNavigate } = {}) {
               </button>
             </div>
           </div>
-          {demo && demo.anosCobertos.length === 0 && (
-            <p style={{ fontSize: '13px', color: 'var(--accent-warning, #f59e0b)', marginTop: '12px', marginBottom: 0 }}>
-              Não há dados neste período. Ajuste as datas ou importe a declaração do ano correspondente na aba Importar.
-            </p>
-          )}
-          {demo && demo.anosCobertos.length > 0 && demo.anosSemDado.length > 0 && (
-            <p style={{ fontSize: '12px', color: 'var(--accent-warning, #f59e0b)', marginTop: '12px', marginBottom: 0 }}>
-              Sem dados de {demo.anosSemDado.join(', ')}. Esses anos ficam de fora das contas e dos gráficos.
-            </p>
+          {avisosPeriodo.length > 0 && (
+            <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
+              {avisosPeriodo.map(a => (
+                <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
+              ))}
+            </div>
           )}
         </div>
 
-        {anosImportadosPorPdf.length === 0 && anosImportadosSemRendimento.length > 0 && (
-          <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <div className="card-header"><h3 className="card-title">Sem rendimentos lançados: confira antes de usar estes números</h3></div>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              {anosImportadosSemRendimento.length === 1
-                ? `O ano-calendário ${anosImportadosSemRendimento[0]} veio de uma declaração importada, tem bens cadastrados e nenhum rendimento.`
-                : `Os anos-calendário ${anosImportadosSemRendimento.join(', ')} vieram de declarações importadas, têm bens cadastrados e nenhum rendimento.`}
-              {' '}O demonstrativo abaixo confronta a variação do patrimônio com os rendimentos do período, então sem eles o
-              Saldo de Caixa fica muito negativo mesmo que a declaração tenha renda. Reimporte o arquivo .DBK da mesma
-              declaração em Importar Declaração, ou cadastre os rendimentos à mão.
-            </p>
+        {/* Os avisos estruturais (número pode estar errado/incompleto) são
+            surgidos numa janela ao abrir o Dashboard (ver Modal no fim do
+            render). Aqui ficam como marca "?" discreta, para continuarem
+            acessíveis depois que a pessoa fecha a janela. */}
+        {avisosDemonstrativo.length > 0 && (
+          <div style={{ marginBottom: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
+            {avisosDemonstrativo.map(a => (
+              <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
+            ))}
           </div>
         )}
-
-        {/* Único aviso sobre ficha que ficou de fora. Só aparece quando a
-            declaração REALMENTE tem dado numa ficha que o app não lê — o
-            parser confirma isso lendo cada ficha e distinguindo "Sem
-            Informações" de conteúdo (ver fichasNaoLidasComConteudo em
-            importParsers.js). O carnê-leão (rendimentos de pessoa física e do
-            exterior) é uma dessas fichas: se vier preenchido no PDF, cai aqui
-            nomeado; se vier vazio, não há o que avisar, e a linha zerada
-            abaixo está correta. Antes existia um segundo aviso ("Importação
-            parcial") que gritava em TODO import por PDF mesmo com o carnê-leão
-            vazio — alarme falso removido, porque um aviso que grita à toa
-            deixa de ser lido quando gritar por um motivo real. */}
-        {fichasNaoLidas.length > 0 && (
-          <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-danger, #ef4444)' }}>
-            <div className="card-header"><h3 className="card-title">Parte da declaração não foi importada</h3></div>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              A declaração importada tem informação nestas fichas, que o app ainda não lê:
-            </p>
-            <ul style={{ margin: '8px 0 0', paddingLeft: '18px', fontSize: '13px' }}>
-              {fichasNaoLidas.map((ficha, i) => <li key={i}>{ficha}</li>)}
-            </ul>
-            <p style={{ margin: '8px 0 0', fontSize: '13px' }}>
-              Os valores dessas fichas não entram em nenhum número desta tela. Confira-os na declaração
-              original, ou cadastre-os à mão, antes de usar o demonstrativo abaixo.
-            </p>
-            {/* Carnê-leão e RRA são lidos pelo .DBK e não pelo PDF (achado 06
-                da auditoria de 24/08/2026). Quando a ficha que ficou de fora é
-                uma dessas E a importação foi por PDF, existe um caminho melhor
-                do que cadastrar à mão, e a pessoa precisa saber disso. */}
-            {fichasNaoLidas.some(f => /ACUMULADAMENTE|PESSOA FÍSICA E DO EXTERIOR/.test(f)) && (
-              <p style={{ margin: '8px 0 0', fontSize: '13px', fontWeight: 600 }}>
-                Estas fichas o arquivo .DEC/.DBK importa: se você tiver o arquivo eletrônico desta mesma
-                declaração, importe por ele em Importar Declaração e os valores entram sozinhos.
-              </p>
-            )}
-          </div>
-        )}
-
 
         {coberturaFichas && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0) && (
-          <div className="card" style={{ marginBottom: '16px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <div className="card-header"><h3 className="card-title">Cobertura das fichas ainda em auditoria</h3></div>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              Dados encontrados não significam ficha integralmente conferida. No período há {coberturaFichas.parciais} ficha(s)
-              com suporte parcial, {coberturaFichas.naoSuportadas} não suportada(s) e {coberturaFichas.erros} com erro de extração.
-              {coberturaFichas.derivadas > 0
-                ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.`
-                : ''}
-            </p>
+          <div style={{ marginBottom: '12px' }}>
+            <Ajuda
+              tom="ressalva"
+              rotulo="Cobertura das fichas ainda em auditoria"
+              titulo="Cobertura das fichas ainda em auditoria"
+              texto={`Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`}
+            />
           </div>
         )}
 
@@ -627,11 +655,11 @@ export default function Dashboard({ onNavigate } = {}) {
         </div>
 
         <div className="card" style={{ marginBottom: '16px' }}>
-          <div className="card-header"><h3 className="card-title">Ganhos Apurados</h3></div>
+          <div className="card-header"><h3 className="card-title">Ganhos e Perdas Apurados</h3></div>
           <table className="demonstrativo-table">
             <tbody>
               {demo.ganhos.vendas.map((v, i) => (
-                <tr key={i}><td>{v.ganhoLiquido >= 0 ? 'GANHO APURADO NA VENDA DE' : 'PERDA APURADA NA VENDA DE'} {v.bem}</td><td className={`currency ${v.ganhoLiquido >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganhoLiquido)}</td></tr>
+                <tr key={i}><td title={v.bem || ''}>{v.ganhoLiquido >= 0 ? 'GANHO APURADO NA VENDA DE' : 'PERDA APURADA NA VENDA DE'} {nomeCurtoBem(v.bem)}</td><td className={`currency ${v.ganhoLiquido >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganhoLiquido)}</td></tr>
               ))}
               <tr>
                 <td>
@@ -657,35 +685,47 @@ export default function Dashboard({ onNavigate } = {}) {
                   <td className="currency negative">{formatCurrency(demo.rendaVariavelPerda)}</td>
                 </tr>
               )}
-              {/* ACHADO 04: bens que encolheram no período sem preço de venda
-                  conhecido. A Variação Patrimonial trata a saída como se todo
-                  o custo tivesse virado dinheiro; quando o bem foi vendido por
-                  menos, a diferença é caixa que não entrou e ninguém tem como
-                  adivinhar. O app NÃO inventa o valor: pede. */}
-              {demo.pendenciasAlienacao?.length > 0 && (
-                <tr>
-                  <td colSpan={2} style={{ padding: '10px 0 0' }}>
-                    <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid var(--accent-warning, #f59e0b)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12.5px' }}>
-                      <b>{demo.pendenciasAlienacao.length} bem(ns) diminuíram no período sem valor de venda informado.</b>{' '}
-                      O Saldo de Caixa está contando que todo o custo virou dinheiro, o que costuma ser otimista:
-                      veículo vendido com prejuízo não aparece na ficha de Ganhos de Capital porque prejuízo não gera
-                      imposto, e a diferença que não voltou fica de fora. Abra cada bem em Bens e Direitos, registre a
-                      venda e preencha o "Valor de venda" para o número fechar. Quando a própria discriminação do bem
-                      traz a venda por escrito ("VENDIDO EM ... POR R$ ..."), o app já lê dali e o bem não aparece
-                      nesta lista.
-                      <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
-                        {demo.pendenciasAlienacao.slice(0, 6).map((p, i) => (
-                          <div key={i} title={p.discriminacao || ''}>
-                            {truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou {formatCurrency(p.reducao)}
-                            {p.vendaForaDoPeriodo && ` (a discriminação diz que a venda foi em ${formatDate(p.vendaForaDoPeriodo)}, fora deste período: o ganho pertence ao ano da alienação)`}
-                          </div>
-                        ))}
-                        {demo.pendenciasAlienacao.length > 6 && <div>e mais {demo.pendenciasAlienacao.length - 6}.</div>}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
+              {/* ACHADO 04, revisto em 03/09/2026: os bens que baixaram no
+                  período sem preço de venda conhecido caem em DOIS casos, e
+                  misturá-los confundia (a usuária apontou "bem sem valor não
+                  deveria mexer no saldo"):
+                  1. venda de ANO ANTERIOR que só zerou o bem agora (financiado,
+                     última parcela caiu neste ano): o app TEM o valor lido do
+                     texto, o problema é a data. O custo entra no Saldo deste ano
+                     mas a venda pertence ao ano anterior — distorção real, cuja
+                     causa é a declaração ter mantido o bem pelo custo em vez de
+                     lançar o valor a receber (crédito).
+                  2. baixa sem nenhum preço no texto: aí sim o app pede o valor. */}
+              {(() => {
+                const pend = demo.pendenciasAlienacao || [];
+                const anoAnterior = pend.filter(p => p.vendaForaDoPeriodo);
+                const semPreco = pend.filter(p => !p.vendaForaDoPeriodo);
+                const fmtItem = p => `${truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou ${formatCurrency(p.reducao)}`;
+                return (
+                  <>
+                    {anoAnterior.length > 0 && (
+                      <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
+                        <Ajuda
+                          tom="ressalva"
+                          rotulo={`${anoAnterior.length} venda(s) de ano anterior ainda no patrimônio inflam este Saldo`}
+                          titulo="Venda de ano anterior zerando o bem só agora"
+                          texto={`Este(s) bem(ns) foi(ram) vendido(s) em ano anterior (venda financiada, cujo saldo só zerou neste período), mas continuava(m) declarado(s) pelo custo. O Saldo de Caixa deste ano soma o custo inteiro como se tivesse virado dinheiro agora, quando a venda e a maior parte do dinheiro pertencem ao ano da alienação. Isso INFLA o Saldo deste período.\n\nO certo na declaração é, no ano da venda, tirar o bem e lançar um crédito (valor a receber, ficha Bens e Direitos grupo 05), baixando-o conforme as parcelas entram. Assim o dinheiro cai no ano correto.\n\n${anoAnterior.slice(0, 6).map(p => `${fmtItem(p)}, venda em ${formatDate(p.vendaForaDoPeriodo)}${p.valorVendaForaDoPeriodo != null ? ` por ${formatCurrency(p.valorVendaForaDoPeriodo)}` : ''}`).join('\n')}${anoAnterior.length > 6 ? `\ne mais ${anoAnterior.length - 6}.` : ''}`}
+                        />
+                      </td></tr>
+                    )}
+                    {semPreco.length > 0 && (
+                      <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
+                        <Ajuda
+                          tom="ressalva"
+                          rotulo={`${semPreco.length} bem(ns) baixaram sem valor de venda informado`}
+                          titulo="Bens que baixaram sem preço de venda"
+                          texto={`O Saldo de Caixa está contando que todo o custo virou dinheiro, o que costuma ser otimista: um bem vendido por menos que o custo (ou com prejuízo, que não aparece na ficha de Ganhos de Capital) deixa de fora a diferença que não voltou. Abra cada bem em Bens e Direitos, registre a venda e preencha o "Valor de venda" para o número fechar. Quando a discriminação do bem traz a venda por escrito ("VENDIDO EM ... POR R$ ..."), o app já lê dali e o bem não aparece nesta lista.\n\n${semPreco.slice(0, 6).map(fmtItem).join('\n')}${semPreco.length > 6 ? `\ne mais ${semPreco.length - 6}.` : ''}`}
+                        />
+                      </td></tr>
+                    )}
+                  </>
+                );
+              })()}
               {/* Aplicação de renda fixa ou poupança que sumiu do patrimônio
                   sem o rendimento correspondente na ficha que lhe cabe. Não é
                   acusação de erro: é o cruzamento que ninguém faz à mão, e que
@@ -693,30 +733,14 @@ export default function Dashboard({ onNavigate } = {}) {
                   de LCI declarado como lucros e dividendos. Ver
                   aplicacoesResgatadasSemRendimento em demonstrativos.js. */}
               {demo.aplicacoesSemRendimento?.length > 0 && (
-                <tr>
-                  <td colSpan={2} style={{ padding: '10px 0 0' }}>
-                    <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid var(--accent-warning, #f59e0b)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12.5px' }}>
-                      <b>{demo.aplicacoesSemRendimento.length} aplicação(ões) foram resgatadas no período sem o rendimento correspondente na ficha.</b>{' '}
-                      Poupança, CDB, RDB, Tesouro Direto, LCI, LCA, CRI e CRA rendem juros, e o resgate credita esse
-                      rendimento. Quando a mesma instituição não aparece na ficha de rendimentos que lhe cabe, ou o
-                      valor não foi declarado, ou foi lançado em outro código. Confira no informe de rendimentos da
-                      instituição.
-                      <div style={{ marginTop: '8px', color: 'var(--text-secondary)' }}>
-                        {demo.aplicacoesSemRendimento.slice(0, 6).map((a, i) => (
-                          <div key={i} style={{ marginBottom: '6px' }} title={a.discriminacao || ''}>
-                            {truncarComReticencias(a.discriminacao || 'Bem sem descrição', 70)} (CNPJ {formatCpfCnpj(a.cnpj)}): resgatado {formatCurrency(a.valorResgatado)}.
-                            {' '}Esperado em: {a.onde}.
-                            {a.outrosDaMesmaFonte.length > 0 && (
-                              <div>
-                                Da mesma fonte, a declaração informa: {a.outrosDaMesmaFonte
-                                  .map(o => `${describeRendimentoTipo(o.tipo)} ${formatCurrency(o.valor)}`).join('; ')}.
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {demo.aplicacoesSemRendimento.length > 6 && <div>e mais {demo.aplicacoesSemRendimento.length - 6}.</div>}
-                      </div>
-                    </div>
+                <tr className="demonstrativo-nota">
+                  <td colSpan={2} style={{ padding: '8px 0 0' }}>
+                    <Ajuda
+                      tom="ressalva"
+                      rotulo={`${demo.aplicacoesSemRendimento.length} aplicação(ões) resgatadas sem o rendimento correspondente na ficha`}
+                      titulo="Aplicações resgatadas sem rendimento na ficha"
+                      texto={`Poupança, CDB, RDB, Tesouro Direto, LCI, LCA, CRI e CRA rendem juros, e o resgate credita esse rendimento. Quando a mesma instituição não aparece na ficha de rendimentos que lhe cabe, ou o valor não foi declarado, ou foi lançado em outro código. Confira no informe de rendimentos da instituição.\n\n${demo.aplicacoesSemRendimento.slice(0, 6).map(a => `${truncarComReticencias(a.discriminacao || 'Bem sem descrição', 70)} (CNPJ ${formatCpfCnpj(a.cnpj)}): resgatado ${formatCurrency(a.valorResgatado)}. Esperado em: ${a.onde}.${a.outrosDaMesmaFonte.length > 0 ? ` Da mesma fonte, a declaração informa: ${a.outrosDaMesmaFonte.map(o => `${describeRendimentoTipo(o.tipo)} ${formatCurrency(o.valor)}`).join('; ')}.` : ''}`).join('\n\n')}${demo.aplicacoesSemRendimento.length > 6 ? `\n\ne mais ${demo.aplicacoesSemRendimento.length - 6}.` : ''}`}
+                    />
                   </td>
                 </tr>
               )}
@@ -763,7 +787,60 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa</td><td className={`currency ${demo.saldoDeCaixa >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixa)}</td></tr>
             </tbody>
           </table>
+          {/* Leitura de compatibilidade das seções 11-12 do estudo: o Saldo de
+              Caixa que fecha a conciliação precisa ser plausível diante do que
+              a pessoa efetivamente tem em forma de dinheiro no fim do período.
+              Não altera o cálculo acima — é referência ao lado. */}
+          {disponibilidades.total > 0 && (
+            <div className="rv-total-imposto" style={{ marginTop: '16px', marginBottom: 0, flexWrap: 'wrap' }}>
+              <span>
+                Disponibilidades em 31/12
+                <Ajuda texto="Soma do que a declaração já traz em forma de dinheiro no fim do período: aplicações e investimentos, créditos, depósitos à vista e numerário, e fundos (grupos 04, 05, 06 e 07 da ficha Bens e Direitos). Serve como referência: o Saldo de Caixa que fecha a conciliação deve ser compatível com o dinheiro efetivamente disponível. Não entra em nenhum cálculo do demonstrativo." />
+                <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 18px', fontSize: '11px', textTransform: 'none', letterSpacing: 0, marginTop: '4px', color: 'var(--text-muted)' }}>
+                  {disponibilidades.porGrupo.map(g => (
+                    <span key={g.grupo}>{g.nome}: {formatCurrency(g.valor)}</span>
+                  ))}
+                </span>
+              </span>
+              <strong className="currency">{formatCurrency(disponibilidades.total)}</strong>
+            </div>
+          )}
         </div>
+
+        {/* SALDOS QUE ATRAVESSAM O EXERCÍCIO (parte 2 do estudo de variação
+            patrimonial). O que a lei deixa transportar de um ano para o outro
+            são os PREJUÍZOS compensáveis — nunca o IRRF, que se resolve no
+            próprio ajuste anual. Este card só EXIBE o que já veio na declaração
+            (ver saldosCompensaveis.js), não recalcula. */}
+        {saldosAtravessam.length > 0 && (
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <div className="card-header">
+              <h3 className="card-title">Saldos que atravessam para o próximo exercício</h3>
+              <span className="badge badge-blue">Da declaração</span>
+            </div>
+            <table className="demonstrativo-table">
+              <tbody>
+                {saldosAtravessam.map(s => (
+                  <tr key={s.chave}>
+                    <td>
+                      {s.rotulo}
+                      <Ajuda texto={s.base} />
+                    </td>
+                    <td className="currency">{formatCurrency(s.valor)}</td>
+                  </tr>
+                ))}
+                <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
+                <tr>
+                  <td style={{ color: 'var(--text-muted)' }}>
+                    IRRF do ano
+                    <Ajuda texto="O IRRF (retido na fonte, carnê-leão, imposto complementar) NÃO atravessa o exercício: é antecipação que se acerta no ajuste anual daquele ano-calendário; se sobrar, vira imposto a restituir, não saldo transportável. Só os prejuízos compensáveis acima seguem para o ano seguinte. Base: Lei nº 7.713/1988 e IN RFB nº 1.585/2015." />
+                  </td>
+                  <td style={{ color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'right' }}>não atravessa</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
         </>
         )}
 
@@ -833,8 +910,8 @@ export default function Dashboard({ onNavigate } = {}) {
                   axisLine={{ stroke: cromo.axis }} tickLine={false}
                 />
                 <YAxis
-                  type="category" dataKey="name" width={190}
-                  tick={{ fill: cromo.tick, fontSize: 12 }} axisLine={{ stroke: cromo.axis }} tickLine={false}
+                  type="category" dataKey="name" width={210}
+                  tick={{ fill: cromo.tick, fontSize: 11 }} axisLine={{ stroke: cromo.axis }} tickLine={false}
                 />
                 <Tooltip
                   formatter={v => formatCurrency(v)}
@@ -862,7 +939,7 @@ export default function Dashboard({ onNavigate } = {}) {
             // pontos (um por mês dentro do mesmo ano), barras lado a lado
             // ficavam finas demais e o eixo pulava mês de forma desigual.
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={evolucaoData} margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
+              <LineChart data={evolucaoData} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
                 <CartesianGrid stroke={cromo.grid} vertical={false} />
                 <XAxis
                   dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
@@ -890,7 +967,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <h3 className="card-title">Evolução do Patrimônio Líquido, {formatDate(de)} a {formatDate(ate)}</h3>
             </div>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={evolucaoData} margin={{ top: 4, right: 16, bottom: 4, left: 4 }}>
+              <LineChart data={evolucaoData} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
                 <CartesianGrid stroke={cromo.grid} vertical={false} />
                 <XAxis
                   dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
@@ -937,6 +1014,29 @@ export default function Dashboard({ onNavigate } = {}) {
         </div>
         <div className="modal-footer">
           <button type="button" className="btn btn-secondary" onClick={() => setDetalheCategoria(null)}>Fechar</button>
+        </div>
+      </Modal>
+
+      {/* Janela dos avisos estruturais: aparece ao abrir o Dashboard quando o
+          número pode estar errado/incompleto, para a pessoa ficar ciente antes
+          de usar os valores. Fecha no OK, no Esc ou no clique fora (o Modal já
+          trata Esc e clique fora). Uma vez fechada, não repete na sessão; a
+          informação continua no "?" ao lado dos avisos acima. */}
+      <Modal open={avisosEstruturais.length > 0 && !avisoVisto} onClose={fecharAviso} style={{ maxWidth: '520px' }}>
+        <div className="modal-header">
+          <h3>Antes de usar estes números</h3>
+          <button className="modal-close" onClick={fecharAviso} aria-label="Fechar aviso">✕</button>
+        </div>
+        <div className="modal-body">
+          {avisosEstruturais.map((a, i) => (
+            <div key={a.chave} style={{ marginBottom: i < avisosEstruturais.length - 1 ? '18px' : 0 }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '4px', color: a.grave ? 'var(--accent-danger)' : 'var(--accent-warning, #f59e0b)' }}>{a.titulo}</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{a.texto}</div>
+            </div>
+          ))}
+        </div>
+        <div className="modal-footer">
+          <button type="button" className="btn btn-primary" onClick={fecharAviso}>OK, entendi</button>
         </div>
       </Modal>
     </>

@@ -6,6 +6,8 @@ import {
   MODALIDADES, NOME_MODALIDADE, ALERTA_MODALIDADE, modalidadeDaDeclaracao,
   blocosEspolio, blocosSaida, bensDaPartilha, conferenciasPartilha,
 } from '../store/modalidadeDeclaracao';
+import Ajuda from '../components/Ajuda';
+import Modal from '../components/Modal';
 
 // Tela das modalidades que NÃO são declaração de ajuste anual. Só aparece na
 // navegação quando a declaração importada é uma delas (ver Sidebar).
@@ -49,6 +51,22 @@ export default function ModalidadePage() {
   const avisosPartilha = conferenciasPartilha(dados?.bens);
   const herdeiros = dados?.espolioOficial?.herdeiros || [];
 
+  // "O que muda nesta modalidade" aparece numa janela ao abrir a tela, para
+  // quem chega saber como ler os valores ANTES de olhar qualquer número.
+  // Fecha no OK/Esc/clique fora; uma vez por sessão por modalidade. Depois
+  // fica no "?" ao lado do título.
+  const [alertaVisto, setAlertaVisto] = useState(true);
+  useEffect(() => {
+    if (modalidade === MODALIDADES.AJUSTE) { setAlertaVisto(true); return; }
+    let jaViu = false;
+    try { jaViu = sessionStorage.getItem(`cp-modalidade-${modalidade}`) === '1'; } catch { /* indisponível */ }
+    setAlertaVisto(jaViu);
+  }, [modalidade]);
+  const fecharAlerta = () => {
+    try { sessionStorage.setItem(`cp-modalidade-${modalidade}`, '1'); } catch { /* ignore */ }
+    setAlertaVisto(true);
+  };
+
   const seletorAno = anosDisponiveis.length > 0 && (
     <select
       className="form-control"
@@ -80,13 +98,15 @@ export default function ModalidadePage() {
           </div>
         ) : (
           <>
-            {/* O alerta vem ANTES dos números: quem abre esta tela precisa saber
-                o que muda na leitura antes de ler qualquer valor. */}
-            <div className="card" style={{ marginBottom: '20px', borderLeft: '3px solid var(--accent-warning)' }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--accent-warning)', marginBottom: '6px' }}>
-                O que muda nesta modalidade
-              </div>
-              <p style={{ margin: 0, fontSize: '13px' }}>{ALERTA_MODALIDADE[modalidade]}</p>
+            {/* O alerta aparece na janela ao abrir (ver Modal no fim). Aqui
+                fica como "?" discreto, para continuar acessível depois. */}
+            <div style={{ marginBottom: '20px' }}>
+              <Ajuda
+                tom="ressalva"
+                rotulo="O que muda nesta modalidade"
+                titulo="O que muda nesta modalidade"
+                texto={ALERTA_MODALIDADE[modalidade]}
+              />
             </div>
 
             {blocos.length > 0 && (
@@ -129,10 +149,13 @@ export default function ModalidadePage() {
                   não um saldo que continua existindo em 31/12.
                 </p>
                 {avisosPartilha.length > 0 && (
-                  <div style={{ padding: '12px 14px', marginBottom: '16px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
-                    {avisosPartilha.map((aviso, i) => (
-                      <div key={i} style={{ fontSize: '12px' }}>{aviso}</div>
-                    ))}
+                  <div style={{ marginBottom: '16px' }}>
+                    <Ajuda
+                      tom="ressalva"
+                      rotulo={`Conferência da partilha (${avisosPartilha.length})`}
+                      titulo="Conferência da partilha"
+                      texto={avisosPartilha.join('\n\n')}
+                    />
                   </div>
                 )}
                 <div className="table-container">
@@ -168,6 +191,19 @@ export default function ModalidadePage() {
           </>
         )}
       </div>
+
+      <Modal open={modalidade !== MODALIDADES.AJUSTE && !alertaVisto} onClose={fecharAlerta} style={{ maxWidth: '520px' }}>
+        <div className="modal-header">
+          <h3>O que muda nesta modalidade</h3>
+          <button className="modal-close" onClick={fecharAlerta} aria-label="Fechar aviso">✕</button>
+        </div>
+        <div className="modal-body">
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{ALERTA_MODALIDADE[modalidade]}</p>
+        </div>
+        <div className="modal-footer">
+          <button type="button" className="btn btn-primary" onClick={fecharAlerta}>OK, entendi</button>
+        </div>
+      </Modal>
     </>
   );
 }

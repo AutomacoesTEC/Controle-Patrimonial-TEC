@@ -5,6 +5,7 @@ import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem, descreverO
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 
 // Um bem que já entrou no ano com as duas situações zeradas (31/12 do ano anterior E 31/12 deste
 // ano em R$ 0,00) e nenhuma movimentação registrada NESTE ano não tem mais nada a conferir na
@@ -133,7 +134,7 @@ export default function BensPage({ onVoltar } = {}) {
           </div>
         </div>
 
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead>
               <tr>
@@ -209,7 +210,7 @@ export default function BensPage({ onVoltar } = {}) {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
 
       <BemModal

@@ -1,12 +1,14 @@
 import { Fragment, useMemo, useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatarAliquotaFicha, descreverOrigemDocumento } from '../utils/formatters';
+import { formatCurrency, formatarAliquotaFicha, descreverOrigemDocumento, formatCpfCnpj } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
+import Ajuda from '../components/Ajuda';
 import {
   linhasAnualRendaVariavel, linhasAnualFiiFiagro, ehDerivadoDosMeses, AVISO_DERIVADO,
 } from '../store/anualRendaVariavel';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 
 // Renda Variável, exatamente as duas fichas do menu do programa da Receita:
 // "Operações Comuns / Day-Trade" e "Operações em FII ou Fiagro".
@@ -22,13 +24,13 @@ import {
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const nomeMes = (m) => MESES[m - 1] || `Mês ${m}`;
 
-// Linhas do quadro mensal de operações comuns/day-trade, na ordem impressa na
-// declaração. Só as de apuração: os 13 tipos de mercado ficam num quadro
-// próprio, aberto por linha.
+// [rótulo curto do cabeçalho, campo em `linha.comuns`]. O "(comuns)" que
+// aparecia em toda coluna era ruído: o título do quadro já diz "Operações
+// Comuns / Day-Trade", e a coluna de day-trade está nomeada à parte.
 const LINHAS_APURACAO = [
-  ['Resultado líquido do mês', 'resultadoLiquidoMes'],
-  ['Resultado negativo até o mês anterior', 'resultadoNegativoMesAnterior'],
-  ['Base de cálculo do imposto', 'baseCalculoImposto'],
+  ['Resultado líquido', 'resultadoLiquidoMes'],
+  ['Prejuízo acum. (mês anterior)', 'resultadoNegativoMesAnterior'],
+  ['Base de cálculo', 'baseCalculoImposto'],
   ['Prejuízo a compensar', 'prejuizoCompensar'],
   ['Imposto devido', 'impostoDevido'],
 ];
@@ -48,29 +50,58 @@ const MERCADOS = [
   ['Mercado a Termo - Outros', 'termoOutros'],
 ];
 const LINHAS_FII = [
-  ['Resultado líquido do mês', 'resultadoLiquidoMes'],
-  ['Resultado negativo até o mês anterior', 'resultadoNegativoMesAnterior'],
-  ['Base de cálculo do imposto', 'baseCalculoImposto'],
+  ['Resultado líquido', 'resultadoLiquidoMes'],
+  ['Prejuízo acum. (mês anterior)', 'resultadoNegativoMesAnterior'],
+  ['Base de cálculo', 'baseCalculoImposto'],
   ['Prejuízo a compensar', 'prejuizoCompensar'],
   // A ficha imprime a alíquota entre o prejuízo a compensar e o imposto
   // devido (AJU-01 p37 r16, "ALÍQUOTA DO IMPOSTO"), e a tabela pulava a
   // linha. Sem ela não há como conferir que o imposto devido é a base vezes a
   // alíquota, que é a única conta desta ficha. Vem como texto do PDF e como
   // número do .DBK, por isso tem formato próprio.
-  ['Alíquota do imposto', 'aliquota', 'aliquota'],
+  ['Alíquota', 'aliquota', 'aliquota'],
   ['Imposto devido', 'impostoDevido'],
   ['Imposto retido no mês', 'impostoRetidoNoMes'],
-  ['Imposto retido em meses anteriores', 'impostoRetidoMesesAnteriores'],
+  ['Imposto retido antes', 'impostoRetidoMesesAnteriores'],
   ['Imposto a compensar', 'impostoACompensar'],
   ['Imposto a pagar', 'impostoAPagar'],
   ['Imposto pago', 'impostoPago'],
 ];
+
+// R$ 0,00 sai apagado: num quadro de 12 meses em que a maioria é zero, isso é
+// o que deixa o olho achar o mês que teve movimento.
+function Valor({ n, formato }) {
+  const num = Number(n) || 0;
+  if (formato === 'aliquota') return <>{formatarAliquotaFicha(n)}</>;
+  return <span className={num === 0 ? 'rv-zero' : undefined}>{formatCurrency(num)}</span>;
+}
+
+function ResumoFicha({ itens }) {
+  const validos = itens.filter(i => i.valor != null);
+  if (validos.length === 0) return null;
+  return (
+    <div className="rv-resumo">
+      {validos.map(i => (
+        <div key={i.rotulo}>
+          <span className="rv-resumo-rotulo">{i.rotulo}</span>
+          <span className={`rv-resumo-valor${i.destaque ? ' ' + i.destaque : ''}`}>
+            {typeof i.valor === 'number' ? formatCurrency(i.valor) : i.valor}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function RendaVariavelPage() {
   const { state } = useData();
   const anosDisponiveis = anosComDado(state);
   const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
   const [mesAberto, setMesAberto] = useState(null);
+  // Beneficiário em foco dentro de cada ficha (titular, dependente...). Só
+  // vira aba quando há mais de um; com um só, mostra direto.
+  const [benComuns, setBenComuns] = useState(null);
+  const [benFii, setBenFii] = useState(null);
 
   useEffect(() => { setAnoEscolhido(state.anoCalendario); }, [state.anoCalendario]);
 
@@ -80,29 +111,39 @@ export default function RendaVariavelPage() {
   const anual = dados?.rendaVariavelAnualOficial || null;
   const fiiAnual = dados?.fiiFiagroAnualOficial || null;
 
+  // Nome de aba de um beneficiário dependente. A usuária pediu (03/09/2026) para
+  // a aba NÃO trazer o CPF cru ("Dependente 33344455508"). Mostra o nome do
+  // dependente; cai no CPF formatado só quando o CPF do lançamento não casa com
+  // nenhum dependente cadastrado no ano (dependente que saiu da lista) — mesma
+  // regra de descreverBeneficiarioRendimento.
+  const dependentes = state.dependentes || [];
+  const nomeDependente = (cpf) => {
+    const digitos = String(cpf || '').replace(/\D/g, '');
+    const d = dependentes.find(x => String(x?.cpf || '').replace(/\D/g, '') === digitos);
+    const nome = (d?.nome || '').trim();
+    return nome || (digitos ? `Dependente ${formatCpfCnpj(digitos)}` : 'Dependente');
+  };
+
   // Titular e dependentes vêm na mesma lista, com `titular` marcando de quem é
   // cada ficha — a declaração imprime as duas separadas, e aqui elas também
   // ficam separadas, senão o resultado de um dependente somaria com o do
-  // titular sem ninguém perceber.
-  const grupos = useMemo(() => {
+  // titular sem ninguém perceber. `chave` é o identificador estável (React key,
+  // estado de aba, composição do mês aberto); `nome` é só o rótulo exibido.
+  const agrupar = (lista) => {
     const porBeneficiario = new Map();
-    for (const linha of mensal) {
-      const chave = linha.titular ? 'Titular' : `Dependente ${linha.cpfDependente || ''}`.trim();
+    for (const linha of lista) {
+      const chave = linha.titular ? 'titular' : (String(linha.cpfDependente || '').replace(/\D/g, '') || 'dependente');
       if (!porBeneficiario.has(chave)) porBeneficiario.set(chave, []);
       porBeneficiario.get(chave).push(linha);
     }
-    return [...porBeneficiario.entries()].map(([nome, linhas]) => ({ nome, linhas: linhas.sort((a, b) => a.mes - b.mes) }));
-  }, [mensal]);
-
-  const gruposFii = useMemo(() => {
-    const porBeneficiario = new Map();
-    for (const linha of fii) {
-      const chave = linha.titular ? 'Titular' : `Dependente ${linha.cpfDependente || ''}`.trim();
-      if (!porBeneficiario.has(chave)) porBeneficiario.set(chave, []);
-      porBeneficiario.get(chave).push(linha);
-    }
-    return [...porBeneficiario.entries()].map(([nome, linhas]) => ({ nome, linhas: linhas.sort((a, b) => a.mes - b.mes) }));
-  }, [fii]);
+    return [...porBeneficiario.entries()].map(([chave, linhas]) => ({
+      chave,
+      nome: chave === 'titular' ? 'Titular' : nomeDependente(chave),
+      linhas: linhas.sort((a, b) => a.mes - b.mes),
+    }));
+  };
+  const grupos = useMemo(() => agrupar(mensal), [mensal]);
+  const gruposFii = useMemo(() => agrupar(fii), [fii]);
 
   const totalImpostoPago = useMemo(
     () => mensal.reduce((s, m) => s + (m.consolidacao?.impostoPago || 0), 0)
@@ -110,10 +151,39 @@ export default function RendaVariavelPage() {
     [mensal, fii]
   );
 
+  const resumoComuns = (linhas) => {
+    const ultimo = linhas[linhas.length - 1];
+    const resultadoAno = linhas.reduce((s, l) => s + (l.comuns?.resultadoLiquidoMes || 0) + (l.daytrade?.resultadoLiquidoMes || 0), 0);
+    const impostoDevido = linhas.reduce((s, l) => s + (l.consolidacao?.totalImpostoDevido ?? l.comuns?.impostoDevido ?? 0), 0);
+    const impostoPago = linhas.reduce((s, l) => s + (l.consolidacao?.impostoPago || 0), 0);
+    const mesesComResultado = linhas.filter(l => (l.comuns?.resultadoLiquidoMes || 0) !== 0 || (l.daytrade?.resultadoLiquidoMes || 0) !== 0).length;
+    return [
+      { rotulo: 'Resultado líquido no ano', valor: resultadoAno, destaque: resultadoAno < 0 ? 'currency negative' : resultadoAno > 0 ? 'currency positive' : undefined },
+      { rotulo: 'Prejuízo a compensar no ano seguinte', valor: ultimo?.comuns?.prejuizoCompensar || 0 },
+      { rotulo: 'Imposto devido no ano', valor: impostoDevido },
+      { rotulo: 'Imposto pago no ano', valor: impostoPago },
+      { rotulo: 'Meses com resultado', valor: String(mesesComResultado) },
+    ];
+  };
+  const resumoFii = (linhas) => {
+    const ultimo = linhas[linhas.length - 1];
+    const resultadoAno = linhas.reduce((s, l) => s + (l.resultadoLiquidoMes || 0), 0);
+    const impostoDevido = linhas.reduce((s, l) => s + (l.impostoDevido || 0), 0);
+    const impostoPago = linhas.reduce((s, l) => s + (l.impostoPago || 0), 0);
+    const mesesComResultado = linhas.filter(l => (l.resultadoLiquidoMes || 0) !== 0).length;
+    return [
+      { rotulo: 'Resultado líquido no ano', valor: resultadoAno, destaque: resultadoAno < 0 ? 'currency negative' : resultadoAno > 0 ? 'currency positive' : undefined },
+      { rotulo: 'Prejuízo a compensar no ano seguinte', valor: ultimo?.prejuizoCompensar || 0 },
+      { rotulo: 'Imposto devido no ano', valor: impostoDevido },
+      { rotulo: 'Imposto pago no ano', valor: impostoPago },
+      { rotulo: 'Meses com resultado', valor: String(mesesComResultado) },
+    ];
+  };
+
   const handleExport = () => exportListaToXlsx(
     [
-      ...mensal.map(m => ({ ficha: 'Operações comuns/day-trade', beneficiario: m.titular ? 'Titular' : `Dependente ${m.cpfDependente || ''}`, m })),
-      ...fii.map(m => ({ ficha: 'FII ou Fiagro', beneficiario: m.titular ? 'Titular' : `Dependente ${m.cpfDependente || ''}`, m })),
+      ...mensal.map(m => ({ ficha: 'Operações comuns/day-trade', beneficiario: m.titular ? 'Titular' : nomeDependente(m.cpfDependente), m })),
+      ...fii.map(m => ({ ficha: 'FII ou Fiagro', beneficiario: m.titular ? 'Titular' : nomeDependente(m.cpfDependente), m })),
     ],
     [
       ['Ficha', l => l.ficha],
@@ -142,12 +212,26 @@ export default function RendaVariavelPage() {
 
   const temAlgo = mensal.length > 0 || fii.length > 0 || anual || fiiAnual;
 
+  // Duas fichas, duas abas — mesmo padrão de Bens, Rendimentos e Doações. A
+  // aba só aparece quando as DUAS existem; com uma ficha só, mostra direto,
+  // sem uma aba sozinha para clicar.
+  const temComuns = grupos.length > 0 || anual;
+  const temFii = gruposFii.length > 0 || fiiAnual;
+  const abas = [
+    temComuns && { id: 'comuns', rotulo: 'Operações Comuns / Day-Trade' },
+    temFii && { id: 'fii', rotulo: 'FII ou Fiagro' },
+  ].filter(Boolean);
+  const [aba, setAba] = useState('comuns');
+  const abaAtiva = abas.some(a => a.id === aba) ? aba : abas[0]?.id;
+
   return (
     <>
       <div className="page-header">
         <div className="page-header-left">
           <h2>Renda Variável</h2>
-          <p>As duas fichas de Renda Variável como vieram na declaração importada: Operações Comuns / Day-Trade e Operações em FII ou Fiagro. Os valores são os que a própria declaração apurou, mês a mês. Nada aqui é recalculado pelo app.</p>
+          <p title="O resultado de renda variável depende das notas de corretagem mês a mês, que o app não tem. Os números aqui são os que a própria declaração apurou.">
+            As duas fichas como vieram na declaração importada. Nada aqui é recalculado pelo app.
+          </p>
         </div>
         <div className="page-header-actions">
           {seletorAno}
@@ -165,27 +249,42 @@ export default function RendaVariavelPage() {
         )}
 
         {totalImpostoPago > 0 && (
-          <div className="card" style={{ marginBottom: '20px' }}>
-            <div className="card-header">
-              <h3 className="card-title">Imposto pago sobre renda variável no ano</h3>
-              <span className="badge badge-blue">Da declaração</span>
-            </div>
-            <p className="currency" style={{ margin: 0, fontSize: '20px' }}>{formatCurrency(totalImpostoPago)}</p>
+          <div className="rv-total-imposto">
+            <span>Imposto pago sobre renda variável no ano</span>
+            <strong className="currency">{formatCurrency(totalImpostoPago)}</strong>
           </div>
         )}
 
-        {grupos.map(grupo => (
-          <div className="card" style={{ marginBottom: '20px' }} key={`rv-${grupo.nome}`}>
+        {abas.length > 1 && (
+          <div className="tabs" style={{ marginBottom: '20px' }}>
+            {abas.map(a => (
+              <button key={a.id} className={`tab ${abaAtiva === a.id ? 'active' : ''}`} onClick={() => setAba(a.id)}>{a.rotulo}</button>
+            ))}
+          </div>
+        )}
+
+        {abaAtiva === 'comuns' && (<>
+        {grupos.length > 1 && (
+          <div className="tabs" style={{ marginBottom: '16px' }}>
+            {grupos.map(g => {
+              const ativo = (grupos.some(x => x.chave === benComuns) ? benComuns : grupos[0].chave) === g.chave;
+              return <button key={g.chave} className={`tab ${ativo ? 'active' : ''}`} onClick={() => setBenComuns(g.chave)}>{g.nome}</button>;
+            })}
+          </div>
+        )}
+        {grupos.filter(g => grupos.length === 1 || (grupos.some(x => x.chave === benComuns) ? benComuns : grupos[0].chave) === g.chave).map(grupo => (
+          <div className="card" style={{ marginBottom: '20px' }} key={`rv-${grupo.chave}`}>
             <div className="card-header">
               <h3 className="card-title">Operações Comuns / Day-Trade: {grupo.nome}</h3>
               <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
             </div>
-            <div className="table-container">
-              <table>
+            <ResumoFicha itens={resumoComuns(grupo.linhas)} />
+            <TabelaRedimensionavel>
+              <table className="rv-mensal">
                 <thead>
                   <tr>
                     <th>Mês</th>
-                    {LINHAS_APURACAO.map(([rotulo]) => <th key={rotulo} style={{ textAlign: 'right' }}>{rotulo} (comuns)</th>)}
+                    {LINHAS_APURACAO.map(([rotulo]) => <th key={rotulo} style={{ textAlign: 'right' }}>{rotulo}</th>)}
                     <th style={{ textAlign: 'right' }}>Resultado day-trade</th>
                     <th style={{ textAlign: 'right' }}>Imposto a pagar</th>
                     <th style={{ textAlign: 'right' }}>Imposto pago</th>
@@ -197,7 +296,7 @@ export default function RendaVariavelPage() {
                     // A key vai no Fragment, e não no <tr>: quem está na lista
                     // é o fragmento (a linha do mês mais a linha de detalhe que
                     // ela abre), e é dele que o React precisa da identidade.
-                    <Fragment key={`${grupo.nome}-${linha.mes}`}>
+                    <Fragment key={`${grupo.chave}-${linha.mes}`}>
                       <tr>
                         <td>
                           {nomeMes(linha.mes)}
@@ -209,22 +308,22 @@ export default function RendaVariavelPage() {
                         </td>
                         {LINHAS_APURACAO.map(([rotulo, campo]) => (
                           <td key={rotulo} style={{ textAlign: 'right' }} className="currency">
-                            {formatCurrency(linha.comuns?.[campo] || 0)}
+                            <Valor n={linha.comuns?.[campo]} />
                           </td>
                         ))}
-                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.daytrade?.resultadoLiquidoMes || 0)}</td>
-                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.consolidacao?.impostoPagar || 0)}</td>
-                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.consolidacao?.impostoPago || 0)}</td>
+                        <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.daytrade?.resultadoLiquidoMes} /></td>
+                        <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.consolidacao?.impostoPagar} /></td>
+                        <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.consolidacao?.impostoPago} /></td>
                         <td>
                           <button
                             className="btn btn-secondary btn-sm"
-                            onClick={() => setMesAberto(mesAberto === `${grupo.nome}-${linha.mes}` ? null : `${grupo.nome}-${linha.mes}`)}
+                            onClick={() => setMesAberto(mesAberto === `${grupo.chave}-${linha.mes}` ? null : `${grupo.chave}-${linha.mes}`)}
                           >
-                            {mesAberto === `${grupo.nome}-${linha.mes}` ? 'Fechar' : 'Mercados'}
+                            {mesAberto === `${grupo.chave}-${linha.mes}` ? 'Fechar' : 'Mercados'}
                           </button>
                         </td>
                       </tr>
-                      {mesAberto === `${grupo.nome}-${linha.mes}` && (
+                      {mesAberto === `${grupo.chave}-${linha.mes}` && (
                         <tr>
                           <td colSpan={LINHAS_APURACAO.length + 5}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
@@ -234,8 +333,8 @@ export default function RendaVariavelPage() {
                                   {MERCADOS.map(([rotulo, campo]) => (
                                     <tr key={rotulo}>
                                       <td>{rotulo}</td>
-                                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.comuns?.[campo] || 0)}</td>
-                                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(linha.daytrade?.[campo] || 0)}</td>
+                                      <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.comuns?.[campo]} /></td>
+                                      <td style={{ textAlign: 'right' }} className="currency"><Valor n={linha.daytrade?.[campo]} /></td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -252,14 +351,19 @@ export default function RendaVariavelPage() {
                                       {linhasConsolidacaoMes(linha.consolidacao).map(l => (
                                         <tr key={l.campo}>
                                           <td>{l.rotulo}</td>
-                                          <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
+                                          <td style={{ textAlign: 'right' }} className="currency"><Valor n={l.valor} /></td>
                                         </tr>
                                       ))}
                                     </tbody>
                                   </table>
                                   {conferenciaConsolidacaoMes(linha.consolidacao) && (
-                                    <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', fontSize: '12px' }}>
-                                      {conferenciaConsolidacaoMes(linha.consolidacao)}
+                                    <div style={{ marginTop: '8px' }}>
+                                      <Ajuda
+                                        tom="ressalva"
+                                        rotulo="Conferência da consolidação"
+                                        titulo="Conferência da consolidação do mês"
+                                        texto={conferenciaConsolidacaoMes(linha.consolidacao)}
+                                      />
                                     </div>
                                   )}
                                 </div>
@@ -272,7 +376,7 @@ export default function RendaVariavelPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           </div>
         ))}
 
@@ -290,29 +394,38 @@ export default function RendaVariavelPage() {
             {ehDerivadoDosMeses(anual) && (
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
             )}
-            <div className="table-container">
-              <table>
-                <tbody>
-                  {linhasAnualRendaVariavel(anual).map(l => (
-                    <tr key={l.rotulo}>
-                      <td>{l.rotulo}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <table className="rv-anual">
+              <tbody>
+                {linhasAnualRendaVariavel(anual).map(l => (
+                  <tr key={l.rotulo}>
+                    <td>{l.rotulo}</td>
+                    <td style={{ textAlign: 'right' }} className="currency"><Valor n={l.valor} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
+        </>)}
 
-        {gruposFii.map(grupo => (
-          <div className="card" style={{ marginBottom: '20px' }} key={`fii-${grupo.nome}`}>
+        {abaAtiva === 'fii' && (<>
+        {gruposFii.length > 1 && (
+          <div className="tabs" style={{ marginBottom: '16px' }}>
+            {gruposFii.map(g => {
+              const ativo = (gruposFii.some(x => x.chave === benFii) ? benFii : gruposFii[0].chave) === g.chave;
+              return <button key={g.chave} className={`tab ${ativo ? 'active' : ''}`} onClick={() => setBenFii(g.chave)}>{g.nome}</button>;
+            })}
+          </div>
+        )}
+        {gruposFii.filter(g => gruposFii.length === 1 || (gruposFii.some(x => x.chave === benFii) ? benFii : gruposFii[0].chave) === g.chave).map(grupo => (
+          <div className="card" style={{ marginBottom: '20px' }} key={`fii-${grupo.chave}`}>
             <div className="card-header">
               <h3 className="card-title">Operações em FII ou Fiagro: {grupo.nome}</h3>
               <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
             </div>
-            <div className="table-container">
-              <table>
+            <ResumoFicha itens={resumoFii(grupo.linhas)} />
+            <TabelaRedimensionavel>
+              <table className="rv-mensal">
                 <thead>
                   <tr>
                     <th>Mês</th>
@@ -321,7 +434,7 @@ export default function RendaVariavelPage() {
                 </thead>
                 <tbody>
                   {grupo.linhas.map(linha => (
-                    <tr key={`fii-${grupo.nome}-${linha.mes}`}>
+                    <tr key={`fii-${grupo.chave}-${linha.mes}`}>
                       <td>
                         {nomeMes(linha.mes)}
                         {descreverOrigemDocumento(linha) && (
@@ -330,14 +443,14 @@ export default function RendaVariavelPage() {
                       </td>
                       {LINHAS_FII.map(([rotulo, campo, formato]) => (
                         <td key={rotulo} style={{ textAlign: 'right' }} className="currency">
-                          {formato === 'aliquota' ? formatarAliquotaFicha(linha[campo]) : formatCurrency(linha[campo] || 0)}
+                          <Valor n={linha[campo]} formato={formato} />
                         </td>
                       ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           </div>
         ))}
 
@@ -352,20 +465,19 @@ export default function RendaVariavelPage() {
             {ehDerivadoDosMeses(fiiAnual) && (
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
             )}
-            <div className="table-container">
-              <table>
-                <tbody>
-                  {linhasAnualFiiFiagro(fiiAnual).map(l => (
-                    <tr key={l.rotulo}>
-                      <td>{l.rotulo}</td>
-                      <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(l.valor)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <table className="rv-anual">
+              <tbody>
+                {linhasAnualFiiFiagro(fiiAnual).map(l => (
+                  <tr key={l.rotulo}>
+                    <td>{l.rotulo}</td>
+                    <td style={{ textAlign: 'right' }} className="currency"><Valor n={l.valor} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
+        </>)}
       </div>
     </>
   );
