@@ -1,9 +1,10 @@
 import { useMemo, useState, useEffect, Fragment } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento, truncarComReticencias } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento, nomeCurtoBem } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
+import Ajuda from '../components/Ajuda';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
   conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
@@ -393,11 +394,13 @@ export default function GanhosCapitalPage() {
             </p>
 
             {avisosGc.length > 0 && (
-              <div style={{ padding: '12px 14px', marginBottom: '16px', borderRadius: 'var(--radius-sm)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--accent-warning)' }}>Conferência do demonstrativo</div>
-                {avisosGc.map((aviso, i) => (
-                  <div key={i} style={{ fontSize: '12px', marginTop: '4px' }}>{aviso}</div>
-                ))}
+              <div style={{ marginBottom: '16px' }}>
+                <Ajuda
+                  tom="ressalva"
+                  rotulo={`Conferência do demonstrativo (${avisosGc.length})`}
+                  titulo="Conferência do demonstrativo"
+                  texto={avisosGc.join('\n\n')}
+                />
               </div>
             )}
 
@@ -555,29 +558,33 @@ export default function GanhosCapitalPage() {
           </div>
         )}
         {ganhos.possiveisDuplicidades?.length > 0 && (
-          <div className="card" style={{ marginBottom: '20px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              {ganhos.possiveisDuplicidades.length} operação(ões) da declaração têm a mesma data de uma venda que você
-              lançou à mão, mas por valor diferente: {ganhos.possiveisDuplicidades.map(d => `${(d.bem || '').substring(0, 40)} em ${formatDate(d.data)} por ${formatCurrency(d.valorAlienacao)}`).join('; ')}.
-              As duas estão sendo contadas. Se forem a mesma venda, corrija o valor da movimentação para o app parar de somar duas vezes.
-            </p>
+          <div style={{ marginBottom: '16px' }}>
+            <Ajuda
+              tom="ressalva"
+              rotulo={`${ganhos.possiveisDuplicidades.length} operação(ões) podem estar em duplicidade`}
+              titulo="Possível duplicidade com venda lançada à mão"
+              texto={`${ganhos.possiveisDuplicidades.length} operação(ões) da declaração têm a mesma data de uma venda que você lançou à mão, mas por valor diferente: ${ganhos.possiveisDuplicidades.map(d => `${(d.bem || '').substring(0, 40)} em ${formatDate(d.data)} por ${formatCurrency(d.valorAlienacao)}`).join('; ')}.\n\nAs duas estão sendo contadas. Se forem a mesma venda, corrija o valor da movimentação para o app parar de somar duas vezes.`}
+            />
           </div>
         )}
         {semValorVenda > 0 && (
-          <div className="card" style={{ marginBottom: '20px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              Há {semValorVenda} venda(s) registrada(s) sem o valor de venda preenchido, então não entram nesse cálculo. Edite o bem e complete a movimentação se quiser incluí-las.
-            </p>
+          <div style={{ marginBottom: '16px' }}>
+            <Ajuda
+              tom="ressalva"
+              rotulo={`${semValorVenda} venda(s) sem valor de venda preenchido`}
+              titulo="Vendas fora deste cálculo"
+              texto={`Há ${semValorVenda} venda(s) registrada(s) sem o valor de venda preenchido, então não entram nesse cálculo. Edite o bem e complete a movimentação se quiser incluí-las.`}
+            />
           </div>
         )}
         {vendasRurais > 0 && (
-          <div className="card" style={{ marginBottom: '20px', borderColor: 'var(--accent-warning, #f59e0b)' }}>
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              {vendasRurais} venda(s) de bem da Atividade Rural registrada(s) neste ano não aparecem aqui, e isso está correto.
-              O valor recebido na alienação de bem usado exclusivamente na atividade rural é receita bruta da própria
-              atividade rural, apurada no livro-caixa, e não ganho de capital (IN SRF 83/2001, art. 5º, § 2º, III).
-              Lance esse valor como receita em Atividade Rural, aba Receitas e Despesas.
-            </p>
+          <div style={{ marginBottom: '16px' }}>
+            <Ajuda
+              tom="ressalva"
+              rotulo={`${vendasRurais} venda(s) de bem rural não entram aqui (correto)`}
+              titulo="Venda de bem da Atividade Rural"
+              texto={`${vendasRurais} venda(s) de bem da Atividade Rural registrada(s) neste ano não aparecem aqui, e isso está correto. O valor recebido na alienação de bem usado exclusivamente na atividade rural é receita bruta da própria atividade rural, apurada no livro-caixa, e não ganho de capital (IN SRF 83/2001, art. 5º, § 2º, III). Lance esse valor como receita em Atividade Rural, aba Receitas e Despesas.`}
+            />
           </div>
         )}
         <div className="stats-grid" style={{ marginBottom: '24px' }}>
@@ -597,7 +604,7 @@ export default function GanhosCapitalPage() {
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma venda com valor de venda registrado ainda.</td></tr>
               ) : vendas.map(v => (
                 <tr key={v.id}>
-                  <td style={{ maxWidth: '300px' }} title={v.bem || ''}>{truncarComReticencias(v.bem, 80)}</td>
+                  <td style={{ maxWidth: '300px' }} title={v.bem || ''}>{nomeCurtoBem(v.bem)}</td>
                   <td>{v.origem}</td>
                   <td>{formatDate(v.data)}</td>
                   <td>{v.tipoVenda}</td>
