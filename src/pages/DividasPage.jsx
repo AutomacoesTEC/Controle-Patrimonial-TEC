@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias } from '../utils/formatters';
+import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias, CODIGOS_DIVIDA, describeDividaCodigo } from '../utils/formatters';
 import Modal from '../components/Modal';
+import SeletorCodigo from '../components/SeletorCodigo';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
 import MoneyInput from '../components/MoneyInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 
@@ -101,7 +103,7 @@ export default function DividasPage({ onVoltar } = {}) {
         </div>
       </div>
       <div className="page-body animate-in">
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead><tr><th>Cód.</th><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Saldo anterior'}</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Saldo atual'}</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
             <tbody>
@@ -109,7 +111,12 @@ export default function DividasPage({ onVoltar } = {}) {
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma dívida cadastrada.</td></tr>
               ) : dividas.map(d => (
                 <tr key={d.id}>
-                  <td><span className="badge badge-red">{d.codigo}</span></td>
+                  <td>
+                    <span className="badge badge-red" title={describeDividaCodigo(d.codigo) || undefined}>{d.codigo}</span>
+                    {describeDividaCodigo(d.codigo) && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '3px' }}>{describeDividaCodigo(d.codigo)}</div>
+                    )}
+                  </td>
                   <td title={d.discriminacao || ''}>
                     {truncarComReticencias(d.discriminacao, 100)}
                     {/* Página e linha da declaração impressa, mesmo tratamento
@@ -142,7 +149,7 @@ export default function DividasPage({ onVoltar } = {}) {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
@@ -154,7 +161,7 @@ export default function DividasPage({ onVoltar } = {}) {
                   </div>
                 )}
                 <div className="form-row">
-                  <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} placeholder="Ex: 11, 12, 13" /></div>
+                  <div className="form-group"><label>Código do credor</label><SeletorCodigo opcoes={CODIGOS_DIVIDA} value={form.codigo} onChange={v => upd('codigo', v)} placeholder="Selecione ou digite o código" /></div>
                 </div>
                 <div className="form-group"><label>Discriminação</label><textarea className="form-control" value={form.discriminacao} onChange={e => upd('discriminacao', e.target.value)} /></div>
                 {editingId && liveDivida ? (

@@ -1,16 +1,20 @@
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
+import SeletorCodigo from '../components/SeletorCodigo';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
 // titularidade nasce vazia de propósito: o cadastro manual não deve assumir
 // que a despesa é do titular. Titular, dependente e alimentando têm regras de
 // dedução diferentes, e o campo em branco é honesto ("não informado").
-const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: new Date().toISOString().slice(0, 10) };
+// Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
+// forçaria trocar de ano ao salvar num exercício de trabalho diferente.
+const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: '' };
 
 export default function PagamentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro } = useData();
@@ -18,19 +22,22 @@ export default function PagamentosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
   const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  // Ano-calendário = ano da DATA do pagamento (a usuária tirou o campo separado
+  // em 03/09/2026). Lê os 4 primeiros caracteres do <input type="date">.
+  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+
+  const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
     if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
-    setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', titularidade: p.titularidade || '', titularidadeNome: p.titularidadeNome || '', data: p.data || new Date().toISOString().slice(0, 10) });
+    setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', titularidade: p.titularidade || '', titularidadeNome: p.titularidadeNome || '', data: p.data || '' });
     setModalOpen(true);
   };
 
@@ -87,9 +94,9 @@ export default function PagamentosPage() {
         </div>
       </div>
       <div className="page-body animate-in">
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
-            <thead><tr><th>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
+            <thead><tr><th style={{ minWidth: '180px' }}>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
             <tbody>
               {pagamentos.length === 0 ? (
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum pagamento cadastrado.</td></tr>
@@ -136,25 +143,18 @@ export default function PagamentosPage() {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Pagamento' : 'Novo Pagamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Código</label>
-                    <select className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)}>
-                      {CODIGOS_PAGAMENTO.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
-                    </select>
+                    <SeletorCodigo opcoes={CODIGOS_PAGAMENTO} value={form.codigo} onChange={v => upd('codigo', v)} placeholder="Selecione ou digite o código" />
                   </div>
-                  <div className="form-group"><label>CPF/CNPJ Beneficiário</label><input className="form-control" value={form.cpf_cnpj} onChange={e => upd('cpf_cnpj', e.target.value)} /></div>
+                  <div className="form-group"><label>CPF/CNPJ Beneficiário</label><input className="form-control" inputMode="numeric" placeholder="000.000.000-00 ou 00.000.000/0000-00" value={mascaraCpfCnpj(form.cpf_cnpj)} onChange={e => upd('cpf_cnpj', mascaraCpfCnpj(e.target.value))} /></div>
                 </div>
                 <div className="form-group"><label>Nome do Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
                 <div className="form-row">
@@ -179,7 +179,13 @@ export default function PagamentosPage() {
                   </div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>Data</label><input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} /></div>
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    {!editingId && anoCadastro != null && (
+                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
+                    )}
+                  </div>
                   <div className="form-group"><label>Valor Pago</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
                   <div className="form-group"><label>Parcela Não Dedutível</label><MoneyInput value={form.parcela_nao_dedutivel} onChange={v => upd('parcela_nao_dedutivel', v)} /></div>
                 </div>

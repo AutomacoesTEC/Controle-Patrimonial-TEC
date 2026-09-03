@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCpfCnpj, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento} from '../utils/formatters';
+import { formatCpfCnpj, mascaraCpf, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, CODIGOS_DEPENDENCIA } from '../utils/formatters';
 import Modal from '../components/Modal';
+import SeletorCodigo from '../components/SeletorCodigo';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import DateInput from '../components/DateInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 
 const FORM_DEPENDENTE_VAZIO = { nome: '', cpf: '', dataNascimento: '', parentesco: '' };
@@ -105,7 +107,7 @@ export default function TitularPage() {
               </div>
               <div className="form-group">
                 <label>CPF</label>
-                <input className="form-control" value={formTitular.cpf} onChange={e => setFormTitular(p => ({ ...p, cpf: e.target.value }))} placeholder="Só números" />
+                <input className="form-control" inputMode="numeric" value={mascaraCpf(formTitular.cpf)} onChange={e => setFormTitular(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="000.000.000-00" />
               </div>
             </div>
             <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -152,7 +154,7 @@ export default function TitularPage() {
             <h3 className="card-title">Dependentes</h3>
             <button className="btn btn-primary" onClick={handleNovoDependenteClick}>＋ Novo Dependente</button>
           </div>
-          <div className="table-container">
+          <TabelaRedimensionavel>
             <table>
               <thead><tr><th>Nome</th><th>CPF</th><th>Data de Nascimento</th><th>Relação de Dependência</th><th>Raça/Cor</th><th>Mora com o titular</th><th>Contato</th><th>Ações</th></tr></thead>
               <tbody>
@@ -175,7 +177,7 @@ export default function TitularPage() {
                     <td title={textoOficialRelacaoDependencia(d.parentesco) || undefined}>
                       {d.parentesco}
                       {describeRelacaoDependencia(d.parentesco) && (
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{describeRelacaoDependencia(d.parentesco)}</div>
+                        <span style={{ color: 'var(--text-muted)' }}>{` - ${describeRelacaoDependencia(d.parentesco)}`}</span>
                       )}
                     </td>
                     <td>{d.racaCor || d.racaCorCodigo || '-'}</td>
@@ -195,7 +197,7 @@ export default function TitularPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TabelaRedimensionavel>
         </div>
       </div>
 
@@ -210,12 +212,12 @@ export default function TitularPage() {
             )}
             <div className="form-group"><label>Nome Completo</label><input className="form-control" value={formDependente.nome} onChange={e => updDependente('nome', e.target.value)} /></div>
             <div className="form-row">
-              <div className="form-group"><label>CPF</label><input className="form-control" value={formDependente.cpf} onChange={e => updDependente('cpf', e.target.value)} placeholder="Se tiver" /></div>
+              <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(formDependente.cpf)} onChange={e => updDependente('cpf', mascaraCpf(e.target.value))} placeholder="000.000.000-00" /></div>
               <div className="form-group"><label>Data de Nascimento</label><DateInput value={formDependente.dataNascimento} onChange={v => updDependente('dataNascimento', v)} /></div>
             </div>
             <div className="form-group">
               <label>Relação de Dependência</label>
-              <input className="form-control" value={formDependente.parentesco} onChange={e => updDependente('parentesco', e.target.value)} placeholder="Código conforme a tabela da declaração" />
+              <SeletorCodigo opcoes={CODIGOS_DEPENDENCIA} value={formDependente.parentesco} onChange={v => updDependente('parentesco', v)} placeholder="Selecione ou digite o código" />
             </div>
           </div>
           <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>

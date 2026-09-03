@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency } from '../utils/formatters';
+import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency, mascaraCnpj } from '../utils/formatters';
+import SeletorCodigo from './SeletorCodigo';
 import MovimentacaoBemForm from './MovimentacaoBemForm';
 import Modal from './Modal';
 import MoneyInput from './MoneyInput';
@@ -157,10 +158,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                     </div>
                     <div className="form-group">
                       <label>Código do Bem</label>
-                      <select className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {codigosDoGrupo.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
-                      </select>
+                      <SeletorCodigo opcoes={codigosDoGrupo} value={form.codigo_bem} onChange={v => upd('codigo_bem', v)} placeholder="Selecione ou digite o código" />
                     </div>
                     <div className="form-group">
                       <label>Beneficiário</label>
@@ -193,7 +191,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                     </div>
                     <div className="form-group">
                       <label>CNPJ</label>
-                      <input className="form-control" value={form.cnpj} onChange={e => upd('cnpj', e.target.value)} placeholder="00.000.000/0000-00" />
+                      <input className="form-control" inputMode="numeric" value={mascaraCnpj(form.cnpj)} onChange={e => upd('cnpj', mascaraCnpj(e.target.value))} placeholder="00.000.000/0000-00" />
                     </div>
                   </div>
 
@@ -252,10 +250,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                   </div>
                   <div className="form-group">
                     <label>Código do Bem</label>
-                    <select className="form-control" value={form.codigo_bem} onChange={e => upd('codigo_bem', e.target.value)}>
-                      <option value="">Selecione...</option>
-                      {codigosDoGrupo.map(c => <option key={c.codigo} value={c.codigo}>{c.codigo} - {c.nome}</option>)}
-                    </select>
+                    <SeletorCodigo opcoes={codigosDoGrupo} value={form.codigo_bem} onChange={v => upd('codigo_bem', v)} placeholder="Selecione ou digite o código" />
                   </div>
                   <div className="form-group">
                     <label>Beneficiário</label>
@@ -283,7 +278,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                   </div>
                   <div className="form-group">
                     <label>CNPJ</label>
-                    <input className="form-control" value={form.cnpj} onChange={e => upd('cnpj', e.target.value)} placeholder="00.000.000/0000-00" />
+                    <input className="form-control" inputMode="numeric" value={mascaraCnpj(form.cnpj)} onChange={e => upd('cnpj', mascaraCnpj(e.target.value))} placeholder="00.000.000/0000-00" />
                   </div>
                 </div>
 

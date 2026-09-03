@@ -1,9 +1,10 @@
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, truncarComReticencias } from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, truncarComReticencias } from '../utils/formatters';
 import Modal from '../components/Modal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 
@@ -110,7 +111,7 @@ export default function DoacoesPage() {
           ))}
         </div>
 
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead>
               <tr>
@@ -155,7 +156,7 @@ export default function DoacoesPage() {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
@@ -180,7 +181,7 @@ export default function DoacoesPage() {
             </div>
             <div className="form-row">
               <div className="form-group"><label>Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
-              <div className="form-group"><label>CPF/CNPJ</label><input className="form-control" value={form.cpf_cnpj} onChange={e => upd('cpf_cnpj', e.target.value)} /></div>
+              <div className="form-group"><label>CPF/CNPJ</label><input className="form-control" inputMode="numeric" placeholder="000.000.000-00 ou 00.000.000/0000-00" value={mascaraCpfCnpj(form.cpf_cnpj)} onChange={e => upd('cpf_cnpj', mascaraCpfCnpj(e.target.value))} /></div>
             </div>
             <div className="form-row">
               <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>

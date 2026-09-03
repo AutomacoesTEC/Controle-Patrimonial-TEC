@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatCpfCnpj, iniciaisNome } from '../utils/formatters';
+import { formatCpfCnpj, mascaraCpf, iniciaisNome } from '../utils/formatters';
 import {
   PERFIS_STORAGE_KEY,
   novoPerfil, adicionarPerfil, removerPerfil, atualizarPerfil, protegerPerfil, dataStorageKeyFor,
@@ -396,7 +396,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                   )}
                   <div className="form-group"><label>Nome do Titular</label><input className="form-control" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} autoFocus /></div>
                   <div className="form-row">
-                    <div className="form-group"><label>CPF</label><input className="form-control" value={form.cpf} onChange={e => setForm(p => ({ ...p, cpf: e.target.value }))} placeholder="Opcional, se já souber" /></div>
+                    <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(form.cpf)} onChange={e => setForm(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="Opcional, 000.000.000-00" /></div>
                     <div className="form-group"><label>Apelido</label><input className="form-control" value={form.apelido} onChange={e => setForm(p => ({ ...p, apelido: e.target.value }))} placeholder="Ex: Cliente A" /></div>
                   </div>
                 </div>
