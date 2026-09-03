@@ -243,6 +243,12 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    que rola e o thead volta a grudar. Só entra em ação quando a tabela passa
    dessa altura; tabela curta dentro de card não muda em nada. */
 .card .table-container{max-height:min(62vh,640px)}
+/* Tabela de tamanho FIXO e pequeno (Renda Variável: sempre 12 meses) não
+   ganha nada com a rolagem interna do max-height — pelo contrário, a usuária
+   apontou (03/09/2026) que os ~28px de sobra criavam uma rolagem interna que
+   travava a roda do mouse e a página não descia. Renderiza inteira e deixa o
+   .page-body rolar. */
+.card .table-container.altura-natural{max-height:none}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{position:sticky;top:0;z-index:1;background:var(--bg-secondary);padding:12px 16px;text-align:left;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border-color);white-space:nowrap}
 
@@ -360,8 +366,9 @@ textarea.form-control{resize:vertical;min-height:80px}
    container. */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border-color);margin-bottom:20px;overflow-x:auto;flex-shrink:0}
 .tab{padding:9px 14px 11px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:color var(--transition-fast),border-color var(--transition-fast);border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--font-family);white-space:nowrap;margin-bottom:-1px}
-.tab:hover:not(.active){color:var(--text-primary);border-bottom-color:var(--border-color)}
+.tab:hover:not(.active):not(:disabled){color:var(--text-primary);border-bottom-color:var(--border-color)}
 .tab.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary);font-weight:600}
+.tab:disabled{opacity:.4;cursor:not-allowed}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn var(--transition-fast)}
 .modal-overlay.closing{animation:fadeOut var(--transition-fast) forwards}

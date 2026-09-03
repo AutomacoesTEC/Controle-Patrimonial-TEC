@@ -212,17 +212,19 @@ export default function RendaVariavelPage() {
 
   const temAlgo = mensal.length > 0 || fii.length > 0 || anual || fiiAnual;
 
-  // Duas fichas, duas abas — mesmo padrão de Bens, Rendimentos e Doações. A
-  // aba só aparece quando as DUAS existem; com uma ficha só, mostra direto,
-  // sem uma aba sozinha para clicar.
+  // As DUAS fichas do menu do programa da Receita ficam SEMPRE visíveis como
+  // abas (a usuária apontou em 03/09/2026 que sumiam quando só uma tinha dado).
+  // A ficha sem dado fica desabilitada, para deixar claro que existe e está
+  // vazia — igual ao programa do IRPF.
   const temComuns = grupos.length > 0 || anual;
   const temFii = gruposFii.length > 0 || fiiAnual;
   const abas = [
-    temComuns && { id: 'comuns', rotulo: 'Operações Comuns / Day-Trade' },
-    temFii && { id: 'fii', rotulo: 'FII ou Fiagro' },
-  ].filter(Boolean);
+    { id: 'comuns', rotulo: 'Operações Comuns / Day-Trade', vazia: !temComuns },
+    { id: 'fii', rotulo: 'FII ou Fiagro', vazia: !temFii },
+  ];
   const [aba, setAba] = useState('comuns');
-  const abaAtiva = abas.some(a => a.id === aba) ? aba : abas[0]?.id;
+  const primeiraComDado = abas.find(a => !a.vazia)?.id || 'comuns';
+  const abaAtiva = abas.find(a => a.id === aba && !a.vazia) ? aba : primeiraComDado;
 
   return (
     <>
@@ -255,10 +257,18 @@ export default function RendaVariavelPage() {
           </div>
         )}
 
-        {abas.length > 1 && (
+        {temAlgo && (
           <div className="tabs" style={{ marginBottom: '20px' }}>
             {abas.map(a => (
-              <button key={a.id} className={`tab ${abaAtiva === a.id ? 'active' : ''}`} onClick={() => setAba(a.id)}>{a.rotulo}</button>
+              <button
+                key={a.id}
+                className={`tab ${abaAtiva === a.id ? 'active' : ''}`}
+                disabled={a.vazia}
+                title={a.vazia ? 'Sem dados nesta ficha' : undefined}
+                onClick={() => !a.vazia && setAba(a.id)}
+              >
+                {a.rotulo}{a.vazia ? ' (sem dados)' : ''}
+              </button>
             ))}
           </div>
         )}
@@ -279,7 +289,7 @@ export default function RendaVariavelPage() {
               <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
             </div>
             <ResumoFicha itens={resumoComuns(grupo.linhas)} />
-            <TabelaRedimensionavel>
+            <TabelaRedimensionavel className="altura-natural">
               <table className="rv-mensal">
                 <thead>
                   <tr>
@@ -424,7 +434,7 @@ export default function RendaVariavelPage() {
               <span className="badge badge-blue">{grupo.linhas.length} mês(es)</span>
             </div>
             <ResumoFicha itens={resumoFii(grupo.linhas)} />
-            <TabelaRedimensionavel>
+            <TabelaRedimensionavel className="altura-natural">
               <table className="rv-mensal">
                 <thead>
                   <tr>
