@@ -689,6 +689,76 @@ describe('ADD_EM_ANO (grava num ano que pode não ser o ativo, sem trocar a vis�
   });
 });
 
+// Item E do HANDOFF-2026-09-03.md: gravação da linha mensal já calculada
+// por calculoRendaVariavelMes.js. O reducer não recalcula nada, só decide
+// anexar ou substituir (mesmo mês+beneficiário = edição, nunca duplica).
+describe('ADD_RENDA_VARIAVEL_MES_MANUAL / ADD_FII_MES_MANUAL', () => {
+  const linhaComuns = (mes, extra = {}) => ({ mes, titular: true, origem: 'manual', comuns: { impostoDevido: 10 }, daytrade: {}, consolidacao: {}, ...extra });
+  const linhaFii = (mes, extra = {}) => ({ mes, titular: true, origem: 'manual', resultadoLiquidoMes: 10, ...extra });
+
+  it('anexa quando não existe linha manual para o mesmo mês+beneficiário', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(5) });
+    state = reducer(state, { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(6) });
+    expect(state.rendaVariavelMensalManual).toHaveLength(2);
+    expect(state.rendaVariavelMensalManual.map(l => l.mes)).toEqual([5, 6]);
+  });
+
+  it('substitui (não duplica) quando já existe manual do mesmo mês+beneficiário', () => {
+    let state = { ...initialState, rendaVariavelMensalManual: [linhaComuns(5, { comuns: { impostoDevido: 111 }, daytrade: {}, consolidacao: {} })] };
+    state = reducer(state, { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(5, { comuns: { impostoDevido: 222 }, daytrade: {}, consolidacao: {} }) });
+    expect(state.rendaVariavelMensalManual).toHaveLength(1);
+    expect(state.rendaVariavelMensalManual[0].comuns.impostoDevido).toBe(222);
+  });
+
+  it('mesmo mês, beneficiário DIFERENTE (titular x dependente), não colide — anexa os dois', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(5, { titular: true }) });
+    state = reducer(state, { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(5, { titular: false, cpfDependente: '11122233344' }) });
+    expect(state.rendaVariavelMensalManual).toHaveLength(2);
+  });
+
+  it('FII: mesmo padrão de anexar/substituir, em fiiFiagroMensalManual', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_FII_MES_MANUAL', payload: linhaFii(3) });
+    state = reducer(state, { type: 'ADD_FII_MES_MANUAL', payload: linhaFii(3, { resultadoLiquidoMes: 999 }) });
+    expect(state.fiiFiagroMensalManual).toHaveLength(1);
+    expect(state.fiiFiagroMensalManual[0].resultadoLiquidoMes).toBe(999);
+  });
+
+  it('funciona via ADD_EM_ANO num ano sem snapshot ainda (infraestrutura do item G)', () => {
+    const state = reducer(
+      { ...initialState, anoCalendario: 2026, historico: {} },
+      { type: 'ADD_EM_ANO', payload: { ano: 2025, action: { type: 'ADD_RENDA_VARIAVEL_MES_MANUAL', payload: linhaComuns(8) } } },
+    );
+    expect(state.anoCalendario).toBe(2026); // não trocou a visão
+    expect(state.rendaVariavelMensalManual).toEqual([]); // ano ativo intocado
+    expect(state.historico[2025].rendaVariavelMensalManual).toHaveLength(1);
+    expect(state.historico[2025].rendaVariavelMensalManual[0].mes).toBe(8);
+  });
+
+  it('IMPORT_DECLARACAO no MESMO ano não apaga os lançamentos manuais (são correção da usuária, não dado do arquivo)', () => {
+    let state = { ...initialState, anoCalendario: 2025, rendaVariavelMensalManual: [linhaComuns(4)], fiiFiagroMensalManual: [linhaFii(4)] };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, contribuinte: { nome: 'x' }, bens: [], dividas: [], rendimentos: [], pagamentos: [], rendaVariavelMensalOficial: [{ mes: 1, titular: true }] },
+    });
+    expect(state.rendaVariavelMensalManual).toHaveLength(1);
+    expect(state.fiiFiagroMensalManual).toHaveLength(1);
+  });
+
+  it('IMPORT_DECLARACAO trocando de ano-calendário: o ano NOVO nasce sem lançamentos manuais do ano antigo', () => {
+    let state = { ...initialState, anoCalendario: 2024, rendaVariavelMensalManual: [linhaComuns(4)], contribuinte: { nome: 'x' } };
+    state = reducer(state, {
+      type: 'IMPORT_DECLARACAO',
+      payload: { anoCalendario: 2025, contribuinte: { nome: 'Fulano' }, bens: [], dividas: [], rendimentos: [], pagamentos: [] },
+    });
+    expect(state.anoCalendario).toBe(2025);
+    expect(state.rendaVariavelMensalManual).toEqual([]); // 2025 é ano novo, não herda o manual de 2024
+    expect(state.historico[2024].rendaVariavelMensalManual).toHaveLength(1); // mas 2024 continua arquivado com o dele
+  });
+});
+
 describe('Ganhos de Capital: valorVenda na movimentação de bem', () => {
   it('venda parcial/total guarda valorVenda junto da movimentação, sem afetar o cálculo de situacao_atual', () => {
     let state = { ...initialState, bens: [{ ...bemBase }] };

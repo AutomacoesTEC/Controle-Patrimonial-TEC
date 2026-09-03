@@ -67,6 +67,44 @@ describe('saldosQueAtravessam', () => {
     const fii = saldosQueAtravessam(dadosFim).find(r => r.chave === 'fii');
     expect(fii.valor).toBeCloseTo(777.77, 2);
   });
+
+  // Item E: um mês lançado à mão (fora da declaração importada) precisa
+  // valer para "última competência" igual a um mês oficial — ver
+  // rendaVariavelMensal.js (mesclarMensal), que este módulo passou a usar.
+  it('considera o lançamento MANUAL quando ele é o maior mês do ano (prevalece sobre o oficial na mesma competência)', () => {
+    const dadosFim = {
+      rendaVariavelMensalOficial: [
+        { titular: true, mes: 10, comuns: { prejuizoCompensar: 500 }, daytrade: { prejuizoCompensar: 0 } },
+      ],
+      rendaVariavelMensalManual: [
+        { titular: true, mes: 12, comuns: { prejuizoCompensar: 8000 }, daytrade: { prejuizoCompensar: 0 } },
+      ],
+    };
+    const comuns = saldosQueAtravessam(dadosFim).find(r => r.chave === 'rvComuns');
+    expect(comuns.valor).toBeCloseTo(8000, 2); // do mês 12 (manual), não do mês 10 (oficial)
+  });
+
+  it('lançamento manual no MESMO mês do oficial prevalece (corrige o valor, não soma)', () => {
+    const dadosFim = {
+      rendaVariavelMensalOficial: [
+        { titular: true, mes: 12, comuns: { prejuizoCompensar: 500 }, daytrade: { prejuizoCompensar: 0 } },
+      ],
+      rendaVariavelMensalManual: [
+        { titular: true, mes: 12, comuns: { prejuizoCompensar: 900 }, daytrade: { prejuizoCompensar: 0 } },
+      ],
+    };
+    const comuns = saldosQueAtravessam(dadosFim).find(r => r.chave === 'rvComuns');
+    expect(comuns.valor).toBeCloseTo(900, 2);
+  });
+
+  it('FII manual também entra na última competência', () => {
+    const dadosFim = {
+      fiiFiagroMensalOficial: [{ titular: true, mes: 6, prejuizoCompensar: 100 }],
+      fiiFiagroMensalManual: [{ titular: true, mes: 12, prejuizoCompensar: 555 }],
+    };
+    const fii = saldosQueAtravessam(dadosFim).find(r => r.chave === 'fii');
+    expect(fii.valor).toBeCloseTo(555, 2);
+  });
 });
 
 describe('disponibilidadesEmData', () => {

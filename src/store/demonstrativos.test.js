@@ -934,6 +934,44 @@ describe('achado 12: perda em renda variável entra no caixa, ganho não', () =>
     const rv = rendaVariavelDoPeriodo([ficha(7, -245.4), ficha(12, -1000)], 2025, '2025-01-01', '2025-08-31');
     expect(rv.perda).toBeCloseTo(-245.4, 2);
   });
+
+  // Item E: demonstrativoConciliacao(state, ...) passou a ler renda
+  // variável via linhasComunsDoAno(state) (mesclagem oficial+manual, ver
+  // rendaVariavelMensal.js), não mais direto de state.rendaVariavelMensalOficial.
+  test('mês lançado à mão (fora da declaração) também entra no Saldo de Caixa como perda', () => {
+    const stateBase = {
+      bens: [], dividas: [], dividasRurais: [], rendimentos: [], pagamentos: [], pagamentosDiversos: [],
+      lancamentosRurais: [], receitasDespesasRuraisOficial: [], anoCalendario: 2025,
+      doacoesEfetuadasOficial: [], doacoesPartidosOficial: [], doacoesEcaIdosoOficial: [],
+    };
+    const semManual = demonstrativoConciliacao(
+      { ...stateBase, rendaVariavelMensalOficial: [] },
+      '2025-01-01', '2025-12-31',
+    );
+    const comManual = demonstrativoConciliacao(
+      {
+        ...stateBase,
+        rendaVariavelMensalOficial: [],
+        rendaVariavelMensalManual: [ficha(9, -500)],
+      },
+      '2025-01-01', '2025-12-31',
+    );
+    expect(semManual.rendaVariavelPerda).toBe(0);
+    expect(comManual.rendaVariavelPerda).toBeCloseTo(-500, 2);
+    expect(comManual.saldoDeCaixa).toBeCloseTo(semManual.saldoDeCaixa - 500, 2);
+  });
+
+  test('mês manual no MESMO mês do oficial substitui (mesclagem), nunca soma os dois — sem duplicar a perda', () => {
+    const stateBase = {
+      bens: [], dividas: [], dividasRurais: [], rendimentos: [], pagamentos: [], pagamentosDiversos: [],
+      lancamentosRurais: [], receitasDespesasRuraisOficial: [], anoCalendario: 2025,
+      doacoesEfetuadasOficial: [], doacoesPartidosOficial: [], doacoesEcaIdosoOficial: [],
+      rendaVariavelMensalOficial: [ficha(9, -100)], // oficial: perda de 100
+      rendaVariavelMensalManual: [ficha(9, -500)], // manual corrige pra 500
+    };
+    const demo = demonstrativoConciliacao(stateBase, '2025-01-01', '2025-12-31');
+    expect(demo.rendaVariavelPerda).toBeCloseTo(-500, 2); // só o manual, não -600
+  });
 });
 
 describe('achado 15: contagem de bens usa o mesmo critério da tela de Bens', () => {

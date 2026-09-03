@@ -10,6 +10,8 @@
 // Lógica pura, sem React, pelo mesmo motivo do reducer.js: testável sem
 // montar componente.
 
+import { linhasComunsDoAno } from './rendaVariavelMensal';
+
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
 
 // Bem com situação anterior E atual zeradas e nenhuma movimentação no ano: ele
@@ -913,7 +915,7 @@ export function demonstrativoConciliacao(state, dataDe, dataAte) {
     { meses: state.receitasDespesasRuraisOficial, ano: state.anoCalendario });
   const rendimentos = totalRendimentos(state.rendimentos, resultadoRural, dataDe, dataAte);
   const ganhos = ganhosApuradosPeriodo(state, dataDe, dataAte);
-  const rv = rendaVariavelDoPeriodo(state.rendaVariavelMensalOficial, state.anoCalendario, dataDe, dataAte);
+  const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(state), state.anoCalendario, dataDe, dataAte);
   const totalDoacoes = totalDoacoesPeriodo(state);
   const pagamentosEfetuados = totalPagamentos(state.pagamentos, dataDe, dataAte);
   const pagamentosDiversos = totalPagamentosDiversos(state.pagamentosDiversos, dataDe, dataAte);

@@ -118,6 +118,17 @@ export const initialState = {
   // exclusiva e não entra em nenhum total do demonstrativo. Ver
   // importParsers.js.
   rendaVariavelMensalOficial: [],
+  // Lançamentos MANUAIS de Renda Variável (item E do HANDOFF-2026-09-03.md):
+  // meses que a declaração não trouxe (ou trouxe errado), calculados por
+  // calculoRendaVariavelMes.js. Nunca se misturam fisicamente com os
+  // campos Oficiais acima — quem lê os dois juntos usa
+  // rendaVariavelMensal.js (mesclarMensal/linhasComunsDoAno/
+  // linhasFiiDoAno), que decide qual prevalece em caso de colisão
+  // (mesmo mês + beneficiário). Reimportar a declaração (IMPORT_DECLARACAO/
+  // RECONCILIAR_IMPORTACAO) NUNCA apaga estes dois campos — são correção
+  // da usuária, não dado do arquivo.
+  rendaVariavelMensalManual: [],
+  fiiFiagroMensalManual: [],
   // Doações (Efetuadas / a Partidos Políticos / diretamente na declaração
   // ECA-Pessoa Idosa) — diferente de todos os campos "Oficial" acima, o
   // .DBK de referência NÃO TEM nenhum registro para essas 4 fichas (nem
@@ -188,6 +199,8 @@ export const snapshotYear = (state) => ({
   participantesRuraisOficial: state.participantesRuraisOficial,
   demonstrativoExteriorOficial: state.demonstrativoExteriorOficial,
   rendaVariavelMensalOficial: state.rendaVariavelMensalOficial,
+  rendaVariavelMensalManual: state.rendaVariavelMensalManual,
+  fiiFiagroMensalManual: state.fiiFiagroMensalManual,
   fichasNaoLidasComConteudo: state.fichasNaoLidasComConteudo,
   doacoesEfetuadasOficial: state.doacoesEfetuadasOficial,
   doacoesPartidosOficial: state.doacoesPartidosOficial,
@@ -212,7 +225,8 @@ export const hasWorkingData = (state = {}) =>
     'receitasDespesasRuraisOficial', 'movimentacaoRebanhoOficial',
     'participantesRuraisOficial', 'demonstrativoExteriorOficial',
     'apuracaoGanhoCapital', 'rendaVariavelMensalOficial',
-    'fiiFiagroMensalOficial', 'doacoesEfetuadasOficial',
+    'fiiFiagroMensalOficial', 'rendaVariavelMensalManual', 'fiiFiagroMensalManual',
+    'doacoesEfetuadasOficial',
     'doacoesPartidosOficial', 'doacoesEcaIdosoOficial',
     'pagamentosDiversos', 'fichasNaoLidasComConteudo',
   ].some(campo => temItens(state[campo])) ||
@@ -244,9 +258,9 @@ export const blankYear = {
   bensRurais: [], dividasRurais: [], lancamentosRurais: [], pagamentosDiversos: [],
   receitasDespesasRuraisOficial: [], apuracaoResultadoRuralOficial: null,
   movimentacaoRebanhoOficial: [], participantesRuraisOficial: [], demonstrativoExteriorOficial: [],
-  rendaVariavelMensalOficial: [],
+  rendaVariavelMensalOficial: [], rendaVariavelMensalManual: [],
   ganhosCapitalOficial: null, rendaVariavelAnualOficial: null,
-  fiiFiagroMensalOficial: [], fiiFiagroAnualOficial: null,
+  fiiFiagroMensalOficial: [], fiiFiagroMensalManual: [], fiiFiagroAnualOficial: null,
   // Fichas que a declaração importada TEM preenchidas e que o app não lê. Fica
   // no ano, e não só no log da importação, porque é informação que a pessoa
   // precisa ter à vista sempre que olhar os números — o log some quando ela sai
@@ -443,6 +457,8 @@ export function reducer(state, action) {
         fiiFiagroAnualOficial: blankYear.fiiFiagroAnualOficial,
         demonstrativoExteriorOficial: blankYear.demonstrativoExteriorOficial,
         rendaVariavelMensalOficial: blankYear.rendaVariavelMensalOficial,
+        rendaVariavelMensalManual: blankYear.rendaVariavelMensalManual,
+        fiiFiagroMensalManual: blankYear.fiiFiagroMensalManual,
         fichasNaoLidasComConteudo: blankYear.fichasNaoLidasComConteudo,
         receitasDespesasRuraisOficial: blankYear.receitasDespesasRuraisOficial,
         apuracaoResultadoRuralOficial: blankYear.apuracaoResultadoRuralOficial,
@@ -609,6 +625,11 @@ export function reducer(state, action) {
         dividasRurais: (dividasRurais && dividasRurais.length > 0) ? marcarImportacao(dividasRurais) : base.dividasRurais,
         lancamentosRurais: base.lancamentosRurais,
         pagamentosDiversos: base.pagamentosDiversos,
+        // Lançamentos manuais de Renda Variável (item E): correção da
+        // usuária, não dado do arquivo — reimportar nunca apaga, mesmo
+        // critério de lancamentosRurais/pagamentosDiversos acima.
+        rendaVariavelMensalManual: base.rendaVariavelMensalManual,
+        fiiFiagroMensalManual: base.fiiFiagroMensalManual,
       };
     }
     // Reimportação de uma declaração retificadora (mesmo ano-calendário,
@@ -886,6 +907,8 @@ export function reducer(state, action) {
         lancamentosRurais: base.lancamentosRurais,
         prejuizoRuralAcompensar: base.prejuizoRuralAcompensar,
         pagamentosDiversos: base.pagamentosDiversos,
+        rendaVariavelMensalManual: base.rendaVariavelMensalManual,
+        fiiFiagroMensalManual: base.fiiFiagroMensalManual,
       };
     }
     // Registra uma movimentação (venda total/parcial, compra, benfeitoria,
@@ -1124,6 +1147,36 @@ export function reducer(state, action) {
       }
       return { ...state, historico };
     }
+    // Item E (HANDOFF-2026-09-03.md): grava um mês de Renda Variável já
+    // CALCULADO (ver src/store/calculoRendaVariavelMes.js — o reducer não
+    // recalcula nada, só decide anexar ou substituir). Identidade da linha
+    // é (mês, beneficiário) — igual ao critério de colisão de
+    // rendaVariavelMensal.js (mesclarMensal): lançar de novo o mesmo mês
+    // do mesmo beneficiário EDITA a linha manual existente, nunca duplica.
+    case 'ADD_RENDA_VARIAVEL_MES_MANUAL': {
+      const linha = action.payload;
+      const mesmaLinha = (l) => l.mes === linha.mes && !!l.titular === !!linha.titular
+        && String(l.cpfDependente || '') === String(linha.cpfDependente || '');
+      const existe = state.rendaVariavelMensalManual.some(mesmaLinha);
+      return {
+        ...state,
+        rendaVariavelMensalManual: existe
+          ? state.rendaVariavelMensalManual.map(l => mesmaLinha(l) ? linha : l)
+          : [...state.rendaVariavelMensalManual, linha],
+      };
+    }
+    case 'ADD_FII_MES_MANUAL': {
+      const linha = action.payload;
+      const mesmaLinha = (l) => l.mes === linha.mes && !!l.titular === !!linha.titular
+        && String(l.cpfDependente || '') === String(linha.cpfDependente || '');
+      const existe = state.fiiFiagroMensalManual.some(mesmaLinha);
+      return {
+        ...state,
+        fiiFiagroMensalManual: existe
+          ? state.fiiFiagroMensalManual.map(l => mesmaLinha(l) ? linha : l)
+          : [...state.fiiFiagroMensalManual, linha],
+      };
+    }
     // Item G do HANDOFF-2026-09-03.md: grava um lançamento no ano da SUA
     // data sem trocar a visão. `action` é a ação normal (ADD_PAGAMENTO,
     // ADD_PAGAMENTO_DIVERSO, ADD_LANCAMENTO_RURAL etc.) que seria despachada
@@ -1208,6 +1261,8 @@ function descreverAcao(state, action) {
     case 'UPDATE_DOACAO_PARTIDO': return `Editou doação a partido/candidato: ${itemLabel('doacoesPartidosOficial', p)}`;
     case 'DELETE_DOACAO_PARTIDO': return `Excluiu doação a partido/candidato: ${itemLabel('doacoesPartidosOficial', buscar(state, 'doacoesPartidosOficial', p))}`;
     case 'ADD_DOACAO_ECA_IDOSO': return `Cadastrou doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', p)}`;
+    case 'ADD_RENDA_VARIAVEL_MES_MANUAL': return `Lançou mês ${p.mes} de Renda Variável (operações comuns/day-trade) à mão: ${p.titular ? 'Titular' : `dependente ${p.cpfDependente || ''}`}`;
+    case 'ADD_FII_MES_MANUAL': return `Lançou mês ${p.mes} de FII/Fiagro à mão: ${p.titular ? 'Titular' : `dependente ${p.cpfDependente || ''}`}`;
     case 'UPDATE_DOACAO_ECA_IDOSO': return `Editou doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', p)}`;
     case 'DELETE_DOACAO_ECA_IDOSO': return `Excluiu doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', buscar(state, 'doacoesEcaIdosoOficial', p))}`;
     case 'ADD_PAGAMENTO': return `Cadastrou pagamento: ${itemLabel('pagamentos', p)}`;

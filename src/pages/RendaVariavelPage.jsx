@@ -3,20 +3,28 @@ import { useData } from '../store/DataContext';
 import { formatCurrency, formatarAliquotaFicha, descreverOrigemDocumento, formatCpfCnpj } from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
+import { linhasComunsDoAno, linhasFiiDoAno } from '../store/rendaVariavelMensal';
 import { linhasConsolidacaoMes, conferenciaConsolidacaoMes } from '../store/consolidacaoRendaVariavel';
 import Ajuda from '../components/Ajuda';
 import {
   linhasAnualRendaVariavel, linhasAnualFiiFiagro, ehDerivadoDosMeses, AVISO_DERIVADO,
 } from '../store/anualRendaVariavel';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
+import RendaVariavelMesModal from '../components/RendaVariavelMesModal';
 
 // Renda Variável, exatamente as duas fichas do menu do programa da Receita:
 // "Operações Comuns / Day-Trade" e "Operações em FII ou Fiagro".
 //
-// Esta tela NÃO calcula nada: mostra o que veio na declaração importada. É
-// deliberado. O resultado de renda variável depende de notas de corretagem mês
-// a mês, que o app não tem; inventar um número aqui seria pior que exibir o que
-// a própria declaração apurou.
+// Esta tela não INVENTA nada: as linhas OFICIAIS (vindas da declaração
+// importada) continuam exatamente como chegaram, sem nenhum recálculo — o
+// resultado de renda variável depende de notas de corretagem mês a mês, que
+// o app não tem, e alterar um número aqui seria pior que exibir o que a
+// própria declaração apurou. As linhas MANUAIS (item E do
+// HANDOFF-2026-09-03.md — mês que a declaração não trouxe, ou trouxe
+// errado) SÃO calculadas pelo app, por src/store/calculoRendaVariavelMes.js
+// (base legal citada no topo daquele arquivo: IN RFB nº 1.585/2015, arts.
+// 37 § 2º, 57, 63 a 65), e mescladas com as oficiais por
+// src/store/rendaVariavelMensal.js (mês manual prevalece na colisão).
 //
 // O que o app faz com esses números está no Demonstrativo do Dashboard: a perda
 // em renda variável reduz o saldo de caixa do ano (dinheiro que saiu e não
@@ -93,8 +101,12 @@ function completar12Meses(linhasReais, ficha) {
 }
 
 // R$ 0,00 sai apagado: num quadro de 12 meses em que a maioria é zero, isso é
-// o que deixa o olho achar o mês que teve movimento.
+// o que deixa o olho achar o mês que teve movimento. null/undefined é outra
+// coisa (sem dado, não "resultado zero" — os 13 campos de MERCADOS do
+// lançamento manual são sempre null, ver MERCADOS_NULOS em
+// calculoRendaVariavelMes.js) e sai como traço, não "R$ 0,00".
 function Valor({ n, formato }) {
+  if (n == null) return <span className="rv-zero">-</span>;
   const num = Number(n) || 0;
   if (formato === 'aliquota') return <>{formatarAliquotaFicha(n)}</>;
   return <span className={num === 0 ? 'rv-zero' : undefined}>{formatCurrency(num)}</span>;
@@ -118,22 +130,67 @@ function ResumoFicha({ itens }) {
 }
 
 export default function RendaVariavelPage() {
-  const { state } = useData();
-  const anosDisponiveis = anosComDado(state);
+  const { state, addToast, garantirAnoCadastro, despacharEmAno } = useData();
+  // Item E existe justamente para lançar RV do ano SEGUINTE ao ativo antes de
+  // ele ter qualquer outro dado (caso do handoff: declaração em N, lançamento
+  // já em N+1) — sem isso no seletor, a pessoa nunca consegue escolher um ano
+  // que ainda não existe em historico para abrir o "Incluir mês" nele.
+  const anosDisponiveis = useMemo(() => {
+    const anos = new Set(anosComDado(state));
+    if (state.anoCalendario != null) anos.add(state.anoCalendario + 1);
+    return [...anos].sort((a, b) => a - b);
+  }, [state]);
   const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
   const [mesAberto, setMesAberto] = useState(null);
   // Beneficiário em foco dentro de cada ficha (titular, dependente...). Só
   // vira aba quando há mais de um; com um só, mostra direto.
   const [benComuns, setBenComuns] = useState(null);
   const [benFii, setBenFii] = useState(null);
+  // Item E do HANDOFF-2026-09-03.md: qual ficha o modal "Incluir mês" está
+  // aberto (null | 'comuns' | 'fii') — um modal só, reaproveitado pelas duas.
+  const [modalFicha, setModalFicha] = useState(null);
 
   useEffect(() => { setAnoEscolhido(state.anoCalendario); }, [state.anoCalendario]);
 
   const dados = anoEscolhido != null ? dadosDoAno(state, anoEscolhido) : null;
-  const mensal = dados?.rendaVariavelMensalOficial || [];
-  const fii = dados?.fiiFiagroMensalOficial || [];
+  // Mesclado com o que a usuária lançou à mão (item E) — quem prevalece na
+  // colisão de mês+beneficiário é o manual, ver rendaVariavelMensal.js.
+  const mensal = linhasComunsDoAno(dados);
+  const fii = linhasFiiDoAno(dados);
+  // A consolidação ANUAL continua vindo só da declaração importada: não há
+  // lógica hoje que a recalcule a partir dos meses (nem aqui nem em
+  // anualRendaVariavel.js) — um mês manual aparece na tabela mensal e no
+  // resumo da ficha (abaixo), mas não neste card.
   const anual = dados?.rendaVariavelAnualOficial || null;
   const fiiAnual = dados?.fiiFiagroAnualOficial || null;
+
+  // Ano anterior, só para sugerirCarry() (prejuízo que atravessa o
+  // exercício, ver base legal no topo de calculoRendaVariavelMes.js) — não
+  // precisa de mais nada desse ano aqui.
+  const dadosAnoAnterior = anoEscolhido != null ? dadosDoAno(state, anoEscolhido - 1) : null;
+  const mensalAnoAnterior = linhasComunsDoAno(dadosAnoAnterior);
+  const fiiAnoAnterior = linhasFiiDoAno(dadosAnoAnterior);
+
+  // Titular + dependentes DO SNAPSHOT DO ANO em exibição (não `state.dependentes`
+  // solto, que é só o ano ativo) — é quem pode ser escolhido no "Incluir mês".
+  const beneficiariosDoAno = [
+    { chave: 'titular', nome: 'Titular', titular: true, cpfDependente: null },
+    ...(dados?.dependentes || []).map(d => {
+      const cpf = String(d?.cpf || '').replace(/\D/g, '');
+      return { chave: cpf || `dep-${d.id}`, nome: d.nome || 'Dependente', titular: false, cpfDependente: cpf };
+    }),
+  ];
+
+  const handleSalvarMes = (linha) => {
+    if (anoEscolhido == null) return;
+    (async () => {
+      const anoAlvo = await garantirAnoCadastro(anoEscolhido);
+      if (!anoAlvo) return;
+      const type = modalFicha === 'fii' ? 'ADD_FII_MES_MANUAL' : 'ADD_RENDA_VARIAVEL_MES_MANUAL';
+      despacharEmAno(anoAlvo, { type, payload: linha });
+      addToast(`Mês ${nomeMes(linha.mes)} lançado.`, 'success');
+    })();
+  };
 
   // Nome de aba de um beneficiário dependente. A usuária pediu (03/09/2026) para
   // a aba NÃO trazer o CPF cru ("Dependente 33344455508"). Mostra o nome do
@@ -262,6 +319,8 @@ export default function RendaVariavelPage() {
         <div className="page-header-actions">
           {seletorAno}
           {temAlgo && <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>}
+          <button className="btn btn-primary btn-sm" disabled={anoEscolhido == null} onClick={() => setModalFicha('comuns')}>＋ Incluir mês (Comuns)</button>
+          <button className="btn btn-primary btn-sm" disabled={anoEscolhido == null} onClick={() => setModalFicha('fii')}>＋ Incluir mês (FII)</button>
         </div>
       </div>
       <div className="page-body animate-in">
@@ -334,6 +393,7 @@ export default function RendaVariavelPage() {
                       <tr className={linha.mesVazio ? 'rv-mes-vazio' : undefined}>
                         <td>
                           {nomeMes(linha.mes)}
+                          {linha.origem === 'manual' && <span className="badge badge-purple" style={{ marginLeft: '6px' }}>Manual</span>}
                           {/* Cada mês é um quadro próprio na ficha impressa, e
                               a página muda de um mês para o outro. */}
                           {descreverOrigemDocumento(linha) && (
@@ -473,6 +533,7 @@ export default function RendaVariavelPage() {
                     <tr key={`fii-${grupo.chave}-${linha.mes}`} className={linha.mesVazio ? 'rv-mes-vazio' : undefined}>
                       <td>
                         {nomeMes(linha.mes)}
+                        {linha.origem === 'manual' && <span className="badge badge-purple" style={{ marginLeft: '6px' }}>Manual</span>}
                         {descreverOrigemDocumento(linha) && (
                           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(linha)}</div>
                         )}
@@ -515,6 +576,18 @@ export default function RendaVariavelPage() {
         )}
         </>)}
       </div>
+
+      <RendaVariavelMesModal
+        open={modalFicha != null}
+        onClose={() => setModalFicha(null)}
+        ficha={modalFicha}
+        ano={anoEscolhido}
+        beneficiarios={beneficiariosDoAno}
+        beneficiarioPadrao={modalFicha === 'fii' ? benFii : benComuns}
+        linhasDoAno={modalFicha === 'fii' ? fii : mensal}
+        linhasAnoAnterior={modalFicha === 'fii' ? fiiAnoAnterior : mensalAnoAnterior}
+        onSalvar={handleSalvarMes}
+      />
     </>
   );
 }

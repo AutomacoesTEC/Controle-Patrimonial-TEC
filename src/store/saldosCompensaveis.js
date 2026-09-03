@@ -12,6 +12,7 @@
 // de "não inventar número" que rege o resto do demonstrativo.
 
 import { totalBensAteData, situacaoBemAteData } from './demonstrativos';
+import { linhasComunsDoAno, linhasFiiDoAno } from './rendaVariavelMensal';
 
 // Última competência de cada beneficiário numa ficha mensal, somando o valor
 // lido por `ler`. Titular e dependentes são buckets de compensação SEPARADOS
@@ -48,7 +49,10 @@ export function saldosQueAtravessam(dadosFim) {
     });
   }
 
-  const rv = dadosFim.rendaVariavelMensalOficial;
+  // Mescla oficial+manual (item E) antes de ler a última competência: um
+  // mês lançado à mão pode ser justamente o que fecha o ano, e o saldo que
+  // atravessa o exercício precisa refletir isso. Ver rendaVariavelMensal.js.
+  const rv = linhasComunsDoAno(dadosFim);
   const comuns = somaUltimaCompetencia(rv, l => l.comuns?.prejuizoCompensar);
   if (comuns > 0) {
     rows.push({
@@ -67,7 +71,7 @@ export function saldosQueAtravessam(dadosFim) {
       base: 'IN RFB nº 1.585/2015, art. 65: compensa apenas ganhos futuros de day-trade.',
     });
   }
-  const fii = somaUltimaCompetencia(dadosFim.fiiFiagroMensalOficial, l => l.prejuizoCompensar);
+  const fii = somaUltimaCompetencia(linhasFiiDoAno(dadosFim), l => l.prejuizoCompensar);
   if (fii > 0) {
     rows.push({
       chave: 'fii',
