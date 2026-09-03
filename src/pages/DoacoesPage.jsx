@@ -22,7 +22,7 @@ const ABAS = {
 const FORM_VAZIO = { codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
 
 export default function DoacoesPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const [subView, setSubView] = useState('efetuadas');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -47,7 +47,7 @@ export default function DoacoesPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código', form.codigo], ['Beneficiário', form.nome_beneficiario]])
       || primeiroValorZerado([['Valor', form.valor]]);
@@ -64,16 +64,16 @@ export default function DoacoesPage() {
       dispatch({ type: aba.updateAction, payload: { ...payload, id: editingId } });
       addToast('Doação atualizada!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: aba.addAction, payload });
       addToast('Doação cadastrada!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (d) => {
+  const handleDelete = async (d) => {
     const nome = d.nome_beneficiario || 'esta doação';
-    if (confirm(`Excluir a doação para "${nome}" (${formatCurrency(d.valor)})?\n\nEssa ação não pode ser desfeita.`)) {
+    if (await confirmar({ titulo: 'Excluir esta doação?', textoConfirmar: 'Excluir', perigo: true, texto: `A doação para "${nome}" (${formatCurrency(d.valor)}) será removida.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: aba.deleteAction, payload: d.id });
       addToast('Doação excluída', 'info');
     }

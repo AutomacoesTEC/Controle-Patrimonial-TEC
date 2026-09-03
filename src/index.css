@@ -374,6 +374,14 @@ textarea.form-control{resize:vertical;min-height:80px}
 .modal-body{padding:24px}
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border-color);display:flex;gap:10px;justify-content:flex-end}
 
+/* Modal de confirmacao proprio (ConfirmacaoModal.jsx), no lugar do confirm()
+   nativo. z-index acima do modal comum, para empilhar por cima dele. */
+.confirmacao-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn var(--transition-fast);padding:20px}
+.confirmacao-caixa{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:440px;padding:22px 24px 18px;animation:slideUp var(--transition-normal)}
+.confirmacao-titulo{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:8px}
+.confirmacao-texto{font-size:13.5px;line-height:1.55;color:var(--text-secondary);white-space:pre-wrap;margin-bottom:18px}
+.confirmacao-acoes{display:flex;gap:10px;justify-content:flex-end}
+
 .import-zone{border:2px dashed var(--border-color);border-radius:var(--radius-lg);padding:48px;text-align:center;cursor:pointer;transition:all var(--transition-normal)}
 .import-zone:hover{border-color:var(--accent-primary);background:rgba(var(--accent-primary-rgb),0.05)}
 .import-zone.active{border-color:var(--accent-success);background:rgba(16,185,129,0.05)}

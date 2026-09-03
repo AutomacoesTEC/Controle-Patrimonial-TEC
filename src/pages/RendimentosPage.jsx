@@ -23,7 +23,7 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
 const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: '' };
 
 export default function RendimentosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const { rendimentos } = state;
   // Aba por categoria (mesmo padrão de BensPage: "Todos" + uma por grupo) —
   // pedido da usuária pra não ficar uma lista contínua de cards empilhados.
@@ -50,7 +50,7 @@ export default function RendimentosPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Tipo', form.tipo], ['Nome Fonte Pagadora', form.nome_fonte]])
       || primeiroValorZerado([['Valor', form.valor]]);
@@ -60,16 +60,16 @@ export default function RendimentosPage() {
       dispatch({ type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
       addToast('Rendimento atualizado!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_RENDIMENTO', payload });
       addToast('Rendimento cadastrado!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (r) => {
+  const handleDelete = async (r) => {
     const nome = r.nome_fonte || describeRendimentoTipo(r.tipo);
-    if (confirm(`Excluir o rendimento "${nome}" (${formatCurrency(r.valor)})?\n\nEssa ação não pode ser desfeita.`)) {
+    if (await confirmar({ titulo: 'Excluir este rendimento?', textoConfirmar: 'Excluir', perigo: true, texto: `O rendimento "${nome}" (${formatCurrency(r.valor)}) será removido.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: 'DELETE_RENDIMENTO', payload: r.id });
       addToast('Rendimento excluído', 'info');
     }
@@ -278,9 +278,6 @@ export default function RendimentosPage() {
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
-                    {!editingId && anoCadastro != null && (
-                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
-                    )}
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>IRRF</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>

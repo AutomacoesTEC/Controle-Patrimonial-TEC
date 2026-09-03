@@ -36,21 +36,21 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Mesmo colapsável do BemModal (ver comentário lá): Bloco 1 "Dados do
-  // Bem" começa sempre expandido a cada abertura do modal.
-  const [bloco1Expandido, setBloco1Expandido] = useState(true);
+  // Mesmo colapsável do BemModal (ver comentário lá): Bloco 1 "Dados do Bem"
+  // começa COLAPSADO na edição (03/09/2026) — quem abre veio pela movimentação.
+  const [bloco1Expandido, setBloco1Expandido] = useState(false);
   useEffect(() => {
-    if (open) setBloco1Expandido(true);
+    if (open) setBloco1Expandido(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const upd = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código', form.codigo], ['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    if (!isEditing && !garantirAnoCadastro(anoCadastro)) return;
+    if (!isEditing && !(await garantirAnoCadastro(anoCadastro))) return;
     onSave({
       ...form,
       situacao_anterior: isEditing ? liveBem.situacao_anterior : (parseFloat(form.situacao_anterior) || 0),

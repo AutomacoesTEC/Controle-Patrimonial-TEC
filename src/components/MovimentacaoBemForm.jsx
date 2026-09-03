@@ -201,8 +201,11 @@ export default function MovimentacaoBemForm({
 
   return (
     <>
-    <div style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '16px', marginBottom: '16px' }}>
-      <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
+    {/* Bloco destacado (borda e título em vermelho) a pedido da usuária em
+        03/09/2026: quem abre "Editar Bem" veio para registrar a movimentação,
+        e o bloco tem que saltar aos olhos. */}
+    <div style={{ background: 'var(--bg-input)', border: '2px solid var(--accent-danger)', borderRadius: 'var(--radius-sm)', padding: '16px', marginBottom: '16px' }}>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--accent-danger)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
         Registrar movimentação
       </div>
       <div className="form-row">

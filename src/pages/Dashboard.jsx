@@ -542,11 +542,11 @@ export default function Dashboard({ onNavigate } = {}) {
                   soma no Total Geral. As duas linhas de desconto só aparecem
                   quando existem, para não poluir a tela de quem só tem
                   rendimento sem retenção nenhuma. */}
-              <tr><td>Tributáveis Recebidos de P.J., bruto</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPjBruto)}</td></tr>
+              <tr><td>Tributáveis Recebidos de PJ, bruto</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPjBruto)}</td></tr>
               {demo.rendimentos.tributavelPjPrevidencia > 0 && (
                 <tr>
                   <td>
-                    P.J., contribuição previdenciária oficial
+                    PJ, contribuição previdenciária oficial
                     <Ajuda texto="INSS descontado na folha pela fonte pagadora. Sai daqui porque este demonstrativo mede caixa, e esse valor nunca chegou à conta de quem declara." />
                   </td>
                   <td className="currency negative">{formatCurrency(-demo.rendimentos.tributavelPjPrevidencia)}</td>
@@ -555,14 +555,14 @@ export default function Dashboard({ onNavigate } = {}) {
               {demo.rendimentos.tributavelPjIrrf > 0 && (
                 <tr>
                   <td>
-                    P.J., IRRF retido
+                    PJ, IRRF retido
                     <Ajuda texto="Imposto retido na fonte sobre o rendimento. Também não entra no caixa: a fonte pagadora reteve e recolheu. O acerto no ajuste anual aparece depois, em imposto a pagar ou a restituir. Não confundir com as quotas do IRPF em Pagamentos Diversos, que são o imposto do ano anterior." />
                   </td>
                   <td className="currency negative">{formatCurrency(-demo.rendimentos.tributavelPjIrrf)}</td>
                 </tr>
               )}
               {(demo.rendimentos.tributavelPjPrevidencia > 0 || demo.rendimentos.tributavelPjIrrf > 0) && (
-                <tr><td>Tributáveis Recebidos de P.J., líquido</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPJ)}</td></tr>
+                <tr><td>Tributáveis Recebidos de PJ, líquido</td><td className="currency">{formatCurrency(demo.rendimentos.tributavelPJ)}</td></tr>
               )}
               <tr>
                 {/* O rótulo dizia "Demais Rend. Tributáveis", e isso era
@@ -586,7 +586,7 @@ export default function Dashboard({ onNavigate } = {}) {
               {demo.rendimentos.tributavelPfExterior !== 0 && (
                 <tr>
                   <td>
-                    Tributáveis Recebidos de P.F. e do Exterior
+                    Tributáveis Recebidos de PF e do Exterior
                     <Ajuda texto="Rendimentos recebidos de pessoa física, aluguéis, outros e do exterior, sujeitos ao carnê-leão. São tributáveis e entram no ajuste anual; o imposto pago mensalmente por carnê-leão é antecipação, e por isso não é descontado desta linha." />
                   </td>
                   <td className="currency">{formatCurrency(demo.rendimentos.tributavelPfExterior)}</td>

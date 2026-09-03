@@ -17,7 +17,7 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: '' };
 
 export default function PagamentosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const { pagamentos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -41,7 +41,7 @@ export default function PagamentosPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código', form.codigo], ['Nome do Beneficiário', form.nome_beneficiario]])
       || primeiroValorZerado([['Valor Pago', form.valor_pago]]);
@@ -51,15 +51,15 @@ export default function PagamentosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });
       addToast('Pagamento atualizado!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_PAGAMENTO', payload });
       addToast('Pagamento cadastrado!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (p) => {
-    if (confirm(`Excluir o pagamento para "${p.nome_beneficiario || 'este beneficiário'}" (${formatCurrency(p.valor_pago)})?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleDelete = async (p) => {
+    if (await confirmar({ titulo: 'Excluir este pagamento?', textoConfirmar: 'Excluir', perigo: true, texto: `O pagamento para "${p.nome_beneficiario || 'este beneficiário'}" (${formatCurrency(p.valor_pago)}) será removido.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: 'DELETE_PAGAMENTO', payload: p.id });
       addToast('Pagamento excluído', 'info');
     }
@@ -182,9 +182,6 @@ export default function PagamentosPage() {
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
-                    {!editingId && anoCadastro != null && (
-                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
-                    )}
                   </div>
                   <div className="form-group"><label>Valor Pago</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
                   <div className="form-group"><label>Parcela Não Dedutível</label><MoneyInput value={form.parcela_nao_dedutivel} onChange={v => upd('parcela_nao_dedutivel', v)} /></div>

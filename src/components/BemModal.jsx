@@ -66,25 +66,23 @@ export default function BemModal({ open, bem, onSave, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Bloco 1 ("Dados do Bem") pode ser colapsado, já que quem abre o modal
-  // pra editar veio pra mexer na movimentação (Bloco 2), não nesses campos
-  // de identificação — pedido da usuária. Sempre começa expandido (mesmo
-  // critério do resto do formulário: ressincroniza a cada abertura, senão
-  // um bem colapsado ficaria colapsado também no próximo bem aberto, sem
-  // relação com o que a pessoa tinha decidido antes).
-  const [bloco1Expandido, setBloco1Expandido] = useState(true);
+  // Bloco 1 ("Dados do Bem") começa COLAPSADO na edição (pedido da usuária em
+  // 03/09/2026): quem abre "Editar Bem" veio para registrar movimentação (Bloco
+  // 2), não para mexer nos campos de identificação. Ressincroniza a cada
+  // abertura, senão um bem colapsado ficaria colapsado no próximo bem aberto.
+  const [bloco1Expandido, setBloco1Expandido] = useState(false);
   useEffect(() => {
-    if (open) setBloco1Expandido(true);
+    if (open) setBloco1Expandido(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const upd = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código do Bem', form.codigo_bem], ['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    if (!isEditing && !garantirAnoCadastro(anoCadastro)) return;
+    if (!isEditing && !(await garantirAnoCadastro(anoCadastro))) return;
     onSave({
       ...form,
       // Em edição, o valor só muda por movimentação registrada (abaixo);

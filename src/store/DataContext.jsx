@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useCallback, useEffect, useRef, 
 import { reducerComHistorico, initialState, snapshotHasData, hasWorkingData } from './reducer';
 import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte } from './perfis';
 import { criptografarObjeto } from '../utils/crypto';
+import ConfirmacaoModal from '../components/ConfirmacaoModal';
 
 const DataContext = createContext(null);
 
@@ -203,16 +204,33 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
   // registro ali — mesma mecânica testada de SWITCH_ANO/ROLLOVER_ANO, só que
   // disparada a partir do formulário de cadastro em vez de um botão à parte
   // na sidebar. Recusar o aviso cancela a troca (e o cadastro).
-  const garantirAnoCadastro = useCallback((anoEscolhido) => {
+  // Confirmação própria (modal "Atenção"), no lugar do confirm() nativo.
+  // `confirmar(opcoes)` devolve Promise<boolean>. Ver ConfirmacaoModal.jsx.
+  const [confirmState, setConfirmState] = useState(null);
+  const resolverConfirmRef = useRef(null);
+  const confirmar = useCallback((opcoes = {}) => new Promise((resolve) => {
+    resolverConfirmRef.current = resolve;
+    setConfirmState({ ...opcoes });
+  }), []);
+  const responderConfirm = useCallback((ok) => {
+    setConfirmState(null);
+    const r = resolverConfirmRef.current;
+    resolverConfirmRef.current = null;
+    r?.(ok);
+  }, []);
+
+  const garantirAnoCadastro = useCallback(async (anoEscolhido) => {
     if (anoEscolhido === state.anoCalendario) return true;
-    const confirmado = confirm(
-      `Isso vai trocar o ano-calendário ativo de ${state.anoCalendario} para ${anoEscolhido} antes de salvar. Continuar?`
-    );
-    if (!confirmado) return false;
+    const ok = await confirmar({
+      titulo: 'Gravar em outro ano-calendário?',
+      texto: `O ano-calendário ativo é ${state.anoCalendario} e o que você está cadastrando é de ${anoEscolhido}. Para gravar em ${anoEscolhido}, o app passa a mostrar esse ano. Confirma?`,
+      textoConfirmar: `Gravar em ${anoEscolhido}`,
+    });
+    if (!ok) return false;
     const existe = snapshotHasData(state.historico[anoEscolhido]);
     dispatch({ type: existe ? 'SWITCH_ANO' : 'ROLLOVER_ANO', payload: anoEscolhido });
     return true;
-  }, [state]);
+  }, [state, confirmar]);
 
   return (
     <DataContext.Provider value={{
@@ -223,9 +241,16 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
       persistencia,
       addToast,
       garantirAnoCadastro,
+      confirmar,
       perfilProtegido: !!chave,
     }}>
       {children}
+      <ConfirmacaoModal
+        open={!!confirmState}
+        {...confirmState}
+        onConfirmar={() => responderConfirm(true)}
+        onCancelar={() => responderConfirm(false)}
+      />
     </DataContext.Provider>
   );
 }

@@ -14,7 +14,7 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: '' };
 
 export default function PagamentosDiversosPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const { pagamentosDiversos } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -41,7 +41,7 @@ export default function PagamentosDiversosPage() {
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Descrição', form.descricao]])
       || primeiroValorZerado([['Valor', form.valor]]);
@@ -51,15 +51,15 @@ export default function PagamentosDiversosPage() {
       dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
       addToast('Despesa atualizada!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_PAGAMENTO_DIVERSO', payload });
       addToast('Despesa cadastrada!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (p) => {
-    if (confirm(`Excluir "${p.descricao || 'esta despesa'}" (${formatCurrency(p.valor)})?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleDelete = async (p) => {
+    if (await confirmar({ titulo: 'Excluir esta despesa?', textoConfirmar: 'Excluir', perigo: true, texto: `A despesa "${p.descricao || 'sem descrição'}" (${formatCurrency(p.valor)}) será removida.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: 'DELETE_PAGAMENTO_DIVERSO', payload: p.id });
       addToast('Despesa excluída', 'info');
     }
@@ -133,9 +133,6 @@ export default function PagamentosDiversosPage() {
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
-                    {!editingId && anoCadastro != null && (
-                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
-                    )}
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>

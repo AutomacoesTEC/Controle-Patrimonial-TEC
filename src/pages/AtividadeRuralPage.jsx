@@ -25,7 +25,7 @@ const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situ
 // baixado justamente NESTE ano, que continua aparecendo.
 
 export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const {
     imoveisRurais, bensRurais, dividasRurais, lancamentosRurais, prejuizoRuralAcompensar, anoCalendario,
     receitasDespesasRuraisOficial, apuracaoResultadoRuralOficial, movimentacaoRebanhoOficial,
@@ -120,7 +120,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
     setForm({ nomeLocalizacao: i.nomeLocalizacao || '', area: i.area || '', participacao: i.participacao ?? '100', condicaoExploracao: i.condicaoExploracao || '', codigoAtividade: i.codigoAtividade || '', cib: i.cib || '', dataAquisicao: i.dataAquisicao || '' });
     setModalOpen(true);
   };
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Nome e Localização', form.nomeLocalizacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
@@ -129,7 +129,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
       dispatch({ type: 'UPDATE_IMOVEL_RURAL', payload: { ...payload, id: editingId } });
       addToast('Imóvel atualizado!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_IMOVEL_RURAL', payload });
       addToast('Imóvel cadastrado!', 'success');
     }
@@ -576,7 +576,7 @@ function LancamentosRuraisSection({
     setForm({ tipo: l.tipo, data: l.data || '', valor: l.valor, descricao: l.descricao || '' });
     setModalOpen(true);
   };
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Data', form.data], ['Descrição', form.descricao]])
       || primeiroValorZerado([['Valor', form.valor]]);
@@ -586,7 +586,7 @@ function LancamentosRuraisSection({
       dispatch({ type: 'UPDATE_LANCAMENTO_RURAL', payload: { ...payload, id: editingId } });
       addToast('Lançamento atualizado!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_LANCAMENTO_RURAL', payload });
       addToast('Lançamento cadastrado!', 'success');
     }
@@ -728,9 +728,6 @@ function LancamentosRuraisSection({
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
-                    {!editingId && anoCadastro != null && (
-                      <small style={{ color: 'var(--text-muted)' }}>Entra no ano-calendário {anoCadastro}</small>
-                    )}
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>

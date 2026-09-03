@@ -17,7 +17,7 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 // neste ano, e a usuária ainda precisa conferir isso na declaração corrente.
 
 export default function BensPage({ onVoltar } = {}) {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, confirmar } = useData();
   const { bens, anoCalendario } = state;
   const [grupoFilter, setGrupoFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -92,9 +92,15 @@ export default function BensPage({ onVoltar } = {}) {
     setEditingBem(null);
   };
 
-  const handleDelete = (bem) => {
+  const handleDelete = async (bem) => {
     const nome = (bem.discriminacao || 'este bem').substring(0, 60);
-    if (confirm(`EXCLUIR "${nome}"?\n\nEsse bem sai do cadastro por completo, com todo o histórico de movimentações dele. Se o bem só mudou de valor (venda parcial, baixa etc.), use "Editar" em vez de excluir. Essa ação não pode ser desfeita.`)) {
+    const ok = await confirmar({
+      titulo: 'Excluir este bem?',
+      texto: `O bem "${nome}" sai do cadastro por completo, com todo o histórico de movimentações dele. Se o bem só mudou de valor (venda parcial, baixa etc.), use "Editar" em vez de excluir.\n\nEssa ação não pode ser desfeita.`,
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (ok) {
       dispatch({ type: 'DELETE_BEM', payload: bem.id });
       addToast('Bem excluído', 'info');
     }

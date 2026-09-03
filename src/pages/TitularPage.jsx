@@ -16,7 +16,7 @@ const FORM_DEPENDENTE_VAZIO = { nome: '', cpf: '', dataNascimento: '', parentesc
 // mais rápido de preencher isso, mas nem toda situação começa por um
 // arquivo — daí esta tela para cadastrar ou corrigir à mão.
 export default function TitularPage() {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const { contribuinte, dependentes, anoCalendario } = state;
 
   const [formTitular, setFormTitular] = useState({ nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
@@ -37,13 +37,13 @@ export default function TitularPage() {
       contribuinte.municipio, contribuinte.uf, contribuinte.cep].filter(Boolean).join(', ')
     : '';
 
-  const salvarTitular = (ano = anoCalendario) => {
+  const salvarTitular = async (ano = anoCalendario) => {
     // Sem esta guarda, salvar o formulário vazio disparava SET_CONTRIBUINTE
     // com nome e CPF em branco e APAGAVA o titular que a importação tinha
     // preenchido.
     const falta = primeiroCampoVazio([['Nome Completo', formTitular.nome]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    if (!garantirAnoCadastro(ano)) return;
+    if (!(await garantirAnoCadastro(ano))) return;
     dispatch({ type: 'SET_CONTRIBUINTE', payload: { nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
     addToast('Titular atualizado!', 'success');
   };
@@ -64,7 +64,7 @@ export default function TitularPage() {
     setModalOpen(true);
   };
 
-  const handleSalvarDependente = (e) => {
+  const handleSalvarDependente = async (e) => {
     e.preventDefault();
     // Achado na auditoria de 21/08/2026: sem validação, o dependente entrava
     // com nome vazio e o Histórico registrava "Cadastrou dependente: (sem
@@ -75,15 +75,15 @@ export default function TitularPage() {
       dispatch({ type: 'UPDATE_DEPENDENTE', payload: { ...formDependente, id: editingId } });
       addToast('Dependente atualizado!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_DEPENDENTE', payload: formDependente });
       addToast('Dependente cadastrado!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleExcluirDependente = (d) => {
-    if (confirm(`Excluir o dependente "${d.nome || 'sem nome'}"?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleExcluirDependente = async (d) => {
+    if (await confirmar({ titulo: 'Excluir este dependente?', textoConfirmar: 'Excluir', perigo: true, texto: `O dependente "${d.nome || 'sem nome'}" será removido desta declaração.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: 'DELETE_DEPENDENTE', payload: d.id });
       addToast('Dependente excluído', 'info');
     }

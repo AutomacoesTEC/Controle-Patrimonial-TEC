@@ -13,7 +13,7 @@ import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 export default function DividasPage({ onVoltar } = {}) {
-  const { state, dispatch, addToast, garantirAnoCadastro } = useData();
+  const { state, dispatch, addToast, garantirAnoCadastro, confirmar } = useData();
   const { dividas, anoCalendario } = state;
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -45,7 +45,7 @@ export default function DividasPage({ onVoltar } = {}) {
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Código', form.codigo], ['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
@@ -57,16 +57,16 @@ export default function DividasPage({ onVoltar } = {}) {
       dispatch({ type: 'UPDATE_DIVIDA', payload: { ...payload, id: editingId, situacao_anterior: liveDivida.situacao_anterior, situacao_atual: liveDivida.situacao_atual, movimentacoes: liveDivida.movimentacoes } });
       addToast('Dívida atualizada!', 'success');
     } else {
-      if (!garantirAnoCadastro(anoCadastro)) return;
+      if (!(await garantirAnoCadastro(anoCadastro))) return;
       dispatch({ type: 'ADD_DIVIDA', payload });
       addToast('Dívida cadastrada!', 'success');
     }
     setModalOpen(false);
   };
 
-  const handleDelete = (d) => {
+  const handleDelete = async (d) => {
     const nome = (d.discriminacao || 'esta dívida').substring(0, 60);
-    if (confirm(`Excluir a dívida "${nome}"?\n\nEssa ação não pode ser desfeita.`)) {
+    if (await confirmar({ titulo: 'Excluir esta dívida?', textoConfirmar: 'Excluir', perigo: true, texto: `A dívida "${nome}" será removida.\n\nEssa ação não pode ser desfeita.` })) {
       dispatch({ type: 'DELETE_DIVIDA', payload: d.id });
       addToast('Dívida excluída', 'info');
     }
