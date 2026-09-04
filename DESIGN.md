@@ -199,6 +199,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **dashboard-graficos**: agrupador nativo recolhido por padrão. Gráficos são
   leitura de apoio e só ocupam a página depois que a pessoa abre `Gráficos de
   apoio`; títulos e visualizações permanecem integrais no estado aberto.
+- **dashboard-avisos**: bloco compacto no topo que reúne todas as ressalvas
+  persistentes do período, importação e cobertura. A janela inicial exige
+  ciência; este bloco único permite consultar os mesmos limites depois.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 

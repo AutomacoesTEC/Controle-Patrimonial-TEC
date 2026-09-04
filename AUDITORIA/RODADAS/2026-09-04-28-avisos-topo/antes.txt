@@ -1,0 +1,1 @@
+{"blocos":0,"scrollTop":0,"titulos":["Cobertura das fichas ainda em auditoria","Parte da declaração não foi importada","Sem dados de 2026"],"locais":["Período da consulta","cabecalho-demonstrativo"],"caixaBloco":null,"blocoVisivelSemRolar":false,"janelaInicial":true}

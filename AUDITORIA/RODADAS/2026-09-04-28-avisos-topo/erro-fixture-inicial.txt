@@ -1,0 +1,8 @@
+A primeira tentativa de baseline usou apenas o período padrão do AJU-01. Ela
+encontrou dois avisos, ambos no cabeçalho do demonstrativo, e por isso não
+reproduziu a dispersão entre card de período e cabeçalho que a rodada nomeia.
+Nenhum arquivo do produto havia sido alterado. O fixture foi então congelado
+com uma lacuna determinística em 2026 entre dados de 2025 e uma cópia em 2027,
+e passou a acionar "Todo o histórico". A saída da tentativa descartada foi:
+
+{"blocos":0,"scrollTop":0,"titulos":["Cobertura das fichas ainda em auditoria","Parte da declaração não foi importada"],"locais":["cabecalho-demonstrativo"],"caixaBloco":null,"blocoVisivelSemRolar":false,"janelaInicial":true}

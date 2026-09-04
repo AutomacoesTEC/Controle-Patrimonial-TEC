@@ -264,7 +264,7 @@ os três seletores previstos passaram a `tabular-nums`, sem alterar a largura
 de controle de 560 px. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-25-fonte-offline/`; suíte em 885/885.
 
-### B2. Dashboard: um número herói e o resto em segundo plano (P1)
+### B2. Dashboard: um número herói e o resto em segundo plano — CONCLUÍDO (P1)
 
 Evidência: `src/pages/Dashboard.jsx` tem 1.044 linhas e uns dez cards no
 mesmo nível visual (período, variação, rendimentos, ganhos, pagamentos,
@@ -291,9 +291,14 @@ rolagem, com o mesmo `-R$ 51.787,27`. Evidência pareada em
 Segunda parte concluída em 04/09/2026: os três gráficos foram agrupados em
 `Gráficos de apoio`, recolhido por padrão. A ocupação inicial caiu de 1.088
 para 54 px e os gráficos expostos de 3 para 0; uma abertura restaura os três
-com títulos idênticos. A consolidação dos avisos continua pendente em rodada
-própria. Evidência pareada em
+com títulos idênticos. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-27-graficos-recolhidos/`.
+
+Terceira parte concluída em 04/09/2026: três avisos plantados que ocupavam
+duas regiões persistentes passaram a um único bloco no topo, entre 298 e 367
+px do primeiro viewport, sem perder nenhum título; a janela obrigatória foi
+preservada. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-28-avisos-topo/`.
 
 Pronto quando: a pessoa abre o Dashboard e em três segundos sabe se a
 declaração fecha, sem rolar.

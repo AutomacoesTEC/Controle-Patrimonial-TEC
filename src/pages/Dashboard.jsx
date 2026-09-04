@@ -321,8 +321,17 @@ export default function Dashboard({ onNavigate } = {}) {
     }
     return lista;
   }, [demo, anosImportadosPorPdf, anosImportadosSemRendimento, fichasNaoLidas]);
-  const avisosDemonstrativo = avisosEstruturais.filter(a => a.local !== 'periodo');
-  const avisosPeriodo = avisosEstruturais.filter(a => a.local === 'periodo');
+  const avisoCobertura = coberturaFichas
+    && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0)
+    ? {
+        chave: 'coberturaFichas',
+        titulo: 'Cobertura das fichas ainda em auditoria',
+        texto: `Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`,
+      }
+    : null;
+  const avisosPersistentes = avisoCobertura
+    ? [...avisosEstruturais, avisoCobertura]
+    : avisosEstruturais;
 
   const assinaturaAviso = avisosEstruturais.map(a => a.chave).join('|');
   const [avisoVisto, setAvisoVisto] = useState(true);
@@ -458,14 +467,21 @@ export default function Dashboard({ onNavigate } = {}) {
               </button>
             </div>
           </div>
-          {avisosPeriodo.length > 0 && (
-            <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
-              {avisosPeriodo.map(a => (
+        </div>
+
+        {avisosPersistentes.length > 0 && (
+          <section className="dashboard-avisos" aria-labelledby="dashboard-avisos-titulo">
+            <div className="dashboard-avisos-cabecalho">
+              <h3 id="dashboard-avisos-titulo">Pontos de atenção</h3>
+              <span>{avisosPersistentes.length}</span>
+            </div>
+            <div className="dashboard-avisos-itens">
+              {avisosPersistentes.map(a => (
                 <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
               ))}
             </div>
-          )}
-        </div>
+          </section>
+        )}
 
         {demo && (
           <section className={`saldo-hero saldo-hero-${leituraSaldoHero.classe}`} aria-labelledby="saldo-hero-titulo">
@@ -515,23 +531,6 @@ export default function Dashboard({ onNavigate } = {}) {
         <>
         <div className="dashboard-demonstrativo-cabecalho">
           <h3>Demonstrativo de Conciliação Patrimonial</h3>
-          <div className="dashboard-demonstrativo-avisos">
-            {/* Os avisos estruturais surgem também numa janela ao abrir o
-                Dashboard. As marcas discretas mantêm o texto acessível depois
-                que a pessoa fecha a janela e agora explicitam a qual quadro
-                essas ressalvas pertencem. */}
-            {avisosDemonstrativo.map(a => (
-              <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
-            ))}
-            {coberturaFichas && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0) && (
-              <Ajuda
-                tom="ressalva"
-                rotulo="Cobertura das fichas ainda em auditoria"
-                titulo="Cobertura das fichas ainda em auditoria"
-                texto={`Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`}
-              />
-            )}
-          </div>
         </div>
         {/* Virou 4 cards separados (Variação Patrimonial / Rendimentos /
             Ganhos Apurados / Pagamentos), em vez de uma tabela só gigante —
