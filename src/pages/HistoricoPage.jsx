@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useData } from '../store/DataContext';
 import DateInput from '../components/DateInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Data/hora no padrão brasileiro (dd/mm/aaaa HH:mm), sempre com zero à
 // esquerda.
@@ -15,7 +16,7 @@ function formatDataHora(iso) {
   return `${dd}/${mm}/${d.getFullYear()} ${hh}:${min}`;
 }
 
-export default function HistoricoPage() {
+export default function HistoricoPage({ onImportar } = {}) {
   const { state } = useData();
   const alteracoes = state.alteracoes || [];
   // Atemporal por padrão: sem filtro, mostra tudo. "De"/"Até" filtram pela
@@ -70,14 +71,12 @@ export default function HistoricoPage() {
         </div>
 
         {filtradas.length === 0 ? (
-          <div className="empty-state">
-            <h3>{alteracoes.length === 0 ? 'Nenhuma alteração registrada' : 'Nenhuma alteração neste período'}</h3>
-            <p>
-              {alteracoes.length === 0
-                ? 'Assim que você cadastrar, editar ou excluir algo, a mudança aparece aqui.'
-                : 'Ajuste o filtro de datas para ver outros registros.'}
-            </p>
-          </div>
+          <EstadoVazio
+            titulo={alteracoes.length === 0 ? 'Nenhuma alteração registrada' : 'Nenhuma alteração neste período'}
+            contexto={alteracoes.length === 0 ? 'Importe uma declaração ou faça o primeiro cadastro; cada mudança aparecerá aqui.' : 'Ajuste o filtro de datas para ver outros registros.'}
+            acao={alteracoes.length === 0 ? 'Importar declaração' : undefined}
+            onAcao={alteracoes.length === 0 ? onImportar : undefined}
+          />
         ) : (
           <TabelaRedimensionavel persistKey="historico">
             <table>

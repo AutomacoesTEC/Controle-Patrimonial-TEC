@@ -430,6 +430,13 @@ Proposta: componente `EstadoVazio` com uma frase de contexto e uma ação
 principal por tela ("Importar declaração" ou "Cadastrar primeiro bem"),
 reutilizado nas onze telas. Sem ilustração, sem emoji.
 
+Concluído em 04/09/2026: `EstadoVazio` foi reutilizado em Bens, Dívidas,
+Rendimentos, Pagamentos, Despesas Gerais, Doações, Atividade Rural, Ganhos de
+Capital, Renda Variável, Histórico e Relatório. No perfil vazio, Bens passou
+de texto solto sem ação a título, contexto e uma ação que abre o cadastro,
+preservando a estrutura vazia da tabela. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-41-estados-vazios/`.
+
 ### B7. Barras em gradiente quente nos cards de estatística (P2)
 
 Evidência: `index.css` linhas 161 a 164: `.stat-card.orange::after` usa

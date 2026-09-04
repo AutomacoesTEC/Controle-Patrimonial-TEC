@@ -6,6 +6,7 @@ import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { totaisEvolucaoPatrimonial } from '../store/demonstrativos';
 import { blocosResumoDeclaracao, conferenciasResumo } from '../store/resumoDeclaracao';
 import Ajuda from '../components/Ajuda';
+import EstadoVazio from '../components/EstadoVazio';
 
 // As 3 tabelas de Doações compartilham o mesmo aviso: diferente dos demais
 // cards "Da declaração original" deste arquivo (bens/pagamentos/renda
@@ -99,7 +100,7 @@ function formatarValorResumo(linha) {
   return formatCurrency(linha.valor);
 }
 
-export default function RelatorioPage() {
+export default function RelatorioPage({ onImportar } = {}) {
   const { state } = useData();
   const anosDisponiveis = anosComDado(state);
   const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
@@ -148,10 +149,7 @@ export default function RelatorioPage() {
         </div>
         <div className="page-body animate-in">
           <div className="card">
-            <div className="empty-state" style={{ padding: '60px 20px' }}>
-              <p style={{ fontSize: '16px', fontWeight: 600 }}>Nenhum ano-calendário definido</p>
-              <p>Importe a declaração do ano anterior na aba <strong>Importar</strong> para o relatório aparecer aqui.</p>
-            </div>
+            <EstadoVazio titulo="Nenhum ano-calendário definido" contexto="Importe a declaração do ano anterior para preparar o relatório deste perfil." acao="Importar declaração" onAcao={onImportar} />
           </div>
         </div>
       </>

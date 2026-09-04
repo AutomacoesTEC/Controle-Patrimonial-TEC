@@ -11,6 +11,7 @@ import {
 } from '../store/anualRendaVariavel';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import RendaVariavelMesModal from '../components/RendaVariavelMesModal';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Renda Variável, exatamente as duas fichas do menu do programa da Receita:
 // "Operações Comuns / Day-Trade" e "Operações em FII ou Fiagro".
@@ -129,7 +130,7 @@ function ResumoFicha({ itens }) {
   );
 }
 
-export default function RendaVariavelPage() {
+export default function RendaVariavelPage({ onImportar } = {}) {
   const { state, addToast, garantirAnoCadastro, despacharEmAno } = useData();
   // Item E existe justamente para lançar RV do ano SEGUINTE ao ativo antes de
   // ele ter qualquer outro dado (caso do handoff: declaração em N, lançamento
@@ -326,10 +327,7 @@ export default function RendaVariavelPage() {
       <div className="page-body animate-in">
         {!temAlgo && (
           <div className="card">
-            <p style={{ margin: 0, fontSize: '13px' }}>
-              Nenhuma ficha de Renda Variável nesta declaração. Se a sua declaração tem operações em bolsa, FII ou Fiagro,
-              importe o arquivo .DBK (ou o PDF) de novo: as duas fichas são lidas pelos dois caminhos.
-            </p>
+            <EstadoVazio titulo="Nenhuma ficha de Renda Variável" contexto="Importe o arquivo .DBK ou PDF para trazer operações comuns, day-trade, FII e Fiagro." acao="Importar declaração" onAcao={onImportar} />
           </div>
         )}
 

@@ -642,6 +642,11 @@ textarea.form-control{resize:vertical;min-height:80px}
 .toast-error{background:rgba(239,68,68,0.9);color:white}
 .toast-info{background:rgba(59,130,246,0.9);color:white}
 
+.estado-vazio{display:flex;min-height:180px;padding:32px 20px;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:var(--text-secondary)}
+.estado-vazio h3{color:var(--text-primary);font-size:16px}
+.estado-vazio p{max-width:520px;font-size:13px;line-height:1.5}
+.estado-vazio .btn{margin-top:8px}
+
 :focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}
 
 .print-header,.print-footer{display:none}

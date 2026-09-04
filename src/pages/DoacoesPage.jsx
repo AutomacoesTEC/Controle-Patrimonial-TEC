@@ -7,6 +7,7 @@ import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Cadastro manual das 3 fichas de Doações — nasceram só-leitura (import do
 // PDF, ver importParsers.js/RelatorioPage.jsx), a usuária pediu pra dar um
@@ -127,9 +128,7 @@ export default function DoacoesPage() {
             </thead>
             <tbody>
               {itens.length === 0 ? (
-                <tr><td colSpan={aba.comCategoria ? 7 : 6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                  Nenhuma doação cadastrada nesta ficha. Clique em "Nova Doação" ou importe uma declaração com esse dado.
-                </td></tr>
+                <EstadoVazio colSpan={aba.comCategoria ? 7 : 6} titulo="Nenhuma doação nesta ficha" contexto="Cadastre a primeira doação ou importe uma declaração que contenha este dado." acao="Cadastrar primeira doação" onAcao={handleNovoClick} />
               ) : itens.map(d => (
                 <tr key={d.id}>
                   <td>{d.codigo}</td>

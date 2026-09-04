@@ -7,6 +7,7 @@ import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -120,10 +121,7 @@ export default function RendimentosPage() {
       </div>
       <div className="page-body animate-in">
         {rendimentos.length === 0 ? (
-          <div className="empty-state">
-            <h3>Nenhum rendimento cadastrado</h3>
-            <p>Importe uma declaração .DBK ou clique em "Novo Rendimento".</p>
-          </div>
+          <EstadoVazio titulo="Nenhum rendimento cadastrado" contexto="Cadastre o primeiro rendimento ou importe uma declaração para preencher esta ficha." acao="Cadastrar primeiro rendimento" onAcao={handleNovoClick} />
         ) : (
           <>
             <div className="grade-quatro-contexto">

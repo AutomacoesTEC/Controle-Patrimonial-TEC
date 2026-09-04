@@ -148,9 +148,9 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
         />
       );
       case 'ganhosCapital': return <GanhosCapitalPage />;
-      case 'rendaVariavel': return <RendaVariavelPage />;
-      case 'relatorio': return <RelatorioPage />;
-      case 'historico': return <HistoricoPage />;
+      case 'rendaVariavel': return <RendaVariavelPage onImportar={() => navegarPelaSidebar('importar')} />;
+      case 'relatorio': return <RelatorioPage onImportar={() => navegarPelaSidebar('importar')} />;
+      case 'historico': return <HistoricoPage onImportar={() => navegarPelaSidebar('importar')} />;
       case 'modalidade': return <ModalidadePage />;
       default: return <Dashboard onNavigate={navegarDoDashboard} />;
     }

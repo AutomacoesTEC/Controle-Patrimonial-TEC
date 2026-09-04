@@ -6,6 +6,7 @@ import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Um bem que já entrou no ano com as duas situações zeradas (31/12 do ano anterior E 31/12 deste
 // ano em R$ 0,00) e nenhuma movimentação registrada NESTE ano não tem mais nada a conferir na
@@ -159,9 +160,7 @@ export default function BensPage({ onVoltar } = {}) {
             </thead>
             <tbody>
               {sorted.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                  Nenhum bem cadastrado. Clique em "Novo Bem" ou importe uma declaração.
-                </td></tr>
+                <EstadoVazio colSpan={8} titulo="Nenhum bem cadastrado" contexto="Cadastre o primeiro bem ou importe uma declaração para começar o patrimônio deste perfil." acao="Cadastrar primeiro bem" onAcao={handleNovoClick} />
               ) : sorted.map(bem => {
                 const vari = (parseFloat(bem.situacao_atual) || 0) - (parseFloat(bem.situacao_anterior) || 0);
                 return (

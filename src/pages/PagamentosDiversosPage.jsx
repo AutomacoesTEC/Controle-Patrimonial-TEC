@@ -7,6 +7,7 @@ import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
+import EstadoVazio from '../components/EstadoVazio';
 
 // Data começa vazia: o ano-calendário do lançamento sai dela, e pré-preencher
 // "hoje" forçaria trocar de ano ao salvar quando o exercício de trabalho é
@@ -96,7 +97,7 @@ export default function PagamentosDiversosPage() {
             <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
             <tbody>
               {pagamentosDiversos.length === 0 ? (
-                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma despesa cadastrada.</td></tr>
+                <EstadoVazio colSpan={5} titulo="Nenhuma despesa cadastrada" contexto="Registre a primeira despesa geral para incluí-la na conciliação de caixa." acao="Cadastrar primeira despesa" onAcao={handleNovoClick} />
               ) : pagamentosDiversos.map(p => (
                 <tr key={p.id}>
                   <td>{p.descricao}</td>

@@ -10,6 +10,7 @@ import DateInput from '../components/DateInput';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
+import EstadoVazio from '../components/EstadoVazio';
 
 const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '', dataAquisicao: '' };
@@ -175,7 +176,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
           <thead><tr><th>Nome e Localização</th><th>Área (ha)</th><th>Participação (%)</th><th>Condição</th><th>Código Atividade</th><th>CIB</th><th>Data Aquisição</th><th>Ações</th></tr></thead>
           <tbody>
             {imoveisRurais.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum imóvel cadastrado.</td></tr>
+              <EstadoVazio colSpan={8} titulo="Nenhum imóvel rural cadastrado" contexto="Cadastre o primeiro imóvel explorado para iniciar esta ficha." acao="Cadastrar primeiro imóvel" onAcao={handleNovoClick} />
             ) : imoveisRurais.map(i => (
               <tr key={i.id}>
                 <td>
@@ -375,7 +376,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
           <thead><tr><th>Código</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th>Ações</th></tr></thead>
           <tbody>
             {bensRuraisVisiveis.length === 0 ? (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum bem cadastrado.</td></tr>
+              <EstadoVazio colSpan={5} titulo="Nenhum bem rural cadastrado" contexto="Cadastre o primeiro bem vinculado à atividade rural." acao="Cadastrar primeiro bem rural" onAcao={handleNovoClick} />
             ) : bensRuraisVisiveis.map(bem => (
               <tr key={bem.id}>
                 <td>{bem.codigo}</td>
@@ -493,7 +494,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
           <thead><tr><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
           <tbody>
             {dividasRurais.length === 0 ? (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma dívida cadastrada.</td></tr>
+              <EstadoVazio colSpan={5} titulo="Nenhuma dívida rural cadastrada" contexto="Cadastre a primeira dívida vinculada à atividade rural." acao="Cadastrar primeira dívida rural" onAcao={abrirNovo} />
             ) : dividasRurais.map(d => (
               <tr key={d.id}>
                 <td style={{ maxWidth: '400px' }} title={d.discriminacao || ''}>
@@ -726,7 +727,7 @@ function LancamentosRuraisSection({
           <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
           <tbody>
             {ordenados.length === 0 ? (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum lançamento cadastrado.</td></tr>
+              <EstadoVazio colSpan={5} titulo="Nenhum lançamento rural cadastrado" contexto="Registre a primeira receita ou despesa do livro-caixa rural." acao="Cadastrar primeiro lançamento" onAcao={handleNovoClick} />
             ) : ordenados.map(l => (
               <tr key={l.id}>
                 <td>{formatDate(l.data)}</td>

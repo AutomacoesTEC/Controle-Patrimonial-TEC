@@ -12,6 +12,7 @@ import Ajuda from '../components/Ajuda';
 import BemModal from '../components/BemModal';
 import SeletorBem from '../components/SeletorBem';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
+import EstadoVazio from '../components/EstadoVazio';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
   conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
@@ -676,7 +677,7 @@ export default function GanhosCapitalPage() {
             <thead><tr><th>Bem</th><th>Origem</th><th>Data</th><th>Tipo</th><th style={{ textAlign: 'right' }}>Custo Baixado</th><th style={{ textAlign: 'right' }}>Valor de Venda</th><th style={{ textAlign: 'right' }}>Ganho/Perda</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
             <tbody>
               {vendas.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhuma venda com valor de venda registrado ainda.</td></tr>
+                <EstadoVazio colSpan={8} titulo="Nenhuma alienação registrada" contexto="Cadastre um bem ou registre sua venda para apurar ganho de capital." acao="Cadastrar primeiro bem" onAcao={abrirNovoBem} />
               ) : vendas.map(v => (
                 <tr key={v.id}>
                   <td style={{ maxWidth: '300px' }} title={v.bem || ''}>{nomeCurtoBem(v.bem)}</td>

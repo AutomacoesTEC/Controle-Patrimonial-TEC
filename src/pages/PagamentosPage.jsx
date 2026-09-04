@@ -8,6 +8,7 @@ import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
+import EstadoVazio from '../components/EstadoVazio';
 
 // titularidade nasce vazia de propósito: o cadastro manual não deve assumir
 // que a despesa é do titular. Titular, dependente e alimentando têm regras de
@@ -100,7 +101,7 @@ export default function PagamentosPage() {
             <thead><tr><th style={{ minWidth: '180px' }}>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
             <tbody>
               {pagamentos.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum pagamento cadastrado.</td></tr>
+                <EstadoVazio colSpan={9} titulo="Nenhum pagamento cadastrado" contexto="Registre o primeiro pagamento efetuado para montar a ficha deste ano." acao="Cadastrar primeiro pagamento" onAcao={handleNovoClick} />
               ) : pagamentos.map(p => (
                 <tr key={p.id}>
                   <td>

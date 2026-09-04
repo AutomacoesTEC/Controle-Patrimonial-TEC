@@ -1,0 +1,1 @@
+{"linhasDados":1,"estados":1,"titulo":"Nenhum bem cadastrado","contexto":"Cadastre o primeiro bem ou importe uma declaração para começar o patrimônio deste perfil.","acoes":1,"acaoAbriuModal":true}
