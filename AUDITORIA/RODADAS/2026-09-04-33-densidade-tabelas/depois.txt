@@ -1,0 +1,1 @@
+{"inicial":{"botoes":1,"padding":{"vertical":"12px","horizontal":"16px"},"armazenamento":null},"aposClique":{"padding":{"vertical":"8px","horizontal":"12px"},"armazenamento":"{\"bens\":true}"},"aposReload":{"padding":{"vertical":"8px","horizontal":"12px"},"pressionado":"true"},"dividas":{"padding":{"vertical":"12px","horizontal":"16px"},"pressionado":"false"}}

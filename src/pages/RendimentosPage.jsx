@@ -163,7 +163,7 @@ export default function RendimentosPage() {
                 <h3 className="card-title">{categoriaFilter === 'all' ? 'Todos os Rendimentos' : CATEGORIAS_RENDIMENTO[categoriaFilter].label}</h3>
                 <span className={`badge badge-${categoriaFilter === 'all' ? 'blue' : CATEGORIAS_RENDIMENTO[categoriaFilter].cor}`}>{formatCurrency(totalPorCategoria(filtrados))}</span>
               </div>
-              <TabelaRedimensionavel stickyRightColumns={3}>
+              <TabelaRedimensionavel persistKey="rendimentos" stickyRightColumns={3}>
                 <table className="tabela-acoes-fixas">
                   <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
                   <tbody>

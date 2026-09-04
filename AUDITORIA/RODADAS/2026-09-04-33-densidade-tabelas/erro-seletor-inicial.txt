@@ -1,0 +1,3 @@
+A primeira tentativa não mediu o produto: "Bens e Direitos" identificava a
+navegação e o link homônimo do demonstrativo. Antes de qualquer edição do
+produto, os cliques foram restringidos ao papel `navigation`.

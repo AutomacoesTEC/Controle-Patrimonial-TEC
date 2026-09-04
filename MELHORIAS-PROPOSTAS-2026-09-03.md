@@ -311,14 +311,19 @@ linhas ocupa mais de duas telas. Ganho e perda se distinguem só por cor
 e branco.
 
 Proposta:
-- Alternância "Compacto" (8px 12px) por tabela, lembrada em `localStorage`
-  junto com a largura das colunas (a memória
-  `cp-tec-tabelas-redimensionaveis` registra que a largura hoje não persiste;
-  resolver as duas no mesmo passo).
+- Alternância "Compacto" (8px 12px) por tabela, lembrada em `localStorage`.
+  Decisão posterior da usuária, já registrada em `TabelaRedimensionavel`:
+  larguras arrastadas são temporárias e sempre reabrem no padrão; não
+  persistir largura.
 - Zebra sutil com `--bg-card-hover` a 40%.
 - Valor negativo sempre com sinal explícito e, opcionalmente, com um traço
   fino à esquerda da célula (borda de 2px em `--accent-danger`), para que a
   leitura não dependa só da cor.
+
+Primeira parte concluída em 04/09/2026: as onze tabelas compartilhadas
+receberam controle compacto com preferência isolada. No fixture, Bens passou
+de 12×16 para 8×12 e preservou o modo após reload, enquanto Dívidas permaneceu
+normal. Evidência em `AUDITORIA/RODADAS/2026-09-04-33-densidade-tabelas/`.
 
 ### B4. Impressão e PDF do demonstrativo — CONCLUÍDO (P1)
 

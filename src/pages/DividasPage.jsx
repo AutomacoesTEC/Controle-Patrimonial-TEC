@@ -104,7 +104,7 @@ export default function DividasPage({ onVoltar } = {}) {
         </div>
       </div>
       <div className="page-body animate-in altura-tabelas-adaptativa">
-        <TabelaRedimensionavel>
+        <TabelaRedimensionavel persistKey="dividas">
           <table>
             <thead><tr><th>Cód.</th><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Saldo anterior'}</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Saldo atual'}</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
             <tbody>

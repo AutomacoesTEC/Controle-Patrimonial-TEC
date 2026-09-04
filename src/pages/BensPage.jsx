@@ -140,7 +140,7 @@ export default function BensPage({ onVoltar } = {}) {
           </div>
         </div>
 
-        <TabelaRedimensionavel>
+        <TabelaRedimensionavel persistKey="bens">
           <table className="tabela-acoes-fixas">
             <thead>
               <tr>

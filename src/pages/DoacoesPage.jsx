@@ -112,7 +112,7 @@ export default function DoacoesPage() {
           ))}
         </div>
 
-        <TabelaRedimensionavel>
+        <TabelaRedimensionavel persistKey="doacoes">
           <table>
             <thead>
               <tr>

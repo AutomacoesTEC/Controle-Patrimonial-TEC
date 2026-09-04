@@ -16,6 +16,7 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 // sticky na rolagem sem nenhum cálculo de scroll.
 
 const MIN_COL = 56;
+const DENSIDADE_STORAGE_KEY = 'cp-tec-tabelas-compactas';
 
 export default function TabelaRedimensionavel({
   children,
@@ -24,6 +25,7 @@ export default function TabelaRedimensionavel({
   stickyFirstColumn = false,
   stickyRightColumns = 0,
   initialColumnWidths = {},
+  persistKey,
 }) {
   const wrapRef = useRef(null);
   const rawId = useId();
@@ -33,6 +35,12 @@ export default function TabelaRedimensionavel({
   // a tabela renderiza no layout automático de sempre até a primeira medição.
   const [larguras, setLarguras] = useState(null);
   const [alturaCab, setAlturaCab] = useState(0);
+  const [compacta, setCompacta] = useState(() => {
+    if (!persistKey) return false;
+    try {
+      return JSON.parse(localStorage.getItem(DENSIDADE_STORAGE_KEY) || '{}')[persistKey] === true;
+    } catch { return false; }
+  });
   const iniciaisRef = useRef(null);
   const dragRef = useRef(null);
 
@@ -86,6 +94,16 @@ export default function TabelaRedimensionavel({
     e.preventDefault();
     setLarguras(prev => { const n = prev.slice(); n[i] = iniciaisRef.current[i]; return n; });
   };
+  const alternarDensidade = () => {
+    setCompacta(anterior => {
+      const proximo = !anterior;
+      try {
+        const salvo = JSON.parse(localStorage.getItem(DENSIDADE_STORAGE_KEY) || '{}');
+        localStorage.setItem(DENSIDADE_STORAGE_KEY, JSON.stringify({ ...salvo, [persistKey]: proximo }));
+      } catch { /* armazenamento indisponível: mantém a preferência nesta montagem */ }
+      return proximo;
+    });
+  };
 
   let css = null;
   let divisorias = [];
@@ -138,7 +156,13 @@ export default function TabelaRedimensionavel({
   }
 
   return (
-    <div ref={wrapRef} className={`table-container ${cls} ${stickyFirstColumn || stickyRightColumns ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
+    <>
+      {persistKey && (
+        <div className="tabela-densidade">
+          <button type="button" className="btn btn-sm btn-secondary" aria-pressed={compacta} onClick={alternarDensidade}>Compacto</button>
+        </div>
+      )}
+    <div ref={wrapRef} className={`table-container ${cls} ${compacta ? 'tabela-compacta' : ''} ${stickyFirstColumn || stickyRightColumns ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
       {css && <style>{css}</style>}
       {larguras && alturaCab > 0 && (
         <>
@@ -178,5 +202,6 @@ export default function TabelaRedimensionavel({
       )}
       {children}
     </div>
+    </>
   );
 }

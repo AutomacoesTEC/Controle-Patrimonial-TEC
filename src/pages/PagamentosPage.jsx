@@ -95,7 +95,7 @@ export default function PagamentosPage() {
         </div>
       </div>
       <div className="page-body animate-in">
-        <TabelaRedimensionavel stickyRightColumns={4}>
+        <TabelaRedimensionavel persistKey="pagamentos" stickyRightColumns={4}>
           <table className="tabela-acoes-fixas">
             <thead><tr><th style={{ minWidth: '180px' }}>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
             <tbody>

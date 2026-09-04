@@ -207,6 +207,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **dashboard-avisos**: bloco compacto no topo que reúne todas as ressalvas
   persistentes do período, importação e cobertura. A janela inicial exige
   ciência; este bloco único permite consultar os mesmos limites depois.
+- **tabela-densidade**: cada tabela redimensionável oferece `Compacto`, que
+  troca células de 12×16px para 8×12px e persiste isoladamente por tabela.
+  Larguras arrastadas continuam temporárias e voltam ao padrão ao reabrir.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 

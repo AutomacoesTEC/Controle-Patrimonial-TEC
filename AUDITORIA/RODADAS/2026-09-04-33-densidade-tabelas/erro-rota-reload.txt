@@ -1,0 +1,4 @@
+A primeira reexecução posterior não mediu: recarregar reinicia a rota React no
+Dashboard, e o fixture aguardava a tabela sem voltar a Bens. Foi acrescentado
+somente o clique de retorno após reload. O antes não entra nesse ramo porque
+não existia botão Compacto, logo sua execução e saída são idênticas.

@@ -79,7 +79,7 @@ export default function HistoricoPage() {
             </p>
           </div>
         ) : (
-          <TabelaRedimensionavel>
+          <TabelaRedimensionavel persistKey="historico">
             <table>
               <thead>
                 <tr>

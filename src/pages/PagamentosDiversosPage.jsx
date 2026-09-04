@@ -91,7 +91,7 @@ export default function PagamentosDiversosPage() {
         </div>
       </div>
       <div className="page-body animate-in altura-tabelas-adaptativa">
-        <TabelaRedimensionavel>
+        <TabelaRedimensionavel persistKey="pagamentos-diversos">
           <table>
             <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
             <tbody>

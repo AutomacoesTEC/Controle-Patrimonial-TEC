@@ -1,0 +1,1 @@
+{"inicial":{"botoes":0,"padding":{"vertical":"12px","horizontal":"16px"},"armazenamento":null},"aposClique":null,"aposReload":null,"dividas":null}
