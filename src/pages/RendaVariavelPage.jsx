@@ -372,7 +372,7 @@ export default function RendaVariavelPage() {
               <span className="badge badge-blue">{(() => { const n = grupo.linhas.filter(l => (l.comuns?.resultadoLiquidoMes || 0) !== 0 || (l.daytrade?.resultadoLiquidoMes || 0) !== 0).length; return n === 1 ? "1 mês com movimento" : `${n} meses com movimento`; })()}</span>
             </div>
             <ResumoFicha itens={resumoComuns(grupo.linhas)} />
-            <TabelaRedimensionavel className="altura-natural">
+            <TabelaRedimensionavel className="altura-natural" stickyFirstColumn stickyRightColumns={4}>
               <table className="rv-mensal">
                 <thead>
                   <tr>

@@ -260,6 +260,7 @@ thead th{position:sticky;top:0;z-index:1;background:var(--bg-secondary);padding:
    colada no topo visível pelo componente TabelaRedimensionavel (translateY
    acompanhando o scroll). Não persiste — some ao trocar de tela. */
 .rdz-camada{position:sticky;top:0;z-index:2;pointer-events:none}
+.rdz-colunas-fixas .rdz-camada{z-index:6}
 .rdz-puxador{position:absolute;top:0;width:11px;margin-left:-6px;cursor:col-resize;pointer-events:auto;touch-action:none}
 .rdz-puxador::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:1px;background:transparent;transition:background var(--transition-fast)}
 .rdz-puxador:hover::before{background:var(--accent-primary)}

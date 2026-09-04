@@ -17,7 +17,13 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 
 const MIN_COL = 56;
 
-export default function TabelaRedimensionavel({ children, className = '', style }) {
+export default function TabelaRedimensionavel({
+  children,
+  className = '',
+  style,
+  stickyFirstColumn = false,
+  stickyRightColumns = 0,
+}) {
   const wrapRef = useRef(null);
   const rawId = useId();
   const cls = 'rdz' + rawId.replace(/[^a-zA-Z0-9]/g, '');
@@ -87,13 +93,36 @@ export default function TabelaRedimensionavel({ children, className = '', style 
         `{width:${w}px;min-width:${w}px;max-width:${w}px}`
       );
     });
+    const inicioFixasDireita = Math.max(0, larguras.length - stickyRightColumns);
+    let deslocamentoDireita = 0;
+    for (let i = larguras.length - 1; i >= inicioFixasDireita; i -= 1) {
+      regras.push(
+        `.${cls}>table>thead>tr>th:nth-child(${i + 1})` +
+        `{position:sticky;right:${deslocamentoDireita}px;z-index:4;background:var(--bg-secondary)}`,
+        `.${cls}>table>tbody>tr>td:nth-child(${i + 1}):not([colspan])` +
+        `{position:sticky;right:${deslocamentoDireita}px;z-index:1;background:var(--bg-card)}`,
+        `.${cls}>table>tbody>tr:hover>td:nth-child(${i + 1}):not([colspan])` +
+        `{background:var(--bg-card-hover)}`
+      );
+      deslocamentoDireita += larguras[i];
+    }
+    if (stickyFirstColumn) {
+      regras.push(
+        `.${cls}>table>thead>tr>th:first-child` +
+        `{position:sticky;left:0;z-index:5;background:var(--bg-secondary)}`,
+        `.${cls}>table>tbody>tr>td:first-child:not([colspan])` +
+        `{position:sticky;left:0;z-index:2;background:var(--bg-card)}`,
+        `.${cls}>table>tbody>tr:hover>td:first-child:not([colspan])` +
+        `{background:var(--bg-card-hover)}`
+      );
+    }
     css = regras.join('\n');
     let acc = 0;
     divisorias = larguras.slice(0, -1).map((w, i) => { acc += w; return { i, left: acc }; });
   }
 
   return (
-    <div ref={wrapRef} className={`table-container ${cls} ${className}`.trim()} style={style}>
+    <div ref={wrapRef} className={`table-container ${cls} ${stickyFirstColumn || stickyRightColumns ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
       {css && <style>{css}</style>}
       {larguras && alturaCab > 0 && (
         <div className="rdz-camada" aria-hidden="true" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
