@@ -12,6 +12,9 @@ import {
   reaplicarMovimentacoesBem,
   reaplicarMovimentacoesDivida,
 } from './demonstrativos';
+// migracoes.js NÃO importa nada daqui (ver o comentário no topo dele): a
+// dependência é de mão única, reducer -> migracoes, só pela constante.
+import { VERSAO_ESQUEMA_ATUAL } from './migracoes';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -30,6 +33,25 @@ export const novoId = () => {
 };
 
 export const initialState = {
+  // Versão do FORMATO deste objeto quando gravado no localStorage do perfil.
+  //
+  // DECISÃO (item A1 de MELHORIAS-PROPOSTAS-2026-09-03.md, tomada em
+  // 03/09/2026 seguindo a recomendação do mapa do estado): a marca fica nos
+  // DOIS níveis. Na raiz ela é a versão do ARQUIVO do perfil, e é essa que a
+  // cadeia de `src/store/migracoes.js` consulta na carga. Em cada snapshot
+  // de `historico[ano]` (ver snapshotYear) ela é a marca POR ANO, porque é
+  // dentro do histórico que um arquivo antigo realmente quebra:
+  // LOAD_HISTORICO/SWITCH_ANO/ROLLOVER_ANO fazem `{...state, ...snapshot}` e
+  // um snapshot sem a chave nova deixa vazar o valor do ano anterior
+  // (contaminação silenciosa entre anos), enquanto ADD_EM_ANO roda o reducer
+  // direto sobre o snapshot e estoura em `.map`/`.filter` quando a coleção
+  // não existe. Só com a marca por ano dá para saber, olhando um snapshot
+  // isolado, se ele já passou pela migração.
+  //
+  // Não entra em `blankYear`: `blankYear` é a lista de campos de DADO que
+  // zeram ao entrar num ano em branco, e a versão do formato não é dado do
+  // ano (quem cria snapshot novo carimba a marca explicitamente).
+  versaoEsquema: VERSAO_ESQUEMA_ATUAL,
   // null até a primeira importação/cadastro: o app é genérico, não nasce
   // preso a um ano fixo. A Sidebar oferece "começar pelo ano X" e o import
   // define o ano a partir do cabeçalho da declaração.
@@ -208,6 +230,9 @@ export const snapshotYear = (state) => ({
   pagamentosDiversos: state.pagamentosDiversos,
   origem: state.origemAnoAtual,
   savedAt: new Date().toISOString(),
+  // Marca de versão POR ANO — ver o comentário de `versaoEsquema` em
+  // initialState. Snapshot recém-criado nasce sempre no formato de hoje.
+  versaoEsquema: VERSAO_ESQUEMA_ATUAL,
 });
 const temItens = (valor) => Array.isArray(valor) && valor.length > 0;
 const temQuadro = (valor) => valor != null && (
@@ -1207,6 +1232,7 @@ export function reducer(state, action) {
         prejuizoRuralAcompensar: state.prejuizoRuralAcompensar,
         origem: null,
         savedAt: new Date().toISOString(),
+        versaoEsquema: VERSAO_ESQUEMA_ATUAL,
       };
       return {
         ...state,

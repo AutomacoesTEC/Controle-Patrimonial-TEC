@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { reducerComHistorico, initialState, snapshotHasData, hasWorkingData } from './reducer';
 import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte } from './perfis';
+import { migrarEstadoPersistido } from './migracoes';
 import { criptografarObjeto } from '../utils/crypto';
 import ConfirmacaoModal from '../components/ConfirmacaoModal';
 
@@ -83,6 +84,34 @@ export function migrarOrigemLegado(merged, raw) {
   return next;
 }
 
+// Carga do estado de um perfil, em UM lugar só (os dois caminhos do
+// useReducer abaixo passam por aqui: perfil em texto puro lido do
+// localStorage e perfil protegido já decriptado por DesbloquearPerfilPage).
+//
+// Ordem, e o porquê dela:
+//   1. `migrarEstadoPersistido` roda a cadeia de versão de esquema (item A1,
+//      ver migracoes.js) sobre o objeto CRU, antes de qualquer merge — é o
+//      único passo que enxerga o que o arquivo realmente tinha e o único que
+//      alcança o interior de `historico[ano]`, que nenhum merge com
+//      initialState cobre;
+//   2. o merge com `initialState` completa o que é só da raiz (ano ativo,
+//      alterações, histórico);
+//   3. `migrarOrigemLegado` fecha a migração de CONTEÚDO que já existia antes
+//      da versão de esquema (origem do ano e marca de origem por item). Ela
+//      recebe o objeto JÁ migrado como "raw" de propósito: nenhum salto de
+//      versão cria `origemAnoAtual` nem `origem`, então a distinção entre
+//      "chave ausente" e "null explícito" que ela usa continua valendo.
+//
+// A migração não é regravada na hora: o autosave só dispara na primeira
+// alteração de verdade (ver o useEffect adiante), e até lá o perfil continua
+// no disco no formato antigo. Não é problema — a cadeia é idempotente e roda
+// a cada carga —, mas explica por que a marca de versão só aparece no
+// localStorage depois do primeiro lançamento.
+export function carregarEstadoDoPerfil(raw) {
+  const migrado = migrarEstadoPersistido(raw);
+  return migrarOrigemLegado({ ...initialState, ...migrado }, migrado);
+}
+
 export async function persistirDadosPerfil({ storage, perfilId, chave, estado, criptografar = criptografarObjeto }) {
   let perfisSalvos = JSON.parse(storage.getItem(PERFIS_STORAGE_KEY) || '[]');
   if (!perfisSalvos.some(p => p.id === perfilId)) return { salvo: false, motivo: 'perfil_removido' };
@@ -128,13 +157,12 @@ export function enfileirarPersistencia(filaRef, tarefa) {
 export function DataProvider({ perfilId, chave, initialData, children }) {
   const [state, dispatch] = useReducer(reducerComHistorico, initialState, () => {
     if (initialData) {
-      return migrarOrigemLegado({ ...initialState, ...initialData }, initialData);
+      return carregarEstadoDoPerfil(initialData);
     }
     try {
       const saved = localStorage.getItem(dataStorageKeyFor(perfilId));
       if (saved) {
-        const raw = JSON.parse(saved);
-        return migrarOrigemLegado({ ...initialState, ...raw }, raw);
+        return carregarEstadoDoPerfil(JSON.parse(saved));
       }
     } catch {}
     return initialState;
