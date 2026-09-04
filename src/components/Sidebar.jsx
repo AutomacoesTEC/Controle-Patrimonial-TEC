@@ -7,7 +7,7 @@ import { MODALIDADES, NOME_CURTO_MODALIDADE, modalidadeDaDeclaracao } from '../s
 
 const navItems = [
   { id: 'importar', label: 'Importar Declaração', short: 'IM', section: 'VISÃO GERAL' },
-  { id: 'dashboard', label: 'Dashboard', short: 'DB', section: 'VISÃO GERAL' },
+  { id: 'dashboard', label: 'Demonstrativo', short: 'DM', section: 'VISÃO GERAL' },
   // Só aparece quando a declaração importada NÃO é de ajuste anual. O rótulo
   // vira o nome da modalidade, para a pessoa ver de imediato que este ano tem
   // regra própria (partilha no espólio, condição de não residente na saída).

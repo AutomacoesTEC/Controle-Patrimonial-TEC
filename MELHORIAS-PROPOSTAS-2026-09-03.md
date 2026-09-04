@@ -454,6 +454,12 @@ português ("Bens e Direitos", "Ganhos de Capital").
 Proposta: "Painel" ou "Demonstrativo" (o segundo descreve melhor o que a tela
 é). Trocar em `Sidebar.jsx`, `Dashboard.jsx` e testes que procuram o texto.
 
+Concluído em 04/09/2026: a interface usa `Demonstrativo` na navegação, no
+título e nos retornos contextuais; o id técnico `dashboard` foi preservado.
+Na abertura, `Dashboard` visível caiu de duas ocorrências a zero e
+`Demonstrativo` subiu de zero a duas. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-43-dashboard-demonstrativo/`.
+
 ### B9/B10. Laptop 1366x768 e tela cheia 2880: capturas feitas, 13 defeitos achados — CAPTURA CONCLUÍDA, CORREÇÃO PENDENTE (P1/P2)
 
 Commit `a39ec6e`, 03/09/2026. `AUDITORIA/verificar-telas-no-app.py` destravado

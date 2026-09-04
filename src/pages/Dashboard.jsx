@@ -432,7 +432,7 @@ export default function Dashboard({ onNavigate } = {}) {
       <>
         <div className="page-header">
           <div className="page-header-left">
-            <h2>Dashboard</h2>
+            <h2>Demonstrativo</h2>
             <p>Visão geral do patrimônio</p>
           </div>
         </div>
@@ -452,7 +452,7 @@ export default function Dashboard({ onNavigate } = {}) {
     <>
       <div className="page-header dashboard-screen-header">
         <div className="page-header-left">
-          <h2>Dashboard</h2>
+          <h2>Demonstrativo</h2>
           <p>Período de {formatDate(de)} até {formatDate(ate)}</p>
         </div>
         <div className="page-header-actions">

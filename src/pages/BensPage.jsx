@@ -111,7 +111,7 @@ export default function BensPage({ onVoltar } = {}) {
     <>
       <div className="page-header">
         <div className="page-header-left">
-          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
+          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Demonstrativo</button>}
           <h2>Bens e Direitos</h2>
           <p>{filtered.length} {filtered.length === 1 ? 'item' : 'itens'}{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totals.atual)}</p>
         </div>

@@ -51,7 +51,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
     <>
       <div className="page-header">
         <div className="page-header-left">
-          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Dashboard</button>}
+          {onVoltar && <button type="button" className="btn-voltar-dashboard" onClick={onVoltar}>← Voltar ao Demonstrativo</button>}
           <h2>Atividade Rural</h2>
           <p>Imóveis explorados, bens, receitas/despesas e resultado. Ficha própria da declaração, separada de Bens e Direitos.</p>
         </div>

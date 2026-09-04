@@ -419,7 +419,7 @@ export default function GanhosCapitalPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h2>Ganhos de Capital</h2>
-          <p>Junta as vendas registradas em Bens e Direitos com as operações que vieram na Apuração do Ganho de Capital da declaração importada, e fecha com o mesmo total do Demonstrativo do Dashboard. Para uma venda lançada à mão entrar aqui, preencha o "Valor de venda" ao registrar a movimentação. A venda de bem da Atividade Rural não entra: é receita da própria atividade rural, apurada no livro-caixa.</p>
+          <p>Junta as vendas registradas em Bens e Direitos com as operações que vieram na Apuração do Ganho de Capital da declaração importada, e fecha com o mesmo total do Demonstrativo de Conciliação Patrimonial. Para uma venda lançada à mão entrar aqui, preencha o "Valor de venda" ao registrar a movimentação. A venda de bem da Atividade Rural não entra: é receita da própria atividade rural, apurada no livro-caixa.</p>
         </div>
         <div className="page-header-actions">
           {seletorAno}

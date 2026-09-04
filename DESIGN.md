@@ -187,6 +187,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 
 ## Components
 
+- **nomenclatura principal**: a tela inicial chama-se `Demonstrativo`; o id
+  técnico `dashboard` não aparece na interface.
+
 - **button-primary**: navy sólido (ou o tint claro no tema escuro),
   texto branco, sem gradiente vistoso — só um `box-shadow` sutil na
   cor do próprio botão.

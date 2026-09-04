@@ -281,7 +281,7 @@ export default function MovimentacaoBemForm({
           <div className="form-group">
             <label>
               Valor de venda (opcional)
-              <Ajuda texto="Preço recebido pela venda. Junto com o IRRF, calcula sozinho o ganho líquido desta venda em Ganhos de Capital e no Demonstrativo de Conciliação do Dashboard." />
+              <Ajuda texto="Preço recebido pela venda. Junto com o IRRF, calcula sozinho o ganho líquido desta venda em Ganhos de Capital e no Demonstrativo de Conciliação Patrimonial." />
             </label>
             <MoneyInput value={movValorVenda} onChange={setMovValorVenda} />
           </div>
