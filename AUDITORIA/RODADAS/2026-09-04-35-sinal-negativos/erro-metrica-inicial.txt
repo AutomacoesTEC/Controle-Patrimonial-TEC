@@ -1,0 +1,7 @@
+A primeira métrica contou toda célula `.negative` sem hífen como negativo sem
+sinal. A única ocorrência era `R$ 0,00`, que não é matematicamente negativa;
+isso revelou uma falha diferente e mais precisa: zero com classe de perda.
+Antes de editar o produto, a métrica passou a separar zero, negativo não zero
+e rótulo da linha. Saída descartada:
+
+{"b3Concluido":false,"tela":{"quantidade":11,"semSinal":1},"impressao":{"quantidade":11,"semSinal":1}}

@@ -809,7 +809,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 </td>
                 <td className="currency negative">{formatCurrency(-demo.pagamentosEfetuados)}</td>
               </tr>
-              <tr><td>Pagamentos Diversos (despesas gerais)</td><td className="currency negative">{formatCurrency(-demo.pagamentosDiversos)}</td></tr>
+              <tr><td>Pagamentos Diversos (despesas gerais)</td><td className={`currency${demo.pagamentosDiversos > 0 ? ' negative' : ''}`}>{formatCurrency(-demo.pagamentosDiversos)}</td></tr>
               {/* Doações (Efetuadas + Partidos/Candidatos + ECA/Pessoa
                   Idosa): dinheiro que saiu de verdade do caixa da pessoa
                   física, por isso reduz o Saldo de Caixa igual Pagamentos —

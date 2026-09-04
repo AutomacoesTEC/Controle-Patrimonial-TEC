@@ -303,7 +303,7 @@ preservada. Evidência pareada em
 Pronto quando: a pessoa abre o Dashboard e em três segundos sabe se a
 declaração fecha, sem rolar.
 
-### B3. Tabelas densas: modo compacto, zebra e sinal além da cor (P2)
+### B3. Tabelas densas: modo compacto, zebra e sinal além da cor — CONCLUÍDO (P2)
 
 Evidência: `tbody td { padding: 12px 16px }` em todas as tabelas; Bens com 73
 linhas ocupa mais de duas telas. Ganho e perda se distinguem só por cor
@@ -329,6 +329,12 @@ Segunda parte concluída em 04/09/2026: linhas pares ganharam zebra sutil a
 40% nos dois temas, sem mudar padding ou conteúdo; fundos adjacentes passaram
 de iguais para diferentes. Evidência em
 `AUDITORIA/RODADAS/2026-09-04-34-zebra-tabelas/`.
+
+Terceira parte concluída em 04/09/2026: o Dashboard real confirmou 10 valores
+negativos não zero e todos já continham sinal explícito, inclusive em
+impressão. A única anomalia era `R$ 0,00` de Pagamentos Diversos marcado como
+negativo; a classe passou a depender de valor maior que zero. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-35-sinal-negativos/`.
 
 ### B4. Impressão e PDF do demonstrativo — CONCLUÍDO (P1)
 
