@@ -1,0 +1,5 @@
+FAIL  src/store/backupPerfil.test.js > perfil protegido por senha > corrupção no ciphertext é pega pelo hash, antes mesmo de pedir a senha
+AssertionError: promise resolved instead of rejecting
+
+Test Files  1 failed | 36 passed (37)
+Tests       1 failed | 871 passed (872)

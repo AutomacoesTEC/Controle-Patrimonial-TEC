@@ -405,7 +405,7 @@ describe('perfil protegido por senha', () => {
     const { storage, perfil } = await armazenamentoProtegido();
     const arquivo = await montarBackupDoArmazenamento({ storage, perfil });
     const adulterado = JSON.parse(textoDoArquivoBackup(arquivo));
-    adulterado.conteudo.ciphertext = `A${adulterado.conteudo.ciphertext.slice(1)}`;
+    adulterado.conteudo.ciphertext = `${adulterado.conteudo.ciphertext[0] === 'A' ? 'B' : 'A'}${adulterado.conteudo.ciphertext.slice(1)}`;
     await expect(lerArquivoBackup(JSON.stringify(adulterado))).rejects.toMatchObject({ codigo: 'corrompido' });
   });
 
