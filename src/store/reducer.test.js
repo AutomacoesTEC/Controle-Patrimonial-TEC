@@ -957,6 +957,20 @@ describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retifi
     expect(state.bens[0].discriminacao).toBe('Apto reformado');
   });
 
+  it('primeira edição de importado preserva o declarado e edições seguintes não trocam o snapshot', () => {
+    let state = { ...initialState, bens: [{ id: 1, discriminacao: 'Apto declarado', situacao_atual: 100, origem: 'importacao' }] };
+    state = reducer(state, { type: 'UPDATE_BEM', payload: { id: 1, discriminacao: 'Apto corrigido' } });
+    expect(state.bens[0].valorDeclarado.discriminacao).toBe('Apto declarado');
+    state = reducer(state, { type: 'UPDATE_BEM', payload: { id: 1, discriminacao: 'Apto corrigido outra vez' } });
+    expect(state.bens[0].valorDeclarado.discriminacao).toBe('Apto declarado');
+  });
+
+  it('edição de item manual não cria valorDeclarado', () => {
+    let state = { ...initialState, bens: [{ id: 1, discriminacao: 'Apto manual', origem: 'manual' }] };
+    state = reducer(state, { type: 'UPDATE_BEM', payload: { id: 1, discriminacao: 'Apto manual corrigido' } });
+    expect(state.bens[0].valorDeclarado).toBeUndefined();
+  });
+
   it('vincula item da retificadora a um bem já importado: atualiza dados declarados, preserva id e movimentações, mantém o delta já movimentado', () => {
     // Bem importado com situação anterior 100.000 e atual 130.000 (uma
     // compra de 30.000 já lançada). A retificadora corrige a situação

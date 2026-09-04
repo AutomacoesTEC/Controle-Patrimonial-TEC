@@ -299,6 +299,16 @@ export const blankYear = {
   // não algo que zera ao começar um ano em branco.
 };
 
+function atualizarPreservandoDeclarado(item, payload) {
+  const atualizado = { ...item, ...payload };
+  if (!['importacao', 'origem_legacy'].includes(item?.origem) || item.valorDeclarado) return atualizado;
+  const ignorados = new Set(['id', 'origem', 'valorDeclarado']);
+  const mudou = Object.keys(payload).some(chave => !ignorados.has(chave) && JSON.stringify(item[chave]) !== JSON.stringify(payload[chave]));
+  if (!mudou) return atualizado;
+  const { valorDeclarado: _anterior, ...declarado } = item;
+  return { ...item, valorDeclarado: declarado, ...payload };
+}
+
 export function reducer(state, action) {
   switch (action.type) {
     // Estado já calculado e gravado com sucesso pelo DataContext. Esta ação
@@ -331,25 +341,25 @@ export function reducer(state, action) {
       // pronto). Sem id no payload, comportamento de sempre.
       return { ...state, bens: [...state.bens, { ...action.payload, id: action.payload.id ?? novoId(), origem: 'manual' }] };
     case 'UPDATE_BEM':
-      return { ...state, bens: state.bens.map(b => b.id === action.payload.id ? { ...b, ...action.payload } : b) };
+      return { ...state, bens: state.bens.map(b => b.id === action.payload.id ? atualizarPreservandoDeclarado(b, action.payload) : b) };
     case 'DELETE_BEM':
       return { ...state, bens: state.bens.filter(b => b.id !== action.payload) };
     case 'ADD_DIVIDA':
       return { ...state, dividas: [...state.dividas, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DIVIDA':
-      return { ...state, dividas: state.dividas.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
+      return { ...state, dividas: state.dividas.map(d => d.id === action.payload.id ? atualizarPreservandoDeclarado(d, action.payload) : d) };
     case 'DELETE_DIVIDA':
       return { ...state, dividas: state.dividas.filter(d => d.id !== action.payload) };
     case 'ADD_RENDIMENTO':
       return { ...state, rendimentos: [...state.rendimentos, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_RENDIMENTO':
-      return { ...state, rendimentos: state.rendimentos.map(r => r.id === action.payload.id ? { ...r, ...action.payload } : r) };
+      return { ...state, rendimentos: state.rendimentos.map(r => r.id === action.payload.id ? atualizarPreservandoDeclarado(r, action.payload) : r) };
     case 'DELETE_RENDIMENTO':
       return { ...state, rendimentos: state.rendimentos.filter(r => r.id !== action.payload) };
     case 'ADD_PAGAMENTO':
       return { ...state, pagamentos: [...state.pagamentos, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_PAGAMENTO':
-      return { ...state, pagamentos: state.pagamentos.map(p => p.id === action.payload.id ? { ...p, ...action.payload } : p) };
+      return { ...state, pagamentos: state.pagamentos.map(p => p.id === action.payload.id ? atualizarPreservandoDeclarado(p, action.payload) : p) };
     case 'DELETE_PAGAMENTO':
       return { ...state, pagamentos: state.pagamentos.filter(p => p.id !== action.payload) };
     // As 3 fichas de Doações nasceram só-leitura (import do PDF, ver

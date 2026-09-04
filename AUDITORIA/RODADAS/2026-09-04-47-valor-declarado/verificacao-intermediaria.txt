@@ -1,0 +1,3 @@
+Tentativa sem medição: o fixture procurou o botão "Salvar", mas a edição usa
+o rótulo explícito "Salvar Dados do Bem". Playwright encerrou por timeout
+antes de alterar ou ler o estado.

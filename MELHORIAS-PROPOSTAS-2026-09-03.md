@@ -79,6 +79,12 @@ exportação. Fixtures mistos preservaram 3/19/9 linhas e separaram exatamente
 1/1/1 manual de 2/18/8 importados. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-46-origem-demais-fichas/`.
 
+Terceira parte concluída em 04/09/2026: a primeira edição de um registro
+importado preserva o objeto original em `valorDeclarado`; o badge compartilhado
+acrescenta `Editado` e expõe o texto original. Edições seguintes não trocam o
+snapshot e itens manuais não o criam. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-47-valor-declarado/`.
+
 ### A4. Trilha de alterações: completar o que já existe (P2)
 
 Evidência: já existe `state.alteracoes` e a tela "Histórico de Alterações"
