@@ -1,0 +1,25 @@
+Mutação repetida igualmente nos fixtures v1 e atual:
+primeiro bem, situacao_atual, 210101.51 -> 210101.52.
+
+× ano-2025
+× primeiro-semestre-2025
+✓ periodo-2025-2026
+
+Diff do ano-2025:
+- bensAte: 444846.93
++ bensAte: 444846.94
+- deltaBens: 337309.08
++ deltaBens: 337309.09
+- total: -369306.05
++ total: -369306.06
+- saldoDeCaixaGeral: -7536.78
++ saldoDeCaixaGeral: -7536.79
+- saldoDeCaixa: -51787.27
++ saldoDeCaixa: -51787.28
+
+O primeiro semestre mostrou os mesmos cinco campos com diferença de R$ 0,01.
+O período 2025-2026 permaneceu igual porque seu estoque final vem do snapshot
+de 2026, não do bem adulterado no estado de 2025.
+
+Test Files  1 failed (1)
+Tests       2 failed | 1 passed (3)

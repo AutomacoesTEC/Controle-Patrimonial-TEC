@@ -1,0 +1,8 @@
+Mutação aplicada igualmente aos fixtures v1 e atual:
+primeiro bem, situacao_atual, 210101.51 -> 210101.52.
+
+Test Files  38 passed (38)
+Tests       875 passed (875)
+
+Veredito do antes: a alteração de R$ 0,01 no resultado de referência não era
+detectada por nenhum teste.

@@ -186,20 +186,19 @@ Proposta:
 Pronto quando: o chunk inicial cai abaixo de 400 KB e a tela de perfis abre
 sem carregar pdfjs.
 
-### A10. Suíte: golden files do demonstrativo por fixture (P2)
+### A10. Suíte: golden files do demonstrativo por fixture — CONCLUÍDO (P2)
 
-Evidência: 804 testes, muito bons em unidade. A conciliação inteira contra a
-planilha da usuária existe para os arquivos de referência. Vale generalizar.
+O perfil canônico produzido pela importação da AJU-01 agora tem
+`demonstrativo-aju01.golden.json`, com a saída integral do motor usado pelo
+Dashboard no ano de 2025, no primeiro semestre e no período 2025–2026. O teste
+normal apenas compara; regravar exige `UPDATE_GOLDEN=1` explícito.
 
-Proposta:
-- Para cada fixture (`output/pdf/AJU-01...`, `.DBK` do perfil real quando
-  disponível localmente, sintéticos da `MATRIZ-CASOS-SINTETICOS`), um arquivo
-  `*.golden.json` com o `demonstrativoConciliacao` completo por período. O
-  teste importa, calcula e compara. Atualização do golden só por comando
-  explícito (`UPDATE_GOLDEN=1`), nunca automática.
-
-Pronto quando: qualquer mudança em `demonstrativos.js` que altere um centavo
-em qualquer fixture falha a suíte com diff legível.
+A prova adversarial alterou R$ 0,01 igualmente nos perfis v1 e atual: os 875
+testes anteriores passaram, enquanto o novo golden mostrou diff legível em
+cinco totais derivados. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-21-golden-demonstrativo/`. Novos fixtures
+canônicos devem entrar na mesma tabela de casos quando forem adicionados ao
+repositório.
 
 ### A11. Persistência em disco no app desktop (P2, corrigido em 03/09)
 
