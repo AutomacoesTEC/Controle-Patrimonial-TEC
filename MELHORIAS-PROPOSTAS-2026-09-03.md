@@ -139,7 +139,7 @@ Pronto quando: para o `.DBK` real do perfil PAULO ROBERTO o total do painel
 é igual ao imposto retido do resumo, e um fixture com retenção a menor
 plantada dispara o alerta.
 
-### A8. Classificação assistida das sobras do Saldo de Caixa (P2)
+### A8. Classificação assistida das sobras do Saldo de Caixa — PARCIAL (P2)
 
 Evidência: o Saldo de Caixa final é "o número de validação", mas a tela só
 mostra o valor. A seção 2 do estudo lista as origens que justificam variação
@@ -159,6 +159,16 @@ Proposta:
 
 Pronto quando: um fixture com restituição recebida e sem lançar mostra a
 linha do checklist com o valor exato da diferença.
+
+Checklist concluído na rodada 23. `src/store/classificacaoSaldo.js` reúne as
+perguntas de dívida nova sem contrapartida em bem, restituição anterior ainda
+sem código 25, alienação sem preço e aplicação resgatada sem rendimento. O
+Dashboard exibe valor e atalho para a tela correspondente sem mudar o Saldo de
+Caixa. Fixture e navegador confirmaram a restituição de R$ 2.032,33; evidência
+em `AUDITORIA/RODADAS/2026-09-04-23-checklist-saldo/`.
+
+Pendente em rodada própria: tolerância explícita e configurável por perfil
+para o selo "fecha".
 
 ### A9. Importação mais leve e separada do resto do app (P2)
 

@@ -1,0 +1,18 @@
+Fixture puro:
+✓ aponta a restituição anterior ausente pelo valor exato e sem mudar o saldo
+✓ não alerta quando o código 25 já cobre a restituição
+✓ reúne dívida sem contrapartida, alienação e aplicação já diagnosticadas
+
+Test Files  1 passed (1)
+Tests       3 passed (3)
+
+Fixture visual no navegador:
+{"checklists":1,"itens":1,"primeiroItem":"Restituição de IRPF de 2024 a conferir","valores":["R$ 2.032,33"],"destinoAtivo":"Rendimentos","overflowPagina":0}
+
+Suíte completa:
+Test Files  41 passed (41)
+Tests       885 passed (885)
+
+Build:
+✓ 658 modules transformed.
+✓ built

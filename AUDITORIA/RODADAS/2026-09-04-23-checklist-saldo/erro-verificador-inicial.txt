@@ -1,0 +1,15 @@
+O primeiro verificador apontou para localhost:4173, já ocupado por uma
+pré-visualização antiga. O build congelado desta rodada iniciou em 4174; por
+isso o seletor novo não existia e a busca expirou. O verificador foi corrigido
+para a porta informada pelo Vite, sem mudar produto, fixture ou critério.
+
+Na porta correta, o perfil AJU-01 puro também não exibiu a seção: ele não tem
+2024 e seus diagnósticos de alienação/aplicação estão vazios. Essa ausência é
+correta. A trajetória visual passou a plantar no mesmo perfil o estado mínimo
+do fixture congelado (restituição de R$ 2.032,33 em 2024), para verificar a
+condição que a rodada se propôs a tornar observável.
+
+Com a pendência visível, o clique de navegação ficou corretamente bloqueado
+pelo modal estrutural "Antes de usar estes números" do próprio Dashboard. O
+verificador passou a fechar esse modal pelo botão "OK, entendi" antes de
+testar o botão do checklist, reproduzindo a trajetória real do usuário.

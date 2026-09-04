@@ -1,0 +1,18 @@
+
+ RUN  v4.1.11 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ FAIL  src/store/classificacaoSaldo.test.js [ src/store/classificacaoSaldo.test.js ]
+Error: Cannot find module './classificacaoSaldo' imported from /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/src/store/classificacaoSaldo.test.js
+ ❯ src/store/classificacaoSaldo.test.js:2:1
+      1| import { describe, expect, test } from 'vitest';
+      2| import { classificarPendenciasSaldo } from './classificacaoSaldo';
+       | ^
+      3|
+      4| const base = (rendimentos = []) => ({
+
+Serialized Error: { code: 'ERR_MODULE_NOT_FOUND' }
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  11:29:40
+   Duration  330ms (transform 30ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)

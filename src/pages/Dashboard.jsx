@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, describeRendimentoTipo, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
+import { formatCurrency, formatDate, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
 import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosCompensaveis';
 import { conferirContinuidade } from '../store/continuidade';
+import { classificarPendenciasSaldo } from '../store/classificacaoSaldo';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
 import Modal from '../components/Modal';
@@ -175,6 +176,10 @@ export default function Dashboard({ onNavigate } = {}) {
   const demo = useMemo(
     () => (de && ate ? demonstrativoPeriodo(state, de, ate) : null),
     [state, de, ate]
+  );
+  const checklistSaldo = useMemo(
+    () => classificarPendenciasSaldo(state, demo, de, ate),
+    [state, demo, de, ate]
   );
 
   // Saldos que ATRAVESSAM o exercício (prejuízos compensáveis) e
@@ -718,65 +723,24 @@ export default function Dashboard({ onNavigate } = {}) {
                   <td className="currency negative">{formatCurrency(demo.rendaVariavelPerda)}</td>
                 </tr>
               )}
-              {/* ACHADO 04, revisto em 03/09/2026: os bens que baixaram no
-                  período sem preço de venda conhecido caem em DOIS casos, e
-                  misturá-los confundia (a usuária apontou "bem sem valor não
-                  deveria mexer no saldo"):
-                  1. venda de ANO ANTERIOR que só zerou o bem agora (financiado,
-                     última parcela caiu neste ano): o app TEM o valor lido do
-                     texto, o problema é a data. O custo entra no Saldo deste ano
-                     mas a venda pertence ao ano anterior — distorção real, cuja
-                     causa é a declaração ter mantido o bem pelo custo em vez de
-                     lançar o valor a receber (crédito).
-                  2. baixa sem nenhum preço no texto: aí sim o app pede o valor. */}
+              {/* Venda financiada de ano anterior é uma distorção temporal,
+                  não uma ausência de preço. Continua junto do ganho que afeta,
+                  separada do checklist final desta rodada. */}
               {(() => {
-                const pend = demo.pendenciasAlienacao || [];
-                const anoAnterior = pend.filter(p => p.vendaForaDoPeriodo);
-                const semPreco = pend.filter(p => !p.vendaForaDoPeriodo);
-                const fmtItem = p => `${truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou ${formatCurrency(p.reducao)}`;
+                const anteriores = (demo.pendenciasAlienacao || []).filter(p => p.vendaForaDoPeriodo);
+                if (anteriores.length === 0) return null;
+                const item = p => `${truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou ${formatCurrency(p.reducao)}, venda em ${formatDate(p.vendaForaDoPeriodo)}${p.valorVendaForaDoPeriodo != null ? ` por ${formatCurrency(p.valorVendaForaDoPeriodo)}` : ''}`;
                 return (
-                  <>
-                    {anoAnterior.length > 0 && (
-                      <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
-                        <Ajuda
-                          tom="ressalva"
-                          rotulo={`${anoAnterior.length} venda(s) de ano anterior ainda no patrimônio inflam este Saldo`}
-                          titulo="Venda de ano anterior zerando o bem só agora"
-                          texto={`Este(s) bem(ns) foi(ram) vendido(s) em ano anterior (venda financiada, cujo saldo só zerou neste período), mas continuava(m) declarado(s) pelo custo. O Saldo de Caixa deste ano soma o custo inteiro como se tivesse virado dinheiro agora, quando a venda e a maior parte do dinheiro pertencem ao ano da alienação. Isso INFLA o Saldo deste período.\n\nO certo na declaração é, no ano da venda, tirar o bem e lançar um crédito (valor a receber, ficha Bens e Direitos grupo 05), baixando-o conforme as parcelas entram. Assim o dinheiro cai no ano correto.\n\n${anoAnterior.slice(0, 6).map(p => `${fmtItem(p)}, venda em ${formatDate(p.vendaForaDoPeriodo)}${p.valorVendaForaDoPeriodo != null ? ` por ${formatCurrency(p.valorVendaForaDoPeriodo)}` : ''}`).join('\n')}${anoAnterior.length > 6 ? `\ne mais ${anoAnterior.length - 6}.` : ''}`}
-                        />
-                      </td></tr>
-                    )}
-                    {semPreco.length > 0 && (
-                      <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
-                        <Ajuda
-                          tom="ressalva"
-                          rotulo={`${semPreco.length} bem(ns) baixaram sem valor de venda informado`}
-                          titulo="Bens que baixaram sem preço de venda"
-                          texto={`O Saldo de Caixa está contando que todo o custo virou dinheiro, o que costuma ser otimista: um bem vendido por menos que o custo (ou com prejuízo, que não aparece na ficha de Ganhos de Capital) deixa de fora a diferença que não voltou. Abra cada bem em Bens e Direitos, registre a venda e preencha o "Valor de venda" para o número fechar. Quando a discriminação do bem traz a venda por escrito ("VENDIDO EM ... POR R$ ..."), o app já lê dali e o bem não aparece nesta lista.\n\n${semPreco.slice(0, 6).map(fmtItem).join('\n')}${semPreco.length > 6 ? `\ne mais ${semPreco.length - 6}.` : ''}`}
-                        />
-                      </td></tr>
-                    )}
-                  </>
-                );
-              })()}
-              {/* Aplicação de renda fixa ou poupança que sumiu do patrimônio
-                  sem o rendimento correspondente na ficha que lhe cabe. Não é
-                  acusação de erro: é o cruzamento que ninguém faz à mão, e que
-                  na declaração de referência apontou 97.706,33 de rendimento
-                  de LCI declarado como lucros e dividendos. Ver
-                  aplicacoesResgatadasSemRendimento em demonstrativos.js. */}
-              {demo.aplicacoesSemRendimento?.length > 0 && (
-                <tr className="demonstrativo-nota">
-                  <td colSpan={2} style={{ padding: '8px 0 0' }}>
+                  <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
                     <Ajuda
                       tom="ressalva"
-                      rotulo={`${demo.aplicacoesSemRendimento.length} aplicação(ões) resgatadas sem o rendimento correspondente na ficha`}
-                      titulo="Aplicações resgatadas sem rendimento na ficha"
-                      texto={`Poupança, CDB, RDB, Tesouro Direto, LCI, LCA, CRI e CRA rendem juros, e o resgate credita esse rendimento. Quando a mesma instituição não aparece na ficha de rendimentos que lhe cabe, ou o valor não foi declarado, ou foi lançado em outro código. Confira no informe de rendimentos da instituição.\n\n${demo.aplicacoesSemRendimento.slice(0, 6).map(a => `${truncarComReticencias(a.discriminacao || 'Bem sem descrição', 70)} (CNPJ ${formatCpfCnpj(a.cnpj)}): resgatado ${formatCurrency(a.valorResgatado)}. Esperado em: ${a.onde}.${a.outrosDaMesmaFonte.length > 0 ? ` Da mesma fonte, a declaração informa: ${a.outrosDaMesmaFonte.map(o => `${describeRendimentoTipo(o.tipo)} ${formatCurrency(o.valor)}`).join('; ')}.` : ''}`).join('\n\n')}${demo.aplicacoesSemRendimento.length > 6 ? `\n\ne mais ${demo.aplicacoesSemRendimento.length - 6}.` : ''}`}
+                      rotulo={`${anteriores.length} venda(s) de ano anterior ainda no patrimônio inflam este Saldo`}
+                      titulo="Venda de ano anterior zerando o bem só agora"
+                      texto={`Este(s) bem(ns) foi(ram) vendido(s) em ano anterior, mas continuava(m) declarado(s) pelo custo. O Saldo soma o custo inteiro como se tivesse virado dinheiro agora. No ano da venda, confira a baixa do bem e o crédito a receber pelas parcelas.\n\n${anteriores.slice(0, 6).map(item).join('\n')}${anteriores.length > 6 ? `\ne mais ${anteriores.length - 6}.` : ''}`}
                     />
-                  </td>
-                </tr>
-              )}
+                  </td></tr>
+                );
+              })()}
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa Geral</td><td className={`currency ${demo.saldoDeCaixaGeral >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
             </tbody>
@@ -820,6 +784,27 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa</td><td className={`currency ${demo.saldoDeCaixa >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixa)}</td></tr>
             </tbody>
           </table>
+          {checklistSaldo.length > 0 && (
+            <section className="saldo-checklist" aria-labelledby="saldo-checklist-titulo">
+              <div className="saldo-checklist-cabecalho">
+                <h4 id="saldo-checklist-titulo">Pontos para conferir no Saldo de Caixa</h4>
+                <span>{checklistSaldo.length}</span>
+              </div>
+              <ul>
+                {checklistSaldo.map((item, indice) => (
+                  <li key={`${item.tipo}-${indice}`}>
+                    <div>
+                      <button type="button" onClick={() => onNavigate && onNavigate(item.destino)}>
+                        {item.titulo}
+                      </button>
+                      <p>{item.texto}</p>
+                    </div>
+                    <strong className="currency">{formatCurrency(item.valor)}</strong>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {/* Leitura de compatibilidade das seções 11-12 do estudo: o Saldo de
               Caixa que fecha a conciliação precisa ser plausível diante do que
               a pessoa efetivamente tem em forma de dinheiro no fim do período.
