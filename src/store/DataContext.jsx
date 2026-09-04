@@ -1,8 +1,10 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { reducerComHistorico, initialState, snapshotHasData, hasWorkingData } from './reducer';
 import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte } from './perfis';
-import { migrarEstadoPersistido } from './migracoes';
+import { migrarEstadoPersistido, versaoDoEstado } from './migracoes';
 import { criptografarObjeto } from '../utils/crypto';
+import { montarArquivoBackup, nomeArquivoBackup, textoDoArquivoBackup, TIPO_MIME_BACKUP } from './backupPerfil';
+import { baixarTexto } from '../utils/baixarArquivo';
 import ConfirmacaoModal from '../components/ConfirmacaoModal';
 
 const DataContext = createContext(null);
@@ -211,6 +213,40 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
     saveToStorage();
   }, [state, saveToStorage]);
 
+  // Backup do perfil ABERTO, em arquivo (item A2). Mora aqui, e não na tela
+  // que tem o botão, por um motivo de segurança: a CryptoKey do perfil
+  // protegido só existe dentro deste provider (ver App.jsx/sessaoProtegida) e
+  // continua sem sair dele. Quem chama recebe o arquivo pronto, nunca a chave.
+  //
+  // Exporta o estado que está em MEMÓRIA, não o que está no localStorage: é o
+  // mais recente, e o autosave é assíncrono (fila de Promises, mais a
+  // criptografia do perfil protegido), então ler do disco podia entregar um
+  // arquivo uma alteração atrás.
+  const exportarPerfilAtual = useCallback(async (agora = new Date()) => {
+    const { toasts: _toasts, ...dados } = state;
+    let registro = null;
+    try {
+      const lista = JSON.parse(localStorage.getItem(PERFIS_STORAGE_KEY) || '[]');
+      registro = lista.find(p => p && p.id === perfilId) || null;
+    } catch { /* lista ilegível: cai no identificador do próprio estado */ }
+    const perfil = registro || {
+      nome: dados.contribuinte?.nome || '',
+      apelido: '',
+      cpf: dados.contribuinte?.cpf || '',
+    };
+    const arquivo = await montarArquivoBackup({
+      perfil,
+      conteudo: chave ? await criptografarObjeto(chave, dados) : dados,
+      protegido: !!chave,
+      salt: chave ? perfil.salt || null : null,
+      versaoEsquema: versaoDoEstado(dados),
+      agora,
+    });
+    const nome = nomeArquivoBackup(perfil, agora);
+    baixarTexto({ nome, texto: textoDoArquivoBackup(arquivo), tipo: TIPO_MIME_BACKUP });
+    return nome;
+  }, [state, perfilId, chave]);
+
   const addToast = useCallback((message, type = 'info') => {
     // O id tem que ser o MESMO usado depois no REMOVE_TOAST — o reducer não
     // pode gerar um id novo aqui, senão o aviso nunca é removido (bug real:
@@ -296,6 +332,7 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
       saveToStorage,
       persistencia,
       addToast,
+      exportarPerfilAtual,
       garantirAnoCadastro,
       despacharEmAno,
       confirmar,

@@ -27,7 +27,7 @@ const navItems = [
 ];
 
 export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCollapsed, onTrocarPerfil }) {
-  const { state, dispatch, addToast } = useData();
+  const { state, dispatch, addToast, exportarPerfilAtual } = useData();
   const modalidade = modalidadeDaDeclaracao(state);
   const itensVisiveis = navItems
     .filter(item => !item.somenteModalidade || modalidade !== MODALIDADES.AJUSTE)
@@ -38,6 +38,21 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
   const avancarAno = (proximoAno) => {
     dispatch({ type: 'ROLLOVER_ANO', payload: proximoAno });
     addToast(`Ano-calendário ${proximoAno} iniciado.`, 'success');
+  };
+
+  // Backup do perfil aberto em arquivo (item A2). O trabalho todo é do
+  // DataContext (`exportarPerfilAtual`), inclusive a criptografia do perfil
+  // protegido: aqui só há o botão e o aviso do resultado.
+  const [exportando, setExportando] = useState(false);
+  const exportarBackup = async () => {
+    setExportando(true);
+    try {
+      const nome = await exportarPerfilAtual();
+      addToast(`Backup salvo como ${nome}. Guarde o arquivo fora deste computador.`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Não foi possível gerar o backup deste perfil.', 'error');
+    }
+    setExportando(false);
   };
 
   // Só anos com dado real: ano em edição (se tiver conteúdo) + snapshots do
@@ -68,14 +83,25 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
           )}
         </div>
         {!collapsed && (
-          <button
-            className="btn btn-sm btn-secondary"
-            style={{ width: '100%', marginTop: '10px' }}
-            onClick={onTrocarPerfil}
-            title="Voltar para a tela de seleção de perfil"
-          >
-            Trocar Perfil
-          </button>
+          <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+            <button
+              className="btn btn-sm btn-secondary"
+              style={{ flex: 1 }}
+              onClick={onTrocarPerfil}
+              title="Voltar para a tela de seleção de perfil"
+            >
+              Trocar Perfil
+            </button>
+            <button
+              className="btn btn-sm btn-secondary"
+              style={{ flex: 1 }}
+              onClick={exportarBackup}
+              disabled={exportando}
+              title="Salva um arquivo .cptec.json com tudo o que está neste perfil, para guardar como backup ou levar para outro computador"
+            >
+              {exportando ? 'Gerando...' : 'Exportar Backup'}
+            </button>
+          </div>
         )}
       </div>
 

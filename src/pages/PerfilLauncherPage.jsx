@@ -6,6 +6,12 @@ import {
   novoPerfil, adicionarPerfil, removerPerfil, atualizarPerfil, protegerPerfil, dataStorageKeyFor,
 } from '../store/perfis';
 import { gerarSaltBase64, derivarChave, criptografarObjeto } from '../utils/crypto';
+import {
+  EXTENSAO_BACKUP, MENSAGENS_BACKUP, TIPO_MIME_BACKUP,
+  anosDoBackup, lerArquivoBackup, montarBackupDoArmazenamento, nomeArquivoBackup,
+  restaurarBackup, textoDoArquivoBackup,
+} from '../store/backupPerfil';
+import { baixarTexto } from '../utils/baixarArquivo';
 import { parseDBK, parsePDF } from './importParsers';
 import { reducerComHistorico, initialState } from '../store/reducer';
 import { validarIntegridadeArquivoIrpf } from '../irpf/leitorRegistrosDbk';
@@ -41,6 +47,17 @@ const LockIcon = (props) => (
 
 const FORM_VAZIO = { nome: '', cpf: '', apelido: '' };
 const SENHA_VAZIA = { senha: '', confirmar: '' };
+
+// Data e hora da exportação no fuso de quem está lendo. `formatDate` não
+// serve aqui: ela lê o prefixo "aaaa-mm-dd" do texto ISO, que é UTC, e um
+// backup gerado às 22h no horário de Brasília apareceria com a data do dia
+// seguinte.
+function dataHoraDoBackup(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return 'data desconhecida';
+  const p = (n) => String(n).padStart(2, '0');
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} às ${p(d.getHours())}h${p(d.getMinutes())}`;
+}
 
 // Tela de entrada do app: cada perfil é um titular inteiro, com seus
 // próprios anos/bens/dívidas/dependentes guardados numa chave de
@@ -95,6 +112,15 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     r?.(ok);
   }, []);
   const fileRef = useRef();
+  // Backup e restauração em arquivo (item A2 de
+  // MELHORIAS-PROPOSTAS-2026-09-03.md). `avisoBackup` é a única linha de
+  // resposta das duas operações (não há toast nesta tela, que vive antes do
+  // DataProvider); `restauracao` é o painel que aparece depois de escolher um
+  // arquivo válido e antes de gravar qualquer coisa.
+  const [avisoBackup, setAvisoBackup] = useState(null); // { tipo: 'sucesso' | 'erro', texto }
+  const [exportandoId, setExportandoId] = useState(null);
+  const [restauracao, setRestauracao] = useState(null);
+  const backupFileRef = useRef();
 
   const persistir = (novaLista) => {
     setPerfis(novaLista);
@@ -238,6 +264,93 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     persistir(removerPerfil(perfis, perfil.id));
   };
 
+  // Exporta QUALQUER perfil da lista, aberto ou não, direto do que está
+  // gravado no localStorage. Perfil protegido não pede senha aqui: o que sai
+  // é o envelope cifrado que já está no disco, cópia exata, e sem a senha ele
+  // continua ilegível (ver o cabeçalho de src/store/backupPerfil.js).
+  const handleExportarPerfil = async (e, perfil) => {
+    e.stopPropagation();
+    setAvisoBackup(null);
+    setExportandoId(perfil.id);
+    try {
+      const agora = new Date();
+      const arquivo = await montarBackupDoArmazenamento({ storage: localStorage, perfil, agora });
+      const nome = nomeArquivoBackup(perfil, agora);
+      baixarTexto({ nome, texto: textoDoArquivoBackup(arquivo), tipo: TIPO_MIME_BACKUP });
+      setAvisoBackup({
+        tipo: 'sucesso',
+        texto: `Backup de ${perfil.apelido || perfil.nome || 'perfil'} salvo como ${nome}. Guarde uma cópia fora deste computador.`,
+      });
+    } catch (err) {
+      setAvisoBackup({ tipo: 'erro', texto: err?.message || 'Não foi possível gerar o backup deste perfil.' });
+    }
+    setExportandoId(null);
+  };
+
+  // Só LÊ e confere o arquivo (formato, integridade pelo hash e versão de
+  // esquema). Nada é gravado antes de a pessoa escolher o destino e clicar em
+  // Restaurar no painel.
+  const handleEscolherBackup = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = ''; // permite reescolher o mesmo arquivo depois de um erro
+    if (!file) return;
+    setAvisoBackup(null);
+    try {
+      const arquivo = await lerArquivoBackup(await file.text());
+      setRestauracao({ nomeArquivo: file.name, arquivo, senha: '', destino: 'novo', erro: '', ocupado: false });
+    } catch (err) {
+      setRestauracao(null);
+      setAvisoBackup({ tipo: 'erro', texto: err?.message || MENSAGENS_BACKUP.arquivo_invalido });
+    }
+  };
+
+  const handleRestaurarBackup = async () => {
+    if (!restauracao || restauracao.ocupado) return;
+    const { arquivo, senha, destino } = restauracao;
+    if (arquivo.protegido && !senha) {
+      setRestauracao(r => ({ ...r, erro: 'Digite a senha que protegia o perfil quando este backup foi exportado.' }));
+      return;
+    }
+    // O padrão é sempre criar um perfil NOVO. Substituir um perfil que já
+    // existe apaga os dados dele, então passa pelo modal próprio de
+    // confirmação (nunca pelo confirm() nativo, ver src/semConfirmNativo.test.js).
+    const alvo = destino === 'novo' ? null : perfis.find(p => p.id === destino);
+    if (destino !== 'novo') {
+      if (!alvo) {
+        setRestauracao(r => ({ ...r, erro: MENSAGENS_BACKUP.perfil_inexistente }));
+        return;
+      }
+      const confirmado = await confirmar({
+        titulo: `Substituir os dados do perfil "${alvo.apelido || alvo.nome || 'sem nome'}"?`,
+        texto: 'Todos os anos, bens, dívidas, rendimentos e dependentes que estão nele hoje são apagados e trocados pelos do arquivo. Essa ação não pode ser desfeita.',
+        textoConfirmar: 'Substituir',
+        perigo: true,
+      });
+      if (!confirmado) return;
+    }
+    setRestauracao(r => ({ ...r, ocupado: true, erro: '' }));
+    try {
+      const { perfil, lista } = await restaurarBackup({
+        storage: localStorage,
+        arquivo,
+        senha,
+        substituirPerfilId: alvo ? alvo.id : null,
+      });
+      // restaurarBackup já gravou a lista; aqui só espelha na tela.
+      setPerfis(lista);
+      setRestauracao(null);
+      const nome = perfil.apelido || perfil.nome || 'sem nome';
+      setAvisoBackup({
+        tipo: 'sucesso',
+        texto: alvo
+          ? `Perfil "${nome}" substituído pelo conteúdo do backup. Escolha o perfil na lista para abrir.`
+          : `Perfil "${nome}" restaurado do backup. Escolha o perfil na lista para abrir.`,
+      });
+    } catch (err) {
+      setRestauracao(r => ({ ...r, ocupado: false, erro: err?.message || 'Não foi possível restaurar este backup.' }));
+    }
+  };
+
   const iniciarEdicaoApelido = (e, perfil) => {
     e.stopPropagation();
     setEditandoApelidoId(perfil.id);
@@ -335,13 +448,21 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                         {senhaErro && <p style={{ color: 'var(--accent-danger)', fontSize: '11px', marginTop: '4px' }}>{senhaErro}</p>}
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', gap: '14px', marginTop: '8px' }}>
+                      <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap' }}>
                         <button className="perfil-link-btn" onClick={e => iniciarEdicaoApelido(e, p)}>
                           {p.apelido ? 'Editar apelido' : '+ Apelido'}
                         </button>
                         {!p.protegido && (
                           <button className="perfil-link-btn" onClick={e => iniciarProtecao(e, p)}>Proteger com senha</button>
                         )}
+                        <button
+                          className="perfil-link-btn"
+                          disabled={exportandoId === p.id}
+                          title={`Salva um arquivo ${EXTENSAO_BACKUP} com tudo o que está neste perfil`}
+                          onClick={e => handleExportarPerfil(e, p)}
+                        >
+                          {exportandoId === p.id ? 'Gerando backup...' : 'Exportar backup'}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -353,6 +474,93 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                   ＋ Novo Perfil
                 </button>
               )}
+            </div>
+          )}
+
+          {/* Backup e restauração em arquivo (item A2). Fica fora do bloco da
+              lista de propósito: numa instalação nova, sem perfil nenhum,
+              restaurar um backup é justamente o que a pessoa precisa fazer. */}
+          <input
+            ref={backupFileRef}
+            type="file"
+            accept={`${EXTENSAO_BACKUP},.json`}
+            style={{ display: 'none' }}
+            onChange={handleEscolherBackup}
+          />
+          {avisoBackup && (
+            <p style={{
+              fontSize: '12px',
+              margin: '0 0 12px',
+              color: avisoBackup.tipo === 'erro' ? 'var(--accent-danger)' : 'var(--text-secondary)',
+            }}>
+              {avisoBackup.texto}
+            </p>
+          )}
+          {!restauracao && (
+            <div style={{ marginBottom: '16px' }}>
+              <button className="perfil-link-btn" onClick={() => backupFileRef.current?.click()}>
+                Restaurar perfil de um arquivo ({EXTENSAO_BACKUP})
+              </button>
+            </div>
+          )}
+          {restauracao && (
+            <div className="card" style={{ marginBottom: '16px' }}>
+              <div className="card-header"><h3 className="card-title">Restaurar perfil</h3></div>
+              <div style={{ padding: '0 16px', fontSize: '13px' }}>
+                <p style={{ margin: '0 0 10px', color: 'var(--text-secondary)' }}>
+                  Arquivo <strong>{restauracao.nomeArquivo}</strong>, exportado em {dataHoraDoBackup(restauracao.arquivo.exportadoEm)} pelo CP-TEC {restauracao.arquivo.versaoApp || 'de versão não informada'}.
+                </p>
+                <p style={{ margin: '0 0 10px' }}>
+                  Titular: <strong>{restauracao.arquivo.perfil?.nome || 'sem nome'}</strong>
+                  {restauracao.arquivo.perfil?.apelido ? <span className="perfil-apelido-badge" style={{ marginLeft: '8px' }}>{restauracao.arquivo.perfil.apelido}</span> : null}
+                </p>
+                {restauracao.arquivo.protegido ? (
+                  <div className="form-group">
+                    <label>Senha do perfil</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={restauracao.senha}
+                      autoFocus
+                      onChange={e => setRestauracao(r => ({ ...r, senha: e.target.value, erro: '' }))}
+                    />
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+                      Este backup está cifrado. Sem a senha usada na exportação, o conteúdo não pode ser lido nem restaurado.
+                    </p>
+                  </div>
+                ) : (
+                  <p style={{ margin: '0 0 10px', color: 'var(--text-secondary)' }}>
+                    {anosDoBackup(restauracao.arquivo).length > 0
+                      ? `Anos no arquivo: ${anosDoBackup(restauracao.arquivo).join(', ')}.`
+                      : 'O arquivo não traz nenhum ano-calendário com dados.'}
+                  </p>
+                )}
+                <div className="form-group">
+                  <label>Destino</label>
+                  <select
+                    className="form-control"
+                    value={restauracao.destino}
+                    onChange={e => setRestauracao(r => ({ ...r, destino: e.target.value, erro: '' }))}
+                  >
+                    <option value="novo">Criar um perfil novo</option>
+                    {perfis.map(p => (
+                      <option key={p.id} value={p.id}>Substituir o perfil {p.apelido || p.nome || 'sem nome'}</option>
+                    ))}
+                  </select>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+                    Criar um perfil novo não mexe em nada do que já está no app. Substituir apaga o conteúdo do perfil escolhido.
+                  </p>
+                </div>
+                {restauracao.erro && (
+                  <p style={{ color: 'var(--accent-danger)', fontSize: '12px', margin: '0 0 10px' }}>{restauracao.erro}</p>
+                )}
+              </div>
+              <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setRestauracao(null)}>Cancelar</button>
+                <button type="button" className="btn btn-primary" disabled={restauracao.ocupado} onClick={handleRestaurarBackup}>
+                  {restauracao.ocupado ? 'Restaurando...' : 'Restaurar'}
+                </button>
+              </div>
             </div>
           )}
 
