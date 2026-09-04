@@ -21,7 +21,7 @@
   --accent-info: #06b6d4;
   --text-primary: #eef0f2;
   --text-secondary: #959aa1;
-  --text-muted: #7b818a;
+  --text-muted: #828993;
   --text-accent: #a9aeba;
   --border-color: rgba(123, 129, 138, 0.15);
   --border-focus: rgba(137, 145, 171, 0.5);
@@ -211,6 +211,8 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .btn-success{background:var(--accent-success);color:white}
 .btn-danger{background:var(--accent-danger);color:#fff;border:1px solid var(--accent-danger);box-shadow:0 1px 4px rgba(239,68,68,0.35)}
 .btn-danger:hover{background:#dc2626;border-color:#dc2626;box-shadow:0 2px 8px rgba(239,68,68,0.5)}
+:root[data-theme="dark"] .btn-danger{background:#dc2626;border-color:#dc2626}
+:root[data-theme="dark"] .btn-danger:hover{background:#b91c1c;border-color:#b91c1c}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn-lg{padding:12px 24px;font-size:15px}
 /* Depois de todas as variantes de :hover (mesma especificidade, ordem

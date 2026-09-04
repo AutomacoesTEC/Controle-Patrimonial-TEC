@@ -134,6 +134,9 @@ de cor à parte aqui. Pelo mesmo critério, texto funcional pequeno no
 tema claro usa variantes escuras de azul, verde, laranja, roxo e vermelho
 (#1d4ed8 / #047857 / #92400e / #6d28d9 / #b91c1c); os fundos de status
 continuam os mesmos e o tema escuro conserva os tons claros originais.
+No tema escuro, texto apagado usa `#828993` sobre cards e o botão destrutivo
+usa `#dc2626` (`#b91c1c` no hover), para que texto pequeno e rótulos de ação
+também atinjam 4,5:1 sem alterar as equivalências do tema claro.
 
 ## Typography
 
