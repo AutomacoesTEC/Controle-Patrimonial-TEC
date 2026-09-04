@@ -89,7 +89,7 @@ Fechamento: a fixture real tem origem e ponto documental em 35/35 itens das
 quatro coleções (7 bens, 2 dívidas, 18 rendimentos e 8 pagamentos); as quatro
 telas reutilizam badge/filtro e as quatro exportações incluem Origem.
 
-### A4. Trilha de alterações: completar o que já existe (P2)
+### A4. Trilha de alterações: completar o que já existe — CONCLUÍDO (P2)
 
 Evidência: já existe `state.alteracoes` e a tela "Histórico de Alterações"
 (`src/pages/HistoricoPage.jsx`, filtro por data real da alteração). Antes de
@@ -124,6 +124,13 @@ linhas removidas agora são substituídas por um resumo acumulativo com contagem
 e intervalo temporal. O fixture de duas inserções preservou o tamanho e
 compactou exatamente três alterações antigas. Evidência em
 `AUDITORIA/RODADAS/2026-09-04-51-compactacao-historico/`.
+
+Fechamento na rodada 52: o teste estrutural percorre os 66 `case` do reducer e
+exige que cada ação esteja em `descreverAcao` ou na lista explícita de quatro
+ações de infraestrutura/UI (`SUBSTITUIR_ESTADO_PERSISTIDO` e toasts). A
+partição atual é 62 registradas + 4 excluídas; uma ação nova sem classificação
+falha na suíte. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-52-cobertura-historico/`.
 
 ### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras — CONCLUÍDO (P1)
 

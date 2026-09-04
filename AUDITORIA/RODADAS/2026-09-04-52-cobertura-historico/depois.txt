@@ -1,0 +1,8 @@
+RUN  v4.1.10
+
+PASS reducer.historicoCobertura.test.js > cobertura estrutural do histórico de alterações > classifica todo case novo como registrado ou infraestrutura sem histórico
+
+Test Files  1 passed (1)
+Tests       1 passed (1)
+
+{"casesReducer":66,"casesDescritos":62,"exclusoesInfraestrutura":4,"testesDeCobertura":1}

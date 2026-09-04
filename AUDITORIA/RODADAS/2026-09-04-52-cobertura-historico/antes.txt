@@ -1,0 +1,1 @@
+{"casesReducer":66,"casesDescritos":62,"semDescricao":["SUBSTITUIR_ESTADO_PERSISTIDO","ADD_TOAST","CLOSE_TOAST","REMOVE_TOAST"],"testesDeCobertura":0}
