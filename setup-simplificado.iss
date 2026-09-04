@@ -26,6 +26,10 @@ DisableDirPage=yes
 DisableProgramGroupPage=yes
 DisableReadyPage=yes
 DisableWelcomePage=yes
+; O fluxo simplificado não mostra a página de diretório. Portanto ele jamais
+; pode herdar silenciosamente um caminho usado em teste ou escolhido por uma
+; instalação técnica anterior: sempre parte do DefaultDirName seguro acima.
+UsePreviousAppDir=no
 
 [Languages]
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"

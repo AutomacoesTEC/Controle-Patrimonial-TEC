@@ -1,0 +1,25 @@
+nao_reutiliza_diretorio_anterior=1
+total=1/1
+
+Teste de contrato:
+Test Files  1 passed (1)
+Tests       11 passed (11)
+
+Prova Windows com o registro contaminado pelo caminho anterior:
+diretorio_registrado=C:\Users\tectr_u0xxepj\AppData\Local\Programs\ControlePatrimonial\
+diretorio_esperado=C:\Users\tectr_u0xxepj\AppData\Local\Programs\ControlePatrimonial\
+diretorio_correto=1
+
+Segunda execução antes da limpeza:
+session_mtime_antes=1788547012
+session_mtime_depois=1788547012
+session_inalterada=1
+
+Prova final após encerrar somente a cópia antiga e remover o resíduo:
+diretorio_correto=1
+session_recriada=0
+executavel_no_local_correto=1
+atalho_destino=C:\Users\tectr_u0xxepj\AppData\Local\Programs\ControlePatrimonial\ControlePatrimonial.exe
+
+O armazenamento de dados em
+C:\Users\tectr_u0xxepj\AppData\Local\ControlePatrimonialIRPF não foi removido.

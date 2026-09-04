@@ -1,0 +1,10 @@
+nao_reutiliza_diretorio_anterior=0
+total=0/1
+
+Registro do Windows antes da mudança:
+DisplayName: CP-TEC - Controle de Variação Patrimonial versão 1.2.0
+InstallLocation: C:\Users\tectr_u0xxepj\Desktop\session_3f3854a4-c79d-42c4-bafe-a2eaf125d2b1\installer-build\test-install\
+UninstallString: ...\test-install\unins000.exe
+
+A pasta foi atualizada novamente às 15:36:54 durante a instalação reportada
+pelo usuário, provando que não era apenas resíduo visual antigo.

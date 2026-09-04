@@ -94,6 +94,7 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     expect(setupSimplificado).toContain('DisableProgramGroupPage=yes');
     expect(setupSimplificado).toContain('DisableReadyPage=yes');
     expect(setupSimplificado).toContain('DisableWelcomePage=yes');
+    expect(setupSimplificado).toContain('UsePreviousAppDir=no');
     expect(setupSimplificado).not.toContain('[Tasks]');
     expect(setupSimplificado).toContain('Name: "{autodesktop}\\{#AppName}"; Filename: "{app}\\{#AppExe}"');
     expect(setupSimplificado).toContain('Description: "Abrir {#AppName}"; Flags: nowait postinstall skipifsilent');
