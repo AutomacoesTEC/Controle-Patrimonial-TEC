@@ -1290,6 +1290,7 @@ const COLECAO_POR_EDICAO = {
 };
 
 const CAMPOS_TECNICOS_HISTORICO = new Set(['id', 'origem', 'origemDocumento', 'valorDeclarado', 'movimentacoes']);
+const LIMITE_HISTORICO = 300;
 
 function mudancasDaAcao(stateAntes, stateDepois, action) {
   const colecao = COLECAO_POR_EDICAO[action.type];
@@ -1301,6 +1302,28 @@ function mudancasDaAcao(stateAntes, stateDepois, action) {
     .filter(campo => !CAMPOS_TECNICOS_HISTORICO.has(campo))
     .filter(campo => JSON.stringify(antes[campo]) !== JSON.stringify(depois[campo]))
     .map(campo => ({ campo, antes: antes[campo] ?? null, depois: depois[campo] ?? null }));
+}
+
+function limitarECompactarHistorico(alteracoes) {
+  if (alteracoes.length <= LIMITE_HISTORICO) return alteracoes;
+  const recentes = alteracoes.slice(0, LIMITE_HISTORICO - 1);
+  const antigas = alteracoes.slice(LIMITE_HISTORICO - 1);
+  const quantidade = antigas.reduce((total, item) => total + (item.compactadoQuantidade || 1), 0);
+  const datas = antigas.flatMap(item => [item.compactadoInicio || item.data, item.compactadoFim || item.data]).filter(Boolean).sort();
+  const anos = [...new Set(antigas.map(item => item.anoCalendario).filter(ano => ano != null))];
+  const inicio = datas[0] || '';
+  const fim = datas.at(-1) || inicio;
+  const resumo = {
+    id: `historico-compactado-${inicio || quantidade}`,
+    data: fim,
+    anoCalendario: anos.length === 1 ? anos[0] : null,
+    descricao: `${quantidade} alterações antigas compactadas`,
+    compactadoQuantidade: quantidade,
+    compactadoInicio: inicio,
+    compactadoFim: fim,
+    mudancas: [],
+  };
+  return [...recentes, resumo];
 }
 
 // Frase legível pro histórico de alterações, a partir da ação já aplicada.
@@ -1403,5 +1426,5 @@ export function reducerComHistorico(state, action) {
     descricao,
     mudancas: mudancasDaAcao(state, novoEstado, action),
   };
-  return { ...novoEstado, alteracoes: [entrada, ...(novoEstado.alteracoes || [])].slice(0, 300) };
+  return { ...novoEstado, alteracoes: limitarECompactarHistorico([entrada, ...(novoEstado.alteracoes || [])]) };
 }

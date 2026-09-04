@@ -214,6 +214,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   anterior e novo por campo; ids e metadados técnicos ficam ocultos.
   A exportação do Relatório IRPF inclui uma aba própria, limitada ao
   ano-calendário exibido e detalhada em uma linha por campo.
+  A trilha mantém no máximo 300 linhas de estado; ao ultrapassar o limite, as
+  mais antigas viram um único resumo acumulativo, sem descarte silencioso.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação

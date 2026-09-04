@@ -119,6 +119,12 @@ ano-calendário selecionado e abre uma linha para cada campo alterado, com valor
 anterior e novo. Evidência em
 `AUDITORIA/RODADAS/2026-09-04-50-historico-no-xlsx/`.
 
+Terceira parte concluída na rodada 51: o cap permanece em 300 entradas, mas as
+linhas removidas agora são substituídas por um resumo acumulativo com contagem
+e intervalo temporal. O fixture de duas inserções preservou o tamanho e
+compactou exatamente três alterações antigas. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-51-compactacao-historico/`.
+
 ### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras — CONCLUÍDO (P1)
 
 Implementada a alternativa menos invasiva: helper único

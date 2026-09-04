@@ -1,0 +1,16 @@
+RUN  v4.1.10
+
+FAIL verificar-compactacao.test.js > fixture congelado: compactação do histórico > mantém o cap e resume cumulativamente as entradas removidas
+AssertionError: expected { id: 'h297', ... } to match object { compactadoQuantidade: 3, ... }
+
+- Expected
++ Received
+
+  {
+-   "compactadoQuantidade": 3,
+-   "descricao": "3 alterações antigas compactadas",
++   "descricao": "Alteração 297",
+  }
+
+Test Files  1 failed (1)
+Tests       1 failed (1)

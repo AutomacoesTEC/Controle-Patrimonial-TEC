@@ -1,0 +1,6 @@
+RUN  v4.1.10
+
+PASS verificar-compactacao.test.js > fixture congelado: compactação do histórico > mantém o cap e resume cumulativamente as entradas removidas
+
+Test Files  1 passed (1)
+Tests       1 passed (1)
