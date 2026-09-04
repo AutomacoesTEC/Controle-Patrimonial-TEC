@@ -243,6 +243,30 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    é a unidade principal da tela em vez de um dado dentro dela. */
 .launcher-ambient{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 22%,rgba(var(--accent-primary-rgb),0.14),transparent 55%)}
 .launcher-logo{width:64px;height:64px;border-radius:var(--radius-lg);background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;box-shadow:var(--shadow-glow);margin:0 auto}
+.launcher-shell{width:100%;max-width:600px;margin:auto 0;padding:36px 20px 48px}
+.launcher-heading{text-align:center;margin-bottom:28px}
+.launcher-restore-wrap{margin-bottom:16px}
+.launcher-restore-action{width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;text-align:left;color:var(--text-primary);background:rgba(var(--accent-primary-rgb),0.06);border:1px solid rgba(var(--accent-primary-rgb),0.18);border-radius:var(--radius-lg);font-family:var(--font-family);cursor:pointer;transition:all var(--transition-normal)}
+.launcher-restore-action:hover{background:rgba(var(--accent-primary-rgb),0.1);border-color:rgba(var(--accent-primary-rgb),0.4);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.launcher-action-icon{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--accent-primary);background:rgba(var(--accent-primary-rgb),0.13);border-radius:10px}
+.launcher-action-icon svg{width:21px;height:21px}
+.launcher-action-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.launcher-action-copy strong{font-size:13px}
+.launcher-action-copy small{font-size:12px;line-height:1.35;color:var(--text-secondary)}
+.launcher-action-arrow{font-size:25px;line-height:1;color:var(--text-muted)}
+.launcher-create-card{overflow:hidden}
+.launcher-create-header{padding-bottom:16px}
+.launcher-create-header p{margin:4px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.45}
+.launcher-create-body{padding:0 20px}
+.launcher-import-option{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-md)}
+.launcher-import-icon{width:40px;height:40px}
+.launcher-import-copy{display:flex;min-width:0;flex-direction:column;gap:3px}
+.launcher-import-copy strong{font-size:13px;color:var(--text-primary)}
+.launcher-import-copy small{font-size:11px;line-height:1.4;color:var(--text-secondary)}
+.launcher-import-option>p{grid-column:2/-1}
+.launcher-choice-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+.launcher-choice-divider::before,.launcher-choice-divider::after{content:"";height:1px;flex:1;background:var(--border-color)}
+.launcher-choice-divider span{white-space:nowrap}
 .perfil-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all var(--transition-normal)}
 .perfil-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:rgba(var(--accent-primary-rgb),0.3)}
 .perfil-avatar{width:46px;height:46px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:var(--shadow-glow)}
@@ -251,6 +275,14 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .perfil-link-btn:hover{color:var(--accent-primary)}
 .perfil-add-card{border:1.5px dashed var(--border-color);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--text-secondary);font-weight:600;font-size:13px;background:transparent;transition:all var(--transition-normal);width:100%}
 .perfil-add-card:hover{border-color:var(--accent-primary);color:var(--accent-primary);background:var(--bg-card)}
+
+@media(max-width:600px){
+  .launcher-shell{padding:28px 14px 36px}
+  .launcher-heading{margin-bottom:22px}
+  .launcher-import-option{grid-template-columns:auto minmax(0,1fr)}
+  .launcher-import-option .btn{grid-column:1/-1;width:100%;justify-content:center}
+  .launcher-import-option>p{grid-column:1/-1}
+}
 
 .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font-family);cursor:pointer;transition:all var(--transition-fast);white-space:nowrap}
 .btn svg{width:16px;height:16px}

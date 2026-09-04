@@ -43,6 +43,19 @@ const LockIcon = (props) => (
     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
   </svg>
 );
+const RestoreIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+const ImportFileIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+    <path d="M14 2v6h6M12 18v-6M9.5 14.5 12 12l2.5 2.5" />
+  </svg>
+);
 
 const FORM_VAZIO = { nome: '', cpf: '', apelido: '' };
 const SENHA_VAZIA = { senha: '', confirmar: '' };
@@ -413,9 +426,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       >
         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
       </button>
-      <main className="main-content" style={{ alignItems: 'center', justifyContent: 'center', overflowY: 'auto', position: 'relative' }}>
-        <div style={{ width: '100%', maxWidth: '560px', padding: '40px 20px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+      <main className="main-content" style={{ alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', position: 'relative' }}>
+        <div className="launcher-shell">
+          <div className="launcher-heading">
             <div className="launcher-logo">CP</div>
             <h1 style={{ fontSize: '26px', fontWeight: 700, margin: '20px 0 0', letterSpacing: '-0.02em' }}>
               Controle Patrimonial <span className="perfil-apelido-badge" style={{ fontSize: '13px', padding: '3px 10px', verticalAlign: 'middle' }}>TEC</span>
@@ -509,9 +522,14 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
             </p>
           )}
           {!restauracao && (
-            <div style={{ marginBottom: '16px' }}>
-              <button className="perfil-link-btn" onClick={() => backupFileRef.current?.click()}>
-                Restaurar perfil de um arquivo ({EXTENSAO_BACKUP})
+            <div className="launcher-restore-wrap">
+              <button className="launcher-restore-action" type="button" onClick={() => backupFileRef.current?.click()}>
+                <span className="launcher-action-icon"><RestoreIcon /></span>
+                <span className="launcher-action-copy">
+                  <strong>Já usou o CP-TEC?</strong>
+                  <small>Restaure aqui um perfil salvo em {EXTENSAO_BACKUP}</small>
+                </span>
+                <span className="launcher-action-arrow" aria-hidden="true">›</span>
               </button>
             </div>
           )}
@@ -577,10 +595,15 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           )}
 
           {formOpen && (
-            <div className="card">
-              <div className="card-header"><h3 className="card-title">Novo Perfil</h3></div>
+            <div className="card launcher-create-card">
+              <div className="card-header launcher-create-header">
+                <div>
+                  <h3 className="card-title">Criar novo perfil</h3>
+                  <p>Comece importando a declaração ou informe os dados do titular.</p>
+                </div>
+              </div>
               <form onSubmit={handleCriarPerfil}>
-                <div style={{ padding: '0 16px' }}>
+                <div className="launcher-create-body">
                   <input ref={fileRef} type="file" accept=".pdf,.dbk,.dec,.f2b" style={{ display: 'none' }} onChange={handleImportarDeclaracao} />
                   {declaracaoImportada ? (
                     <div className="form-group" style={{ padding: '10px 12px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
@@ -626,14 +649,22 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                       })()}
                     </div>
                   ) : (
-                    <div className="form-group">
-                      <button type="button" className="btn btn-secondary btn-sm" disabled={importando} onClick={() => fileRef.current?.click()}>
-                        {importando ? 'Lendo declaração...' : 'Importar Declaração (PDF, .DEC ou .DBK)'}
+                    <div className="form-group launcher-import-option">
+                      <span className="launcher-action-icon launcher-import-icon"><ImportFileIcon /></span>
+                      <div className="launcher-import-copy">
+                        <strong>Importar declaração</strong>
+                        <small>Preencha o perfil automaticamente usando PDF, .DEC, .DBK ou .F2B.</small>
+                      </div>
+                      <button type="button" className="btn btn-secondary" disabled={importando} onClick={() => fileRef.current?.click()}>
+                        {importando ? 'Lendo arquivo...' : 'Selecionar arquivo'}
                       </button>
                       {erroImportacao && <p style={{ color: 'var(--accent-danger)', fontSize: '12px', marginTop: '6px', marginBottom: 0 }}>{erroImportacao}</p>}
                     </div>
                   )}
-                  <div className="form-group"><label>Nome do Titular</label><input className="form-control" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} autoFocus /></div>
+                  {!declaracaoImportada && (
+                    <div className="launcher-choice-divider"><span>Preencher manualmente</span></div>
+                  )}
+                  <div className="form-group"><label>Nome do Titular</label><input className="form-control" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} placeholder="Nome completo do titular" autoFocus /></div>
                   <div className="form-row">
                     <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(form.cpf)} onChange={e => setForm(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="Opcional, 000.000.000-00" /></div>
                     <div className="form-group"><label>Apelido</label><input className="form-control" value={form.apelido} onChange={e => setForm(p => ({ ...p, apelido: e.target.value }))} placeholder="Ex: Cliente A" /></div>

@@ -1,0 +1,21 @@
+restauracao_estruturada=1
+importacao_centralizada=1
+divisor_cadastro_manual=1
+placeholder_nome=1
+total=4/4
+
+Validação visual automatizada com Chromium:
+- desktop 1285x957: largura do documento=1285, viewport=1285
+- celular 390x844: largura do documento=390, viewport=390
+- celular: scrollTop inicial=0, logoTop=28, conteúdo rolável=995
+- tema claro: overflow horizontal=0, logoTop=98
+
+Verificações finais:
+- build Vite: 669 módulos transformados, sucesso
+- Vitest: 54 arquivos e 917 testes aprovados
+- unittest desktop: 2 testes aprovados
+- diff --check: aprovado
+
+Observação bruta: a primeira execução concorrente da suíte registrou uma falha
+intermitente na identidade do PDF AJU-01; o teste isolado passou 4/4 logo em
+seguida e a reexecução integral passou 917/917.

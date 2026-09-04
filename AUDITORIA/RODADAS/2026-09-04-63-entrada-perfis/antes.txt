@@ -1,0 +1,9 @@
+restauracao_estruturada=0
+importacao_centralizada=0
+divisor_cadastro_manual=0
+placeholder_nome=0
+total=0/4
+
+Evidência visual: captura eeeee.jpg enviada pelo usuário, 1285x957, tema
+claro. A restauração aparece como texto solto e a importação como botão
+pequeno à esquerda, sem explicação de que o cadastro manual é uma alternativa.
