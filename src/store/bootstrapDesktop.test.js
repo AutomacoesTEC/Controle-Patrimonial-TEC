@@ -15,6 +15,22 @@ function storageMemoria(inicial = {}) {
 }
 
 describe('bootstrap da persistência desktop', () => {
+  it('inicializa uma instalação nova sem perfil e sem dados de declaração', async () => {
+    const storage = storageMemoria();
+    const api = {
+      carregar_cache: vi.fn(async () => ({ indice: null, perfis: {} })),
+      salvar_perfil: vi.fn(async () => ({ salvo: true })),
+      salvar_indice_perfis: vi.fn(async () => ({ salvo: true })),
+    };
+
+    await expect(hidratarCacheDesktop({ api, storage }))
+      .resolves.toEqual({ origem: 'cache_migrado', perfis: 0 });
+    expect(api.salvar_perfil).not.toHaveBeenCalled();
+    expect(api.salvar_indice_perfis).toHaveBeenCalledWith('[]');
+    expect(storage.getItem(PERFIS_STORAGE_KEY)).toBeNull();
+    expect([...storage.dados.keys()].filter(chave => chave.startsWith('controle-patrimonial-data-'))).toEqual([]);
+  });
+
   it('migra o localStorage antigo para o disco e grava o índice por último', async () => {
     const storage = storageMemoria({
       [PERFIS_STORAGE_KEY]: '[{"id":"p1"}]',

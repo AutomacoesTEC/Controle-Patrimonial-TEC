@@ -1,0 +1,14 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  15:19:53
+   Duration  420ms (transform 406ms, setup 0ms, import 523ms, tests 50ms, environment 0ms)
+
+Resultado pareado:
+- primeira abertura: 0 perfis e 0 chaves de declaração
+- chamadas para salvar perfil fiscal: 0
+- índice durável criado: []
+- fontes extras aceitas pelo pacote além de dist/: 0
+- teste permanente específico: 0 -> 1

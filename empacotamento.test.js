@@ -55,6 +55,19 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     expect(viteConfig).toContain("new URL('./desktop.html', import.meta.url)");
   });
 
+  it('o pacote leva somente o frontend compilado, nunca fixtures ou dados locais', () => {
+    const blocoDatas = /datas=\[(.*?)\],\s*\n\s*hiddenimports=/s.exec(spec)?.[1]
+      ?.replace(/\s/g, '');
+    expect(blocoDatas).toBe("('dist','dist')");
+
+    const fontesDoInstalador = [...setup.matchAll(/^Source:\s*"([^"]+)"/gm)]
+      .map(resultado => resultado[1]);
+    const fontesDoSimplificado = [...setupSimplificado.matchAll(/^Source:\s*"([^"]+)"/gm)]
+      .map(resultado => resultado[1]);
+    expect(fontesDoInstalador).toEqual(['dist-app\\ControlePatrimonial\\*']);
+    expect(fontesDoSimplificado).toEqual(['dist-app\\ControlePatrimonial\\*']);
+  });
+
   it('o app abre sem console e com o ícone da marca', () => {
     expect(spec).toContain('console=False');
     expect(spec).toContain("icon='assets/cp-tec.ico'");

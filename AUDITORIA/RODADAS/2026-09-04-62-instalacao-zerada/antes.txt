@@ -1,0 +1,17 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  15:19:21
+   Duration  480ms (transform 222ms, setup 0ms, import 260ms, tests 6ms, environment 0ms)
+
+Inspeção do computador em 04/09/2026:
+- perfis/_perfis.json: [] (2 bytes)
+- arquivos de perfil no armazenamento durável: 0
+- initialState: contribuinte=null, anoCalendario=null e coleções fiscais vazias
+- dist-app/_internal/dist: somente artefatos gerados pelo frontend; nenhuma fixture fiscal
+
+Lacuna observada: a trajetória passou, mas não existia na suíte permanente e
+o contrato do PyInstaller ainda não exigia que `datas` contivesse somente
+`dist/`.
