@@ -130,7 +130,10 @@ sozinho (#7b818a) não passa em texto pequeno sobre fundo claro — os
 tokens de texto efetivos no tema claro são variantes mais escuras
 (#5c6168 / #676c74), documentadas como CSS custom properties
 `--text-secondary`/`--text-muted` em `src/index.css`, não como token
-de cor à parte aqui.
+de cor à parte aqui. Pelo mesmo critério, texto funcional pequeno no
+tema claro usa variantes escuras de azul, verde, laranja, roxo e vermelho
+(#1d4ed8 / #047857 / #92400e / #6d28d9 / #b91c1c); os fundos de status
+continuam os mesmos e o tema escuro conserva os tons claros originais.
 
 ## Typography
 

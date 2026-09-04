@@ -358,6 +358,15 @@ textarea.form-control{resize:vertical;min-height:80px}
 .badge-purple{background:rgba(139,92,246,0.15);color:#a78bfa}
 .badge-red{background:rgba(239,68,68,0.15);color:#f87171}
 
+/* Os tons claros acima preservam contraste sobre cards escuros. No tema
+   claro, badges e valores financeiros pequenos precisam de variantes mais
+   escuras; os fundos semitransparentes e a semântica permanecem iguais. */
+:root[data-theme="light"] .badge-blue{color:#1d4ed8}
+:root[data-theme="light"] .badge-green{color:#047857}
+:root[data-theme="light"] .badge-orange{color:#92400e}
+:root[data-theme="light"] .badge-purple{color:#6d28d9}
+:root[data-theme="light"] .badge-red{color:#b91c1c}
+
 /* flex-shrink:0 é necessário: overflow-x:auto sem overflow-y explícito faz
    o overflow-y computar pra 'auto' também (regra da spec CSS quando só um
    eixo é setado), o que zera a altura mínima automática do elemento. Sem
@@ -506,6 +515,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 .currency{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";white-space:nowrap}
 .currency.positive{color:var(--accent-success)}
 .currency.negative{color:var(--accent-danger)}
+:root[data-theme="light"] .currency.positive{color:#047857}
+:root[data-theme="light"] .currency.negative{color:#b91c1c}
 
 .demonstrativo-table{width:100%;border-collapse:collapse;font-size:13px}
 /* vertical-align:top + line-height 1.5: quando o rótulo quebra em várias
