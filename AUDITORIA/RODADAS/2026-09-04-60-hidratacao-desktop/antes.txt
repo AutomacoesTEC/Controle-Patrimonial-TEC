@@ -1,0 +1,1 @@
+{"sinais":{"bootstrapAntesDoRender":false,"carregaDisco":false,"janelaMarcada":false},"total":0}

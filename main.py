@@ -24,7 +24,9 @@ def get_storage_path():
 
 if __name__ == '__main__':
     storage_path = get_storage_path()
-    dist_path = os.path.join(get_base_path(), 'dist', 'index.html')
+    # desktop.html define #desktop antes de carregar o módulo React. A entrada
+    # web index.html não define o marcador e por isso não espera pywebview.
+    dist_path = os.path.join(get_base_path(), 'dist', 'desktop.html')
     webview.create_window(
         'CP-TEC | Controle de Variação Patrimonial',
         dist_path,

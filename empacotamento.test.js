@@ -47,7 +47,9 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     const pastaDoVite = outDirExplicito || 'dist';
     expect(pastaDoVite).toBe('dist');
     expect(spec).toContain(`datas=[('${pastaDoVite}', '${pastaDoVite}')]`);
-    expect(mainPy).toContain(`'${pastaDoVite}', 'index.html'`);
+    expect(mainPy).toContain(`'${pastaDoVite}', 'desktop.html'`);
+    expect(viteConfig).toContain("new URL('./index.html', import.meta.url)");
+    expect(viteConfig).toContain("new URL('./desktop.html', import.meta.url)");
   });
 
   it('o app abre sem console e com o ícone da marca', () => {

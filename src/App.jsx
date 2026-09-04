@@ -6,11 +6,10 @@ import PerfilLauncherPage from './pages/PerfilLauncherPage';
 import DesbloquearPerfilPage from './pages/DesbloquearPerfilPage';
 import useRotulosAcessiveis from './components/useRotulosAcessiveis';
 import useLegendasTabelas from './components/useLegendasTabelas';
-import { snapshotHasData } from './store/reducer';
 import {
-  PERFIS_STORAGE_KEY, LEGADO_STORAGE_KEY, PERFIL_SESSAO_KEY,
-  perfilAPartirDeDadosLegados, perfilDaSessao, dataStorageKeyFor,
+  PERFIS_STORAGE_KEY, PERFIL_SESSAO_KEY, perfilDaSessao,
 } from './store/perfis';
+import { migrarLegadoParaCache } from './store/bootstrapDesktop';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ImportPage = lazy(() => import('./pages/ImportPage'));
 const TitularPage = lazy(() => import('./pages/TitularPage'));
@@ -70,15 +69,7 @@ export function inicializarAppInicial() {
   try {
     perfisRaw = localStorage.getItem(PERFIS_STORAGE_KEY);
     if (!perfisRaw) {
-      const dadosLegadoRaw = localStorage.getItem(LEGADO_STORAGE_KEY);
-      if (dadosLegadoRaw) {
-        const dadosLegado = JSON.parse(dadosLegadoRaw);
-        if (snapshotHasData(dadosLegado)) {
-          const perfil = perfilAPartirDeDadosLegados(dadosLegado);
-          localStorage.setItem(dataStorageKeyFor(perfil.id), dadosLegadoRaw);
-          localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify([perfil]));
-        }
-      }
+      migrarLegadoParaCache(localStorage);
       // Perfil recém-migrado nunca tem sessão aberta: cai na tela de perfis.
       return APP_SEM_PERFIL;
     }

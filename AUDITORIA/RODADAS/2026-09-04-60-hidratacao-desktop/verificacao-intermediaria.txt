@@ -1,0 +1,18 @@
+Primeira suíte integral após trocar a entrada do executável:
+
+Test Files  1 failed | 52 passed (53)
+Tests       1 failed | 912 passed (913)
+
+Falha observada:
+
+FAIL empacotamento.test.js > empacotamento Windows: os contratos entre os arquivos > o PyInstaller empacota a pasta que o Vite gera, e é dela que o app carrega
+AssertionError: expected main.py to contain "'dist', 'index.html'"
+
+Correção dentro da mesma camada: o contrato passou a exigir `desktop.html`
+no executável e as duas entradas (`index.html` e `desktop.html`) no Vite.
+A reexecução integral terminou em 53 arquivos e 913/913 testes aprovados.
+
+A fixture visual histórica `AUDITORIA/verificar-telas-no-app.py` iniciou o
+Chromium, mas expirou após 180 s esperando o botão "Usar esta declaração",
+etapa alheia ao bootstrap. O smoke test curto e congelado da rodada 43 foi
+usado para a verificação proporcional da montagem web e passou.

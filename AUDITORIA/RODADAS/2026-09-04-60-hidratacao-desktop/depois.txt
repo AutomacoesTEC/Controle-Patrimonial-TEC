@@ -1,0 +1,13 @@
+{"sinais":{"bootstrapAntesDoRender":true,"carregaDisco":true,"janelaMarcada":true},"total":3}
+
+Testes dirigidos:
+
+- `src/store/bootstrapDesktop.test.js` + `src/App.test.js`: 15/15 aprovados.
+- `empacotamento.test.js`: 9/9 aprovados.
+- `test_desktop_api.py`: 2/2 aprovados.
+
+Verificações finais:
+
+- suíte Vitest: 53 arquivos, 913/913 testes aprovados;
+- build Vite: 669 módulos, `dist/index.html` e `dist/desktop.html` gerados;
+- Chromium, entrada web: `{"dashboardVisivel":0,"demonstrativoVisivel":2,"destinoInternoPresente":true}`.

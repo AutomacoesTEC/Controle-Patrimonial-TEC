@@ -285,22 +285,25 @@ cinco totais derivados. Evidência pareada em
 canônicos devem entrar na mesma tabela de casos quando forem adicionados ao
 repositório.
 
-### A11. Persistência em disco no app desktop (P2, corrigido em 03/09)
+### A11. Persistência em disco no app desktop — CONCLUÍDO (P2)
 
-Evidência corrigida pelo levantamento do backup (A2): o app desktop NÃO é
-Electron, é pywebview (WebView2/Edge dirigido por Python, ver
-`build-windows.ps1` e `main.py`) e não tem ponte de IPC nenhuma hoje — é por
-isso que A2 saiu só com API de navegador (Blob + âncora), que funciona nos
-dois modos sem depender dessa ponte. `DataContext` continua gravando só no
-`localStorage` do WebView2 (mesmo limite prático de alguns MB, apagável pelo
-sistema).
+Evidência histórica corrigida pelo levantamento do backup (A2): o app desktop
+não é Electron, é pywebview (WebView2/Edge dirigido por Python, ver
+`build-windows.ps1` e `main.py`) e, antes das rodadas 57–60, não possuía ponte
+de persistência. O `DataContext` gravava somente no `localStorage` do WebView2,
+armazenamento apagável pelo sistema.
 
-Proposta, revista: criar uma ponte Python-JavaScript no pywebview
-(`window.expose` ou equivalente) para o app escrever em
-`%APPDATA%/ControlePatrimonial/perfis/<id>.json` com escrita atômica; o
-`localStorage` vira só cache. Depende de A1 e A2 (prontos). Sem essa ponte,
-a exportação/restauração manual de A2 já é o caminho de proteção disponível
-hoje no desktop.
+Concluído em três rodadas em 04/09/2026. A ponte Python passou a salvar índice
+e perfis em `%LOCALAPPDATA%/ControlePatrimonialIRPF/perfis/`, com nomes
+confinados, substituição atômica e rejeição de travessia; o autosave e todo o
+ciclo de criar, renomear, proteger, excluir e restaurar confirmam o disco antes
+de atualizar o `localStorage`; e uma entrada `desktop.html` aguarda
+`pywebviewready` para hidratar o cache antes do React. A primeira abertura
+migra o armazenamento legado com o índice por último. JSON inválido interrompe
+a carga com erro visível, sem fallback silencioso. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-57-ponte-persistencia-disco/`,
+`2026-09-04-58-autosave-disco/`, `2026-09-04-59-ciclo-perfis-disco/` e
+`2026-09-04-60-hidratacao-desktop/`.
 
 ## B. Interface e desenho
 
@@ -446,7 +449,7 @@ diálogo do host a impressão e as opções de PDF disponíveis no Windows. O
 runtime permanece pywebview/WebView2. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-31-botoes-impressao/`.
 
-### B5. Acessibilidade de teclado e leitores de tela (P2)
+### B5. Acessibilidade de teclado e leitores de tela — CONCLUÍDO (P2)
 
 Evidência: 16 atributos `aria-` em todo `src/`; `Modal.jsx` não declara
 `role="dialog"` nem `aria-modal`, sem armadilha de foco; `focus-visible` só
@@ -492,7 +495,7 @@ do Dashboard foram preservadas e passaram de zero a cinco captions nomeadas,
 todas comprovadamente fora do fluxo visual. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-40-legendas-tabelas/`.
 
-### B6. Estados vazios e primeiro uso por tela (P2)
+### B6. Estados vazios e primeiro uso por tela — CONCLUÍDO (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória
 `feedback-cp-tec-entrega-sem-declaracao`), mas cada tela vazia mostra só a
@@ -509,7 +512,7 @@ de texto solto sem ação a título, contexto e uma ação que abre o cadastro,
 preservando a estrutura vazia da tabela. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-41-estados-vazios/`.
 
-### B7. Barras em gradiente quente nos cards de estatística (P2)
+### B7. Barras em gradiente quente nos cards de estatística — CONCLUÍDO (P2)
 
 Concluído na rodada 06, commit `a15c655`: as 14 barras medidas nos temas claro
 e escuro passaram de gradiente/3px para cor semântica sólida/2px. Ganhos de
@@ -518,7 +521,7 @@ neutros usam o acento primário. Os tokens quentes foram removidos e o sistema
 foi registrado no `DESIGN.md`. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-06-barras-semanticas/`.
 
-### B8. Nomenclatura em português na navegação (P3)
+### B8. Nomenclatura em português na navegação — CONCLUÍDO (P3)
 
 Evidência: item "Dashboard" na sidebar e nos títulos, com todo o resto em
 português ("Bens e Direitos", "Ganhos de Capital").
@@ -603,9 +606,8 @@ cards) e merecem entrar junto. 8 a 13 podem esperar a rodada de B3/B5.
 
 ## Ordem sugerida — histórico de 03/09/2026
 
-Esta ordem foi executada pelas rodadas registradas acima e pelos itens já
-marcados como concluídos. As pendências atuais são somente A3, A4, a
-tolerância restante de A8, A7 e A11.
+Esta ordem foi integralmente executada pelas rodadas registradas acima. O
+backlog executável A1–A11 e B1–B10 está zerado em 04/09/2026.
 
 Concluído em 03/09/2026: **B10/B9** (capturas, commit `a39ec6e`), **A1**
 (versão de esquema, commit `bdb6203`), **A2** (backup e restauração, commit
@@ -613,7 +615,7 @@ Concluído em 03/09/2026: **B10/B9** (capturas, commit `a39ec6e`), **A1**
 lentes (perda de dado, regressão de cálculo, perfil protegido) feita por
 leitura direta do diff e dos módulos — nenhum achado.
 
-Ordem do que falta:
+Ordem executada:
 
 1. Os cinco defeitos P1 do inventário de B9/B10 (abas que rolam a página
    inteira, coluna Ações cortada, tabela de RV que estoura, valor monetário
