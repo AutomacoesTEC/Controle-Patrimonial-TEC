@@ -390,6 +390,12 @@ Proposta:
 - Toda `<input>` com `<label htmlFor>` ou `aria-label`; tabelas com
   `<caption>` visualmente oculta.
 
+Primeira parte concluída em 04/09/2026: o Modal compartilhado ganhou papel,
+modalidade e nome acessível derivados do título, foco inicial, ciclo de Tab e
+retorno ao gatilho. O fixture `Novo Bem` passou de todos os cinco critérios
+falsos/ausentes para verdadeiros. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-36-modal-acessivel/`.
+
 ### B6. Estados vazios e primeiro uso por tela (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória

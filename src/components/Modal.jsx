@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useData } from '../store/DataContext';
 
 const EXIT_DURATION = 150; // bate com --transition-fast em index.css
+const FOCAVEIS = 'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
 
 // Pra filhos que mudam de valor sem passar por um onChange nativo de
 // verdade (ex.: DateInput escolhido pelo calendário, que chama o onChange
@@ -33,6 +34,9 @@ export default function Modal({ open, onClose, children, style }) {
   const [shouldRender, setShouldRender] = useState(open);
   const [closing, setClosing] = useState(false);
   const dirtyRef = useRef(false);
+  const modalRef = useRef(null);
+  const focoAnteriorRef = useRef(null);
+  const tituloId = `modal-titulo-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   // Trava reentrância: enquanto o ConfirmacaoModal (assíncrono) está
@@ -51,6 +55,25 @@ export default function Modal({ open, onClose, children, style }) {
       return () => clearTimeout(t);
     }
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || !shouldRender || !modalRef.current) return undefined;
+    focoAnteriorRef.current = document.activeElement;
+    const modal = modalRef.current;
+    const titulo = modal?.querySelector('.modal-header h3, .modal-header h2');
+    if (titulo && !titulo.id) titulo.id = tituloId;
+    const frame = requestAnimationFrame(() => {
+      const primeiro = modal?.querySelector(FOCAVEIS);
+      (primeiro || modal)?.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      const anterior = focoAnteriorRef.current;
+      requestAnimationFrame(() => {
+        if (anterior?.isConnected && typeof anterior.focus === 'function') anterior.focus();
+      });
+    };
+  }, [open, shouldRender, tituloId]);
 
   const fecharComGuarda = async () => {
     if (perguntandoRef.current) return;
@@ -72,6 +95,24 @@ export default function Modal({ open, onClose, children, style }) {
     if (!open) return;
     const onKeyDown = (e) => {
       if (e.key === 'Escape') fecharComGuarda();
+      if (e.key === 'Tab') {
+        const itens = [...(modalRef.current?.querySelectorAll(FOCAVEIS) || [])]
+          .filter(item => item.getClientRects().length > 0);
+        if (itens.length === 0) {
+          e.preventDefault();
+          modalRef.current?.focus();
+          return;
+        }
+        const primeiro = itens[0];
+        const ultimo = itens[itens.length - 1];
+        if (e.shiftKey && (document.activeElement === primeiro || !modalRef.current?.contains(document.activeElement))) {
+          e.preventDefault();
+          ultimo.focus();
+        } else if (!e.shiftKey && (document.activeElement === ultimo || !modalRef.current?.contains(document.activeElement))) {
+          e.preventDefault();
+          primeiro.focus();
+        }
+      }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -82,7 +123,12 @@ export default function Modal({ open, onClose, children, style }) {
   return (
     <div className={`modal-overlay${closing ? ' closing' : ''}`} onClick={fecharComGuarda}>
       <div
+        ref={modalRef}
         className="modal" style={style}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={tituloId}
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
         onChange={() => { dirtyRef.current = true; }}
       >
