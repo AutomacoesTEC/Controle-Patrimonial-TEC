@@ -105,7 +105,7 @@ export default function DoacoesPage() {
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Doação</button>
         </div>
       </div>
-      <div className="page-body animate-in">
+      <div className="page-body animate-in altura-tabelas-adaptativa">
         <div className="tabs" style={{ marginBottom: '20px' }}>
           {Object.entries(ABAS).map(([key, meta]) => (
             <button key={key} className={`tab ${subView === key ? 'active' : ''}`} onClick={() => setSubView(key)}>{meta.titulo}</button>

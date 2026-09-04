@@ -103,7 +103,7 @@ export default function DividasPage({ onVoltar } = {}) {
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Dívida</button>
         </div>
       </div>
-      <div className="page-body animate-in">
+      <div className="page-body animate-in altura-tabelas-adaptativa">
         <TabelaRedimensionavel>
           <table>
             <thead><tr><th>Cód.</th><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Saldo anterior'}</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Saldo atual'}</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>

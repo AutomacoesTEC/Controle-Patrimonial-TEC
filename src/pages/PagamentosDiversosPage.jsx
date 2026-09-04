@@ -90,7 +90,7 @@ export default function PagamentosDiversosPage() {
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Despesa</button>
         </div>
       </div>
-      <div className="page-body animate-in">
+      <div className="page-body animate-in altura-tabelas-adaptativa">
         <TabelaRedimensionavel>
           <table>
             <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>

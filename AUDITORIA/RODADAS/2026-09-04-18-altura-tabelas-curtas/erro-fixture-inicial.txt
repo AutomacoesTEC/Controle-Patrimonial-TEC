@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "medir-altura.py", line 60, in <module>
+    pagina.get_by_role("button",name=tela,exact=True).first.click()
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_role("button", name="Dívidas e Ônus Reais", exact=True).first
+
+O fixture não produziu medição do produto. O nome visível da página é
+"Dívidas e Ônus Reais", mas o botão acessível do menu se chama
+"Dívidas e Ônus". A trajetória foi corrigida sem mudar o produto, viewport,
+tema, PDF, perfil ou as grandezas medidas.

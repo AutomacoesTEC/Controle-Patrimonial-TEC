@@ -247,6 +247,10 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    tabelas menores dentro de um .card, como no Relatório) o flex:1 não tem
    pai flex pra valer, então fica inerte — o comportamento ali não muda. */
 .table-container{overflow:auto;flex:1;min-height:0;border-radius:var(--radius-md);border:1px solid var(--border-color);position:relative}
+/* Cadastros curtos não precisam esticar o contêiner até o rodapé. O
+   flex-shrink continua ativo: se a tabela crescer além do espaço restante,
+   o próprio contêiner encolhe e preserva sua rolagem interna. */
+.page-body.altura-tabelas-adaptativa>.table-container{flex:0 1 auto;max-height:100%}
 /* thead sticky só gruda se quem rola for o próprio .table-container. Como
    filho direto do .page-body, flex:1;min-height:0 já garante isso. Dentro
    de um .card (Rendimentos, Histórico, Ganhos de Capital, Atividade Rural,

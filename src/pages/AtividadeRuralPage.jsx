@@ -55,7 +55,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
           <p>Imóveis explorados, bens, receitas/despesas e resultado. Ficha própria da declaração, separada de Bens e Direitos.</p>
         </div>
       </div>
-      <div className="page-body animate-in">
+      <div className="page-body animate-in altura-tabelas-adaptativa">
         <div className="tabs" style={{ marginBottom: '20px' }}>
           <button className={`tab ${subView === 'imoveis' ? 'active' : ''}`} onClick={() => setSubView('imoveis')}>Imóveis Explorados</button>
           <button className={`tab ${subView === 'bens' ? 'active' : ''}`} onClick={() => setSubView('bens')}>Bens da Atividade Rural</button>

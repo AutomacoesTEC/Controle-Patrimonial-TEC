@@ -1,0 +1,10 @@
+[
+  {"tela":"Doações","tema":"escuro","linhas":3,"alturaContainer":248,"alturaTabela":246,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false},
+  {"tela":"Dívidas e Ônus Reais","tema":"escuro","linhas":2,"alturaContainer":224,"alturaTabela":222,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false},
+  {"tela":"Despesas Gerais","tema":"escuro","linhas":1,"alturaContainer":137,"alturaTabela":135,"espacoVazio":0,"overflowHorizontal":1,"overflowVertical":false},
+  {"tela":"Atividade Rural","tema":"escuro","linhas":1,"alturaContainer":159,"alturaTabela":157,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false},
+  {"tela":"Doações","tema":"claro","linhas":3,"alturaContainer":248,"alturaTabela":246,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false},
+  {"tela":"Dívidas e Ônus Reais","tema":"claro","linhas":2,"alturaContainer":224,"alturaTabela":222,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false},
+  {"tela":"Despesas Gerais","tema":"claro","linhas":1,"alturaContainer":137,"alturaTabela":135,"espacoVazio":0,"overflowHorizontal":1,"overflowVertical":false},
+  {"tela":"Atividade Rural","tema":"claro","linhas":1,"alturaContainer":159,"alturaTabela":157,"espacoVazio":0,"overflowHorizontal":0,"overflowVertical":false}
+]
