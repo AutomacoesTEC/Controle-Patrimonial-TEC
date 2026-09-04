@@ -113,6 +113,12 @@ edições agora guardam e exibem diferenças por campo, excluindo ids e metadado
 O fixture passou de `mudancas=null` às duas mudanças exatas plantadas.
 Evidência em `AUDITORIA/RODADAS/2026-09-04-49-historico-diff/`.
 
+Segunda parte concluída na rodada 50: o `.xlsx` do Relatório IRPF passou de
+uma para duas abas no fixture congelado. `Histórico de Alterações` acompanha o
+ano-calendário selecionado e abre uma linha para cada campo alterado, com valor
+anterior e novo. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-50-historico-no-xlsx/`.
+
 ### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras — CONCLUÍDO (P1)
 
 Implementada a alternativa menos invasiva: helper único

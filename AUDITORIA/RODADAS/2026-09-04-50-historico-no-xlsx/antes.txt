@@ -1,0 +1,15 @@
+RUN  v4.1.10
+
+FAIL verificar-historico-xlsx.test.js > fixture congelado: histórico no relatório xlsx > leva a alteração e seus dois campos em aba própria
+AssertionError: expected [ 'Relatório IRPF 2025' ] to deeply equal [ 'Relatório IRPF 2025', 'Histórico de Alterações' ]
+
+- Expected
++ Received
+
+  [
+    "Relatório IRPF 2025",
+-   "Histórico de Alterações",
+  ]
+
+Test Files  1 failed (1)
+Tests       1 failed (1)

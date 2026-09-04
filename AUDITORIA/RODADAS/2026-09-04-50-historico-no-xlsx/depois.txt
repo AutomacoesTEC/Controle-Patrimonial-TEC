@@ -1,0 +1,6 @@
+RUN  v4.1.10
+
+PASS verificar-historico-xlsx.test.js > fixture congelado: histórico no relatório xlsx > leva a alteração e seus dois campos em aba própria
+
+Test Files  1 passed (1)
+Tests       1 passed (1)

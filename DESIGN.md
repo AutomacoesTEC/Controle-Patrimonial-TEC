@@ -212,6 +212,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   de importado acrescenta `Editado`, com o original preservado no tooltip.
 - **histórico**: edições mostram a descrição e, abaixo, os pares de valor
   anterior e novo por campo; ids e metadados técnicos ficam ocultos.
+  A exportação do Relatório IRPF inclui uma aba própria, limitada ao
+  ano-calendário exibido e detalhada em uma linha por campo.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação

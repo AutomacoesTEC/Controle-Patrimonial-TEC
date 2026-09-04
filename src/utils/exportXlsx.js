@@ -107,11 +107,32 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
   XLSX.writeFile(wb, `${fileName}_${data.anoCalendario || 'export'}_${today}.xlsx`);
 }
 
-// Exportador genérico de uma aba só: cada página de cadastro (Dívidas,
+// Exportador genérico: cada página de cadastro (Dívidas,
 // Rendimentos, Pagamentos, Despesas Gerais...) passa suas próprias colunas,
 // pra exportar exatamente o que está naquela tela — não um recorte de um
-// export combinado de outra aba.
-export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoCalendario) {
+// export combinado de outra aba. O Relatório IRPF também pode anexar sua
+// trilha de alterações como aba de auditoria.
+function valorHistoricoParaCelula(valor) {
+  if (valor == null) return '';
+  if (typeof valor === 'object') return JSON.stringify(valor);
+  return String(valor);
+}
+
+function linhasDoHistorico(alteracoes) {
+  return alteracoes.flatMap(alteracao => {
+    const mudancas = alteracao.mudancas?.length ? alteracao.mudancas : [{}];
+    return mudancas.map(mudanca => ({
+      'Data/hora': alteracao.data || '',
+      'Ano-calendário': alteracao.anoCalendario ?? '',
+      'Alteração': alteracao.descricao || '',
+      'Campo': mudanca.campo || '',
+      'Antes': valorHistoricoParaCelula(mudanca.antes),
+      'Depois': valorHistoricoParaCelula(mudanca.depois),
+    }));
+  });
+}
+
+export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoCalendario, opcoes = {}) {
   const wb = XLSX.utils.book_new();
   const dados = linhas.map(linha => {
     const obj = {};
@@ -120,6 +141,12 @@ export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoC
   });
   const ws = XLSX.utils.json_to_sheet(dados);
   XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+  if (opcoes.historico) {
+    const cabecalhos = ['Data/hora', 'Ano-calendário', 'Alteração', 'Campo', 'Antes', 'Depois'];
+    const wsHistorico = XLSX.utils.json_to_sheet(linhasDoHistorico(opcoes.historico), { header: cabecalhos });
+    wsHistorico['!cols'] = [{ wch: 26 }, { wch: 16 }, { wch: 48 }, { wch: 24 }, { wch: 32 }, { wch: 32 }];
+    XLSX.utils.book_append_sheet(wb, wsHistorico, 'Histórico de Alterações');
+  }
   const today = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `${prefixoArquivo}_${anoCalendario || ''}_${today}.xlsx`);
 }

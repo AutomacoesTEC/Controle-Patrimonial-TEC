@@ -222,7 +222,8 @@ export default function RelatorioPage({ onImportar } = {}) {
         ['Variação', b => (b.situacao_atual || 0) - (b.situacao_anterior || 0)],
         ['Movimentações no Ano', b => resumoMovimentacoes(b)],
       ],
-      `Relatório IRPF ${anoCalendario}`, 'relatorio_irpf', anoCalendario
+      `Relatório IRPF ${anoCalendario}`, 'relatorio_irpf', anoCalendario,
+      { historico: (state.alteracoes || []).filter(a => a.anoCalendario === anoCalendario) },
     );
   };
 
