@@ -125,7 +125,7 @@ export default function TabelaRedimensionavel({
         `.${cls}>table>thead>tr>th:nth-child(${i + 1})` +
         `{position:sticky;right:${deslocamentoDireita}px;z-index:4;background:var(--bg-secondary)}`,
         `.${cls}>table>tbody>tr>td:nth-child(${i + 1}):not([colspan])` +
-        `{position:sticky;right:${deslocamentoDireita}px;z-index:1;background:var(--bg-card)}`,
+        `{position:sticky;right:${deslocamentoDireita}px;z-index:1;background:inherit}`,
         `.${cls}>table>tbody>tr:hover>td:nth-child(${i + 1}):not([colspan])` +
         `{background:var(--bg-card-hover)}`
       );
@@ -136,7 +136,7 @@ export default function TabelaRedimensionavel({
         `.${cls}>table>thead>tr>th:first-child` +
         `{position:sticky;left:0;z-index:5;background:var(--bg-secondary)}`,
         `.${cls}>table>tbody>tr>td:first-child:not([colspan])` +
-        `{position:sticky;left:0;z-index:2;background:var(--bg-card)}`,
+        `{position:sticky;left:0;z-index:2;background:inherit}`,
         `.${cls}>table>tbody>tr:hover>td:first-child:not([colspan])` +
         `{background:var(--bg-card-hover)}`
       );

@@ -210,6 +210,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **tabela-densidade**: cada tabela redimensionável oferece `Compacto`, que
   troca células de 12×16px para 8×12px e persiste isoladamente por tabela.
   Larguras arrastadas continuam temporárias e voltam ao padrão ao reabrir.
+- **table zebra**: linhas pares misturam `--bg-card-hover` a 40% com o card;
+  células fixas herdam o fundo opaco da linha e o hover continua prevalecendo.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 

@@ -325,6 +325,11 @@ receberam controle compacto com preferência isolada. No fixture, Bens passou
 de 12×16 para 8×12 e preservou o modo após reload, enquanto Dívidas permaneceu
 normal. Evidência em `AUDITORIA/RODADAS/2026-09-04-33-densidade-tabelas/`.
 
+Segunda parte concluída em 04/09/2026: linhas pares ganharam zebra sutil a
+40% nos dois temas, sem mudar padding ou conteúdo; fundos adjacentes passaram
+de iguais para diferentes. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-34-zebra-tabelas/`.
+
 ### B4. Impressão e PDF do demonstrativo — CONCLUÍDO (P1)
 
 Evidência: zero `@media print` em `index.css`; `RelatorioPage.jsx` exporta só
