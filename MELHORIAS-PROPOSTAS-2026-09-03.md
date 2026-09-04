@@ -320,7 +320,7 @@ Proposta:
   fino à esquerda da célula (borda de 2px em `--accent-danger`), para que a
   leitura não dependa só da cor.
 
-### B4. Impressão e PDF do demonstrativo (P1)
+### B4. Impressão e PDF do demonstrativo — CONCLUÍDO (P1)
 
 Evidência: zero `@media print` em `index.css`; `RelatorioPage.jsx` exporta só
 `.xlsx`. O contador entrega o demonstrativo ao cliente e hoje não tem como
@@ -332,15 +332,17 @@ Proposta:
   data de geração e versão do app; quebras de página por card.
 - Botão "Imprimir demonstrativo" no Dashboard e no Relatório, que só chama
   `window.print()`.
-- No Electron, "Salvar em PDF" via `webContents.printToPDF`.
+- No desktop pywebview/WebView2, usar o mesmo `window.print()` para abrir o
+  diálogo do host; salvar em PDF depende da opção instalada no Windows. Não
+  trocar o runtime nem prometer exportação silenciosa sem uma ponte suportada
+  pela arquitetura atual; `empacotamento.test.js` aplica esse limite.
 
 Primeira parte concluída em 04/09/2026: a mídia `print` agora produz folha A4
 clara, libera todo o fluxo vertical, protege a quebra interna de cards, oculta
 36 controles e todo o cromo/gráficos, e inclui cabeçalho e rodapé com os
 metadados previstos. No fixture, a altura deixou de ficar presa em 768 px e
-passou a representar 2.588,5 px de conteúdo com overflow visível. Os botões
-de acesso à impressão e a integração Electron continuam pendentes em rodadas
-próprias. Evidência pareada em
+passou a representar 2.588,5 px de conteúdo com overflow visível. Evidência
+pareada em
 `AUDITORIA/RODADAS/2026-09-04-29-folha-impressao/`.
 
 Segunda parte concluída em 04/09/2026: o título e o ano do Relatório IRPF
@@ -351,8 +353,9 @@ identificação própria criada na rodada anterior. Evidência pareada em
 
 Terceira parte concluída em 04/09/2026: Dashboard e Relatório IRPF ganharam
 um botão `Imprimir demonstrativo`; o fixture interceptou uma chamada exata a
-`window.print()` por clique em cada tela. A integração nativa Electron ainda
-fica pendente. Evidência pareada em
+`window.print()` por clique em cada tela. No WebView2, essa ação entrega ao
+diálogo do host a impressão e as opções de PDF disponíveis no Windows. O
+runtime permanece pywebview/WebView2. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-31-botoes-impressao/`.
 
 ### B5. Acessibilidade de teclado e leitores de tela (P2)
