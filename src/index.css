@@ -641,6 +641,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 .toast-error{background:rgba(239,68,68,0.9);color:white}
 .toast-info{background:rgba(59,130,246,0.9);color:white}
 
+:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}
+
 .print-header,.print-footer{display:none}
 
 @page{size:A4;margin:14mm}

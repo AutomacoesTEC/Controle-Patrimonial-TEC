@@ -196,6 +196,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   foco inicial interno, ciclo de Tab confinado e retorno ao gatilho ao fechar.
 - **linha interativa do demonstrativo**: participa da ordem de Tab, expõe papel
   de botão e responde igualmente a clique, Enter e Espaço.
+- **foco de teclado**: todo elemento em `:focus-visible` recebe contorno sólido
+  de 2px em `--accent-primary`, afastado 2px do componente.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação

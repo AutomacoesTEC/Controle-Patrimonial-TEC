@@ -402,6 +402,12 @@ detalhamento por Enter ou Espaço. O clique permaneceu funcional. Evidência
 pareada em
 `AUDITORIA/RODADAS/2026-09-04-37-linhas-demonstrativo-teclado/`.
 
+Terceira parte concluída em 04/09/2026: o indicador global de foco passou a
+usar contorno sólido de 2px na cor primária, afastado 2px. Navegação lateral,
+botão de tema e linha clicável foram medidos no estado estável e atingiram os
+quatro valores previstos. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-38-foco-visivel-global/`.
+
 ### B6. Estados vazios e primeiro uso por tela (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória
