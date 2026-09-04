@@ -1,0 +1,1 @@
+{"diretas":{"src/pages/PerfilLauncherPage.jsx":5,"src/store/backupPerfil.js":2},"total":7}

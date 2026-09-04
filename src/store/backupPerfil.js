@@ -38,6 +38,7 @@
 // app usa (AES-GCM derivado da senha por PBKDF2, ver utils/crypto.js). A
 // senha e a chave derivada NUNCA entram no arquivo: o que vai junto é só o
 // `salt`, que é público por natureza (já fica em claro no registro do perfil)
+import { salvarIndiceDuravel, salvarPerfilDuravel } from './persistenciaDesktop';
 // e sem o qual a senha certa não conseguiria derivar a chave de volta.
 // Exportar não pede senha (o conteúdo cifrado já está no disco de qualquer
 // jeito); restaurar pede, porque só assim dá para migrar o estado e regravar.
@@ -281,6 +282,7 @@ export function anosDoBackup(arquivo) {
 // próxima carga para se adaptar.
 export async function restaurarBackup({
   storage,
+  desktopApi,
   arquivo,
   senha = '',
   substituirPerfilId = null,
@@ -360,7 +362,7 @@ export async function restaurarBackup({
   // Dados primeiro, lista depois: se a gravação falhar no meio (quota), o
   // pior caso é uma chave de dados órfã, e não um perfil na lista apontando
   // para nada.
-  storage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify(conteudoParaGravar));
-  storage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(lista));
+  await salvarPerfilDuravel({ storage, desktopApi, perfilId: perfil.id, conteudo: conteudoParaGravar });
+  await salvarIndiceDuravel({ storage, desktopApi, perfis: lista });
   return { perfil, lista, estado, substituiu: !!substituirPerfilId };
 }

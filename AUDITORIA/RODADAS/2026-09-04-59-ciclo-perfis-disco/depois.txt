@@ -1,0 +1,7 @@
+{"diretas":{"src/pages/PerfilLauncherPage.jsx":0,"src/store/backupPerfil.js":0},"total":0}
+
+Testes dinâmicos:
+
+- `src/store/persistenciaDesktop.test.js`: 2/2 aprovados.
+- `src/store/backupPerfil.test.js`: 33/33 aprovados.
+- Total: 2 arquivos, 35/35 testes aprovados.

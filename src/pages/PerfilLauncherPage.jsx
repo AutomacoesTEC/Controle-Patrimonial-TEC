@@ -15,6 +15,7 @@ import { baixarTexto } from '../utils/baixarArquivo';
 import { reducerComHistorico, initialState } from '../store/reducer';
 import { identificarArquivoFonte, payloadImportacaoCompleto, resumirImportacao } from '../utils/importacaoDeclaracao';
 import RevisaoImportacaoModal from '../components/RevisaoImportacaoModal';
+import { excluirPerfilDuravel, salvarIndiceDuravel, salvarPerfilDuravel } from '../store/persistenciaDesktop';
 
 // pdfjs-dist é uma biblioteca pesada (é o motivo do bundle de Importar
 // Declaração ser o maior do app) — PerfilLauncherPage é a ÚNICA tela que
@@ -120,9 +121,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   const [restauracao, setRestauracao] = useState(null);
   const backupFileRef = useRef();
 
-  const persistir = (novaLista) => {
+  const persistir = async (novaLista) => {
+    await salvarIndiceDuravel({ storage: localStorage, perfis: novaLista });
     setPerfis(novaLista);
-    try { localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(novaLista)); } catch {}
   };
 
   // Lê e interpreta a declaração com os MESMOS parsers da tela Importar
@@ -242,9 +243,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         // Titular e Dependentes assim que entrasse no perfil.
         dados = { contribuinte: { nome: perfil.nome, cpf: perfil.cpf } };
       }
-      localStorage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify(dados));
+      await salvarPerfilDuravel({ storage: localStorage, perfilId: perfil.id, conteudo: dados });
       const novaLista = adicionarPerfil(perfis, perfil);
-      localStorage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(novaLista));
+      await salvarIndiceDuravel({ storage: localStorage, perfis: novaLista });
       setPerfis(novaLista);
       onSelecionarPerfil(perfil);
     } catch (err) {
@@ -262,9 +263,13 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     });
     if (!confirmado) return;
     try {
-      localStorage.removeItem(dataStorageKeyFor(perfil.id));
-    } catch {}
-    persistir(removerPerfil(perfis, perfil.id));
+      const novaLista = removerPerfil(perfis, perfil.id);
+      await salvarIndiceDuravel({ storage: localStorage, perfis: novaLista });
+      await excluirPerfilDuravel({ storage: localStorage, perfilId: perfil.id });
+      setPerfis(novaLista);
+    } catch (err) {
+      setAvisoBackup({ tipo: 'erro', texto: err?.message || 'Não foi possível excluir o perfil neste computador.' });
+    }
   };
 
   // Exporta QUALQUER perfil da lista, aberto ou não, direto do que está
@@ -359,10 +364,14 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     setEditandoApelidoId(perfil.id);
     setApelidoEdicao(perfil.apelido || '');
   };
-  const salvarApelido = (e, perfilId) => {
+  const salvarApelido = async (e, perfilId) => {
     e.stopPropagation();
-    persistir(atualizarPerfil(perfis, perfilId, { apelido: apelidoEdicao.trim() }));
-    setEditandoApelidoId(null);
+    try {
+      await persistir(atualizarPerfil(perfis, perfilId, { apelido: apelidoEdicao.trim() }));
+      setEditandoApelidoId(null);
+    } catch (err) {
+      setAvisoBackup({ tipo: 'erro', texto: err?.message || 'Não foi possível salvar o apelido.' });
+    }
   };
 
   const iniciarProtecao = (e, perfil) => {
@@ -386,8 +395,8 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       const atualRaw = localStorage.getItem(dataStorageKeyFor(perfil.id));
       const atual = atualRaw ? JSON.parse(atualRaw) : {};
       const envelope = await criptografarObjeto(chave, atual);
-      localStorage.setItem(dataStorageKeyFor(perfil.id), JSON.stringify(envelope));
-      persistir(protegerPerfil(perfis, perfil.id, salt));
+      await salvarPerfilDuravel({ storage: localStorage, perfilId: perfil.id, conteudo: envelope });
+      await persistir(protegerPerfil(perfis, perfil.id, salt));
       setProtegendoId(null);
     } catch {
       setSenhaErro('Não foi possível ativar a proteção. Tente novamente.');
