@@ -1,0 +1,4 @@
+correcao_pendente=0
+correcoes_concluidas=1
+achados_mapeados=13
+rodadas_existentes=19

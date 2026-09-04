@@ -460,7 +460,16 @@ Na abertura, `Dashboard` visível caiu de duas ocorrências a zero e
 `Demonstrativo` subiu de zero a duas. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-43-dashboard-demonstrativo/`.
 
-### B9/B10. Laptop 1366x768 e tela cheia 2880: capturas feitas, 13 defeitos achados — CAPTURA CONCLUÍDA, CORREÇÃO PENDENTE (P1/P2)
+### B9/B10. Laptop 1366x768 e tela cheia 2880 — CORREÇÕES CONCLUÍDAS (P1/P2)
+
+Os 13 achados abaixo são o inventário original, preservado como histórico.
+Foram resolvidos nas rodadas 01–19: 1 `61a79cd`; 2 `c81bdf9`; 3 `335bc1d`;
+4 `4d5f2c1`; 5 `b353215`; 6 e 7 `a15c655`, `018195f`, `75638da` e
+`c5d3ff9`; 8 `4aa4f95`; 9 `eb42996` após a reversão `8692d81`; 10 `be74a6b`
+após as reversões `ef79f3b` e `a4c8a3b`; 11 `16d1fea`; 12 `6de99ff`; 13
+`a399bcf`. Cada rodada conserva antes/depois, decisão MANTER ou REVERTER e
+suas verificações em `AUDITORIA/RODADAS/2026-09-04-01-*` a
+`AUDITORIA/RODADAS/2026-09-04-19-*`.
 
 Commit `a39ec6e`, 03/09/2026. `AUDITORIA/verificar-telas-no-app.py` destravado
 (fechava o modal de avisos estruturais e travava; 30/33 conferências passam
@@ -520,7 +529,11 @@ Próximo passo: corrigir 1 a 5 antes de B2 (hierarquia do Dashboard) e B3
 layout. 6 e 7 alimentam diretamente o B7 (que já mexe nas cores dos
 cards) e merecem entrar junto. 8 a 13 podem esperar a rodada de B3/B5.
 
-## Ordem sugerida
+## Ordem sugerida — histórico de 03/09/2026
+
+Esta ordem foi executada pelas rodadas registradas acima e pelos itens já
+marcados como concluídos. As pendências atuais são somente A3, A4, a
+tolerância restante de A8, A7 e A11.
 
 Concluído em 03/09/2026: **B10/B9** (capturas, commit `a39ec6e`), **A1**
 (versão de esquema, commit `bdb6203`), **A2** (backup e restauração, commit
