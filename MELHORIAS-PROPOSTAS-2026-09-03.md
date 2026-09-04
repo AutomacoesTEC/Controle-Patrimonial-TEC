@@ -191,6 +191,13 @@ Pronto quando: para o `.DBK` real do perfil PAULO ROBERTO o total do painel
 é igual ao imposto retido do resumo, e um fixture com retenção a menor
 plantada dispara o alerta.
 
+Primeira parte concluída na rodada 55: o painel anual consolida fonte,
+beneficiário e tipo, marca separadamente o que compõe o ajuste e o que é só
+informativo, e confronta o primeiro grupo com `impostoPagoTotal`. No `.DBK`
+externo de PAULO ROBERTO, duas linhas somaram R$ 774,78 dos dois lados, com
+diferença zero; o fixture adversarial com R$ 1,00 a menos gerou divergência.
+Evidência em `AUDITORIA/RODADAS/2026-09-04-55-painel-irrf/`.
+
 ### A8. Classificação assistida das sobras do Saldo de Caixa — CONCLUÍDO (P2)
 
 Evidência: o Saldo de Caixa final é "o número de validação", mas a tela só

@@ -1,0 +1,8 @@
+Fixture externo PAULO ROBERTO:
+{"linhas":2,"totalPainel":774.78,"totalResumo":774.78,"diferenca":0,"confere":true}
+
+Fixture adversarial:
+{"totalPainel":99,"totalResumo":100,"diferenca":-1,"confere":false}
+
+Navegador AJU-01:
+{"paineis":1,"linhas":16,"cabecalhos":["Fonte","Beneficiário","Tipo","Tratamento","IRRF"],"tratamentos":["Compõe o ajuste","Informativo"],"selo":"Total divergente","overflowPagina":0}

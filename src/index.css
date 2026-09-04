@@ -541,6 +541,12 @@ textarea.form-control{resize:vertical;min-height:80px}
 .toolbar-spacer{flex:1}
 .filtro-origem{width:auto;min-width:150px;padding:8px 10px}
 .historico-mudancas{margin:6px 0 0 18px;color:var(--text-secondary);font-size:11px;line-height:1.5}
+.painel-irrf .card-header>div p{margin-top:3px;color:var(--text-secondary);font-size:11px}
+.painel-irrf .ajuda-ressalva{margin-bottom:12px}
+.painel-irrf tfoot td{font-weight:700;background:var(--bg-input)}
+.painel-irrf-resumo{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:14px;color:var(--text-secondary);font-size:12px}
+.painel-irrf-resumo span{display:flex;gap:7px}
+.painel-irrf-resumo strong{color:var(--text-primary)}
 
 .search-box{position:relative}
 .search-box input{width:100%;padding:9px 14px 9px 38px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;font-family:var(--font-family);outline:none;transition:all var(--transition-fast)}

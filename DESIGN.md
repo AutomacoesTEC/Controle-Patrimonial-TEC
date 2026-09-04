@@ -232,6 +232,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **dashboard-avisos**: bloco compacto no topo que reúne todas as ressalvas
   persistentes do período, importação e cobertura. A janela inicial exige
   ciência; este bloco único permite consultar os mesmos limites depois.
+- **painel de IRRF**: tabela anual por fonte, beneficiário e tipo. Distingue
+  visualmente o crédito que compõe o ajuste da retenção apenas informativa e
+  confronta o primeiro com o total oficial do resumo, sem afetar o caixa.
 - **tabela-densidade**: cada tabela redimensionável oferece `Compacto`, que
   troca células de 12×16px para 8×12px e persiste isoladamente por tabela.
   Larguras arrastadas continuam temporárias e voltam ao padrão ao reabrir.

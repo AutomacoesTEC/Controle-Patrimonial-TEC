@@ -9,6 +9,7 @@ import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosComp
 import { conferirContinuidade } from '../store/continuidade';
 import { classificarPendenciasSaldo } from '../store/classificacaoSaldo';
 import { avaliarSaldoComTolerancia, normalizarToleranciaSaldo } from '../store/toleranciaSaldo';
+import { montarPainelIrrf } from '../store/painelIrrf';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
 import Modal from '../components/Modal';
@@ -232,6 +233,10 @@ export default function Dashboard({ onNavigate } = {}) {
   const disponibilidades = useMemo(
     () => (ate ? disponibilidadesEmData(dadosFimPeriodo, ate) : { total: 0, porGrupo: [] }),
     [dadosFimPeriodo, ate]
+  );
+  const painelIrrf = useMemo(
+    () => montarPainelIrrf(dadosFimPeriodo || {}),
+    [dadosFimPeriodo]
   );
 
   // Anos do período consultado cuja declaração veio do PDF. O caminho PDF só
@@ -945,6 +950,55 @@ export default function Dashboard({ onNavigate } = {}) {
                 </tr>
               </tbody>
             </table>
+          </div>
+        )}
+
+        {(painelIrrf.linhas.length > 0 || painelIrrf.totalResumo != null) && (
+          <div className="card painel-irrf" style={{ marginBottom: '20px' }}>
+            <div className="card-header">
+              <div>
+                <h3 className="card-title">IRRF do ano</h3>
+                <p>Por fonte, beneficiário e tipo; conferência separada do Saldo de Caixa.</p>
+              </div>
+              {painelIrrf.confere != null && (
+                <span className={`badge ${painelIrrf.confere ? 'badge-green' : 'badge-orange'}`}>
+                  {painelIrrf.confere ? 'Total confere' : 'Total divergente'}
+                </span>
+              )}
+            </div>
+            {!painelIrrf.confere && painelIrrf.diferenca != null && (
+              <Ajuda
+                tom="ressalva"
+                rotulo={`Diferença de ${formatCurrency(painelIrrf.diferenca)}`}
+                titulo="IRRF detalhado não confere com o resumo"
+                texto={`As linhas que compõem o ajuste somam ${formatCurrency(painelIrrf.totalPainel)}, mas o resumo importado informa ${formatCurrency(painelIrrf.totalResumo)}. Confira fontes ou fichas ainda sem detalhamento; o app não altera nenhum valor.`}
+              />
+            )}
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Fonte</th><th>Beneficiário</th><th>Tipo</th><th>Tratamento</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
+                <tbody>
+                  {painelIrrf.linhas.map((linha, indice) => (
+                    <tr key={`${linha.fonte}-${linha.beneficiario}-${linha.tipo}-${indice}`}>
+                      <td>{linha.fonte}</td>
+                      <td>{linha.beneficiario}</td>
+                      <td>{linha.tipo}</td>
+                      <td><span className={`badge ${linha.compoeAjuste ? 'badge-blue' : ''}`}>{linha.compoeAjuste ? 'Compõe o ajuste' : 'Informativo'}</span></td>
+                      <td className="currency" style={{ textAlign: 'right' }}>{formatCurrency(linha.valor)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr><td colSpan={4}>Total que compõe o ajuste</td><td className="currency" style={{ textAlign: 'right' }}>{formatCurrency(painelIrrf.totalPainel)}</td></tr>
+                  {painelIrrf.totalResumo != null && <tr><td colSpan={4}>Total oficial do resumo</td><td className="currency" style={{ textAlign: 'right' }}>{formatCurrency(painelIrrf.totalResumo)}</td></tr>}
+                </tfoot>
+              </table>
+            </div>
+            <div className="painel-irrf-resumo">
+              <span>Imposto devido <strong>{formatCurrency(painelIrrf.impostoDevido)}</strong></span>
+              <span>Saldo a pagar <strong>{formatCurrency(painelIrrf.saldoPagar)}</strong></span>
+              <span>Restituição <strong>{formatCurrency(painelIrrf.impostoRestituir)}</strong></span>
+            </div>
           </div>
         )}
         </>
