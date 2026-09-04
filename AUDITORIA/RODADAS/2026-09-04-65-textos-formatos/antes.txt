@@ -1,0 +1,6 @@
+mencoes_visiveis_f2b=4
+extensao_na_chamada_restauracao=1
+
+A primeira versão do fixture contou também duas ocorrências internas em
+minúsculas e produziu 6. A expressão foi corrigida antes da mudança de produto
+para medir somente texto visível, que é o objeto desta rodada.

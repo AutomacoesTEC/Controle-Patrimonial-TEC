@@ -1,0 +1,6 @@
+mencoes_visiveis_f2b=0
+extensao_na_chamada_restauracao=0
+
+Test Files  2 passed (2)
+Tests       12 passed (12)
+Build Vite  669 módulos transformados, sucesso

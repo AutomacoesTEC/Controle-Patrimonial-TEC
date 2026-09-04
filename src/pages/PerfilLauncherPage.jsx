@@ -186,7 +186,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         const pdf = await pdfjsLib.getDocument({ data: arrayBufferFonte.slice(0) }).promise;
         result = await parsePDF(pdf, coletar, () => {});
       } else {
-        setErroImportacao('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC, .DBK ou .F2B gerado pelo programa da Receita.');
+        setErroImportacao('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC ou .DBK gerado pelo programa da Receita.');
         setImportando(false);
         return;
       }
@@ -527,7 +527,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                 <span className="launcher-action-icon"><RestoreIcon /></span>
                 <span className="launcher-action-copy">
                   <strong>Já usou o CP-TEC?</strong>
-                  <small>Restaure aqui um perfil salvo em {EXTENSAO_BACKUP}</small>
+                  <small>Restaure aqui um perfil salvo anteriormente</small>
                 </span>
                 <span className="launcher-action-arrow" aria-hidden="true">›</span>
               </button>
@@ -653,7 +653,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                       <span className="launcher-action-icon launcher-import-icon"><ImportFileIcon /></span>
                       <div className="launcher-import-copy">
                         <strong>Importar declaração</strong>
-                        <small>Preencha o perfil automaticamente usando PDF, .DEC, .DBK ou .F2B.</small>
+                        <small>Preencha o perfil automaticamente usando PDF, .DEC ou .DBK.</small>
                       </div>
                       <button type="button" className="btn btn-secondary" disabled={importando} onClick={() => fileRef.current?.click()}>
                         {importando ? 'Lendo arquivo...' : 'Selecionar arquivo'}

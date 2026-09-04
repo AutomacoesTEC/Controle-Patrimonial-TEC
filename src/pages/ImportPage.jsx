@@ -128,7 +128,7 @@ export default function ImportPage() {
         setProgress({ current: 0, total: pdf.numPages });
         result = await parsePDF(pdf, log, (current, total) => setProgress({ current, total }));
       } else {
-        log('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC, .DBK ou .F2B gerado pelo programa da Receita.', 'error');
+        log('Formato não suportado. Use o PDF da declaração ou o arquivo .DEC ou .DBK gerado pelo programa da Receita.', 'error');
         setImporting(false);
         return;
       }
@@ -375,7 +375,7 @@ export default function ImportPage() {
             onClick={() => { setImportType('dbk'); fileRef.current?.click(); }}
           >
             <h3>Importar Arquivo Eletrônico</h3>
-            <p>Arquivo .DEC, .DBK ou .F2B gerado pelo programa IRPF (declaração, cópia de segurança ou backup do ano anterior)</p>
+            <p>Arquivo .DEC ou .DBK gerado pelo programa IRPF</p>
           </div>
         </div>
 
