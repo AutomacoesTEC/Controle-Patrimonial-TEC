@@ -159,6 +159,9 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .card-title{font-size:16px;font-weight:600;color:var(--text-primary)}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.dashboard-demonstrativo-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;margin:0 0 8px}
+.dashboard-demonstrativo-cabecalho>h3{font-size:16px;margin:0}
+.dashboard-demonstrativo-avisos{display:flex;align-items:center;justify-content:flex-end;gap:8px 20px;flex-wrap:wrap}
 .grade-quatro-contexto{container-type:inline-size}
 @container (min-width:752px) and (max-width:1007px) {
   .stats-grid-quatro:has(> :nth-child(4):last-child){grid-template-columns:repeat(2,minmax(240px,1fr))}

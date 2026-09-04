@@ -437,32 +437,28 @@ export default function Dashboard({ onNavigate } = {}) {
           )}
         </div>
 
-        {/* Os avisos estruturais (número pode estar errado/incompleto) são
-            surgidos numa janela ao abrir o Dashboard (ver Modal no fim do
-            render). Aqui ficam como marca "?" discreta, para continuarem
-            acessíveis depois que a pessoa fecha a janela. */}
-        {avisosDemonstrativo.length > 0 && (
-          <div style={{ marginBottom: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px 20px' }}>
+        {demo && (
+        <>
+        <div className="dashboard-demonstrativo-cabecalho">
+          <h3>Demonstrativo de Conciliação Patrimonial</h3>
+          <div className="dashboard-demonstrativo-avisos">
+            {/* Os avisos estruturais surgem também numa janela ao abrir o
+                Dashboard. As marcas discretas mantêm o texto acessível depois
+                que a pessoa fecha a janela e agora explicitam a qual quadro
+                essas ressalvas pertencem. */}
             {avisosDemonstrativo.map(a => (
               <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
             ))}
+            {coberturaFichas && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0) && (
+              <Ajuda
+                tom="ressalva"
+                rotulo="Cobertura das fichas ainda em auditoria"
+                titulo="Cobertura das fichas ainda em auditoria"
+                texto={`Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`}
+              />
+            )}
           </div>
-        )}
-
-        {coberturaFichas && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0) && (
-          <div style={{ marginBottom: '12px' }}>
-            <Ajuda
-              tom="ressalva"
-              rotulo="Cobertura das fichas ainda em auditoria"
-              titulo="Cobertura das fichas ainda em auditoria"
-              texto={`Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`}
-            />
-          </div>
-        )}
-
-        {demo && (
-        <>
-        <h3 style={{ margin: '0 0 4px', fontSize: '16px' }}>Demonstrativo de Conciliação Patrimonial</h3>
+        </div>
         {/* Virou 4 cards separados (Variação Patrimonial / Rendimentos /
             Ganhos Apurados / Pagamentos), em vez de uma tabela só gigante —
             pedido real da usuária, "está tudo muito junto, separe por
