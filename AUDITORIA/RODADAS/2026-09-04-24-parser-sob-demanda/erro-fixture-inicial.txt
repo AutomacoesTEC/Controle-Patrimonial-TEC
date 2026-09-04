@@ -1,0 +1,5 @@
+O primeiro fixture tratou `imports` do manifesto como nomes de arquivo. No
+manifesto do Vite eles são chaves (`_DataContext-...js`), cujo campo `file`
+contém o caminho em `dist/assets`. A medição parou em ENOENT. O fixture foi
+corrigido para resolver chave → item → arquivo antes da medição; nenhum arquivo
+do produto mudou.

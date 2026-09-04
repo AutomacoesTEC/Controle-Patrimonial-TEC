@@ -1,0 +1,24 @@
+{
+  "entrada": "assets/index-BYCE0sM6.js",
+  "entradaBytes": 235097,
+  "fechamentoEstatico": [
+    "assets/index-BYCE0sM6.js",
+    "assets/DataContext-Dj0Lm4Bm.js"
+  ],
+  "fechamentoEstaticoBytes": 326349,
+  "importsDinamicosDaEntrada": [
+    "src/pages/importParsers.js",
+    "src/irpf/leitorRegistrosDbk.js",
+    "node_modules/pdfjs-dist/build/pdf.mjs",
+    "node_modules/pdfjs-dist/build/pdf.worker.min.mjs?url",
+    "src/pages/Dashboard.jsx",
+    "src/pages/ImportPage.jsx"
+  ]
+}
+
+Fluxo no navegador:
+{"telaInicial":"Controle Patrimonial TEC","parserNoInicio":false,"layoutNoInicio":false,"parserAposArquivo":true,"layoutAposArquivo":true,"decInvalidoRecusado":true,"revisao":"Revisar antes de importar"}
+
+Suíte completa:
+Test Files  41 passed (41)
+Tests       885 passed (885)

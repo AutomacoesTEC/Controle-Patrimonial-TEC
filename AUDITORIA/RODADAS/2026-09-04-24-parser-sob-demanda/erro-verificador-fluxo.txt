@@ -1,0 +1,10 @@
+O primeiro arquivo escolhido para verificar o fluxo no navegador não abriu a
+revisão dentro de 30 segundos. O verificador foi instrumentado para preservar
+a mensagem da interface e as requisições de scripts antes de decidir se há
+regressão no produto ou fixture inadequado.
+
+A captura mostrou que o arquivo `output/gcap/...DEC` começa por `PK`: é um
+contêiner binário renomeado, não o texto estrutural esperado, e o produto o
+recusou por falha de integridade. Antes da recusa, as requisições mostraram os
+dois chunks dinâmicos novos. O verificador manteve essa prova e passou a usar o
+PDF sintético canônico para confirmar também o fluxo bem-sucedido até a revisão.

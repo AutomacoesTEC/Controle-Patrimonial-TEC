@@ -1,0 +1,28 @@
+{
+  "entrada": "assets/index-DctFPk0s.js",
+  "entradaBytes": 837798,
+  "fechamentoEstatico": [
+    "assets/index-DctFPk0s.js",
+    "assets/DataContext-Dj0Lm4Bm.js"
+  ],
+  "fechamentoEstaticoBytes": 929050,
+  "importsDinamicosDaEntrada": [
+    "node_modules/pdfjs-dist/build/pdf.mjs",
+    "node_modules/pdfjs-dist/build/pdf.worker.min.mjs?url",
+    "src/pages/Dashboard.jsx",
+    "src/pages/ImportPage.jsx",
+    "src/pages/TitularPage.jsx",
+    "src/pages/BensPage.jsx",
+    "src/pages/DividasPage.jsx",
+    "src/pages/RendimentosPage.jsx",
+    "src/pages/PagamentosPage.jsx",
+    "src/pages/PagamentosDiversosPage.jsx",
+    "src/pages/DoacoesPage.jsx",
+    "src/pages/AtividadeRuralPage.jsx",
+    "src/pages/GanhosCapitalPage.jsx",
+    "src/pages/RendaVariavelPage.jsx",
+    "src/pages/RelatorioPage.jsx",
+    "src/pages/HistoricoPage.jsx",
+    "src/pages/ModalidadePage.jsx"
+  ]
+}

@@ -170,7 +170,7 @@ em `AUDITORIA/RODADAS/2026-09-04-23-checklist-saldo/`.
 Pendente em rodada própria: tolerância explícita e configurável por perfil
 para o selo "fecha".
 
-### A9. Importação mais leve e separada do resto do app (P2)
+### A9. Importação mais leve e separada do resto do app — CONCLUÍDO (P2)
 
 Evidência: `dist/assets` tem `index` com 851 KB, `pdf` com 431 KB e o worker
 do pdfjs com 1,27 MB. `src/irpf/layoutArquivosIrpf2026.js` tem 33 mil linhas
@@ -186,6 +186,18 @@ Proposta:
 
 Pronto quando: o chunk inicial cai abaixo de 400 KB e a tela de perfis abre
 sem carregar pdfjs.
+
+Concluído na rodada 24. Os imports estáticos de `importParsers` e
+`leitorRegistrosDbk` na tela de perfis passaram para o handler que recebe o
+arquivo. O entry caiu de 837.798 para 235.097 bytes (−71,9%); seu fechamento
+estático caiu para 326.349 bytes. O navegador confirmou parser/layout ausentes
+na abertura e requisitados após escolher arquivo, com PDF chegando à revisão.
+
+Não foi necessário fixar `manualChunks`: as fronteiras lazy/dinâmicas já
+produzem chunks separados para Dashboard/Recharts, `exportXlsx`, pdfjs,
+parser e layout. Configurar nomes manualmente não reduziria a carga inicial e
+seria uma segunda mudança sem ganho demonstrado. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-24-parser-sob-demanda/`.
 
 ### A10. Suíte: golden files do demonstrativo por fixture — CONCLUÍDO (P2)
 

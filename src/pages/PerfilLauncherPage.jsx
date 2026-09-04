@@ -12,9 +12,7 @@ import {
   restaurarBackup, textoDoArquivoBackup,
 } from '../store/backupPerfil';
 import { baixarTexto } from '../utils/baixarArquivo';
-import { parseDBK, parsePDF } from './importParsers';
 import { reducerComHistorico, initialState } from '../store/reducer';
-import { validarIntegridadeArquivoIrpf } from '../irpf/leitorRegistrosDbk';
 import { identificarArquivoFonte, payloadImportacaoCompleto, resumirImportacao } from '../utils/importacaoDeclaracao';
 import RevisaoImportacaoModal from '../components/RevisaoImportacaoModal';
 
@@ -155,11 +153,16 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       // senão a pessoa consegue importar um formato ao criar o perfil e não
       // consegue reimportar depois (ou o contrário).
       if (ext === 'dbk' || ext === 'dec' || ext === 'f2b') {
+        const [{ parseDBK }, { validarIntegridadeArquivoIrpf }] = await Promise.all([
+          import('./importParsers'),
+          import('../irpf/leitorRegistrosDbk'),
+        ]);
         const text = await file.text();
         validarIntegridadeArquivoIrpf(text, ext);
         result = await parseDBK(text, coletar);
       } else if (ext === 'pdf') {
-        const [pdfjsLib, { default: pdfjsWorker }] = await Promise.all([
+        const [{ parsePDF }, pdfjsLib, { default: pdfjsWorker }] = await Promise.all([
+          import('./importParsers'),
           import('pdfjs-dist'),
           import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
         ]);
