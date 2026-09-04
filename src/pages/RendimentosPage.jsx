@@ -126,7 +126,8 @@ export default function RendimentosPage() {
           </div>
         ) : (
           <>
-            <div className="stats-grid" style={{ marginBottom: '24px' }}>
+            <div className="grade-quatro-contexto">
+              <div className="stats-grid stats-grid-quatro" style={{ marginBottom: '24px' }}>
               {Object.entries(CATEGORIAS_RENDIMENTO).map(([key, meta]) => {
                 const lista = porCategoria[key];
                 if (lista.length === 0) return null;
@@ -141,6 +142,7 @@ export default function RendimentosPage() {
               <div style={{ padding: '16px', background: 'rgba(239,68,68,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239,68,68,0.2)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--accent-danger)', textTransform: 'uppercase', fontWeight: 600 }}>IRRF retido no total</div>
                 <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(totalIRRF)}</div>
+              </div>
               </div>
             </div>
 

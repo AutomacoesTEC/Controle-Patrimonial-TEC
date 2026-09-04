@@ -156,6 +156,10 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .card-title{font-size:16px;font-weight:600;color:var(--text-primary)}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.grade-quatro-contexto{container-type:inline-size}
+@container (min-width:752px) and (max-width:1007px) {
+  .stats-grid-quatro:has(> :nth-child(4):last-child){grid-template-columns:repeat(2,minmax(240px,1fr))}
+}
 /* Sem overflow:hidden aqui: cortava o texto do rótulo quando ele precisava
    quebrar em 2-3 linhas (rótulos como "Variação de 31/12/AAAA a 31/12/AAAA"
    não cabem numa linha só em cards estreitos). */

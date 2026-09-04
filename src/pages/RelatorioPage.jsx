@@ -252,7 +252,7 @@ export default function RelatorioPage() {
         )}
 
         {impostoDevido && (
-          <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card grade-quatro-contexto" style={{ marginBottom: '20px' }}>
             <div className="card-header">
               <h3 className="card-title">Resumo da Declaração Importada</h3>
               <span className="badge badge-blue" title="Lido do arquivo importado, não é calculado pelo app">Da declaração original</span>
@@ -262,7 +262,7 @@ export default function RelatorioPage() {
               linha a linha com o documento ao lado. Valor zerado aparece porque a declaração
               também o imprime; linha que este modelo de declaração não informa fica de fora.
             </p>
-            <div className="stats-grid">
+            <div className="stats-grid stats-grid-quatro">
               <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Base de Cálculo</div>
                 <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(impostoDevido.baseCalculo)}</div>
