@@ -414,6 +414,12 @@ trajetória `Bens e Direitos → Novo Bem`, os 22 campos sem nome caíram a zero
 sem mudar tipos ou valores. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-39-rotulos-campos/`.
 
+Quinta parte e B5 concluídas em 04/09/2026: tabelas montadas inicialmente ou
+de forma dinâmica recebem caption contextual em `.sr-only`. As cinco tabelas
+do Dashboard foram preservadas e passaram de zero a cinco captions nomeadas,
+todas comprovadamente fora do fluxo visual. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-40-legendas-tabelas/`.
+
 ### B6. Estados vazios e primeiro uso por tela (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória

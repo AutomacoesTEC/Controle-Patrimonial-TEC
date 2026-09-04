@@ -200,6 +200,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   de 2px em `--accent-primary`, afastado 2px do componente.
 - **campos**: todo `input`, `select` e `textarea` expõe nome acessível; quando
   o rótulo visual não está associado por HTML, o app deriva `aria-label` dele.
+- **tabelas**: toda tabela recebe caption programática derivada do contexto ou
+  dos cabeçalhos; `.sr-only` a oculta visualmente sem removê-la da árvore.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação
