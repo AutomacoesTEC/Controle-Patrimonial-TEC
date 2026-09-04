@@ -1,0 +1,1 @@
+{"inicial":{"controles":0,"aberto":null,"graficosDom":3,"graficosDimensionados":3,"alturaInicial":1088,"titulos":["Distribuição de Bens e Direitos por Categoria, situação em 31/12/2025","Bens e Dívidas, período de 01/01/2025 até 31/12/2025","Evolução do Patrimônio Líquido, 01/01/2025 a 31/12/2025"]},"aposAbrir":null}

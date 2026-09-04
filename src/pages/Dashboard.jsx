@@ -942,7 +942,13 @@ export default function Dashboard({ onNavigate } = {}) {
             </div>
           </div>
         </div>
-        <div className="card" style={{ marginTop: '20px' }}>
+        <details className="dashboard-graficos">
+          <summary>
+            <span>Gráficos de apoio</span>
+            <small>Distribuição e evolução patrimonial</small>
+          </summary>
+          <div className="dashboard-graficos-conteudo">
+        <div className="card">
           <div className="card-header">
             <h3 className="card-title">Distribuição de Bens e Direitos por Categoria, situação em {formatDate(ate)}</h3>
           </div>
@@ -1034,6 +1040,8 @@ export default function Dashboard({ onNavigate } = {}) {
             </ResponsiveContainer>
           </div>
         )}
+          </div>
+        </details>
       </div>
 
       <Modal open={!!detalheCategoria} onClose={() => setDetalheCategoria(null)}>

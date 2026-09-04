@@ -196,6 +196,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   Saldo de Caixa em 30px/700 e um estado textual (`Conciliação fecha`,
   `Sobra a explicar` ou `Falta a explicar`). Cor reforça o estado, mas nunca
   o substitui.
+- **dashboard-graficos**: agrupador nativo recolhido por padrão. Gráficos são
+  leitura de apoio e só ocupam a página depois que a pessoa abre `Gráficos de
+  apoio`; títulos e visualizações permanecem integrais no estado aberto.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 

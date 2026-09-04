@@ -178,6 +178,14 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .saldo-hero-fecha .saldo-hero-estado{color:var(--accent-success)}
 .saldo-hero-sobra .saldo-hero-estado{color:var(--accent-warning)}
 .saldo-hero-falta .saldo-hero-estado{color:var(--accent-danger)}
+.dashboard-graficos{margin-top:20px;border:1px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-card)}
+.dashboard-graficos>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;cursor:pointer;color:var(--text-primary);font-size:14px;font-weight:700;list-style:none}
+.dashboard-graficos>summary::-webkit-details-marker{display:none}
+.dashboard-graficos>summary::after{content:'+';font-size:20px;line-height:1;color:var(--accent-primary)}
+.dashboard-graficos[open]>summary::after{content:'−'}
+.dashboard-graficos>summary small{margin-left:auto;color:var(--text-muted);font-size:11px;font-weight:400}
+.dashboard-graficos-conteudo{padding:0 20px 20px}
+.dashboard-graficos-conteudo>.card+.card{margin-top:20px}
 .continuidade-card{padding:16px 20px;margin-bottom:20px}
 .continuidade-resumo{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .continuidade-resumo p{font-size:12px;color:var(--text-muted);margin-top:3px}

@@ -1,0 +1,7 @@
+A primeira reexecução posterior não produziu medição: o verificador aguardava
+o contêiner Recharts ficar visível, exatamente a condição que a mudança devia
+eliminar no estado fechado. A espera foi corrigida de "visible" para
+"attached" antes da medição válida do depois. Os campos medidos, a interação,
+os dados e o viewport não mudaram. No antes, os três contêineres estavam
+visíveis e anexados, portanto as duas condições eram satisfeitas e a saída
+bruta preservada não se altera.

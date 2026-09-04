@@ -1,0 +1,7 @@
+Na primeira medição válida do depois, o agrupador fechado media 54 px, mas os
+filhos do Recharts ainda devolviam os retângulos calculados antes de o
+`<details>` ser fechado pelo navegador. Retângulo positivo não provava que o
+elemento estava exposto. O filtro de `graficosDimensionados` passou a exigir
+também `Element.checkVisibility()`. No antes os três gráficos estavam
+expostos, logo todos já satisfaziam esse critério; nenhum dado bruto do antes
+foi reinterpretado ou descartado.
