@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import PageSkeleton from './components/PageSkeleton';
 import PerfilLauncherPage from './pages/PerfilLauncherPage';
 import DesbloquearPerfilPage from './pages/DesbloquearPerfilPage';
+import useRotulosAcessiveis from './components/useRotulosAcessiveis';
 import { snapshotHasData } from './store/reducer';
 import {
   PERFIS_STORAGE_KEY, LEGADO_STORAGE_KEY, PERFIL_SESSAO_KEY,
@@ -184,6 +185,7 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
 }
 
 export default function App() {
+  useRotulosAcessiveis();
   // O tema vive aqui (não dentro de AppContent) porque também precisa
   // pintar a tela de seleção de perfil, que aparece ANTES de qualquer
   // perfil (e portanto antes do DataProvider) existir.

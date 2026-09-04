@@ -408,6 +408,12 @@ botão de tema e linha clicável foram medidos no estado estável e atingiram os
 quatro valores previstos. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-38-foco-visivel-global/`.
 
+Quarta parte concluída em 04/09/2026: uma regra na raiz associa nome acessível
+a `input`, `select` e `textarea` já montados ou inseridos dinamicamente. Na
+trajetória `Bens e Direitos → Novo Bem`, os 22 campos sem nome caíram a zero,
+sem mudar tipos ou valores. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-39-rotulos-campos/`.
+
 ### B6. Estados vazios e primeiro uso por tela (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória

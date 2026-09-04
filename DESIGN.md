@@ -198,6 +198,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   de botão e responde igualmente a clique, Enter e Espaço.
 - **foco de teclado**: todo elemento em `:focus-visible` recebe contorno sólido
   de 2px em `--accent-primary`, afastado 2px do componente.
+- **campos**: todo `input`, `select` e `textarea` expõe nome acessível; quando
+  o rótulo visual não está associado por HTML, o app deriva `aria-label` dele.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação
