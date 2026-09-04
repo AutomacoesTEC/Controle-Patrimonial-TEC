@@ -141,7 +141,7 @@ export default function BensPage({ onVoltar } = {}) {
         </div>
 
         <TabelaRedimensionavel>
-          <table>
+          <table className="tabela-acoes-fixas">
             <thead>
               <tr>
                 {/* Número do item impresso na ficha de Bens e Direitos. É por

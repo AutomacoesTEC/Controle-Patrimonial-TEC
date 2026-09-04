@@ -171,7 +171,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
         <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Imóvel</button>
       </div>
       <div className="table-container">
-        <table>
+        <table className="tabela-acoes-fixas">
           <thead><tr><th>Nome e Localização</th><th>Área (ha)</th><th>Participação (%)</th><th>Condição</th><th>Código Atividade</th><th>CIB</th><th>Data Aquisição</th><th>Ações</th></tr></thead>
           <tbody>
             {imoveisRurais.length === 0 ? (
@@ -371,7 +371,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
         </div>
       </div>
       <div className="table-container">
-        <table>
+        <table className="tabela-acoes-fixas">
           <thead><tr><th>Código</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th>Ações</th></tr></thead>
           <tbody>
             {bensRuraisVisiveis.length === 0 ? (
@@ -489,7 +489,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
         </div>
       </div>
       <div className="table-container">
-        <table>
+        <table className="tabela-acoes-fixas">
           <thead><tr><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
           <tbody>
             {dividasRurais.length === 0 ? (
@@ -722,7 +722,7 @@ function LancamentosRuraisSection({
         <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Lançamento</button>
       </div>
       <div className="table-container">
-        <table>
+        <table className="tabela-acoes-fixas">
           <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
           <tbody>
             {ordenados.length === 0 ? (

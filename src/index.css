@@ -251,6 +251,10 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .card .table-container.altura-natural{max-height:none}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{position:sticky;top:0;z-index:1;background:var(--bg-secondary);padding:12px 16px;text-align:left;font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border-color);white-space:nowrap}
+.tabela-acoes-fixas>thead>tr>th:last-child,
+.tabela-acoes-fixas>tbody>tr>td:not([colspan]):last-child{position:sticky;right:0;background:var(--bg-card);box-shadow:-10px 0 14px -12px rgba(0,0,0,.75)}
+.tabela-acoes-fixas>thead>tr>th:last-child{z-index:3;background:var(--bg-secondary)}
+.tabela-acoes-fixas>tbody>tr:hover>td:not([colspan]):last-child{background:var(--bg-card-hover)}
 
 /* Redimensionamento de coluna: camada de alças sobre o cabeçalho, mantida
    colada no topo visível pelo componente TabelaRedimensionavel (translateY

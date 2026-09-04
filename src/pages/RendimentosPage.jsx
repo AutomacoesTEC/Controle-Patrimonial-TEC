@@ -162,7 +162,7 @@ export default function RendimentosPage() {
                 <span className={`badge badge-${categoriaFilter === 'all' ? 'blue' : CATEGORIAS_RENDIMENTO[categoriaFilter].cor}`}>{formatCurrency(totalPorCategoria(filtrados))}</span>
               </div>
               <TabelaRedimensionavel>
-                <table>
+                <table className="tabela-acoes-fixas">
                   <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
                   <tbody>
                     {filtrados.length === 0 ? (

@@ -157,7 +157,7 @@ export default function TitularPage() {
             <button className="btn btn-primary" onClick={handleNovoDependenteClick}>＋ Novo Dependente</button>
           </div>
           <TabelaRedimensionavel>
-            <table>
+            <table className="tabela-acoes-fixas">
               <thead><tr><th>Nome</th><th>CPF</th><th>Data de Nascimento</th><th>Relação de Dependência</th><th>Raça/Cor</th><th>Mora com o titular</th><th>Contato</th><th>Ações</th></tr></thead>
               <tbody>
                 {dependentes.length === 0 ? (
