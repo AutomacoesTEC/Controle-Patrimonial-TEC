@@ -107,6 +107,12 @@ Proposta, condicionada a esse levantamento:
 Pronto quando: um teste percorre a lista de `case` do reducer e falha se uma
 ação que altera coleção fiscal não gera entrada no histórico.
 
+Primeira parte concluída em 04/09/2026: a auditoria encontrou cobertura para
+todas as ações fiscais atuais e confirmou o cap existente de 300 entradas. As
+edições agora guardam e exibem diferenças por campo, excluindo ids e metadados.
+O fixture passou de `mudancas=null` às duas mudanças exatas plantadas.
+Evidência em `AUDITORIA/RODADAS/2026-09-04-49-historico-diff/`.
+
 ### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras — CONCLUÍDO (P1)
 
 Implementada a alternativa menos invasiva: helper único

@@ -1282,6 +1282,27 @@ function buscar(state, colecao, id) {
   return (state[colecao] || []).find(i => i.id === id);
 }
 
+const COLECAO_POR_EDICAO = {
+  UPDATE_BEM: 'bens', UPDATE_DIVIDA: 'dividas', UPDATE_RENDIMENTO: 'rendimentos', UPDATE_PAGAMENTO: 'pagamentos',
+  UPDATE_BEM_RURAL: 'bensRurais', UPDATE_DIVIDA_RURAL: 'dividasRurais', UPDATE_IMOVEL_RURAL: 'imoveisRurais',
+  UPDATE_LANCAMENTO_RURAL: 'lancamentosRurais', UPDATE_PAGAMENTO_DIVERSO: 'pagamentosDiversos', UPDATE_DEPENDENTE: 'dependentes',
+  UPDATE_DOACAO_EFETUADA: 'doacoesEfetuadasOficial', UPDATE_DOACAO_PARTIDO: 'doacoesPartidosOficial', UPDATE_DOACAO_ECA_IDOSO: 'doacoesEcaIdosoOficial',
+};
+
+const CAMPOS_TECNICOS_HISTORICO = new Set(['id', 'origem', 'origemDocumento', 'valorDeclarado', 'movimentacoes']);
+
+function mudancasDaAcao(stateAntes, stateDepois, action) {
+  const colecao = COLECAO_POR_EDICAO[action.type];
+  if (!colecao) return [];
+  const antes = buscar(stateAntes, colecao, action.payload?.id);
+  const depois = buscar(stateDepois, colecao, action.payload?.id);
+  if (!antes || !depois) return [];
+  return [...new Set([...Object.keys(antes), ...Object.keys(depois)])]
+    .filter(campo => !CAMPOS_TECNICOS_HISTORICO.has(campo))
+    .filter(campo => JSON.stringify(antes[campo]) !== JSON.stringify(depois[campo]))
+    .map(campo => ({ campo, antes: antes[campo] ?? null, depois: depois[campo] ?? null }));
+}
+
 // Frase legível pro histórico de alterações, a partir da ação já aplicada.
 // Roda sobre o estado ANTES da mutação de propósito: é onde ainda dá pra
 // achar a descrição de um item que acabou de ser excluído (no estado novo
@@ -1380,6 +1401,7 @@ export function reducerComHistorico(state, action) {
     data: new Date().toISOString(),
     anoCalendario: novoEstado.anoCalendario,
     descricao,
+    mudancas: mudancasDaAcao(state, novoEstado, action),
   };
   return { ...novoEstado, alteracoes: [entrada, ...(novoEstado.alteracoes || [])].slice(0, 300) };
 }

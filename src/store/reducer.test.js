@@ -20,6 +20,17 @@ describe('ADD_TOAST / REMOVE_TOAST', () => {
   });
 });
 
+describe('detalhe por campo no histórico', () => {
+  it('guarda antes e depois apenas dos campos alterados', () => {
+    const state = { ...initialState, anoCalendario: 2025, bens: [{ id: 1, discriminacao: 'Apto', situacao_atual: 100, origem: 'manual' }] };
+    const novo = reducerComHistorico(state, { type: 'UPDATE_BEM', payload: { id: 1, discriminacao: 'Apto reformado', situacao_atual: 120 } });
+    expect(novo.alteracoes[0].mudancas).toEqual([
+      { campo: 'discriminacao', antes: 'Apto', depois: 'Apto reformado' },
+      { campo: 'situacao_atual', antes: 100, depois: 120 },
+    ]);
+  });
+});
+
 describe('CRUD de bens/dívidas/rendimentos/pagamentos', () => {
   it('ADD/UPDATE/DELETE_BEM', () => {
     let state = { ...initialState };

@@ -210,6 +210,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **origem do registro**: badge semântico `Manual` ou `Declaração PDF/DBK` e
   filtro explícito; a exportação repete a mesma nomenclatura. Primeira edição
   de importado acrescenta `Editado`, com o original preservado no tooltip.
+- **histórico**: edições mostram a descrição e, abaixo, os pares de valor
+  anterior e novo por campo; ids e metadados técnicos ficam ocultos.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação

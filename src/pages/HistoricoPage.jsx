@@ -16,6 +16,12 @@ function formatDataHora(iso) {
   return `${dd}/${mm}/${d.getFullYear()} ${hh}:${min}`;
 }
 
+function formatarValorHistorico(valor) {
+  if (valor == null || valor === '') return 'vazio';
+  if (typeof valor === 'object') return JSON.stringify(valor);
+  return String(valor);
+}
+
 export default function HistoricoPage({ onImportar } = {}) {
   const { state } = useData();
   const alteracoes = state.alteracoes || [];
@@ -92,7 +98,14 @@ export default function HistoricoPage({ onImportar } = {}) {
                   <tr key={a.id}>
                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>{formatDataHora(a.data)}</td>
                     <td>{a.anoCalendario != null ? <span className="badge badge-blue">{a.anoCalendario}</span> : ''}</td>
-                    <td>{a.descricao}</td>
+                    <td>
+                      {a.descricao}
+                      {a.mudancas?.length > 0 && (
+                        <ul className="historico-mudancas">
+                          {a.mudancas.map(m => <li key={m.campo}><strong>{m.campo.replace(/_/g, ' ')}</strong>: {formatarValorHistorico(m.antes)} → {formatarValorHistorico(m.depois)}</li>)}
+                        </ul>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

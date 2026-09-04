@@ -1,0 +1,3 @@
+Node puro não resolveu o import sem extensão `./demonstrativos` usado pelo
+projeto. O fixture não executou o reducer nem produziu baseline; foi migrado
+para Vitest, o mesmo transformador da suíte.
