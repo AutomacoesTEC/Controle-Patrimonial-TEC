@@ -349,6 +349,12 @@ ocultos. O cabeçalho redundante de tela do Dashboard permanece separado da
 identificação própria criada na rodada anterior. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-30-cabecalho-relatorio-print/`.
 
+Terceira parte concluída em 04/09/2026: Dashboard e Relatório IRPF ganharam
+um botão `Imprimir demonstrativo`; o fixture interceptou uma chamada exata a
+`window.print()` por clique em cada tela. A integração nativa Electron ainda
+fica pendente. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-31-botoes-impressao/`.
+
 ### B5. Acessibilidade de teclado e leitores de tela (P2)
 
 Evidência: 16 atributos `aria-` em todo `src/`; `Modal.jsx` não declara

@@ -237,6 +237,7 @@ export default function RelatorioPage() {
         </div>
         <div className="page-header-actions">
           {seletorAno}
+          <button className="btn btn-secondary" onClick={() => window.print()}>Imprimir demonstrativo</button>
           <button className="btn btn-success" onClick={handleExport}>Exportar Relatório .xlsx</button>
         </div>
       </div>

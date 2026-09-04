@@ -449,6 +449,9 @@ export default function Dashboard({ onNavigate } = {}) {
           <p>Período de {formatDate(de)} até {formatDate(ate)}</p>
         </div>
         <div className="page-header-actions">
+          <button className="btn btn-secondary" onClick={() => window.print()}>
+            Imprimir demonstrativo
+          </button>
           <button className="btn btn-success" onClick={handleExport}>
             Exportar .xlsx
           </button>
