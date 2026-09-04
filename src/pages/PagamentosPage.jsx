@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
@@ -9,6 +9,8 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 import EstadoVazio from '../components/EstadoVazio';
+import BadgeOrigem from '../components/BadgeOrigem';
+import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRegistro';
 
 // titularidade nasce vazia de propósito: o cadastro manual não deve assumir
 // que a despesa é do titular. Titular, dependente e alimentando têm regras de
@@ -21,6 +23,7 @@ export default function PagamentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { pagamentos } = state;
   const [modalOpen, setModalOpen] = useState(false);
+  const [origemFilter, setOrigemFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
@@ -67,12 +70,14 @@ export default function PagamentosPage() {
     }
   };
 
-  const totalPago = pagamentos.reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
-  const totalNaoDedutivel = pagamentos.reduce((s, p) => s + (parseFloat(p.parcela_nao_dedutivel) || 0), 0);
+  const pagamentosVisiveis = useMemo(() => pagamentos.filter(p => correspondeFiltroOrigem(p, origemFilter)), [pagamentos, origemFilter]);
+  const totalPago = pagamentosVisiveis.reduce((s, p) => s + (parseFloat(p.valor_pago) || 0), 0);
+  const totalNaoDedutivel = pagamentosVisiveis.reduce((s, p) => s + (parseFloat(p.parcela_nao_dedutivel) || 0), 0);
 
   const handleExport = () => exportListaToXlsx(
-    pagamentos,
+    pagamentosVisiveis,
     [
+      ['Origem', p => rotuloOrigemRegistro(p)],
       ['Código', p => p.codigo || ''],
       ['Descrição do Código', p => describePagamentoCodigo(p.codigo) || ''],
       ['Data', p => formatDate(p.data)],
@@ -91,6 +96,7 @@ export default function PagamentosPage() {
       <div className="page-header">
         <div className="page-header-left"><h2>Pagamentos Efetuados</h2><p>{pagamentos.length} registro(s){state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}, total {formatCurrency(totalPago)}</p></div>
         <div className="page-header-actions">
+          <select className="form-control filtro-origem" aria-label="Filtrar por origem" value={origemFilter} onChange={e => setOrigemFilter(e.target.value)}><option value="all">Todas as origens</option><option value="importacao">Declaração</option><option value="manual">Manual</option></select>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Pagamento</button>
         </div>
@@ -100,9 +106,9 @@ export default function PagamentosPage() {
           <table className="tabela-acoes-fixas">
             <thead><tr><th style={{ minWidth: '180px' }}>Cód.</th><th>Data</th><th>Nome Beneficiário</th><th>Titularidade</th><th>CPF/CNPJ</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th style={{ textAlign: 'right' }}>Parcela Não Dedutível</th><th>Descrição</th><th>Ações</th></tr></thead>
             <tbody>
-              {pagamentos.length === 0 ? (
+              {pagamentosVisiveis.length === 0 ? (
                 <EstadoVazio colSpan={9} titulo="Nenhum pagamento cadastrado" contexto="Registre o primeiro pagamento efetuado para montar a ficha deste ano." acao="Cadastrar primeiro pagamento" onAcao={handleNovoClick} />
-              ) : pagamentos.map(p => (
+              ) : pagamentosVisiveis.map(p => (
                 <tr key={p.id}>
                   <td>
                     <span className="badge badge-orange">{p.codigo}</span>
@@ -113,6 +119,7 @@ export default function PagamentosPage() {
                   <td>{formatDate(p.data)}</td>
                   <td title={p.nome_beneficiario || ''}>
                     {truncarComReticencias(p.nome_beneficiario, 40)}
+                    <div><BadgeOrigem item={p} /></div>
                     {descreverOrigemDocumento(p) && (
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(p)}</div>
                     )}
@@ -133,7 +140,7 @@ export default function PagamentosPage() {
                 </tr>
               ))}
             </tbody>
-            {pagamentos.length > 0 && (
+            {pagamentosVisiveis.length > 0 && (
               <tfoot>
                 <tr style={{ background: 'var(--bg-secondary)' }}>
                   <td colSpan={4} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAIS</td>

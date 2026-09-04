@@ -1,0 +1,1 @@
+{"dividas":{"todas":3,"badges":0,"filtro":0,"manual":null,"declaracao":null},"rendimentos":{"todas":19,"badges":0,"filtro":0,"manual":null,"declaracao":null},"pagamentos":{"todas":9,"badges":0,"filtro":0,"manual":null,"declaracao":null}}

@@ -8,6 +8,8 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '../utils/validacao';
 import EstadoVazio from '../components/EstadoVazio';
+import BadgeOrigem from '../components/BadgeOrigem';
+import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRegistro';
 
 // Lista completa (26 códigos isentos + 14 de tributação exclusiva),
 // conferida contra o manual oficial do programa IRPF2026 — ver
@@ -29,6 +31,7 @@ export default function RendimentosPage() {
   // Aba por categoria (mesmo padrão de BensPage: "Todos" + uma por grupo) —
   // pedido da usuária pra não ficar uma lista contínua de cards empilhados.
   const [categoriaFilter, setCategoriaFilter] = useState('all');
+  const [origemFilter, setOrigemFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
@@ -77,20 +80,22 @@ export default function RendimentosPage() {
     }
   };
 
+  const rendimentosOrigem = useMemo(() => rendimentos.filter(r => correspondeFiltroOrigem(r, origemFilter)), [rendimentos, origemFilter]);
   const porCategoria = useMemo(() => {
     const grupos = { tributavel: [], isento: [], exclusivo: [], outro: [] };
-    for (const r of rendimentos) grupos[categoriaRendimento(r.tipo)].push(r);
+    for (const r of rendimentosOrigem) grupos[categoriaRendimento(r.tipo)].push(r);
     return grupos;
-  }, [rendimentos]);
+  }, [rendimentosOrigem]);
 
   const totalPorCategoria = (lista) => lista.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
-  const totalIRRF = rendimentos.reduce((s, r) => s + (parseFloat(r.irrf) || 0), 0);
+  const totalIRRF = rendimentosOrigem.reduce((s, r) => s + (parseFloat(r.irrf) || 0), 0);
 
-  const filtrados = categoriaFilter === 'all' ? rendimentos : porCategoria[categoriaFilter];
+  const filtrados = categoriaFilter === 'all' ? rendimentosOrigem : porCategoria[categoriaFilter];
 
   const handleExport = () => exportListaToXlsx(
-    rendimentos,
+    rendimentosOrigem,
     [
+      ['Origem', r => rotuloOrigemRegistro(r)],
       ['Tipo', r => describeRendimentoTipo(r.tipo)],
       ['Data', r => formatDate(r.data)],
       ['CNPJ Fonte', r => formatCpfCnpj(r.cnpj_fonte)],
@@ -115,6 +120,7 @@ export default function RendimentosPage() {
       <div className="page-header">
         <div className="page-header-left"><h2>Rendimentos</h2><p>{rendimentos.length} registro(s){state.anoCalendario != null ? ` no ano-calendário ${state.anoCalendario}` : ''}</p></div>
         <div className="page-header-actions">
+          <select className="form-control filtro-origem" aria-label="Filtrar por origem" value={origemFilter} onChange={e => setOrigemFilter(e.target.value)}><option value="all">Todas as origens</option><option value="importacao">Declaração</option><option value="manual">Manual</option></select>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Rendimento</button>
         </div>
@@ -194,6 +200,7 @@ export default function RendimentosPage() {
                         <td>{formatCpfCnpj(r.cnpj_fonte)}</td>
                         <td title={r.nome_fonte || ''}>
                           {truncarComReticencias(r.nome_fonte, 50)}
+                          <div><BadgeOrigem item={r} /></div>
                           {descreverComunicacaoNaoResidente(r) && (
                             <div style={{ fontSize: '11px', color: 'var(--accent-warning)' }} title="A partir dessa data a fonte pagadora deixa de aplicar a tabela do residente. Não é a mesma data da caracterização da condição de não residente, que fica no quadro da saída definitiva.">
                               {descreverComunicacaoNaoResidente(r)}

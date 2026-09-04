@@ -73,6 +73,12 @@ persistida. Num fixture com sete importados e um manual, os oito badges
 apareceram e os filtros produziram exatamente 7/1. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-45-origem-bens/`.
 
+Segunda parte concluída em 04/09/2026: Dívidas, Rendimentos e Pagamentos
+reutilizam o mesmo badge, filtro Manual/Declaração e coluna Origem na
+exportação. Fixtures mistos preservaram 3/19/9 linhas e separaram exatamente
+1/1/1 manual de 2/18/8 importados. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-46-origem-demais-fichas/`.
+
 ### A4. Trilha de alterações: completar o que já existe (P2)
 
 Evidência: já existe `state.alteracoes` e a tela "Histórico de Alterações"

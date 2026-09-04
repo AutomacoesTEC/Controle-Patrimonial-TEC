@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias, CODIGOS_DIVIDA, describeDividaCodigo } from '../utils/formatters';
 import Modal from '../components/Modal';
@@ -10,6 +10,8 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx, resumoMovimentacoes } from '../utils/exportXlsx';
 import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 import EstadoVazio from '../components/EstadoVazio';
+import BadgeOrigem from '../components/BadgeOrigem';
+import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRegistro';
 
 const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
@@ -17,6 +19,7 @@ export default function DividasPage({ onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { dividas, anoCalendario } = state;
   const [modalOpen, setModalOpen] = useState(false);
+  const [origemFilter, setOrigemFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
   const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
@@ -74,12 +77,14 @@ export default function DividasPage({ onVoltar } = {}) {
     }
   };
 
-  const totalAnterior = dividas.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
-  const totalAtual = dividas.reduce((s, d) => s + (parseFloat(d.situacao_atual) || 0), 0);
+  const dividasVisiveis = useMemo(() => dividas.filter(d => correspondeFiltroOrigem(d, origemFilter)), [dividas, origemFilter]);
+  const totalAnterior = dividasVisiveis.reduce((s, d) => s + (parseFloat(d.situacao_anterior) || 0), 0);
+  const totalAtual = dividasVisiveis.reduce((s, d) => s + (parseFloat(d.situacao_atual) || 0), 0);
 
   const handleExport = () => exportListaToXlsx(
-    dividas,
+    dividasVisiveis,
     [
+      ['Origem', d => rotuloOrigemRegistro(d)],
       ['Código', d => d.codigo || ''],
       ['Discriminação', d => d.discriminacao || ''],
       ['Situação 31/12 Anterior', d => d.situacao_anterior || 0],
@@ -100,6 +105,7 @@ export default function DividasPage({ onVoltar } = {}) {
           <p>{dividas.length} {dividas.length === 1 ? 'item' : 'itens'}{anoCalendario != null ? `, total em 31/12/${anoCalendario}` : ''}: {formatCurrency(totalAtual)}</p>
         </div>
         <div className="page-header-actions">
+          <select className="form-control filtro-origem" aria-label="Filtrar por origem" value={origemFilter} onChange={e => setOrigemFilter(e.target.value)}><option value="all">Todas as origens</option><option value="importacao">Declaração</option><option value="manual">Manual</option></select>
           <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Nova Dívida</button>
         </div>
@@ -109,9 +115,9 @@ export default function DividasPage({ onVoltar } = {}) {
           <table>
             <thead><tr><th>Cód.</th><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Saldo anterior'}</th><th style={{ textAlign: 'right' }}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Saldo atual'}</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
             <tbody>
-              {dividas.length === 0 ? (
+              {dividasVisiveis.length === 0 ? (
                 <EstadoVazio colSpan={6} titulo="Nenhuma dívida cadastrada" contexto="Registre a primeira dívida para acompanhar saldos e pagamentos do ano." acao="Cadastrar primeira dívida" onAcao={handleNovoClick} />
-              ) : dividas.map(d => (
+              ) : dividasVisiveis.map(d => (
                 <tr key={d.id}>
                   <td>
                     <span className="badge badge-red" title={describeDividaCodigo(d.codigo) || undefined}>{d.codigo}</span>
@@ -121,6 +127,7 @@ export default function DividasPage({ onVoltar } = {}) {
                   </td>
                   <td title={d.discriminacao || ''}>
                     {truncarComReticencias(d.discriminacao, 100)}
+                    <div><BadgeOrigem item={d} /></div>
                     {/* Página e linha da declaração impressa, mesmo tratamento
                         que Bens, Rendimentos e Pagamentos já tinham. */}
                     {descreverOrigemDocumento(d) && (
@@ -139,7 +146,7 @@ export default function DividasPage({ onVoltar } = {}) {
                 </tr>
               ))}
             </tbody>
-            {dividas.length > 0 && (
+            {dividasVisiveis.length > 0 && (
               <tfoot>
                 <tr style={{ background: 'var(--bg-secondary)' }}>
                   <td colSpan={2} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAIS</td>

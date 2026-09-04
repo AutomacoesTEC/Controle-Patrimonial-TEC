@@ -1,0 +1,4 @@
+Tentativa sem medição: o fixture procurou na sidebar os títulos completos
+"Dívidas e Ônus Reais"/"Pagamentos Efetuados"; os rótulos reais são
+"Dívidas e Ônus"/"Pagamentos". Playwright encerrou por timeout antes de
+produzir JSON.
