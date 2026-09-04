@@ -235,6 +235,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **painel de IRRF**: tabela anual por fonte, beneficiário e tipo. Distingue
   visualmente o crédito que compõe o ajuste da retenção apenas informativa e
   confronta o primeiro com o total oficial do resumo, sem afetar o caixa.
+  Rendimento PJ mensal de 2026 pode receber ressalva pela tabela progressiva e
+  pelo redutor oficial; total anual em 31/12 nunca é tratado como mês.
 - **tabela-densidade**: cada tabela redimensionável oferece `Compacto`, que
   troca células de 12×16px para 8×12px e persiste isoladamente por tabela.
   Larguras arrastadas continuam temporárias e voltam ao padrão ao reabrir.

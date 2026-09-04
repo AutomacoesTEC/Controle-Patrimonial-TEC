@@ -2,6 +2,74 @@ import { linhasComunsDoAno, linhasFiiDoAno } from './rendaVariavelMensal';
 
 const moeda = valor => Math.round((Number(valor) || 0) * 100) / 100;
 
+// Parâmetros oficiais a partir de janeiro de 2026:
+// https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026
+// Lei 15.270/2025, art. 3º-A. O redutor usa o rendimento BRUTO sujeito à
+// incidência mensal; a tabela progressiva usa a base depois das deduções.
+export function calcularIrrfMensal2026({
+  bruto,
+  previdencia = 0,
+  quantidadeDependentes = 0,
+  deducaoDependentes,
+} = {}) {
+  const rendimento = Math.max(0, Number(bruto) || 0);
+  const dependentes = deducaoDependentes == null
+    ? Math.max(0, Number(quantidadeDependentes) || 0) * 189.59
+    : Math.max(0, Number(deducaoDependentes) || 0);
+  // A fonte pode aplicar o desconto simplificado mensal. Usar a maior dedução
+  // produz o menor IRRF lícito e evita falso alerta de "retenção a menor".
+  const deducao = Math.max(607.20, Math.max(0, Number(previdencia) || 0) + dependentes);
+  const base = Math.max(0, rendimento - deducao);
+  let impostoTabela = 0;
+  if (base <= 2428.80) impostoTabela = 0;
+  else if (base <= 2826.65) impostoTabela = base * 0.075 - 182.16;
+  else if (base <= 3751.05) impostoTabela = base * 0.15 - 394.16;
+  else if (base <= 4664.68) impostoTabela = base * 0.225 - 675.49;
+  else impostoTabela = base * 0.275 - 908.73;
+  impostoTabela = Math.max(0, impostoTabela);
+
+  let reducao = 0;
+  if (rendimento <= 5000) reducao = impostoTabela;
+  else if (rendimento <= 7350) reducao = Math.max(0, 978.62 - 0.133145 * rendimento);
+  reducao = Math.min(impostoTabela, reducao);
+  return {
+    bruto: moeda(rendimento),
+    deducao: moeda(deducao),
+    base: moeda(base),
+    impostoTabela: moeda(impostoTabela),
+    reducao: moeda(reducao),
+    esperado: moeda(impostoTabela - reducao),
+  };
+}
+
+function alertasRetencaoMensal(rendimentos) {
+  return (rendimentos || []).flatMap(rendimento => {
+    const data = String(rendimento.data || '');
+    const mensalExplicito = rendimento.periodicidade === 'mensal' || rendimento.competenciaMensal;
+    const dataMensalNaoAmbigua = /^2026-\d{2}-\d{2}$/.test(data) && !data.endsWith('-12-31');
+    if (!String(rendimento.tipo || '').startsWith('tributavel_pj') || (!mensalExplicito && !dataMensalNaoAmbigua)) return [];
+    if (!data.startsWith('2026-')) return [];
+    const calculo = calcularIrrfMensal2026({
+      bruto: rendimento.valor,
+      previdencia: rendimento.contribuicaoPrevidenciaria,
+      quantidadeDependentes: rendimento.quantidadeDependentes ?? rendimento.numeroDependentes,
+      deducaoDependentes: rendimento.deducaoDependentes,
+    });
+    const informado = moeda(rendimento.irrf);
+    const diferenca = moeda(calculo.esperado - informado);
+    if (diferenca <= 0.01) return [];
+    return [{
+      fonte: rendimento.nome_fonte || 'Fonte não detalhada',
+      beneficiario: nomeBeneficiario(rendimento),
+      data,
+      informado,
+      esperado: calculo.esperado,
+      diferenca,
+      calculo,
+    }];
+  });
+}
+
 function nomeBeneficiario(item) {
   if (item?.titular === true) return 'Titular';
   const nome = item?.beneficiario || (item?.titular === false ? 'Dependente' : 'Titular');
@@ -95,5 +163,6 @@ export function montarPainelIrrf(dados = {}) {
     impostoDevido: moeda(imposto.impostoDevidoTotal),
     saldoPagar: moeda(imposto.saldoPagar),
     impostoRestituir: moeda(imposto.impostoRestituir),
+    alertasRetencao: alertasRetencaoMensal(dados.rendimentos),
   };
 }

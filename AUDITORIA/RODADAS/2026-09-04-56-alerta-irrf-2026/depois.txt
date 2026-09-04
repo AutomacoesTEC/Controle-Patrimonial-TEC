@@ -1,0 +1,6 @@
+Lógica:
+{"bruto":6500,"deducao":839.59,"base":5660.41,"esperado":534.71,"informado":500,"diferenca":34.71,"alertas":1}
+{"bruto":5000,"esperado":0,"alertas":0}
+
+Navegador:
+{"alertas":1,"rotulo":"Retenção possivelmente abaixo do esperado: EMPRESA FIXTURE","painelVisivel":true,"overflowPagina":0}

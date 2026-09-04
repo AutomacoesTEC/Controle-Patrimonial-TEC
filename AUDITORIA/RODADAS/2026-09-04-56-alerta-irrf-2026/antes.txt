@@ -1,0 +1,1 @@
+{"calculoMensal2026":false,"redutor15270":false,"alertasRetencao":false,"fixtureRetencaoMenor":0}

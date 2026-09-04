@@ -165,7 +165,7 @@ no par coerente e exatamente 3 falhas plantadas; o perfil AJU-01 2025–2026 foi
 verificado no navegador. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-22-continuidade-anos/`.
 
-### A7. Painel de IRRF por fonte e por beneficiário (P2)
+### A7. Painel de IRRF por fonte e por beneficiário — CONCLUÍDO (P2)
 
 Evidência: `irrf` existe por rendimento, `irrfVenda` na movimentação de venda,
 IRRF de operações comuns e day-trade na ficha mensal de RV, e o total só
@@ -197,6 +197,14 @@ informativo, e confronta o primeiro grupo com `impostoPagoTotal`. No `.DBK`
 externo de PAULO ROBERTO, duas linhas somaram R$ 774,78 dos dois lados, com
 diferença zero; o fixture adversarial com R$ 1,00 a menos gerou divergência.
 Evidência em `AUDITORIA/RODADAS/2026-09-04-55-painel-irrf/`.
+
+Fechamento na rodada 56: rendimentos PJ mensais de 2026 recebem conferência
+conservadora pela tabela oficial, usando a maior dedução entre R$ 607,20
+simplificado e previdência + dependentes informados, seguida do redutor da Lei
+15.270/2025 sobre o bruto. R$ 6.500 com R$ 839,59 de deduções produziu
+referência R$ 534,71 e detectou R$ 34,71 a menor; R$ 5.000 zerou. Totais anuais
+em 31/12 não são tratados como mês. Evidência e fontes oficiais em
+`AUDITORIA/RODADAS/2026-09-04-56-alerta-irrf-2026/`.
 
 ### A8. Classificação assistida das sobras do Saldo de Caixa — CONCLUÍDO (P2)
 

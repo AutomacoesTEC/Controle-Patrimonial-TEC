@@ -974,6 +974,15 @@ export default function Dashboard({ onNavigate } = {}) {
                 texto={`As linhas que compõem o ajuste somam ${formatCurrency(painelIrrf.totalPainel)}, mas o resumo importado informa ${formatCurrency(painelIrrf.totalResumo)}. Confira fontes ou fichas ainda sem detalhamento; o app não altera nenhum valor.`}
               />
             )}
+            {painelIrrf.alertasRetencao.map(alerta => (
+              <Ajuda
+                key={`${alerta.fonte}-${alerta.beneficiario}-${alerta.data}`}
+                tom="ressalva"
+                rotulo={`Retenção possivelmente abaixo do esperado: ${alerta.fonte}`}
+                titulo="Conferência mensal de IRRF"
+                texto={`Em ${formatDate(alerta.data)}, foram informados ${formatCurrency(alerta.informado)}. Pela tabela de 2026, usando a maior dedução entre o simplificado e as deduções informadas, a referência é ${formatCurrency(alerta.esperado)}; diferença de ${formatCurrency(alerta.diferenca)}. É somente um alerta: confira a fonte pagadora e não altere o valor sem o comprovante.`}
+              />
+            ))}
             <div className="table-container">
               <table>
                 <thead><tr><th>Fonte</th><th>Beneficiário</th><th>Tipo</th><th>Tratamento</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
