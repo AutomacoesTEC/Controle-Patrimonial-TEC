@@ -1,0 +1,13 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+stdout | AUDITORIA/RODADAS/2026-09-04-58-autosave-disco/verificar-persistencia.test.js > mede a trajetória do autosave com a API desktop presente
+{"salvo":true,"chamadasDisco":2,"escritasCache":2,"eventos":["disco:perfil-1","disco:indice","cache:controle-patrimonial-data-perfil-1","cache:controle-patrimonial-perfis"],"perfilIgual":true,"indiceIgual":true}
+
+ ✓ AUDITORIA/RODADAS/2026-09-04-58-autosave-disco/verificar-persistencia.test.js > mede a trajetória do autosave com a API desktop presente 3ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Duration  442ms
+
+Regressão dirigida: `src/store/DataContext.test.js`, 11/11 testes aprovados.

@@ -115,7 +115,21 @@ export function carregarEstadoDoPerfil(raw) {
   return migrarOrigemLegado({ ...initialState, ...migrado }, migrado);
 }
 
-export async function persistirDadosPerfil({ storage, perfilId, chave, estado, criptografar = criptografarObjeto }) {
+function apiDesktopAtual(desktopApi) {
+  if (desktopApi !== undefined) return desktopApi;
+  return typeof window !== 'undefined' ? window.pywebview?.api : null;
+}
+
+async function exigirGravacaoDesktop(api, metodo, ...argumentos) {
+  if (!api) return;
+  if (typeof api[metodo] !== 'function') {
+    throw new Error(`A ponte desktop não oferece ${metodo}.`);
+  }
+  const resultado = await api[metodo](...argumentos);
+  if (!resultado?.salvo) throw new Error('O ambiente desktop recusou a persistência em disco.');
+}
+
+export async function persistirDadosPerfil({ storage, desktopApi, perfilId, chave, estado, criptografar = criptografarObjeto }) {
   let perfisSalvos = JSON.parse(storage.getItem(PERFIS_STORAGE_KEY) || '[]');
   if (!perfisSalvos.some(p => p.id === perfilId)) return { salvo: false, motivo: 'perfil_removido' };
 
@@ -125,13 +139,24 @@ export async function persistirDadosPerfil({ storage, perfilId, chave, estado, c
   // estava em andamento; reconferir evita que um autosave atrasado o recrie.
   perfisSalvos = JSON.parse(storage.getItem(PERFIS_STORAGE_KEY) || '[]');
   if (!perfisSalvos.some(p => p.id === perfilId)) return { salvo: false, motivo: 'perfil_removido' };
-  storage.setItem(dataStorageKeyFor(perfilId), JSON.stringify(conteudo));
-
+  const textoConteudo = JSON.stringify(conteudo);
+  let perfisAtualizados = perfisSalvos;
   if (estado.contribuinte) {
-    const perfisAtualizados = sincronizarPerfilComContribuinte(perfisSalvos, perfilId, estado.contribuinte);
-    if (perfisAtualizados !== perfisSalvos) {
-      storage.setItem(PERFIS_STORAGE_KEY, JSON.stringify(perfisAtualizados));
-    }
+    perfisAtualizados = sincronizarPerfilComContribuinte(perfisSalvos, perfilId, estado.contribuinte);
+  }
+  const textoIndice = perfisAtualizados !== perfisSalvos ? JSON.stringify(perfisAtualizados) : null;
+  const api = apiDesktopAtual(desktopApi);
+
+  // No executável, o arquivo durável vem primeiro; localStorage é atualizado
+  // somente depois de o pywebview confirmar a gravação atômica. No navegador
+  // não há ponte e o comportamento local existente permanece inalterado.
+  await exigirGravacaoDesktop(api, 'salvar_perfil', perfilId, textoConteudo);
+  if (textoIndice !== null) {
+    await exigirGravacaoDesktop(api, 'salvar_indice_perfis', textoIndice);
+  }
+  storage.setItem(dataStorageKeyFor(perfilId), textoConteudo);
+  if (textoIndice !== null) {
+    storage.setItem(PERFIS_STORAGE_KEY, textoIndice);
   }
   return { salvo: true };
 }

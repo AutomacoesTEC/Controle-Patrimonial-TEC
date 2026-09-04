@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { enfileirarPersistencia, migrarOrigemLegado, persistirDadosPerfil } from './DataContext';
 import { initialState } from './reducer';
 import { PERFIS_STORAGE_KEY, dataStorageKeyFor } from './perfis';
@@ -117,6 +117,27 @@ describe('persistirDadosPerfil', () => {
     expect(criptografou).toBe(true);
     expect(resultado.salvo).toBe(true);
     expect(JSON.parse(memoria.dados.get(dataStorageKeyFor('perfil-1')))).toEqual({ cifrado: 1 });
+  });
+
+  it('confirma o disco antes de atualizar o localStorage no desktop', async () => {
+    const memoria = criarStorage();
+    const eventos = [];
+    const setItemOriginal = memoria.setItem;
+    memoria.setItem = (chave, valor) => { eventos.push(`cache:${chave}`); setItemOriginal(chave, valor); };
+    const desktopApi = {
+      salvar_perfil: vi.fn(async () => { eventos.push('disco:perfil'); return { salvo: true }; }),
+      salvar_indice_perfis: vi.fn(async () => { eventos.push('disco:indice'); return { salvo: true }; }),
+    };
+
+    await persistirDadosPerfil({
+      storage: memoria, desktopApi, perfilId: 'perfil-1', chave: null,
+      estado: { contribuinte: { nome: 'Atualizado' }, bens: [], toasts: [] },
+    });
+
+    expect(eventos).toEqual([
+      'disco:perfil', 'disco:indice',
+      `cache:${dataStorageKeyFor('perfil-1')}`, `cache:${PERFIS_STORAGE_KEY}`,
+    ]);
   });
 });
 
