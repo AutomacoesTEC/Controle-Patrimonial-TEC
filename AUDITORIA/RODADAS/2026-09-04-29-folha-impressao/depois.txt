@@ -1,0 +1,3 @@
+/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/RODADAS/2026-09-04-29-folha-impressao/verificar-impressao.py:31: SyntaxWarning: invalid escape sequence '\s'
+  resultado = pagina.evaluate("""() => {
+{"displays":{"sidebar":"none","tema":"none","acoes":"none","periodo":"none","graficos":"none"},"controlesVisiveis":0,"layout":{"altura":"2588.5px","overflow":"visible"},"corpo":{"overflowY":"visible","altura":"2588.5px"},"fundo":"rgb(255, 255, 255)","breakCard":"avoid","cabecalhos":1,"rodapes":1,"textoCabecalho":"Demonstrativo de Conciliação PatrimonialAUDITORIA PDF TEC AJUSTECPF111.444.777-35Ano-calendário2025Período01/01/2025 a 31/12/2025","textoRodape":"Gerado em 04/09/2026, 12:33CP-TEC v1.2.0"}

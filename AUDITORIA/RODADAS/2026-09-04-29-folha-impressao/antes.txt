@@ -1,0 +1,3 @@
+/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/RODADAS/2026-09-04-29-folha-impressao/verificar-impressao.py:31: SyntaxWarning: invalid escape sequence '\s'
+  resultado = pagina.evaluate("""() => {
+{"displays":{"sidebar":"flex","tema":"flex","acoes":"flex","periodo":null,"graficos":"block"},"controlesVisiveis":36,"layout":{"altura":"768px","overflow":"hidden"},"corpo":{"overflowY":"auto","altura":"689px"},"fundo":"rgb(10, 13, 21)","breakCard":"auto","cabecalhos":0,"rodapes":0,"textoCabecalho":null,"textoRodape":null}

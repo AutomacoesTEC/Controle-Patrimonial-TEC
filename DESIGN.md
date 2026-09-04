@@ -166,6 +166,11 @@ tamanho da tela, não por breakpoint fixo. Em telas a partir de 1800px,
 `page-body` fica centralizado e limitado a 1600px para manter rótulos e
 valores fiscais dentro da mesma área de leitura.
 
+Na impressão do Dashboard, a folha é A4 clara e contém somente o
+demonstrativo e suas ressalvas: navegação, controles, estatísticas auxiliares
+e gráficos ficam ocultos. Cards não quebram internamente. Cabeçalho identifica
+titular, CPF, ano e período; rodapé registra geração e versão do app.
+
 ## Elevation & Depth
 
 Sombras são discretas e só aparecem em três situações: hover de card

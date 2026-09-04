@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
+import { formatCurrency, formatDate, formatCPF, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
+import { version as VERSAO_APP } from '../../package.json';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
@@ -200,6 +201,10 @@ export default function Dashboard({ onNavigate } = {}) {
           estado: 'Falta a explicar',
           explicacao: 'As saídas e o aumento patrimonial superam as entradas registradas no período.',
         };
+  const geradoEm = new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date());
 
   // Saldos que ATRAVESSAM o exercício (prejuízos compensáveis) e
   // Disponibilidades — dois recortes do estudo de variação patrimonial, lidos
@@ -450,7 +455,19 @@ export default function Dashboard({ onNavigate } = {}) {
         </div>
       </div>
       <div className="page-body animate-in">
-        <div className="card" style={{ marginBottom: '20px' }}>
+        <header className="print-header">
+          <div>
+            <strong>Demonstrativo de Conciliação Patrimonial</strong>
+            <span>{state.contribuinte?.nome || 'Titular não informado'}</span>
+          </div>
+          <dl>
+            <div><dt>CPF</dt><dd>{formatCPF(state.contribuinte?.cpf) || 'não informado'}</dd></div>
+            <div><dt>Ano-calendário</dt><dd>{state.anoCalendario}</dd></div>
+            <div><dt>Período</dt><dd>{formatDate(de)} a {formatDate(ate)}</dd></div>
+          </dl>
+        </header>
+
+        <div className="card dashboard-periodo-controles" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Período da consulta</h3></div>
           <div className="form-row" style={{ alignItems: 'end', marginBottom: 0 }}>
             <div className="form-group">
@@ -1041,6 +1058,10 @@ export default function Dashboard({ onNavigate } = {}) {
         )}
           </div>
         </details>
+        <footer className="print-footer">
+          <span>Gerado em {geradoEm}</span>
+          <span>CP-TEC v{VERSAO_APP}</span>
+        </footer>
       </div>
 
       <Modal open={!!detalheCategoria} onClose={() => setDetalheCategoria(null)}>

@@ -334,6 +334,15 @@ Proposta:
   `window.print()`.
 - No Electron, "Salvar em PDF" via `webContents.printToPDF`.
 
+Primeira parte concluída em 04/09/2026: a mídia `print` agora produz folha A4
+clara, libera todo o fluxo vertical, protege a quebra interna de cards, oculta
+36 controles e todo o cromo/gráficos, e inclui cabeçalho e rodapé com os
+metadados previstos. No fixture, a altura deixou de ficar presa em 768 px e
+passou a representar 2.588,5 px de conteúdo com overflow visível. Os botões
+de acesso à impressão e a integração Electron continuam pendentes em rodadas
+próprias. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-29-folha-impressao/`.
+
 ### B5. Acessibilidade de teclado e leitores de tela (P2)
 
 Evidência: 16 atributos `aria-` em todo `src/`; `Modal.jsx` não declara
