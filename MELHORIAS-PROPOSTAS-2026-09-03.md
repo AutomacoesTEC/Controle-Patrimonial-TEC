@@ -439,19 +439,12 @@ preservando a estrutura vazia da tabela. Evidência pareada em
 
 ### B7. Barras em gradiente quente nos cards de estatística (P2)
 
-Evidência: `index.css` linhas 161 a 164: `.stat-card.orange::after` usa
-`--gradient-warm` (laranja para vermelho) e `.stat-card.purple::after` usa um
-roxo para rosa fixo. Na tela de Ganhos de Capital o card "Ganho apurado no
-ano" aparece com essa barra roxo-rosa no topo (captura
-`tmp/f-verificacao/14-apos-fechar.png`). Contraria o "sem acento quente, sem
-gradiente chamativo" do `DESIGN.md` e a regra de no máximo três pontos de
-acento por tela.
-
-Proposta: a barra do stat card passa a ser uma linha de 2px sólida no token
-semântico do valor (`--accent-success` para ganho, `--accent-danger` para
-perda, `--accent-primary` para neutro), sem gradiente. Remover
-`--gradient-success`, `--gradient-warm` e a variante `purple`; manter só
-`--gradient-primary` para logo e avatar. Registrar no `DESIGN.md`.
+Concluído na rodada 06, commit `a15c655`: as 14 barras medidas nos temas claro
+e escuro passaram de gradiente/3px para cor semântica sólida/2px. Ganhos de
+Capital usa sucesso para ganho; dívida, despesa e perda usam perigo; valores
+neutros usam o acento primário. Os tokens quentes foram removidos e o sistema
+foi registrado no `DESIGN.md`. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-06-barras-semanticas/`.
 
 ### B8. Nomenclatura em português na navegação (P3)
 

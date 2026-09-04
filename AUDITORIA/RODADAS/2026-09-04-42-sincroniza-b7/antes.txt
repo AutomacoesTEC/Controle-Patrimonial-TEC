@@ -1,0 +1,4 @@
+referencias_pendentes=4
+status_concluido=0
+codigo_gradiente_quente=0
+evidencia_existente=AUDITORIA/RODADAS/2026-09-04-06-barras-semanticas
