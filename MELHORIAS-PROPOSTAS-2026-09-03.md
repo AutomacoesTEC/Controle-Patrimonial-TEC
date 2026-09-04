@@ -12,49 +12,40 @@ leitura ou retrabalho; P3 acabamento.
 
 ## A. Dados e cálculo (engenharia aplicada ao IRPF/IRRF)
 
-### A1. Versão de esquema do estado persistido, com migração (P1)
+### A1. Versão de esquema do estado persistido, com migração — CONCLUÍDO (P1)
 
-Evidência: `src/store/reducer.js` `blankYear` ganhou campos novos em 03/09
-(`rendaVariavelMensalManual`, `fiiFiagroMensalManual`) e nada registra a versão
-do objeto gravado no `localStorage` por perfil (`src/App.jsx`,
-`src/store/perfis.js`). Um perfil salvo por uma versão antiga do app é lido pela
-nova sem nenhum passo de adaptação; hoje isso funciona porque o código usa
-`|| []` em quase todo lugar, mas é sorte, não contrato.
+Commit `bdb6203`, 03/09/2026. `src/store/migracoes.js` (`VERSAO_ESQUEMA_ATUAL`,
+`migrarEstadoPersistido`), campo `versaoEsquema` na raiz e em cada snapshot de
+`historico[ano]` (`src/store/reducer.js`), fixtures reais de perfil em
+`src/store/__fixtures__/` (versão 1 e atual, gerados a partir da importação do
+AJU-01). A migração só preenche campo AUSENTE (nunca sobrescreve valor
+existente), é idempotente por construção, e nunca rebaixa um estado de versão
+maior que a do app. Validado por mim (leitura do diff e do módulo inteiro,
+independente da suíte): `demonstrativos.js`/`consultaPeriodo.js`/
+`resumoDeclaracao.js` ficaram intocados neste commit. 872/872 testes, build
+limpo.
 
-Proposta:
-- Campo `versaoEsquema` no objeto raiz do estado e em cada snapshot de
-  `historico[ano]`.
-- Módulo `src/store/migracoes.js` com uma função por salto de versão (1 para 2,
-  2 para 3), aplicadas em cadeia na carga do perfil, antes de
-  `SUBSTITUIR_ESTADO_PERSISTIDO`.
-- Teste de regressão que carrega fixtures de estado antigo (gravar hoje um
-  JSON real de perfil como fixture) e prova que a carga não perde nenhum
-  campo.
+### A2. Backup e restauração do perfil em arquivo — CONCLUÍDO (P1)
 
-Pronto quando: mudar a forma de um campo passa a exigir uma migração com
-teste, e a suíte falha se `blankYear` mudar sem a versão subir.
+Commit `cf08e18`, 03/09/2026. `src/store/backupPerfil.js` (formato
+`.cptec.json`, hash SHA-256 do envelope inteiro menos o próprio hash,
+serialização canônica para o hash não depender de ordem de chave),
+`src/utils/baixarArquivo.js` (Blob + âncora, funciona nos dois modos porque o
+app desktop é pywebview sem ponte de IPC, não Electron — achado do
+levantamento, corrige a suposição original deste item). Restaurar cria
+perfil NOVO por padrão; sobrescrever exige `substituirPerfilId` explícito e
+passa pelo `ConfirmacaoModal`. Perfil protegido exporta cifrado com a chave
+já existente (`src/utils/crypto.js`, PBKDF2 210k + AES-GCM, pré-existente);
+senha e chave derivada nunca entram no arquivo, só o salt (já público no
+registro do perfil). Validado por mim: senha/chave ausentes do arquivo,
+ciphertext corrompido é pego pelo hash antes de pedir senha, versão de
+esquema futura é recusada, e os 55 testes de `backupPerfil.test.js` cobrem
+ida e volta completa (perfil comum e protegido) com demonstrativo idêntico.
+872/872 testes, build limpo.
 
-### A2. Backup e restauração do perfil em arquivo (P1)
-
-Evidência: o único caminho de saída é o `.xlsx` do relatório
-(`src/utils/exportXlsx.js`), que não é reimportável. O dado vive só no
-`localStorage` do navegador ou do Electron; limpar dados do site, trocar de
-máquina ou reinstalar o app apaga anos de trabalho. A memória
-`feedback-cp-tec-entrega-sem-declaracao` registra exatamente esse efeito
-colateral (dado "sumindo" ou "aparecendo" conforme a origem da porta).
-
-Proposta:
-- "Exportar perfil (.cptec.json)" e "Restaurar perfil" na tela de perfis e no
-  menu do perfil ativo. Conteúdo: estado inteiro, `versaoEsquema`, data, nome
-  do perfil, e um hash simples do conteúdo para detectar arquivo corrompido.
-- Perfil protegido por senha exporta cifrado com a mesma chave
-  (`src/store/crypto.js` já existe).
-- No Electron, oferecer pasta de backup automático a cada gravação (arquivo
-  por data, mantendo os últimos N), escrito de forma atômica (gravar em
-  temporário e renomear).
-
-Pronto quando: exportar, apagar o perfil, restaurar e obter Dashboard
-idêntico byte a byte (mesmo teste de baseline usado no relatório do item E).
+Pendente deste item: backup automático periódico no app desktop (a proposta
+original citava Electron; como o app é pywebview, o mecanismo seria outro —
+não desenhado ainda).
 
 ### A3. Proveniência por registro, não só por ano (P1)
 
@@ -216,15 +207,22 @@ Proposta:
 Pronto quando: qualquer mudança em `demonstrativos.js` que altere um centavo
 em qualquer fixture falha a suíte com diff legível.
 
-### A11. Persistência em disco no Electron (P2)
+### A11. Persistência em disco no app desktop (P2, corrigido em 03/09)
 
-Evidência: `build-app/` e `build-windows.ps1` existem; o app desktop continua
-gravando no `localStorage` do Chromium embutido (limite prático de alguns MB e
-apagável pelo sistema).
+Evidência corrigida pelo levantamento do backup (A2): o app desktop NÃO é
+Electron, é pywebview (WebView2/Edge dirigido por Python, ver
+`build-windows.ps1` e `main.py`) e não tem ponte de IPC nenhuma hoje — é por
+isso que A2 saiu só com API de navegador (Blob + âncora), que funciona nos
+dois modos sem depender dessa ponte. `DataContext` continua gravando só no
+`localStorage` do WebView2 (mesmo limite prático de alguns MB, apagável pelo
+sistema).
 
-Proposta: no Electron, `DataContext` grava por IPC em
+Proposta, revista: criar uma ponte Python-JavaScript no pywebview
+(`window.expose` ou equivalente) para o app escrever em
 `%APPDATA%/ControlePatrimonial/perfis/<id>.json` com escrita atômica; o
-`localStorage` vira só cache. Depende de A1 e A2.
+`localStorage` vira só cache. Depende de A1 e A2 (prontos). Sem essa ponte,
+a exportação/restauração manual de A2 já é o caminho de proteção disponível
+hoje no desktop.
 
 ## B. Interface e desenho
 
@@ -353,36 +351,90 @@ português ("Bens e Direitos", "Ganhos de Capital").
 Proposta: "Painel" ou "Demonstrativo" (o segundo descreve melhor o que a tela
 é). Trocar em `Sidebar.jsx`, `Dashboard.jsx` e testes que procuram o texto.
 
-### B9. Laptop 1366x768 e tela cheia 2880 (P3)
+### B9/B10. Laptop 1366x768 e tela cheia 2880: capturas feitas, 13 defeitos achados — CAPTURA CONCLUÍDA, CORREÇÃO PENDENTE (P1/P2)
 
-Evidência: um único `@media (max-width: 700px)`; sidebar fixa de 260 px; grids
-`auto-fit` cuidam do resto. A usuária trabalha com dois monitores (memória
-`dell-7472-dois-monitores`), então os dois extremos importam.
+Commit `a39ec6e`, 03/09/2026. `AUDITORIA/verificar-telas-no-app.py` destravado
+(fechava o modal de avisos estruturais e travava; 30/33 conferências passam
+agora, 3 falhas são de conteúdo de Renda Variável não atualizado, não da
+trava). `AUDITORIA/capturar-telas-baseline.py` novo: 84 capturas em
+`AUDITORIA/telas-2026-09/<tamanho>/<tema>/<tela>.png` (14 telas × 3 tamanhos
+× 2 temas), mais `medicoes.json` com overflow medido por JavaScript.
+Nenhuma correção de layout foi feita — é só o inventário, como planejado.
 
-Proposta: sessão de verificação com Playwright em 1366x768, 1920x1080 a 150%
-(equivale a 1280x720 CSS) e 2880x1620; capturar as onze telas nos dois temas;
-corrigir o que quebrar (provável: cards de estatística do Dashboard em 1280
-de largura útil e o quadro de 12 meses de RV).
+Achados, por ordem de gravidade (P1 = usuário perde acesso a dado ou não
+consegue ler um valor; P2 = layout ruim mas contornável):
 
-### B10. Auditoria visual com capturas (primeiro passo de B)
+1. **P1 — barra de abas de Bens e Direitos estoura e rola a página inteira
+   na horizontal**, 1366x768 e 1280x720. `div.tabs` em `BensPage.jsx`; sobra
+   até 360 px. "Criptoativos" e "Fundos" ficam fora da vista.
+2. **P1 — coluna AÇÕES cortada, botão Excluir pela metade**, em Bens,
+   Titular e Dependentes, Rendimentos, Pagamentos, Atividade Rural, nos dois
+   tamanhos menores. Rola dentro de `div.table-container`, mas sem nenhuma
+   pista visual de que há rolagem.
+3. **P1 — tabela mensal de Renda Variável estoura até 577 px**, escondendo
+   "RESULTADO DAY-TRADE", "IMPOSTO A PAGAR", "IMPOSTO PAGO" e o botão
+   "Mercados" de cada mês, sem indicação de rolagem. Era a suspeita já
+   registrada abaixo antes da captura.
+4. **P1 — valores monetários truncados sem reticências**, em Rendimentos,
+   Pagamentos, Ganhos de Capital, 1280x720: número cortado no meio é o pior
+   caso possível numa tela fiscal.
+5. **P1 — navegação lateral esconde 3 itens em telas de 720/768 px de
+   altura** ("Ganhos de Capital", "Renda Variável", "Histórico de
+   Alterações" só aparecem após rolar a sidebar, sem indicador).
+6. **P2 — contraste insuficiente no tema claro**: badges laranja (1,54:1),
+   verde (1,78 a 1,92:1), azul (2,35 a 2,54:1), roxo e vermelho (~2,5:1), e
+   valor positivo/negativo em `td.currency` (2,34 a 3,76:1) — todos abaixo
+   do mínimo AA de 4,5:1 para texto pequeno. Tons 400/500 pensados só para o
+   tema escuro, sem variante `[data-theme="light"]`.
+7. **P2 — contraste marginal no tema escuro**: botão Excluir (3,76:1), texto
+   secundário "PDF, página X, linha Y" (4,28:1).
+8. **P2 — última coluna redimensionável fora da área visível**, em Titular,
+   Rendimentos, Pagamentos, Renda Variável.
+9. **P2 — grade de cards quebra 3+1**, deixando um card sozinho na segunda
+   linha, em Rendimentos e Relatório IRPF.
+10. **P2 — coluna BEM espremida em 4 linhas** em Ganhos de Capital, enquanto
+    colunas de data ficam largas.
+11. **P2 — conteúdo esticado em 2880x1620** sem `max-width`: rótulo e valor
+    do Demonstrativo separados por ~1.700 px. Sem estouro nesse tamanho, é
+    proporção e legibilidade, não corte.
+12. **P3 — área morta sob tabelas curtas** (Doações, Dívidas, Despesas
+    Gerais, Atividade Rural): 300 a 400 px de fundo vazio porque
+    `table-container` mantém altura reservada.
+13. **P3 — avisos do Dashboard soltos fora de card**, sem contêiner nem
+    respiro antes do título do Demonstrativo.
 
-Este documento foi escrito lendo o código. Antes de executar B2 e B3, rodar a
-verificação de B9 e anexar as capturas em `AUDITORIA/telas-2026-09/`, para
-que as decisões de hierarquia sejam tomadas sobre a tela real, com a
-declaração de referência importada. O `AUDITORIA/verificar-telas-no-app.py`
-precisa antes aprender a fechar o modal de avisos estruturais (registrado no
-handoff de 03/09).
+Zero rolagem horizontal na página em si, zero card sobreposto, zero erro de
+JavaScript nas 84 capturas.
+
+Próximo passo: corrigir 1 a 5 antes de B2 (hierarquia do Dashboard) e B3
+(tabelas), porque são os que escondem dado ou dígito, não só desalinham
+layout. 6 e 7 alimentam diretamente o B7 (que já mexe nas cores dos
+cards) e merecem entrar junto. 8 a 13 podem esperar a rodada de B3/B5.
 
 ## Ordem sugerida
 
-1. B10 e B9 (capturas e verificação de resolução): meio dia, sem risco.
-2. A1 e A2 (versão de esquema e backup): protegem tudo o que vem depois.
+Concluído em 03/09/2026: **B10/B9** (capturas, commit `a39ec6e`), **A1**
+(versão de esquema, commit `bdb6203`), **A2** (backup e restauração, commit
+`cf08e18`). Suíte em 872/872, build limpo, verificação adversarial em três
+lentes (perda de dado, regressão de cálculo, perfil protegido) feita por
+leitura direta do diff e dos módulos — nenhum achado.
+
+Ordem do que falta:
+
+1. Os cinco defeitos P1 do inventário de B9/B10 (abas que rolam a página
+   inteira, coluna Ações cortada, tabela de RV que estoura, valor monetário
+   truncado, itens da sidebar escondidos): corrigir antes de B2 e B3, porque
+   escondem dado, não só desalinham.
+2. B7 já reformulado (barra de gradiente quente) mais os achados 6 e 7 do
+   inventário (contraste de badge e de botão Excluir), no mesmo passo.
 3. A5 (centavos) e A10 (golden files): travam o cálculo antes de mexer nele.
 4. A6 (continuidade entre anos) e A8 (checklist do Saldo de Caixa): maior
    valor fiscal por hora investida.
-5. B1, B4, B2 (fonte, impressão, hierarquia do Dashboard).
+5. B1, B4, B2 (fonte, impressão, hierarquia do Dashboard) e os achados 8 a
+   13 do inventário (coluna redimensionável, grade de cards, largura em
+   2880, área morta, avisos soltos).
 6. A3, A4, A7 (proveniência, trilha, painel de IRRF).
-7. B3, B5, B6, B7, B8, A9, A11.
+7. B3, B5, B6, B8, A9, A11.
 
-Cada item deve nascer com teste de regressão e verificação no app real, e
-entrar num commit próprio com o trailer padrão do projeto.
+Cada item nasce com teste de regressão e verificação no app real, e entra
+num commit próprio com o trailer padrão do projeto.
