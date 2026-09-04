@@ -343,6 +343,12 @@ de acesso à impressão e a integração Electron continuam pendentes em rodadas
 próprias. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-29-folha-impressao/`.
 
+Segunda parte concluída em 04/09/2026: o título e o ano do Relatório IRPF
+voltaram a aparecer na mídia de impressão, enquanto seletor e botões continuam
+ocultos. O cabeçalho redundante de tela do Dashboard permanece separado da
+identificação própria criada na rodada anterior. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-30-cabecalho-relatorio-print/`.
+
 ### B5. Acessibilidade de teclado e leitores de tela (P2)
 
 Evidência: 16 atributos `aria-` em todo `src/`; `Modal.jsx` não declara

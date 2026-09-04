@@ -443,7 +443,7 @@ export default function Dashboard({ onNavigate } = {}) {
 
   return (
     <>
-      <div className="page-header">
+      <div className="page-header dashboard-screen-header">
         <div className="page-header-left">
           <h2>Dashboard</h2>
           <p>Período de {formatDate(de)} até {formatDate(ate)}</p>

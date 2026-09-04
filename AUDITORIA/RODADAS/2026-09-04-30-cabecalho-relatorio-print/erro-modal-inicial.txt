@@ -1,0 +1,4 @@
+A segunda tentativa não produziu saída porque a janela obrigatória de ciência
+do Dashboard interceptava o clique na navegação. O fixture passou a aguardar o
+Dashboard e fechar essa janela antes de navegar. Produto e métricas continuam
+intocados.

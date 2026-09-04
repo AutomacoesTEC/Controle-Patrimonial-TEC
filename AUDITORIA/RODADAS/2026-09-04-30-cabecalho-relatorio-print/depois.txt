@@ -1,0 +1,1 @@
+{"displayCabecalho":"flex","displayAcoes":"none","titulo":"Relatório para IRPF 2026","subtitulo":"Dados do ano-calendário 2025 prontos para declaração em 2026","tituloVisivel":true,"cabecalhoDashboard":null}

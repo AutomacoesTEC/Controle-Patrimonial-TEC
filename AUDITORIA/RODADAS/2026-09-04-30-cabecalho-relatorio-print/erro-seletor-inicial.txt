@@ -1,0 +1,3 @@
+A primeira tentativa não mediu o produto: o seletor parcial "Relatório IRPF"
+casou tanto com a navegação quanto com o aria-label longo de uma ajuda. Antes
+de qualquer edição do produto, o seletor foi congelado com `exact=True`.
