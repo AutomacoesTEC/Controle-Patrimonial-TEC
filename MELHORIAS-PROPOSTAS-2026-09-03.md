@@ -396,6 +396,12 @@ retorno ao gatilho. O fixture `Novo Bem` passou de todos os cinco critérios
 falsos/ausentes para verdadeiros. Evidência em
 `AUDITORIA/RODADAS/2026-09-04-36-modal-acessivel/`.
 
+Segunda parte concluída em 04/09/2026: as três linhas clicáveis da Variação
+Patrimonial entraram na ordem de Tab, expõem papel de botão e abrem o mesmo
+detalhamento por Enter ou Espaço. O clique permaneceu funcional. Evidência
+pareada em
+`AUDITORIA/RODADAS/2026-09-04-37-linhas-demonstrativo-teclado/`.
+
 ### B6. Estados vazios e primeiro uso por tela (P2)
 
 Evidência: perfil novo abre vazio (comportamento correto, ver memória

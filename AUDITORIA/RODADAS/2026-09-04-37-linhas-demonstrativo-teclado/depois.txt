@@ -1,0 +1,1 @@
+{"quantidade":3,"atributos":[{"role":"button","tabIndex":0},{"role":"button","tabIndex":0},{"role":"button","tabIndex":0}],"enterAbriu":true,"espacoAbriu":true,"cliqueAbriu":true}

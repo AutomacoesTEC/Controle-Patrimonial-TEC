@@ -24,6 +24,13 @@ const CATEGORIA_VARIACAO = {
 
 const GRUPO_LABELS = Object.fromEntries(GRUPOS_BENS.map(g => [g.codigo, g.nome]));
 
+function acionarPorTeclado(evento, acao) {
+  if (evento.key === 'Enter' || evento.key === ' ') {
+    evento.preventDefault();
+    acao();
+  }
+}
+
 
 // Paleta categórica validada (skill dataviz): 8 tons, ordem fixa, checada por
 // CVD contra as cores reais do app (fundo escuro #161d2e e claro #ffffff) —
@@ -574,7 +581,7 @@ export default function Dashboard({ onNavigate } = {}) {
               </tr>
               <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
               <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" onClick={() => setDetalheCategoria('bens')} title="Ver as movimentações que compõem esse saldo">
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('bens')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('bens'))} title="Ver as movimentações que compõem esse saldo">
                 <td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td>
               </tr>
 
@@ -587,7 +594,7 @@ export default function Dashboard({ onNavigate } = {}) {
               </tr>
               <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumDe)}</td></tr>
               <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" onClick={() => setDetalheCategoria('dividaComum')} title="Ver as movimentações que compõem esse saldo">
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaComum')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaComum'))} title="Ver as movimentações que compõem esse saldo">
                 <td>Variação das Dívidas e Ônus Reais</td><td className={`currency ${demo.varPatrimonial.deltaDividaComum >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaComum)}</td>
               </tr>
 
@@ -600,7 +607,7 @@ export default function Dashboard({ onNavigate } = {}) {
               </tr>
               <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralDe)}</td></tr>
               <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" onClick={() => setDetalheCategoria('dividaRural')} title="Ver as movimentações que compõem esse saldo">
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaRural')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaRural'))} title="Ver as movimentações que compõem esse saldo">
                 <td>Variação da Dívida Rural</td><td className={`currency ${demo.varPatrimonial.deltaDividaRural >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaRural)}</td>
               </tr>
 

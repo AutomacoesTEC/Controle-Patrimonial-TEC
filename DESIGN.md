@@ -194,6 +194,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   do navy, borda de 1px.
 - **modal**: diálogo nomeado por seu título, modal para tecnologia assistiva,
   foco inicial interno, ciclo de Tab confinado e retorno ao gatilho ao fechar.
+- **linha interativa do demonstrativo**: participa da ordem de Tab, expõe papel
+  de botão e responde igualmente a clique, Enter e Espaço.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação
