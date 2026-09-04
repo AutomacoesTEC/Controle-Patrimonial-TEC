@@ -1,0 +1,1 @@
+{"linhasTodas":8,"badges":0,"filtro":0,"linhasManual":null,"linhasDeclaracao":null}

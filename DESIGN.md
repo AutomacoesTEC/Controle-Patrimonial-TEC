@@ -207,6 +207,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   dos cabeçalhos; `.sr-only` a oculta visualmente sem removê-la da árvore.
 - **estado vazio**: título factual, uma frase de contexto e uma única ação
   principal; sem ilustração e sem emoji. Usa o componente `EstadoVazio`.
+- **origem do registro**: badge semântico `Manual` ou `Declaração PDF/DBK` e
+  filtro explícito; a exportação repete a mesma nomenclatura.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação

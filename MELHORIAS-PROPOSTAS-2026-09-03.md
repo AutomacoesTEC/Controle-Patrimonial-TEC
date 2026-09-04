@@ -67,6 +67,12 @@ Proposta:
 Pronto quando: em qualquer tabela dá para filtrar "só o que eu digitei" e
 "só o que veio da declaração", e a exportação `.xlsx` traz a coluna Origem.
 
+Primeira parte concluída em 04/09/2026: Bens e Direitos passou a exibir badge,
+filtrar Manual/Declaração e exportar a coluna Origem usando a proveniência já
+persistida. Num fixture com sete importados e um manual, os oito badges
+apareceram e os filtros produziram exatamente 7/1. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-45-origem-bens/`.
+
 ### A4. Trilha de alterações: completar o que já existe (P2)
 
 Evidência: já existe `state.alteracoes` e a tela "Histórico de Alterações"

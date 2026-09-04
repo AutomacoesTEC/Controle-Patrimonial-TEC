@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { formatCpfCnpj, formatDate, describeRendimentoTipo, MOVIMENTACAO_TIPOS } from './formatters';
+import { rotuloOrigemRegistro } from './origemRegistro';
 
 const resumoMovimentacoes = (bem) => (bem.movimentacoes || []).map(m =>
   `${MOVIMENTACAO_TIPOS[m.tipo]?.label || m.tipo} em ${formatDate(m.data)}`
@@ -131,6 +132,7 @@ export function exportBensToXlsx(bens, anoCalendario) {
     // Número do item impresso na ficha, que é como se acha o bem no papel e
     // no Demonstrativo da Lei 14.754/2023.
     'Item': b.numeroItem || '',
+    'Origem': rotuloOrigemRegistro(b),
     'Grupo': b.grupo || '',
     'Cód. Bem': b.codigo_bem || '',
     'Discriminação': b.discriminacao || '',
@@ -152,7 +154,7 @@ export function exportBensToXlsx(bens, anoCalendario) {
     'Movimentações no Ano': resumoMovimentacoes(b),
   }));
   const ws = XLSX.utils.json_to_sheet(bensData);
-  ws['!cols'] = [{wch:6},{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:24},{wch:20},{wch:18},{wch:12},{wch:16},{wch:14},{wch:18},{wch:50}];
+  ws['!cols'] = [{wch:6},{wch:18},{wch:6},{wch:8},{wch:50},{wch:18},{wch:18},{wch:15},{wch:24},{wch:20},{wch:18},{wch:12},{wch:16},{wch:14},{wch:18},{wch:50}];
   XLSX.utils.book_append_sheet(wb, ws, 'Bens e Direitos');
   const today = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `bens_direitos_${anoCalendario || ''}_${today}.xlsx`);

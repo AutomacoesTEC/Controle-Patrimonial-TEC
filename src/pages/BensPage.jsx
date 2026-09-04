@@ -7,6 +7,8 @@ import BemModal from '../components/BemModal';
 import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import EstadoVazio from '../components/EstadoVazio';
+import BadgeOrigem from '../components/BadgeOrigem';
+import { correspondeFiltroOrigem } from '../utils/origemRegistro';
 
 // Um bem que já entrou no ano com as duas situações zeradas (31/12 do ano anterior E 31/12 deste
 // ano em R$ 0,00) e nenhuma movimentação registrada NESTE ano não tem mais nada a conferir na
@@ -21,6 +23,7 @@ export default function BensPage({ onVoltar } = {}) {
   const { state, dispatch, addToast, despacharEmAno, confirmar } = useData();
   const { bens, anoCalendario } = state;
   const [grupoFilter, setGrupoFilter] = useState('all');
+  const [origemFilter, setOrigemFilter] = useState('all');
   const [search, setSearch] = useState('');
   // null = ordem original (a da importação/cadastro). Clicar num cabeçalho
   // ordena por ele; clicar de novo no mesmo inverte a direção.
@@ -45,6 +48,7 @@ export default function BensPage({ onVoltar } = {}) {
     return bens.filter(b => {
       if (bemZeradoSemMovimentacaoNoAno(b)) return false;
       if (grupoFilter !== 'all' && b.grupo !== grupoFilter) return false;
+      if (!correspondeFiltroOrigem(b, origemFilter)) return false;
       if (search) {
         const s = search.toLowerCase();
         return (b.discriminacao || '').toLowerCase().includes(s) ||
@@ -53,7 +57,7 @@ export default function BensPage({ onVoltar } = {}) {
       }
       return true;
     });
-  }, [bens, grupoFilter, search]);
+  }, [bens, grupoFilter, origemFilter, search]);
 
   const SORTERS = {
     grupo: b => b.grupo || '',
@@ -134,6 +138,11 @@ export default function BensPage({ onVoltar } = {}) {
               </button>
             ))}
           </div>
+          <select className="form-control filtro-origem" aria-label="Filtrar por origem" value={origemFilter} onChange={e => setOrigemFilter(e.target.value)}>
+            <option value="all">Todas as origens</option>
+            <option value="importacao">Declaração</option>
+            <option value="manual">Manual</option>
+          </select>
           <div className="toolbar-spacer" />
           <div className="search-box">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -172,6 +181,7 @@ export default function BensPage({ onVoltar } = {}) {
                       <div style={{ fontWeight: 500, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={bem.discriminacao || ''}>
                         {bem.discriminacao || ''}
                       </div>
+                      <BadgeOrigem item={bem} />
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
                       {/* De quem o bem é e onde ele está: bem do dependente não é
