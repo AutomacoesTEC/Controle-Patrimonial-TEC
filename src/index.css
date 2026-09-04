@@ -149,6 +149,9 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    direto (relatório com vários cards, por exemplo) — nessas, ele que
    rola, como sempre rolou. */
 .page-body{flex:1;display:flex;flex-direction:column;padding:24px 28px;overflow-y:auto}
+@media (min-width:1800px) {
+  .page-body{width:100%;max-width:1600px;align-self:center}
+}
 
 .card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;transition:all var(--transition-normal),background-color var(--transition-normal)}
 .card:hover{border-color:rgba(var(--accent-primary-rgb),0.2);box-shadow:var(--shadow-glow)}

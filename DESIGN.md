@@ -159,7 +159,9 @@ Espaçamento em múltiplos de 8px (`spacing.sm` a `spacing.xl`). Sidebar
 fixa em 260px (68px recolhida); conteúdo principal em `page-header` +
 `page-body` com padding lateral de 24–28px. Grids de card usam
 `repeat(auto-fit, minmax(...))` — o layout se realinha por
-tamanho da tela, não por breakpoint fixo.
+tamanho da tela, não por breakpoint fixo. Em telas a partir de 1800px,
+`page-body` fica centralizado e limitado a 1600px para manter rótulos e
+valores fiscais dentro da mesma área de leitura.
 
 ## Elevation & Depth
 
