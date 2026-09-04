@@ -26,8 +26,6 @@
   --border-color: rgba(123, 129, 138, 0.15);
   --border-focus: rgba(137, 145, 171, 0.5);
   --gradient-primary: linear-gradient(135deg, #687187, #283453);
-  --gradient-success: linear-gradient(135deg, #10b981, #06b6d4);
-  --gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
@@ -162,11 +160,10 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    quebrar em 2-3 linhas (rótulos como "Variação de 31/12/AAAA a 31/12/AAAA"
    não cabem numa linha só em cards estreitos). */
 .stat-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:flex-start;gap:16px;transition:all var(--transition-normal);position:relative}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
-.stat-card.blue::after{background:var(--gradient-primary)}
-.stat-card.green::after{background:var(--gradient-success)}
-.stat-card.orange::after{background:var(--gradient-warm)}
-.stat-card.purple::after{background:linear-gradient(135deg,#8b5cf6,#ec4899)}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.stat-card.blue::after{background:var(--accent-primary)}
+.stat-card.green::after{background:var(--accent-success)}
+.stat-card.danger::after{background:var(--accent-danger)}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
 .stat-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stat-icon svg{width:22px;height:22px}
@@ -211,7 +208,7 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(var(--accent-primary-rgb),0.4)}
 .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color)}
 .btn-secondary:hover{background:var(--bg-card-hover);border-color:var(--accent-primary)}
-.btn-success{background:var(--gradient-success);color:white}
+.btn-success{background:var(--accent-success);color:white}
 .btn-danger{background:var(--accent-danger);color:#fff;border:1px solid var(--accent-danger);box-shadow:0 1px 4px rgba(239,68,68,0.35)}
 .btn-danger:hover{background:#dc2626;border-color:#dc2626;box-shadow:0 2px 8px rgba(239,68,68,0.5)}
 .btn-sm{padding:6px 12px;font-size:12px}

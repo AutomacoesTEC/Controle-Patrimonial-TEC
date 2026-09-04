@@ -70,6 +70,12 @@ components:
     textColor: "{colors.success}"
   currency-negative:
     textColor: "{colors.danger}"
+  stat-card-rule:
+    height: 2px
+    neutralColor: "{colors.primary}"
+    gainColor: "{colors.success}"
+    lossColor: "{colors.danger}"
+    gradient: false
   toast-warning:
     backgroundColor: "{colors.warning}"
   toast-info:
@@ -172,6 +178,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   do navy, borda de 1px.
 - **card**: superfície elevada com borda de 1px translúcida na cor
   `secondary`; hover levanta 2px e acende `--shadow-glow`.
+- **stat-card**: linha superior sólida de 2px; `primary` para informação
+  neutra, `success` para ganho/resultado positivo e `danger` para
+  dívida/despesa/perda. Nunca usa gradiente nem cor sem significado.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 

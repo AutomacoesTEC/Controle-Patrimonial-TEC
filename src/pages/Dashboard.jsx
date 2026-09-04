@@ -860,7 +860,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <span className="stat-change positive">{totFim?.qtdBens || 0} itens</span>
             </div>
           </div>
-          <div className="stat-card orange">
+          <div className="stat-card danger">
             <div className="stat-icon orange"><IconQuedaVermelha /></div>
             <div className="stat-info">
               <h3>{formatCurrency(totFim?.totalDividas || 0)}</h3>

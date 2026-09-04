@@ -700,7 +700,7 @@ function LancamentosRuraisSection({
         <div className="stat-card blue">
           <div className="stat-info"><h3>{formatCurrency(receitaTotal)}</h3><p>Receita Bruta Total {origemRural.temOficial && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(livro-caixa manual)</span>}</p></div>
         </div>
-        <div className="stat-card orange">
+        <div className="stat-card danger">
           <div className="stat-info"><h3>{formatCurrency(despesaTotal)}</h3><p>Despesa de Custeio/Investimento {origemRural.temOficial && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>(livro-caixa manual)</span>}</p></div>
         </div>
         <div className="stat-card green">

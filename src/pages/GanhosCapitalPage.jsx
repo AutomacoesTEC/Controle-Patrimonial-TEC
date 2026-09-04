@@ -641,7 +641,7 @@ export default function GanhosCapitalPage() {
           </div>
         )}
         <div className="stats-grid" style={{ marginBottom: '24px' }}>
-          <div className="stat-card purple">
+          <div className={`stat-card ${totalGanho >= 0 ? 'green' : 'danger'}`}>
             <div className="stat-info">
               <h3>{formatCurrency(totalGanho)}</h3>
               <p>{totalGanho >= 0 ? 'Ganho apurado no ano' : 'Perda apurada no ano'}</p>
