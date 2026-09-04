@@ -23,6 +23,7 @@ export default function TabelaRedimensionavel({
   style,
   stickyFirstColumn = false,
   stickyRightColumns = 0,
+  initialColumnWidths = {},
 }) {
   const wrapRef = useRef(null);
   const rawId = useId();
@@ -51,6 +52,11 @@ export default function TabelaRedimensionavel({
       medidas = medidas.map(w => w * fator);
     }
     medidas = medidas.map(w => Math.round(w));
+    medidas = medidas.map((w, i) => (
+      initialColumnWidths[i] == null
+        ? w
+        : Math.max(MIN_COL, Math.round(initialColumnWidths[i]))
+    ));
 
     iniciaisRef.current = medidas;
     setLarguras(medidas);

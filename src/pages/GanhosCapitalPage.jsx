@@ -457,7 +457,7 @@ export default function GanhosCapitalPage() {
               </div>
             )}
 
-            <TabelaRedimensionavel stickyRightColumns={5}>
+            <TabelaRedimensionavel stickyRightColumns={5} initialColumnWidths={{ 1: 260 }}>
               <table>
                 <thead>
                   <tr>
