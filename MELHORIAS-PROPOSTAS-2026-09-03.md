@@ -99,28 +99,19 @@ Permanece como evolução de longo prazo guardar centavos inteiros no estado,
 com migração via A1. A fronteira atual remove o resíduo observável sem impor
 essa migração aos perfis existentes.
 
-### A6. Conferência de continuidade entre anos (P1, alto valor fiscal)
+### A6. Conferência de continuidade entre anos — CONCLUÍDO (P1)
 
-Evidência: `ROLLOVER_ANO` copia `situacao_atual` para `situacao_anterior` do
-ano seguinte. Mas quando a pessoa importa dois anos consecutivos (dois `.DBK`),
-nada compara o "31/12 do ano anterior" declarado no ano N+1 com o "31/12" do
-ano N que o app tem. Essa é exatamente a batida que a Receita faz na malha de
-variação patrimonial.
+`src/store/continuidade.js` compara o fechamento de bens, dívidas e seus
+equivalentes rurais com a abertura do ano seguinte. O casamento prioriza
+documento/identificador e usa descrição semelhante somente dentro do mesmo
+código; o resultado apenas aponta, nunca corrige saldo. Detecta saldo
+divergente, item que sumiu com saldo e item que apareceu trazendo saldo.
 
-Proposta:
-- Função pura `conferirContinuidade(historico, anoN)` em `src/store/`:
-  para cada bem e dívida casado entre os dois anos (por chave: grupo, código,
-  CNPJ ou identificação extraída da discriminação, com fallback por
-  similaridade de texto), comparar `situacao_atual` de N com
-  `situacao_anterior` de N+1; listar divergências, bens que sumiram sem baixa
-  e bens que apareceram sem aquisição.
-- Card no Dashboard "Continuidade com o ano anterior" com contagem e link para
-  a lista; selo verde quando fecha.
-- Regras do estudo: só saldo compensável atravessa ano; bem e dívida
-  atravessam por posição em 31/12; ganho de capital não atravessa.
-
-Pronto quando: fixture com dois anos sintéticos (um coerente, outro com três
-divergências plantadas) passa no teste, e o Dashboard mostra as três.
+O Dashboard mostra o card "Continuidade com o ano anterior", selo verde quando
+fecha e lista expansível quando há divergências. Fixture sintético confirmou 0
+no par coerente e exatamente 3 falhas plantadas; o perfil AJU-01 2025–2026 foi
+verificado no navegador. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-22-continuidade-anos/`.
 
 ### A7. Painel de IRRF por fonte e por beneficiário (P2)
 

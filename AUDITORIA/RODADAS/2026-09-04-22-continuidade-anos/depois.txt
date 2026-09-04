@@ -1,0 +1,15 @@
+Fixture puro:
+✓ dois anos coerentes fecham sem divergência, inclusive com um centavo de tolerância
+✓ detecta exatamente saldo divergente, item desaparecido e item surgido com saldo
+✓ sem os dois anos declara indisponível em vez de aprovar
+✓ descrição exata impede que CNPJ repetido troque dois bens de ordem
+
+Test Files  1 passed (1)
+Tests       4 passed (4)
+
+Perfil persistido AJU-01 no navegador:
+{"cards":1,"titulo":"Continuidade com o ano anterior","status":"Saldos conferidos","overflowPagina":0}
+
+Suíte completa:
+Test Files  40 passed (40)
+Tests       882 passed (882)

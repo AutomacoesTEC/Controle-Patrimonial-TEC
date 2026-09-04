@@ -5,6 +5,7 @@ import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
 import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComDado, movimentacoesNoPeriodo } from '../store/consultaPeriodo';
 import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosCompensaveis';
+import { conferirContinuidade } from '../store/continuidade';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
 import Modal from '../components/Modal';
@@ -140,6 +141,11 @@ export default function Dashboard({ onNavigate } = {}) {
 
   const anosDisponiveis = useMemo(() => anosComDado(state), [state]);
   const temDado = anosDisponiveis.length > 0;
+  const continuidade = useMemo(() => {
+    const ano = Number(state.anoCalendario);
+    const comAnterior = conferirContinuidade(state, ano - 1);
+    return comAnterior.disponivel ? comAnterior : conferirContinuidade(state, ano);
+  }, [state]);
 
   // "De" é o INÍCIO do período consultado: o saldo anterior de verdade é da
   // véspera, não do próprio dia — senão um lançamento cadastrado exatamente
@@ -436,6 +442,37 @@ export default function Dashboard({ onNavigate } = {}) {
             </div>
           )}
         </div>
+
+        {continuidade.disponivel && (
+          <div className="card continuidade-card">
+            <div className="continuidade-resumo">
+              <div>
+                <h3 className="card-title">Continuidade com o ano anterior</h3>
+                <p>Fechamento de {continuidade.anoAnterior} comparado à abertura de {continuidade.anoSeguinte}.</p>
+              </div>
+              <span className={`badge ${continuidade.divergencias.length ? 'badge-red' : 'badge-green'}`}>
+                {continuidade.divergencias.length ? `${continuidade.divergencias.length} divergência(s)` : 'Saldos conferidos'}
+              </span>
+            </div>
+            {continuidade.divergencias.length > 0 && (
+              <details className="continuidade-detalhes">
+                <summary>Ver divergências</summary>
+                <ul>
+                  {continuidade.divergencias.map((item, indice) => (
+                    <li key={`${item.tipo}-${item.categoria}-${indice}`}>
+                      <strong>{item.categoria}: {truncarComReticencias(item.identificacao, 90)}</strong>
+                      {': '}{item.tipo === 'saldo_divergente'
+                        ? `${formatCurrency(item.fechamento)} fechou / ${formatCurrency(item.abertura)} abriu`
+                        : item.tipo === 'sumiu_com_saldo'
+                          ? `sumiu levando saldo de ${formatCurrency(item.fechamento)}`
+                          : `apareceu trazendo saldo anterior de ${formatCurrency(item.abertura)}`}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
 
         {demo && (
         <>

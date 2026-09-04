@@ -1,0 +1,10 @@
+FAIL  empacotamento.test.js > escrita da interface
+> nenhum texto de tela usa travessão conector
+
+src/pages/Dashboard.jsx:447
+
+Test Files  1 failed | 39 passed (40)
+Tests       1 failed | 880 passed (881)
+
+O separador visual foi trocado por dois-pontos; a saída da conferência e os
+fixtures permaneceram iguais.

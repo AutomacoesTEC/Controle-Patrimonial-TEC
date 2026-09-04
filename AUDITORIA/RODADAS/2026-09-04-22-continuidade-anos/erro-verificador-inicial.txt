@@ -1,0 +1,4 @@
+O primeiro verificador importou AJU-01 pela tela, trajetória que cria somente
+o ano 2025. O card ficou corretamente ausente e a busca expirou. O verificador
+foi corrigido para carregar `perfil-aju01-atual.json`, fixture persistido que
+contém o par 2025-2026, sem mudar produto nem critério de aceite.

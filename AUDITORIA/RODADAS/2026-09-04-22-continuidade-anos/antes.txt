@@ -1,0 +1,8 @@
+FAIL  src/store/continuidade.test.js
+
+Error: Cannot find module './continuidade'
+
+Test Files  1 failed (1)
+Tests       no tests
+
+Não havia função nem resultado de continuidade para os fixtures executarem.
