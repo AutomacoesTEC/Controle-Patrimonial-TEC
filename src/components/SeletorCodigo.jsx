@@ -1,4 +1,5 @@
 import { useState, useRef, useId } from 'react';
+import { normalizarBusca } from '../utils/formatters';
 
 // Combobox de código de ficha da declaração: a lista OFICIAL da Receita (a
 // mesma que o programa do IRPF usa, extraída em tabelas-irpf2026/) num dropdown
@@ -11,7 +12,7 @@ import { useState, useRef, useId } from 'react';
 // Filtra por prefixo do código OU por trecho do nome, sem acento e sem caixa.
 // O texto digitado que não seja um código é usado só como filtro: ao sair do
 // campo sem escolher nada, o valor anterior é mantido (não vira lixo).
-const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const norm = normalizarBusca;
 const pareceCodigo = t => /^[0-9]{1,3}$/.test(String(t).trim());
 
 export default function SeletorCodigo({ opcoes = [], value, onChange, placeholder = 'Código', id }) {

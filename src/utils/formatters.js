@@ -35,6 +35,62 @@ export function nomeCurtoBem(discriminacao) {
   return truncarComReticencias(corte || base, 48);
 }
 
+// Normalizador de busca (sem acento, sem caixa), usado pelos comboboxes de
+// filtro (SeletorCodigo, SeletorBem). Extraído aqui para as duas casas usarem
+// a mesma regra, sem duplicar.
+export function normalizarBusca(s) {
+  return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+// Opções do seletor de bens da aba Ganhos de Capital (item F, SeletorBem):
+// rótulo principal = nomeCurtoBem (marca/modelo/placa, sem o preço de
+// compra); linha secundária = grupo/código do bem + discriminação completa
+// truncada, para desambiguar dois bens com nome curto parecido (ex.: dois
+// veículos "Q3-AUDI"). Sufixo "(baixado)" quando o bem já foi vendido por
+// inteiro ou baixado (situacao_atual zerada por venda_total/baixa) — a
+// pessoa pode precisar corrigir a venda, então continua na lista.
+export function opcoesSeletorBem(bens = []) {
+  return (bens || []).map(b => {
+    const baixado = Number(b.situacao_atual) === 0 &&
+      (b.movimentacoes || []).some(m => m.tipo === 'venda_total' || m.tipo === 'baixa');
+    return {
+      id: b.id,
+      rotulo: `${nomeCurtoBem(b.discriminacao)}${baixado ? ' (baixado)' : ''}`,
+      detalhe: `${b.grupo || ''}/${b.codigo_bem || ''} - ${truncarComReticencias(b.discriminacao || '', 90)}`,
+      baixado,
+    };
+  });
+}
+
+// Filtra as opções do SeletorBem por trecho do nome curto, da discriminação
+// completa (ambas embutidas no rótulo/detalhe) ou do código, sem acento nem
+// caixa. Função pura para poder testar o filtro sem montar o componente (o
+// projeto não usa testing-library/jsdom).
+export function filtrarOpcoesBem(opcoes, termo) {
+  const t = normalizarBusca(termo).trim();
+  if (!t) return opcoes;
+  return opcoes.filter(o => normalizarBusca(o.rotulo).includes(t) || normalizarBusca(o.detalhe).includes(t));
+}
+
+// Depois de salvar um bem NOVO a partir da aba Ganhos de Capital (item F):
+// se o ano de gravação é o mesmo ano ativo, o bem entrou em state.bens e dá
+// pra reabrir o BemModal já em edição, para a pessoa lançar a venda na
+// sequência sem procurar o bem. Se caiu num ano diferente (ADD_EM_ANO fora
+// do ano ativo — item G), o bem não está em state.bens: não reabre, e a
+// tela avisa onde ele foi gravado, no mesmo tom da confirmação de G
+// (DataContext.jsx:garantirAnoCadastro, "Será gravado em X; a tela continua
+// mostrando Y").
+export function decidirReaberturaAposNovoBem(anoAlvo, anoAtivo, bemCriado) {
+  if (anoAlvo === anoAtivo) {
+    return { reabrirEdicao: true, bemParaEditar: bemCriado, mensagemToast: null };
+  }
+  return {
+    reabrirEdicao: false,
+    bemParaEditar: null,
+    mensagemToast: `O bem foi gravado no ano ${anoAlvo}; a tela continua mostrando ${anoAtivo}.`,
+  };
+}
+
 export function formatCurrency(value) {
   if (value === null || value === undefined || isNaN(value)) return 'R$ 0,00';
   // Normaliza o zero negativo antes de formatar. O Intl formata -0 como

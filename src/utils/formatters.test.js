@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, mascaraCpf, mascaraCnpj, mascaraCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento, nomeCurtoBem, CODIGOS_DIVIDA, describeDividaCodigo, CODIGOS_DEPENDENCIA } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, mascaraCpf, mascaraCnpj, mascaraCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento, nomeCurtoBem, CODIGOS_DIVIDA, describeDividaCodigo, CODIGOS_DEPENDENCIA, normalizarBusca, opcoesSeletorBem, filtrarOpcoesBem, decidirReaberturaAposNovoBem } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -60,6 +60,87 @@ describe('tabelas de código da Receita para o SeletorCodigo', () => {
     const c11 = CODIGOS_DEPENDENCIA.find(c => c.codigo === '11');
     expect(c11.nome).toBe(describeRelacaoDependencia('11'));
     expect(c11.nome).toBe('Companheiro(a) ou cônjuge');
+  });
+});
+
+// Item F (HANDOFF-2026-09-03.md): opções/filtro do SeletorBem e a decisão de
+// reabertura após cadastrar um bem novo direto da aba Ganhos de Capital.
+describe('opcoesSeletorBem / filtrarOpcoesBem (SeletorBem)', () => {
+  const bens = [
+    {
+      id: 1, grupo: '02', codigo_bem: '01', situacao_atual: 50000,
+      discriminacao: 'AQUISIÇÃO DE UM VEÍCULO Q3-AUDI, PLACA ABC1234, POR R$ 200.000,00',
+      movimentacoes: [],
+    },
+    {
+      id: 2, grupo: '02', codigo_bem: '01', situacao_atual: 0,
+      discriminacao: 'AQUISIÇÃO DE UM VEÍCULO GOL, PLACA XYZ9876, POR R$ 60.000,00',
+      movimentacoes: [{ tipo: 'venda_total', data: '2026-05-10', valor: 60000, valorVenda: 55000 }],
+    },
+    {
+      id: 3, grupo: '01', codigo_bem: '12', situacao_atual: 300000,
+      discriminacao: 'CASA NA RUA DAS FLORES, 123',
+      movimentacoes: [],
+    },
+  ];
+  const opcoes = opcoesSeletorBem(bens);
+
+  it('rótulo usa nomeCurtoBem, sem o preço de aquisição', () => {
+    expect(opcoes[0].rotulo).toBe('Q3-AUDI');
+    expect(opcoes[0].rotulo).not.toMatch(/R\$/);
+  });
+
+  it('marca "(baixado)" quando situacao_atual é 0 e há venda_total/baixa', () => {
+    expect(opcoes[1].rotulo).toBe('GOL (baixado)');
+    expect(opcoes[1].baixado).toBe(true);
+    expect(opcoes[0].baixado).toBe(false);
+  });
+
+  it('detalhe traz grupo/código do bem e a discriminação completa', () => {
+    expect(opcoes[0].detalhe).toContain('02/01');
+    expect(opcoes[0].detalhe).toContain('PLACA ABC1234');
+  });
+
+  it('filtra por trecho do nome curto (rótulo), sem acento nem caixa', () => {
+    const achou = filtrarOpcoesBem(opcoes, 'gol');
+    expect(achou.map(o => o.id)).toEqual([2]);
+  });
+
+  it('filtra por trecho da discriminação completa (não só do rótulo)', () => {
+    const achou = filtrarOpcoesBem(opcoes, 'rua das flores');
+    expect(achou.map(o => o.id)).toEqual([3]);
+  });
+
+  it('filtro sem acento/caixa casa "flôres" digitado sem acento e em maiúscula', () => {
+    const achou = filtrarOpcoesBem(opcoes, 'FLORES');
+    expect(achou.map(o => o.id)).toEqual([3]);
+  });
+
+  it('sem termo, devolve todas as opções (não filtra)', () => {
+    expect(filtrarOpcoesBem(opcoes, '')).toHaveLength(3);
+  });
+
+  it('normalizarBusca tira acento e caixa', () => {
+    expect(normalizarBusca('AÇÃO')).toBe('acao');
+  });
+});
+
+describe('decidirReaberturaAposNovoBem (item F, encadeia com item G)', () => {
+  it('mesmo ano ativo: reabre em edição do bem recém-criado', () => {
+    const bemCriado = { id: 123, discriminacao: 'BEM X' };
+    const d = decidirReaberturaAposNovoBem(2026, 2026, bemCriado);
+    expect(d.reabrirEdicao).toBe(true);
+    expect(d.bemParaEditar).toBe(bemCriado);
+    expect(d.mensagemToast).toBeNull();
+  });
+
+  it('ano diferente do ativo (ADD_EM_ANO): não reabre, avisa onde foi gravado', () => {
+    const bemCriado = { id: 456, discriminacao: 'BEM Y' };
+    const d = decidirReaberturaAposNovoBem(2027, 2026, bemCriado);
+    expect(d.reabrirEdicao).toBe(false);
+    expect(d.bemParaEditar).toBeNull();
+    expect(d.mensagemToast).toMatch(/gravado no ano 2027/);
+    expect(d.mensagemToast).toMatch(/continua mostrando 2026/);
   });
 });
 

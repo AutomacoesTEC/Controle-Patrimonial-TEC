@@ -1,10 +1,16 @@
 import { useMemo, useState, useEffect, Fragment } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento, nomeCurtoBem } from '../utils/formatters';
+import {
+  formatCurrency, formatDate, formatCpfCnpj, descreverOrigemDocumento, nomeCurtoBem,
+  opcoesSeletorBem, decidirReaberturaAposNovoBem,
+} from '../utils/formatters';
 import { exportListaToXlsx } from '../utils/exportXlsx';
 import { dadosDoAno, anosComDado } from '../store/consultaPeriodo';
 import { ganhosApuradosPeriodo } from '../store/demonstrativos';
+import { novoId } from '../store/reducer';
 import Ajuda from '../components/Ajuda';
+import BemModal from '../components/BemModal';
+import SeletorBem from '../components/SeletorBem';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
   conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
@@ -165,7 +171,7 @@ function DetalheOperacaoGc({ op }) {
 }
 
 export default function GanhosCapitalPage() {
-  const { state } = useData();
+  const { state, dispatch, addToast, despacharEmAno } = useData();
   const anosDisponiveis = anosComDado(state);
   const [anoEscolhido, setAnoEscolhido] = useState(state.anoCalendario);
 
@@ -348,6 +354,52 @@ export default function GanhosCapitalPage() {
     ],
     'Ganhos de Capital', 'ganhos_capital', anoEscolhido
   );
+
+  // Item F (HANDOFF-2026-09-03.md): gerir bem direto daqui, sem mostrar a
+  // lista inteira de Bens e Direitos. Reusa BemModal LITERALMENTE (mesmas
+  // props open/bem/onSave/onClose de BensPage.jsx); o seletor lista sempre
+  // os bens do ANO ATIVO (state.bens, não bensDoAno do ano escolhido acima —
+  // escolher um ano de exibição diferente não muda em qual ano se pode
+  // cadastrar/editar um bem).
+  const opcoesBens = useMemo(() => opcoesSeletorBem(state.bens || []), [state.bens]);
+  const [bemModalOpen, setBemModalOpen] = useState(false);
+  const [bemEmEdicao, setBemEmEdicao] = useState(null); // null = "Novo bem"; objeto = edição
+  const [bemSelecionadoId, setBemSelecionadoId] = useState('');
+
+  const fecharBemModal = () => { setBemModalOpen(false); setBemEmEdicao(null); setBemSelecionadoId(''); };
+  const abrirNovoBem = () => { setBemEmEdicao(null); setBemModalOpen(true); };
+  const abrirBemSelecionado = (id) => {
+    setBemSelecionadoId(id);
+    const bem = (state.bens || []).find(b => String(b.id) === String(id));
+    if (bem) { setBemEmEdicao(bem); setBemModalOpen(true); }
+  };
+
+  // Mesmo contrato de BensPage.jsx:handleSave — edição via UPDATE_BEM direto,
+  // cadastro novo via despacharEmAno (NUNCA dispatch cru de ADD_BEM, senão
+  // quebra o item G, que grava fichas planas no ano da data sem trocar a
+  // visão). Depois de cadastrar um bem NOVO, reabre o modal em edição dele
+  // (fluxo encadeado: criar e, na sequência, já lançar a venda) — a menos
+  // que tenha caído num ano diferente do ativo, caso em que o bem não está
+  // em state.bens e não há o que reabrir (ver decidirReaberturaAposNovoBem).
+  const handleSaveBem = (formPreenchido, anoAlvo) => {
+    if (bemEmEdicao) {
+      dispatch({ type: 'UPDATE_BEM', payload: formPreenchido });
+      addToast('Bem atualizado com sucesso!', 'success');
+      fecharBemModal();
+      return;
+    }
+    const bemCriado = { ...formPreenchido, id: novoId() };
+    despacharEmAno(anoAlvo, { type: 'ADD_BEM', payload: bemCriado });
+    addToast('Bem cadastrado com sucesso!', 'success');
+    const decisao = decidirReaberturaAposNovoBem(anoAlvo, state.anoCalendario, bemCriado);
+    if (decisao.reabrirEdicao) {
+      setBemSelecionadoId(decisao.bemParaEditar.id);
+      setBemEmEdicao(decisao.bemParaEditar);
+    } else {
+      fecharBemModal();
+      addToast(decisao.mensagemToast, 'info');
+    }
+  };
 
   const seletorAno = anosDisponiveis.length > 0 && (
     <select
@@ -596,6 +648,28 @@ export default function GanhosCapitalPage() {
             </div>
           </div>
         </div>
+
+        {/* Item F: gerir bem sem sair de Ganhos de Capital, sem mostrar a
+            lista inteira de Bens e Direitos. */}
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header">
+            <h3 className="card-title">Gerir bem</h3>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>
+            Selecione um bem já cadastrado para editar os dados ou registrar uma venda/baixa, ou cadastre um bem novo aqui mesmo.
+          </p>
+          <div className="form-row" style={{ alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>Bem já cadastrado (ano ativo)</label>
+              <SeletorBem opcoes={opcoesBens} value={bemSelecionadoId} onChange={abrirBemSelecionado} />
+            </div>
+            <div className="form-group">
+              <button type="button" className="btn btn-secondary" onClick={abrirNovoBem}>Novo bem</button>
+            </div>
+          </div>
+        </div>
+        <BemModal open={bemModalOpen} bem={bemEmEdicao} onSave={handleSaveBem} onClose={fecharBemModal} />
+
         <div className="table-container">
           <table>
             <thead><tr><th>Bem</th><th>Origem</th><th>Data</th><th>Tipo</th><th style={{ textAlign: 'right' }}>Custo Baixado</th><th style={{ textAlign: 'right' }}>Valor de Venda</th><th style={{ textAlign: 'right' }}>Ganho/Perda</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>

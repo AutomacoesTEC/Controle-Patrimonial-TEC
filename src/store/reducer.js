@@ -299,7 +299,11 @@ export function reducer(state, action) {
     // retificadora, distinguir o que é seguro sobrescrever do que tem que
     // ficar intocado (ver RECONCILIAR_IMPORTACAO mais abaixo).
     case 'ADD_BEM':
-      return { ...state, bens: [...state.bens, { ...action.payload, id: novoId(), origem: 'manual' }] };
+      // Aceita um id já gerado no payload (item F: a tela de Ganhos de
+      // Capital precisa saber o id do bem recém-criado ANTES de reabrir o
+      // BemModal em edição, então gera com novoId() no chamador e passa
+      // pronto). Sem id no payload, comportamento de sempre.
+      return { ...state, bens: [...state.bens, { ...action.payload, id: action.payload.id ?? novoId(), origem: 'manual' }] };
     case 'UPDATE_BEM':
       return { ...state, bens: state.bens.map(b => b.id === action.payload.id ? { ...b, ...action.payload } : b) };
     case 'DELETE_BEM':

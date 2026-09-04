@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { reducer, reducerComHistorico, initialState, blankYear, hasWorkingData, snapshotHasData, novoId } from './reducer';
+import { ganhosApuradosPeriodo } from './demonstrativos';
 
 const bemBase = { id: 1, grupo: '01', codigo_bem: '12', discriminacao: 'Casa', situacao_anterior: 100000, situacao_atual: 130000 };
 
@@ -29,6 +30,20 @@ describe('CRUD de bens/dívidas/rendimentos/pagamentos', () => {
     expect(state.bens[0].discriminacao).toBe('Carro novo');
     state = reducer(state, { type: 'DELETE_BEM', payload: id });
     expect(state.bens).toHaveLength(0);
+  });
+
+  // Item F: a tela de Ganhos de Capital precisa saber o id do bem recém
+  // -criado ANTES de reabrir o BemModal em edição dele (decidirReaberturaAposNovoBem),
+  // então gera o id no chamador (novoId()) e passa pronto no payload — o
+  // reducer precisa RESPEITAR esse id, não sobrescrever com um novo.
+  it('ADD_BEM aceita um id já gerado no payload (item F), sem quebrar o caso sem id (novoId gera)', () => {
+    let state = { ...initialState };
+    state = reducer(state, { type: 'ADD_BEM', payload: { id: 999888777, discriminacao: 'Bem com id pronto', situacao_atual: 1000 } });
+    expect(state.bens[0].id).toBe(999888777);
+
+    state = reducer(state, { type: 'ADD_BEM', payload: { discriminacao: 'Bem sem id', situacao_atual: 500 } });
+    expect(state.bens[1].id).toBeTypeOf('number');
+    expect(state.bens[1].id).not.toBe(999888777);
   });
 
   it('ADD/UPDATE/DELETE_DIVIDA, ADD/UPDATE/DELETE_RENDIMENTO, ADD/UPDATE/DELETE_PAGAMENTO seguem o mesmo padrão', () => {
@@ -676,6 +691,43 @@ describe('ADD_EM_ANO (grava num ano que pode não ser o ativo, sem trocar a vis�
     // A 2ª chamada reaproveitou o MESMO snapshot criado pela 1ª (não recriou
     // do zero, o que perderia o pagamento já gravado).
     expect(state.historico[2025].pagamentos[0].valor_pago).toBe(100);
+  });
+
+  // Regressão de G aplicada ao caminho de F: salvar um bem NOVO num ano
+  // diferente do ativo (via ADD_EM_ANO/despacharEmAno, como GanhosCapitalPage
+  // faz) grava em historico[ano] e NÃO troca state.anoCalendario nem
+  // adiciona o bem em state.bens.
+  it('ADD_BEM via ADD_EM_ANO num ano diferente do ativo grava em historico[ano], sem trocar anoCalendario nem tocar state.bens', () => {
+    const estadoAntes = { ...initialState, anoCalendario: 2026, bens: [{ ...bemBase }], historico: {} };
+    const bemNovo = { id: 555, discriminacao: 'Carro comprado e vendido em 2025', situacao_atual: 0 };
+    const state = reducer(estadoAntes, {
+      type: 'ADD_EM_ANO',
+      payload: { ano: 2025, action: { type: 'ADD_BEM', payload: bemNovo } },
+    });
+
+    expect(state.anoCalendario).toBe(2026);
+    expect(state.bens).toEqual(estadoAntes.bens); // ano ativo intocado
+    expect(state.historico[2025].bens).toHaveLength(1);
+    expect(state.historico[2025].bens[0].id).toBe(555);
+    expect(state.historico[2025].bens[0].discriminacao).toBe('Carro comprado e vendido em 2025');
+  });
+
+  // Item F, fim a fim: criar um bem (fluxo "Novo bem" da aba Ganhos de
+  // Capital) e registrar a venda_total nele (o "dar baixa" do BemModal)
+  // alimenta ganhosApuradosPeriodo (demonstrativos.js) sem nenhuma mudança
+  // de cálculo — a mesma função que já lê state.bens hoje.
+  it('bem criado e vendido pelo fluxo de F entra em ganhosApuradosPeriodo com ganho = valorVenda - valor', () => {
+    let state = { ...initialState, anoCalendario: 2026 };
+    state = reducer(state, { type: 'ADD_BEM', payload: { grupo: '02', codigo_bem: '01', discriminacao: 'Veículo teste', situacao_anterior: 80000, situacao_atual: 80000 } });
+    const bemId = state.bens[0].id;
+    state = reducer(state, {
+      type: 'REGISTRAR_MOVIMENTACAO_BEM',
+      payload: { bemId, colecao: 'bens', movimentacao: { tipo: 'venda_total', data: '2026-06-15', valor: 80000, valorVenda: 95000 } },
+    });
+
+    const ganhos = ganhosApuradosPeriodo({ bens: state.bens, bensRurais: [] }, '2026-01-01', '2026-12-31');
+    expect(ganhos.total).toBe(15000); // valorVenda (95000) - valor (80000)
+    expect(ganhos.vendas).toHaveLength(1);
   });
 
   it('o histórico de alterações (reducerComHistorico) descreve a ação interna, não "ADD_EM_ANO" cru', () => {
