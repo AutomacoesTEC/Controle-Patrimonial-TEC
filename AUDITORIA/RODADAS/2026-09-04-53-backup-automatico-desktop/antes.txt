@@ -1,0 +1,1 @@
+{"ponteDesktop":false,"metodoBackupAutomatico":false,"agendamentoPeriodico":false,"intervaloMinutos":null}

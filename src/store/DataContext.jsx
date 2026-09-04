@@ -4,6 +4,7 @@ import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte
 import { migrarEstadoPersistido, versaoDoEstado } from './migracoes';
 import { criptografarObjeto } from '../utils/crypto';
 import { montarArquivoBackup, nomeArquivoBackup, textoDoArquivoBackup, TIPO_MIME_BACKUP } from './backupPerfil';
+import { agendarBackupAutomaticoDesktop, salvarBackupAutomaticoDesktop } from './backupAutomaticoDesktop';
 import { baixarTexto } from '../utils/baixarArquivo';
 import ConfirmacaoModal from '../components/ConfirmacaoModal';
 
@@ -172,6 +173,8 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
   const [persistencia, setPersistencia] = useState({ estado: 'ociosa', erro: null });
   const filaPersistencia = useRef(Promise.resolve());
   const numeroPersistencia = useRef(0);
+  const estadoBackupRef = useRef(state);
+  estadoBackupRef.current = state;
 
   const saveToStorage = useCallback((estadoParaSalvar = state) => {
     const numero = ++numeroPersistencia.current;
@@ -260,6 +263,50 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
       setTimeout(() => dispatch({ type: 'REMOVE_TOAST', payload: id }), 150);
     }, 4000);
   }, []);
+
+  // No navegador comum não existe bridge e nada é agendado. No executável,
+  // pywebview pode injetar a API antes ou logo depois do React montar; os dois
+  // caminhos convergem para uma única agenda. A primeira cópia é imediata e
+  // as seguintes substituem o arquivo diário a cada 15 minutos. Erro não vira
+  // fallback para download nem passa silencioso: aparece uma vez por sequência
+  // de falhas, sem inundar a tela a cada intervalo.
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    let encerrarAgendamento = null;
+    let erroJaAvisado = false;
+    const executar = async (api) => {
+      const resultado = await salvarBackupAutomaticoDesktop({
+        api,
+        storage: localStorage,
+        perfilId,
+        estado: estadoBackupRef.current,
+        chave,
+      });
+      if (!resultado.salvo && resultado.motivo !== 'perfil_removido') {
+        throw new Error('O backup automático não foi salvo.');
+      }
+      erroJaAvisado = false;
+    };
+    const onErro = (erro) => {
+      if (erroJaAvisado) return;
+      erroJaAvisado = true;
+      addToast(`Falha no backup automático: ${erro?.message || 'não foi possível gravar o arquivo'}`, 'error');
+    };
+    const iniciar = () => {
+      if (encerrarAgendamento) return;
+      encerrarAgendamento = agendarBackupAutomaticoDesktop({
+        api: window.pywebview?.api,
+        executar,
+        onErro,
+      });
+    };
+    iniciar();
+    window.addEventListener('pywebviewready', iniciar);
+    return () => {
+      window.removeEventListener('pywebviewready', iniciar);
+      encerrarAgendamento?.();
+    };
+  }, [perfilId, chave, addToast]);
 
   // O ano-calendário ativo NÃO trava o que pode ser cadastrado — ele é só o
   // contexto que "Novo X" assume por padrão. Se a pessoa escolher um ano

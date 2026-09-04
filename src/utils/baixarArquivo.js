@@ -3,8 +3,9 @@
 // exportação da fonte de auditoria (ImportPage.jsx) e o `.xlsx` do SheetJS já
 // usam em produção, e funciona tanto no navegador quanto no app empacotado,
 // que é um WebView2/Edge dirigido por pywebview (ver build-windows.ps1 e
-// main.py). Não existe ponte de IPC com o Python, então este é o único
-// caminho de gravação disponível nos dois modos, e é o suficiente.
+// main.py). O download MANUAL permanece neste caminho comum. A ponte Python
+// adicionada para backup automático é deliberadamente restrita à pasta de
+// backups e não substitui o seletor/download das exportações feitas à mão.
 export function baixarTexto({ nome, texto, tipo = 'text/plain;charset=utf-8' }) {
   const url = URL.createObjectURL(new Blob([texto], { type: tipo }));
   const a = document.createElement('a');

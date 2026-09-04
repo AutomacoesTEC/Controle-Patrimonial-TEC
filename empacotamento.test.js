@@ -77,7 +77,9 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     // app perde os dados da pessoa ao fechar. Ver main.py.
     expect(mainPy).toContain('LOCALAPPDATA');
     expect(mainPy).toContain('private_mode=False');
-    expect(mainPy).toContain('storage_path=get_storage_path()');
+    expect(mainPy).toContain('storage_path = get_storage_path()');
+    expect(mainPy).toContain('js_api=DesktopApi(storage_path)');
+    expect(mainPy).toContain('storage_path=storage_path');
   });
 });
 

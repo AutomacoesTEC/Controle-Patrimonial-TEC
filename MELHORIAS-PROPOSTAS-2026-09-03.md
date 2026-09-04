@@ -31,8 +31,9 @@ Commit `cf08e18`, 03/09/2026. `src/store/backupPerfil.js` (formato
 `.cptec.json`, hash SHA-256 do envelope inteiro menos o próprio hash,
 serialização canônica para o hash não depender de ordem de chave),
 `src/utils/baixarArquivo.js` (Blob + âncora, funciona nos dois modos porque o
-app desktop é pywebview sem ponte de IPC, não Electron — achado do
-levantamento, corrige a suposição original deste item). Restaurar cria
+app desktop é pywebview, não Electron — achado do levantamento que corrigiu a
+suposição original deste item; a ponte mínima veio depois, na rodada 53,
+somente para a cópia automática). Restaurar cria
 perfil NOVO por padrão; sobrescrever exige `substituirPerfilId` explícito e
 passa pelo `ConfirmacaoModal`. Perfil protegido exporta cifrado com a chave
 já existente (`src/utils/crypto.js`, PBKDF2 210k + AES-GCM, pré-existente);
@@ -43,9 +44,13 @@ esquema futura é recusada, e os 55 testes de `backupPerfil.test.js` cobrem
 ida e volta completa (perfil comum e protegido) com demonstrativo idêntico.
 872/872 testes, build limpo.
 
-Pendente deste item: backup automático periódico no app desktop (a proposta
-original citava Electron; como o app é pywebview, o mecanismo seria outro —
-não desenhado ainda).
+Complementado na rodada 53: no pywebview, o perfil aberto agora gera uma cópia
+imediata e a atualiza a cada 15 minutos em
+`ControlePatrimonialIRPF/BackupsAutomaticos`. A ponte Python aceita somente
+nome de arquivo saneado dentro dessa pasta, grava por substituição atômica e
+retém no máximo 30 cópias. No navegador comum, a agenda não é criada; falha no
+desktop aparece como aviso, sem fallback silencioso. Fixtures JS e Python em
+`AUDITORIA/RODADAS/2026-09-04-53-backup-automatico-desktop/`.
 
 ### A3. Proveniência por registro, não só por ano — CONCLUÍDO (P1)
 

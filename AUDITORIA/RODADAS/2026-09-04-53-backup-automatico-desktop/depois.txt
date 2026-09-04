@@ -1,0 +1,4 @@
+{"ponteDesktop":true,"metodoBackupAutomatico":true,"agendamentoPeriodico":true,"intervaloMinutos":15}
+
+Vitest: 2 testes aprovados (arquivo íntegro; execução imediata + intervalo).
+unittest Python: 1 teste aprovado (confinamento, escrita atômica e retenção 30).

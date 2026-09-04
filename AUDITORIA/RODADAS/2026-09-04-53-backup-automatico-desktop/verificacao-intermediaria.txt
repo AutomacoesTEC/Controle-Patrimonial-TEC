@@ -1,0 +1,11 @@
+Regressão inicial após a mudança:
+
+FAIL empacotamento.test.js > a persistência dos dados fica fora da pasta temporária do PyInstaller
+AssertionError: esperava o literal storage_path=get_storage_path()
+
+Test Files  1 failed | 46 passed (47)
+Tests       1 failed | 896 passed (897)
+
+Diagnóstico: o caminho continua vindo de get_storage_path(), porém agora é
+calculado uma vez em storage_path e reutilizado no bridge e no webview. A
+prova textual antiga não reconhecia a forma semanticamente equivalente.
