@@ -281,6 +281,14 @@ Proposta:
 - Avisos (fichas não lidas, importação parcial, pendências) num único bloco
   no topo, não espalhados.
 
+Primeira parte concluída em 04/09/2026: a faixa superior repete o Saldo de
+Caixa já calculado, traz as três leituras textuais e fica inteira no primeiro
+viewport de 1366 × 768. No perfil AJU-01, o valor final antes aparecia apenas
+em `top=2186`; a faixa passou a aparecer entre `top=298` e `bottom=387`, sem
+rolagem, com o mesmo `-R$ 51.787,27`. Gráficos e consolidação dos avisos
+continuam pendentes em rodadas próprias. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-26-saldo-heroi/`.
+
 Pronto quando: a pessoa abre o Dashboard e em três segundos sabe se a
 declaração fecha, sem rolar.
 

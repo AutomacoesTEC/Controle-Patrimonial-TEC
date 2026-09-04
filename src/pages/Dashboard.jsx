@@ -181,6 +181,25 @@ export default function Dashboard({ onNavigate } = {}) {
     () => classificarPendenciasSaldo(state, demo, de, ate),
     [state, demo, de, ate]
   );
+  const saldoHero = demo?.saldoDeCaixa || 0;
+  const saldoHeroCentavos = Math.round(saldoHero * 100);
+  const leituraSaldoHero = saldoHeroCentavos === 0
+    ? {
+        classe: 'fecha',
+        estado: 'Conciliação fecha',
+        explicacao: 'Entradas e saídas registradas se conciliam no período.',
+      }
+    : saldoHeroCentavos > 0
+      ? {
+          classe: 'sobra',
+          estado: 'Sobra a explicar',
+          explicacao: 'As entradas registradas superam as saídas e o aumento patrimonial no período.',
+        }
+      : {
+          classe: 'falta',
+          estado: 'Falta a explicar',
+          explicacao: 'As saídas e o aumento patrimonial superam as entradas registradas no período.',
+        };
 
   // Saldos que ATRAVESSAM o exercício (prejuízos compensáveis) e
   // Disponibilidades — dois recortes do estudo de variação patrimonial, lidos
@@ -447,6 +466,19 @@ export default function Dashboard({ onNavigate } = {}) {
             </div>
           )}
         </div>
+
+        {demo && (
+          <section className={`saldo-hero saldo-hero-${leituraSaldoHero.classe}`} aria-labelledby="saldo-hero-titulo">
+            <div className="saldo-hero-contexto">
+              <span className="saldo-hero-rotulo" id="saldo-hero-titulo">Saldo de Caixa</span>
+              <p>{leituraSaldoHero.explicacao}</p>
+            </div>
+            <div className="saldo-hero-leitura">
+              <span className="saldo-hero-estado">{leituraSaldoHero.estado}</span>
+              <strong className="saldo-hero-valor">{formatCurrency(saldoHero)}</strong>
+            </div>
+          </section>
+        )}
 
         {continuidade.disponivel && (
           <div className="card continuidade-card">

@@ -1,0 +1,1 @@
+{"herois":1,"scrollTop":0,"viewport":768,"caixaHero":{"top":298,"bottom":387},"visivelSemRolar":true,"textoHero":"Saldo de Caixa","valorHero":"-R$ 51.787,27","selo":"Falta a explicar","estiloValor":{"tamanho":"30px","peso":"700","variante":"tabular-nums"},"valorLinha":"-R$ 51.787,27","caixaLinha":{"top":2294,"bottom":2343}}

@@ -1,0 +1,1 @@
+{"herois":0,"scrollTop":0,"viewport":768,"caixaHero":null,"visivelSemRolar":false,"textoHero":null,"valorHero":null,"selo":null,"estiloValor":null,"valorLinha":"-R$ 51.787,27","caixaLinha":{"top":2186,"bottom":2235}}

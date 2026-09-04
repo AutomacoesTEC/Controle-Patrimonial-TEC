@@ -192,6 +192,10 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **stat-card**: linha superior sólida de 2px; `primary` para informação
   neutra, `success` para ganho/resultado positivo e `danger` para
   dívida/despesa/perda. Nunca usa gradiente nem cor sem significado.
+- **saldo-hero**: faixa de decisão no primeiro viewport do Dashboard, com o
+  Saldo de Caixa em 30px/700 e um estado textual (`Conciliação fecha`,
+  `Sobra a explicar` ou `Falta a explicar`). Cor reforça o estado, mas nunca
+  o substitui.
 - **nav-item-active**: sem preenchimento sólido — uma barra de 3px na
   lateral esquerda + fundo translúcido de 12% na cor `primary-light`.
 
