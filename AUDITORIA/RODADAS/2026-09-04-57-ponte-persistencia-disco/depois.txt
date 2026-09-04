@@ -1,0 +1,9 @@
+{"antesExcluir":{"indice":"[{\"id\":\"perfil-1\"},{\"id\":\"perfil-2\"}]","perfis":{"perfil-1":"{\"nome\":\"João\",\"valor\":2}","perfil-2":"{\"nome\":\"Maria\"}"}},"capacidades":{"carregar_cache":true,"excluir_perfil":true,"salvar_indice_perfis":true,"salvar_perfil":true},"depoisExcluir":{"indice":"[{\"id\":\"perfil-1\"},{\"id\":\"perfil-2\"}]","perfis":{"perfil-1":"{\"nome\":\"João\",\"valor\":2}"}},"escapeExiste":false,"temporarios":[],"total":4,"travessiaRejeitada":true}
+
+test_confina_escrita_atomica_e_limita_retencao (test_desktop_api.DesktopApiTest.test_confina_escrita_atomica_e_limita_retencao) ... ok
+test_persiste_carrega_e_exclui_perfis_com_confinamento (test_desktop_api.DesktopApiTest.test_persiste_carrega_e_exclui_perfis_com_confinamento) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.259s
+
+OK

@@ -1,0 +1,1 @@
+{"capacidades":{"carregar_cache":false,"excluir_perfil":false,"salvar_indice_perfis":false,"salvar_perfil":false},"total":0}

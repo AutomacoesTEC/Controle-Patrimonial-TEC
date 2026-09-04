@@ -6,6 +6,31 @@ from desktop_api import DesktopApi
 
 
 class DesktopApiTest(unittest.TestCase):
+    def test_persiste_carrega_e_exclui_perfis_com_confinamento(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            api = DesktopApi(pasta)
+            api.salvar_indice_perfis('[{"id":"perfil-1"}]')
+            api.salvar_perfil('perfil-1', '{"nome":"João","valor":1}')
+            api.salvar_perfil('perfil-1', '{"nome":"João","valor":2}')
+
+            self.assertEqual(
+                {
+                    'indice': '[{"id":"perfil-1"}]',
+                    'perfis': {'perfil-1': '{"nome":"João","valor":2}'},
+                },
+                api.carregar_cache(),
+            )
+            self.assertFalse(any(nome.endswith('.tmp') for nome in os.listdir(api.perfis_path)))
+            with self.assertRaises(ValueError):
+                api.salvar_perfil('../escape', '{}')
+            self.assertFalse(os.path.exists(os.path.join(pasta, 'escape.json')))
+
+            self.assertEqual(
+                {'excluido': True, 'perfilId': 'perfil-1'},
+                api.excluir_perfil('perfil-1'),
+            )
+            self.assertEqual({'indice': '[{"id":"perfil-1"}]', 'perfis': {}}, api.carregar_cache())
+
     def test_confina_escrita_atomica_e_limita_retencao(self):
         with tempfile.TemporaryDirectory() as pasta:
             api = DesktopApi(pasta, max_backups=30)
