@@ -1,0 +1,8 @@
+api_seletor_nativo=0
+janela_vinculada=0
+downloads_do_usuario=0
+fallback_navegador=0
+total=0/4
+
+Trajetória observada no Windows: o clique em restauração abriu um caminho do
+Linux/WSL, herdado pelo seletor HTML do WebView.

@@ -114,7 +114,9 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     expect(mainPy).toContain('LOCALAPPDATA');
     expect(mainPy).toContain('private_mode=False');
     expect(mainPy).toContain('storage_path = get_storage_path()');
-    expect(mainPy).toContain('js_api=DesktopApi(storage_path)');
+    expect(mainPy).toContain('desktop_api = DesktopApi(storage_path)');
+    expect(mainPy).toContain('js_api=desktop_api');
+    expect(mainPy).toContain('desktop_api.vincular_janela(window)');
     expect(mainPy).toContain('storage_path=storage_path');
   });
 });

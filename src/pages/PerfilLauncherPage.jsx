@@ -15,7 +15,9 @@ import { baixarTexto } from '../utils/baixarArquivo';
 import { reducerComHistorico, initialState } from '../store/reducer';
 import { identificarArquivoFonte, payloadImportacaoCompleto, resumirImportacao } from '../utils/importacaoDeclaracao';
 import RevisaoImportacaoModal from '../components/RevisaoImportacaoModal';
-import { excluirPerfilDuravel, salvarIndiceDuravel, salvarPerfilDuravel } from '../store/persistenciaDesktop';
+import {
+  excluirPerfilDuravel, salvarIndiceDuravel, salvarPerfilDuravel, selecionarBackupDesktop,
+} from '../store/persistenciaDesktop';
 
 // pdfjs-dist é uma biblioteca pesada (é o motivo do bundle de Importar
 // Declaração ser o maior do app) — PerfilLauncherPage é a ÚNICA tela que
@@ -311,17 +313,37 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   // Só LÊ e confere o arquivo (formato, integridade pelo hash e versão de
   // esquema). Nada é gravado antes de a pessoa escolher o destino e clicar em
   // Restaurar no painel.
-  const handleEscolherBackup = async (e) => {
-    const file = e.target.files[0];
-    e.target.value = ''; // permite reescolher o mesmo arquivo depois de um erro
-    if (!file) return;
+  const prepararRestauracao = async (nomeArquivo, conteudo) => {
     setAvisoBackup(null);
     try {
-      const arquivo = await lerArquivoBackup(await file.text());
-      setRestauracao({ nomeArquivo: file.name, arquivo, senha: '', destino: 'novo', erro: '', ocupado: false });
+      const arquivo = await lerArquivoBackup(conteudo);
+      setRestauracao({ nomeArquivo, arquivo, senha: '', destino: 'novo', erro: '', ocupado: false });
     } catch (err) {
       setRestauracao(null);
       setAvisoBackup({ tipo: 'erro', texto: err?.message || MENSAGENS_BACKUP.arquivo_invalido });
+    }
+  };
+
+  const handleEscolherBackup = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = ''; // permite reescolher o mesmo arquivo depois de um erro
+    if (file) await prepararRestauracao(file.name, await file.text());
+  };
+
+  const handleAbrirSeletorBackup = async () => {
+    setAvisoBackup(null);
+    try {
+      const selecao = await selecionarBackupDesktop();
+      if (!selecao.disponivel) {
+        backupFileRef.current?.click();
+        return;
+      }
+      if (selecao.arquivo) {
+        await prepararRestauracao(selecao.arquivo.nomeArquivo, selecao.arquivo.conteudo);
+      }
+    } catch (err) {
+      setRestauracao(null);
+      setAvisoBackup({ tipo: 'erro', texto: err?.message || 'Não foi possível abrir o seletor de arquivos.' });
     }
   };
 
@@ -523,7 +545,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           )}
           {!restauracao && (
             <div className="launcher-restore-wrap">
-              <button className="launcher-restore-action" type="button" onClick={() => backupFileRef.current?.click()}>
+              <button className="launcher-restore-action" type="button" onClick={handleAbrirSeletorBackup}>
                 <span className="launcher-action-icon"><RestoreIcon /></span>
                 <span className="launcher-action-copy">
                   <strong>Já usou o CP-TEC?</strong>

@@ -6,6 +6,35 @@ from desktop_api import DesktopApi
 
 
 class DesktopApiTest(unittest.TestCase):
+    def test_seletor_backup_abre_em_downloads_do_usuario(self):
+        class JanelaFalsa:
+            def __init__(self, retorno):
+                self.retorno = retorno
+                self.chamada = None
+
+            def create_file_dialog(self, dialog_type, **opcoes):
+                self.chamada = (dialog_type, opcoes)
+                return self.retorno
+
+        with tempfile.TemporaryDirectory() as pasta:
+            usuario = os.path.join(pasta, 'usuario')
+            downloads = os.path.join(usuario, 'Downloads')
+            os.makedirs(downloads)
+            caminho = os.path.join(downloads, 'perfil.cptec.json')
+            with open(caminho, 'w', encoding='utf-8') as arquivo:
+                arquivo.write('{"formato":"cptec-backup"}')
+            janela = JanelaFalsa((caminho,))
+            api = DesktopApi(os.path.join(pasta, 'dados'), user_path=usuario)
+            api.vincular_janela(janela)
+
+            self.assertEqual(
+                {'nomeArquivo': 'perfil.cptec.json', 'conteudo': '{"formato":"cptec-backup"}'},
+                api.selecionar_backup(),
+            )
+            self.assertEqual(10, janela.chamada[0])
+            self.assertEqual(downloads, janela.chamada[1]['directory'])
+            self.assertFalse(janela.chamada[1]['allow_multiple'])
+
     def test_persiste_carrega_e_exclui_perfis_com_confinamento(self):
         with tempfile.TemporaryDirectory() as pasta:
             api = DesktopApi(pasta)

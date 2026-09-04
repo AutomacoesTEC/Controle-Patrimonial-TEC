@@ -6,11 +6,54 @@ import tempfile
 
 
 class DesktopApi:
-    def __init__(self, storage_path, max_backups=30):
+    MAX_BACKUP_BYTES = 100 * 1024 * 1024
+
+    def __init__(self, storage_path, max_backups=30, user_path=None):
         self.storage_path = os.path.realpath(storage_path)
         self.backup_path = os.path.join(self.storage_path, 'BackupsAutomaticos')
         self.perfis_path = os.path.join(self.storage_path, 'perfis')
         self.max_backups = max_backups
+        self.user_path = os.path.realpath(
+            user_path or os.environ.get('USERPROFILE') or os.path.expanduser('~')
+        )
+        self.window = None
+
+    def vincular_janela(self, window):
+        self.window = window
+
+    def _diretorio_inicial_usuario(self):
+        # O backup exportado pelo WebView normalmente vai para Downloads.
+        # Calcula sempre a partir do perfil do Windows em execução: nenhum
+        # caminho da máquina de desenvolvimento entra no aplicativo.
+        for nome in ('Downloads', 'Documents'):
+            candidato = os.path.join(self.user_path, nome)
+            if os.path.isdir(candidato):
+                return candidato
+        return self.user_path if os.path.isdir(self.user_path) else ''
+
+    def selecionar_backup(self):
+        """Abre o diálogo nativo e devolve somente o arquivo autorizado."""
+        if self.window is None:
+            raise RuntimeError('A janela do aplicativo ainda não está disponível.')
+        caminhos = self.window.create_file_dialog(
+            10,  # webview.FileDialog.OPEN, sem importar a GUI neste módulo puro
+            directory=self._diretorio_inicial_usuario(),
+            allow_multiple=False,
+            file_types=('Backup do CP-TEC (*.cptec.json;*.json)',),
+        )
+        if not caminhos:
+            return None
+        caminho = os.path.realpath(caminhos[0])
+        nome = os.path.basename(caminho)
+        if not os.path.isfile(caminho) or not nome.lower().endswith(('.cptec.json', '.json')):
+            raise ValueError('Escolha um arquivo de backup do CP-TEC.')
+        if os.path.getsize(caminho) > self.MAX_BACKUP_BYTES:
+            raise ValueError('O arquivo escolhido é grande demais para ser um backup do CP-TEC.')
+        with open(caminho, encoding='utf-8') as arquivo:
+            conteudo = arquivo.read(self.MAX_BACKUP_BYTES + 1)
+        if len(conteudo.encode('utf-8')) > self.MAX_BACKUP_BYTES:
+            raise ValueError('O arquivo escolhido é grande demais para ser um backup do CP-TEC.')
+        return {'nomeArquivo': nome, 'conteudo': conteudo}
 
     @staticmethod
     def _validar_perfil_id(perfil_id):

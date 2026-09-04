@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { excluirPerfilDuravel, salvarIndiceDuravel, salvarPerfilDuravel } from './persistenciaDesktop';
+import {
+  excluirPerfilDuravel, salvarIndiceDuravel, salvarPerfilDuravel, selecionarBackupDesktop,
+} from './persistenciaDesktop';
 
 describe('persistência durável do desktop', () => {
   it('confirma o disco antes de atualizar o cache', async () => {
@@ -32,5 +34,22 @@ describe('persistência durável do desktop', () => {
     await excluirPerfilDuravel({ storage, desktopApi: null, perfilId: 'p1' });
     expect(storage.setItem).toHaveBeenCalledTimes(2);
     expect(storage.removeItem).toHaveBeenCalledOnce();
+  });
+
+  it('usa o seletor nativo no desktop e preserva o fallback do navegador', async () => {
+    const desktopApi = {
+      selecionar_backup: vi.fn(async () => ({ nomeArquivo: 'perfil.cptec.json', conteudo: '{"ok":true}' })),
+    };
+    await expect(selecionarBackupDesktop({ desktopApi })).resolves.toEqual({
+      disponivel: true,
+      arquivo: { nomeArquivo: 'perfil.cptec.json', conteudo: '{"ok":true}' },
+    });
+    await expect(selecionarBackupDesktop({ desktopApi: null })).resolves.toEqual({
+      disponivel: false, arquivo: null,
+    });
+    desktopApi.selecionar_backup.mockResolvedValueOnce(null);
+    await expect(selecionarBackupDesktop({ desktopApi })).resolves.toEqual({
+      disponivel: true, arquivo: null,
+    });
   });
 });

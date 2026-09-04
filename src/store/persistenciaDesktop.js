@@ -33,3 +33,16 @@ export async function excluirPerfilDuravel({ storage, desktopApi, perfilId }) {
   );
   storage.removeItem(dataStorageKeyFor(perfilId));
 }
+
+export async function selecionarBackupDesktop({ desktopApi } = {}) {
+  const api = apiDesktopAtual(desktopApi);
+  if (typeof api?.selecionar_backup !== 'function') {
+    return { disponivel: false, arquivo: null };
+  }
+  const arquivo = await api.selecionar_backup();
+  if (arquivo === null) return { disponivel: true, arquivo: null };
+  if (typeof arquivo?.nomeArquivo !== 'string' || typeof arquivo?.conteudo !== 'string') {
+    throw new Error('O seletor de arquivos devolveu um resultado inválido.');
+  }
+  return { disponivel: true, arquivo };
+}

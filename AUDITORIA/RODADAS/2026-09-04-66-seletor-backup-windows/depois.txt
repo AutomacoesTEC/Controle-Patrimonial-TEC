@@ -1,0 +1,17 @@
+api_seletor_nativo=1
+janela_vinculada=1
+downloads_do_usuario=1
+fallback_navegador=1
+total=4/4
+
+Test Files  3 passed (3)
+Tests       25 passed (25)
+Python      3 testes aprovados
+Build Vite  669 módulos transformados, sucesso
+
+Teste da API:
+- diretório inicial: <perfil-do-usuário>/Downloads
+- diálogo: abertura de um único arquivo
+- resultado: somente nome e conteúdo do arquivo escolhido
+- cancelamento: nenhuma leitura
+- navegador sem API: mantém o input de arquivo existente
