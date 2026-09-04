@@ -178,6 +178,11 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .saldo-hero-rotulo{display:block;font-size:13px;font-weight:700;color:var(--text-primary);text-transform:uppercase;letter-spacing:.8px}
 .saldo-hero-contexto p{margin-top:4px;font-size:12px;color:var(--text-secondary)}
 .saldo-hero-leitura{display:flex;align-items:flex-end;flex-direction:column;gap:5px;flex-shrink:0}
+.saldo-hero-tolerancia{display:flex;flex-direction:column;gap:5px;min-width:250px;padding-left:18px;border-left:1px solid var(--border-color)}
+.saldo-hero-tolerancia>label,.saldo-hero-tolerancia>small{font-size:11px;color:var(--text-secondary)}
+.saldo-hero-tolerancia>div{display:grid;grid-template-columns:minmax(130px,1fr) 90px;gap:6px}
+.saldo-hero-tolerancia .form-control{height:34px;padding:6px 9px;font-size:12px}
+@media(max-width:800px){.saldo-hero{flex-wrap:wrap}.saldo-hero-tolerancia{width:100%;padding:12px 0 0;border-left:0;border-top:1px solid var(--border-color)}}
 .saldo-hero-estado{font-size:11px;font-weight:700;color:var(--text-secondary)}
 .saldo-hero-valor{font-size:30px;font-weight:700;line-height:1.05;color:var(--text-primary);font-variant-numeric:tabular-nums;font-feature-settings:"tnum","ss01";white-space:nowrap}
 .saldo-hero-fecha .saldo-hero-estado{color:var(--accent-success)}

@@ -191,7 +191,7 @@ Pronto quando: para o `.DBK` real do perfil PAULO ROBERTO o total do painel
 é igual ao imposto retido do resumo, e um fixture com retenção a menor
 plantada dispara o alerta.
 
-### A8. Classificação assistida das sobras do Saldo de Caixa — PARCIAL (P2)
+### A8. Classificação assistida das sobras do Saldo de Caixa — CONCLUÍDO (P2)
 
 Evidência: o Saldo de Caixa final é "o número de validação", mas a tela só
 mostra o valor. A seção 2 do estudo lista as origens que justificam variação
@@ -219,8 +219,13 @@ Dashboard exibe valor e atalho para a tela correspondente sem mudar o Saldo de
 Caixa. Fixture e navegador confirmaram a restituição de R$ 2.032,33; evidência
 em `AUDITORIA/RODADAS/2026-09-04-23-checklist-saldo/`.
 
-Pendente em rodada própria: tolerância explícita e configurável por perfil
-para o selo "fecha".
+Tolerância concluída na rodada 54. A faixa do Saldo de Caixa oferece valor
+fixo ou percentual do patrimônio líquido, mostra o limite calculado e persiste
+a escolha no estado isolado do perfil. O default continua estrito em R$ 0,00.
+Fixtures provaram R$ 1,00 fixo e 0,5% de R$ 200.000 (= R$ 1.000), inclusive a
+fronteira de um centavo; o navegador confirmou configuração, recarga e ausência
+de overflow. Evidência em
+`AUDITORIA/RODADAS/2026-09-04-54-tolerancia-saldo/`.
 
 ### A9. Importação mais leve e separada do resto do app — CONCLUÍDO (P2)
 

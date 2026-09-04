@@ -16,6 +16,7 @@ import {
 // dependência é de mão única, reducer -> migracoes, só pela constante.
 import { VERSAO_ESQUEMA_ATUAL } from './migracoes';
 import { arredondarCentavos } from '../utils/formatters';
+import { normalizarToleranciaSaldo, TOLERANCIA_SALDO_PADRAO } from './toleranciaSaldo';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -181,6 +182,10 @@ export const initialState = {
   avisosImportacao: [],
   registrosDbkNaoModelados: [],
   alteracoes: [],
+  // Configuração global deste perfil: não pertence a um ano e por isso não
+  // entra em snapshotYear/blankYear. Perfis antigos recebem o padrão no merge
+  // de carregarEstadoDoPerfil, sem exigir migração de coleção fiscal.
+  toleranciaSaldo: TOLERANCIA_SALDO_PADRAO,
   toasts: [],
 };
 
@@ -324,6 +329,8 @@ export function reducer(state, action) {
       // Editar nome/CPF na tela não pode apagar endereço, ocupação e demais
       // dados cadastrais que vieram da declaração.
       return { ...state, contribuinte: { ...(state.contribuinte || {}), ...action.payload } };
+    case 'SET_TOLERANCIA_SALDO':
+      return { ...state, toleranciaSaldo: normalizarToleranciaSaldo(action.payload) };
     case 'ADD_DEPENDENTE':
       return { ...state, dependentes: [...state.dependentes, { ...action.payload, id: novoId() }] };
     case 'UPDATE_DEPENDENTE':
@@ -1403,6 +1410,11 @@ function descreverAcao(state, action) {
     case 'LOAD_HISTORICO': return `Carregou o ano ${p} do histórico de declarações`;
     case 'DELETE_HISTORICO_ANO': return `Excluiu o ano ${p} do histórico de declarações`;
     case 'SET_CONTRIBUINTE': return `Atualizou os dados do titular`;
+    case 'SET_TOLERANCIA_SALDO': {
+      const config = normalizarToleranciaSaldo(p);
+      const valor = config.valor.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+      return `Atualizou a tolerância do Saldo de Caixa para ${config.tipo === 'percentual' ? `${valor}% do patrimônio` : `R$ ${valor}`}`;
+    }
     case 'ADD_DEPENDENTE': return `Cadastrou dependente: ${itemLabel('dependentes', p)}`;
     case 'UPDATE_DEPENDENTE': return `Editou dependente: ${itemLabel('dependentes', p)}`;
     case 'DELETE_DEPENDENTE': return `Excluiu dependente: ${itemLabel('dependentes', buscar(state, 'dependentes', p))}`;

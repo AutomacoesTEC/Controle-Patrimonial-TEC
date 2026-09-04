@@ -1,0 +1,1 @@
+{"criterio":"zero_centavos","configuracaoPersistida":false,"tiposDisponiveis":[],"limiteFixo":null,"limitePercentual":null}

@@ -224,7 +224,8 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **saldo-hero**: faixa de decisão no primeiro viewport do Dashboard, com o
   Saldo de Caixa em 30px/700 e um estado textual (`Conciliação fecha`,
   `Sobra a explicar` ou `Falta a explicar`). Cor reforça o estado, mas nunca
-  o substitui.
+  o substitui. A própria faixa expõe a tolerância persistida do perfil, por
+  valor fixo ou percentual do patrimônio líquido, e mostra o limite calculado.
 - **dashboard-graficos**: agrupador nativo recolhido por padrão. Gráficos são
   leitura de apoio e só ocupam a página depois que a pessoa abre `Gráficos de
   apoio`; títulos e visualizações permanecem integrais no estado aberto.

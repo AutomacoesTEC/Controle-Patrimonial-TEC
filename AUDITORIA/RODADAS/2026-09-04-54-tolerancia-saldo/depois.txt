@@ -1,0 +1,6 @@
+{"criterio":"configuravel","configuracaoPersistida":true,"tiposDisponiveis":["fixa","percentual"],"limiteFixo":1,"limitePercentual":1000}
+
+Vitest direcionado: 4 testes aprovados (3 de tolerância + guarda do histórico).
+
+Navegador:
+{"opcoes":["Valor fixo","% do patrimônio"],"tipoPersistido":"fixa","valorPersistido":"999999999","seloAposAjuste":"Conciliação fecha","limiteExibido":"Limite atual: R$ 999.999.999,00","overflowPagina":0}
