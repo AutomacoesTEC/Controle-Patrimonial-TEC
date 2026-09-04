@@ -1,5 +1,5 @@
-; setup.iss — instalador do Controle de Variação Patrimonial (Inno Setup 6)
-; Gera installer\ControlePatrimonial_Setup.exe a partir de dist-app\ControlePatrimonial\
+; Instalador simplificado do CP-TEC para usuário final.
+; Usa o mesmo aplicativo de setup.iss; muda somente o fluxo do assistente.
 
 #define AppName "CP-TEC - Controle de Variação Patrimonial"
 #define AppVersion "1.2.0"
@@ -14,27 +14,28 @@ SetupIconFile=assets\cp-tec.ico
 UninstallDisplayIcon={app}\{#AppExe}
 DefaultDirName={localappdata}\Programs\ControlePatrimonial
 DefaultGroupName={#AppName}
-OutputDir=installer\completa
-OutputBaseFilename=ControlePatrimonial_Setup_Completo
+OutputDir=installer\simplificada
+OutputBaseFilename=ControlePatrimonial_Setup_Simplificado
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+DisableDirPage=yes
+DisableProgramGroupPage=yes
+DisableReadyPage=yes
+DisableWelcomePage=yes
 
 [Languages]
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
-
-[Tasks]
-Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDescription: "Atalhos:"
 
 [Files]
 Source: "dist-app\ControlePatrimonial\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "Abrir {#AppName}"; Flags: nowait postinstall skipifsilent

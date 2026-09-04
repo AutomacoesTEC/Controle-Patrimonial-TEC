@@ -1,0 +1,10 @@
+Variantes geradas pelo build: 1
+
+Páginas técnicas/opcionais da única variante não desabilitadas: 4
+
+- seleção de pasta de instalação;
+- seleção de grupo do menu;
+- página de tarefas para decidir sobre o atalho;
+- página "Pronto para instalar".
+
+Atalho na Área de Trabalho condicionado à tarefa `desktopicon`.

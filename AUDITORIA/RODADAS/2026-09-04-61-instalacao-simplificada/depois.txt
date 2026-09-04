@@ -1,0 +1,19 @@
+Variantes geradas pelo build: 2
+
+- completa/ControlePatrimonial_Setup_Completo.exe: 13.882.302 bytes
+- simplificada/ControlePatrimonial_Setup_Simplificado.exe: 13.882.319 bytes
+
+Completa: preserva seleção de destino, grupo, tarefa de atalho e confirmação.
+Simplificada: 0 páginas/opções técnicas; destino e atalho automáticos.
+As duas usam `dist-app/ControlePatrimonial` e a versão 1.2.0.
+
+Teste de empacotamento: 1 arquivo, 10/10 testes aprovados.
+Frontend: build aprovado, 669 módulos transformados.
+PyInstaller 6.22.2: build aprovado.
+Inno Setup 6.7.3: duas compilações aprovadas.
+
+SHA-256 completa:
+05484ca909bb8facd457d0f2d41160baa49640c883845babbafeda4c364b501b
+
+SHA-256 simplificada:
+19ccdc96e56befff11b27475697eb67bb11f36bdd987c33d58d87fedd439a48e

@@ -1,4 +1,4 @@
-# build-windows.ps1 — gera o instalador ControlePatrimonial_Setup.exe
+# build-windows.ps1 — gera os instaladores completo e simplificado
 #
 # Uso (PowerShell, na pasta do projeto):
 #   powershell -ExecutionPolicy Bypass -File build-windows.ps1
@@ -7,7 +7,7 @@
 #   1. Build do frontend (npm run build → dist/)
 #   2. venv Python em .build-venv\ com pywebview + pyinstaller
 #   3. PyInstaller com ControlePatrimonial.spec → dist-app\ControlePatrimonial\
-#   4. Inno Setup (setup.iss) → installer\ControlePatrimonial_Setup.exe
+#   4. Inno Setup → installer\completa\ e installer\simplificada\
 #
 # Pré-requisitos: Node.js no PATH, Python 3.10+ no PATH (ou `py`),
 # Inno Setup 6 instalado (https://jrsoftware.org/isdl.php).
@@ -30,9 +30,12 @@ $pacote = Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json
 if ($pacote.version -eq '0.0.0') {
     throw "Esta pasta é a cópia ANTIGA do projeto (package.json na versão 0.0.0). Rode o build a partir do repositório atual."
 }
-$versaoSetup = (Select-String -Path (Join-Path $root 'setup.iss') -Pattern '#define AppVersion "([^"]+)"').Matches[0].Groups[1].Value
-if ($versaoSetup -ne $pacote.version) {
-    throw "Versão divergente: package.json diz $($pacote.version) e setup.iss diz $versaoSetup. Alinhe as duas antes de gerar o instalador."
+$scriptsSetup = @('setup.iss', 'setup-simplificado.iss')
+foreach ($scriptSetup in $scriptsSetup) {
+    $versaoSetup = (Select-String -Path (Join-Path $root $scriptSetup) -Pattern '#define AppVersion "([^"]+)"').Matches[0].Groups[1].Value
+    if ($versaoSetup -ne $pacote.version) {
+        throw "Versão divergente: package.json diz $($pacote.version) e $scriptSetup diz $versaoSetup. Alinhe antes de gerar os instaladores."
+    }
 }
 Write-Host "==> 0/4 Projeto $($pacote.name) versão $($pacote.version)" -ForegroundColor Cyan
 
@@ -80,8 +83,10 @@ if (-not $iscc) {
     Write-Host "O executável já está pronto em dist-app\ControlePatrimonial\" -ForegroundColor Yellow
     exit 2
 }
-& $iscc setup.iss
-if ($LASTEXITCODE -ne 0) { throw "Inno Setup falhou" }
+foreach ($scriptSetup in $scriptsSetup) {
+    & $iscc $scriptSetup
+    if ($LASTEXITCODE -ne 0) { throw "Inno Setup falhou em $scriptSetup" }
+}
 
 # Assinatura digital (opcional, mas é o que tira o aviso de editor desconhecido).
 #
@@ -95,24 +100,30 @@ if ($LASTEXITCODE -ne 0) { throw "Inno Setup falhou" }
 #   $env:CP_TEC_CERT_PFX   = 'C:\caminho\certificado.pfx'
 #   $env:CP_TEC_CERT_SENHA = 'senha do pfx'
 $pfx = $env:CP_TEC_CERT_PFX
-$instalador = Join-Path $root 'installer\ControlePatrimonial_Setup.exe'
+$instaladores = @(
+    (Join-Path $root 'installer\completa\ControlePatrimonial_Setup_Completo.exe'),
+    (Join-Path $root 'installer\simplificada\ControlePatrimonial_Setup_Simplificado.exe')
+)
 if ($pfx -and (Test-Path $pfx)) {
-    Write-Host "==> Assinando o instalador" -ForegroundColor Cyan
+    Write-Host "==> Assinando os instaladores" -ForegroundColor Cyan
     $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
         Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
     if (-not $signtool) {
         Write-Host "signtool.exe não encontrado (Windows SDK). Instalador NÃO assinado." -ForegroundColor Yellow
     } else {
-        & $signtool.FullName sign /f $pfx /p $env:CP_TEC_CERT_SENHA /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $instalador
-        if ($LASTEXITCODE -ne 0) { throw "assinatura falhou" }
-        Write-Host "Instalador assinado." -ForegroundColor Green
+        foreach ($instalador in $instaladores) {
+            & $signtool.FullName sign /f $pfx /p $env:CP_TEC_CERT_SENHA /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $instalador
+            if ($LASTEXITCODE -ne 0) { throw "assinatura falhou em $instalador" }
+        }
+        Write-Host "Instaladores assinados." -ForegroundColor Green
     }
 } else {
     Write-Host ""
-    Write-Host "ATENÇÃO: instalador NÃO assinado digitalmente." -ForegroundColor Yellow
+    Write-Host "ATENÇÃO: instaladores NÃO assinados digitalmente." -ForegroundColor Yellow
     Write-Host "O Windows vai mostrar aviso de editor desconhecido para quem instalar." -ForegroundColor Yellow
     Write-Host "Para assinar, defina CP_TEC_CERT_PFX e CP_TEC_CERT_SENHA e rode de novo." -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "Pronto: installer\ControlePatrimonial_Setup.exe" -ForegroundColor Green
+Write-Host "Pronto: installer\completa\ControlePatrimonial_Setup_Completo.exe" -ForegroundColor Green
+Write-Host "Pronto: installer\simplificada\ControlePatrimonial_Setup_Simplificado.exe" -ForegroundColor Green

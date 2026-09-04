@@ -20,6 +20,7 @@ const ler = (nome) => readFileSync(`${RAIZ}${nome}`, 'utf8');
 
 const pacote = JSON.parse(ler('package.json'));
 const setup = ler('setup.iss');
+const setupSimplificado = ler('setup-simplificado.iss');
 const spec = ler('ControlePatrimonial.spec');
 const mainPy = ler('main.py');
 const viteConfig = ler('vite.config.js');
@@ -27,7 +28,9 @@ const viteConfig = ler('vite.config.js');
 describe('empacotamento Windows: os contratos entre os arquivos', () => {
   it('a versão do instalador é a mesma do pacote', () => {
     const noSetup = /#define AppVersion "([^"]+)"/.exec(setup)?.[1];
+    const noSimplificado = /#define AppVersion "([^"]+)"/.exec(setupSimplificado)?.[1];
     expect(noSetup).toBe(pacote.version);
+    expect(noSimplificado).toBe(pacote.version);
   });
 
   it('o instalador distribui o executável que o PyInstaller produz', () => {
@@ -64,6 +67,23 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
     // atrito e não é necessário aqui.
     expect(setup).toContain('PrivilegesRequired=lowest');
     expect(setup).toContain('DefaultDirName={localappdata}\\Programs\\ControlePatrimonial');
+  });
+
+  it('mantém variantes completa e simplificada em pastas distintas', () => {
+    expect(setup).toContain('OutputDir=installer\\completa');
+    expect(setup).toContain('OutputBaseFilename=ControlePatrimonial_Setup_Completo');
+    expect(setup).toContain('[Tasks]');
+    expect(setup).toContain('Tasks: desktopicon');
+
+    expect(setupSimplificado).toContain('OutputDir=installer\\simplificada');
+    expect(setupSimplificado).toContain('OutputBaseFilename=ControlePatrimonial_Setup_Simplificado');
+    expect(setupSimplificado).toContain('DisableDirPage=yes');
+    expect(setupSimplificado).toContain('DisableProgramGroupPage=yes');
+    expect(setupSimplificado).toContain('DisableReadyPage=yes');
+    expect(setupSimplificado).toContain('DisableWelcomePage=yes');
+    expect(setupSimplificado).not.toContain('[Tasks]');
+    expect(setupSimplificado).toContain('Name: "{autodesktop}\\{#AppName}"; Filename: "{app}\\{#AppExe}"');
+    expect(setupSimplificado).toContain('Description: "Abrir {#AppName}"; Flags: nowait postinstall skipifsilent');
   });
 
   it('o Electron não voltou para o empacotamento', () => {
