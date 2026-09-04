@@ -1,0 +1,3428 @@
+[
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1411,
+    "right": 1422,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1186,
+    "right": 1417,
+    "texto": "CONTATO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1577,
+    "texto": "AJU PES DEPENDENTE UM\nPDF, página 1, linha 23\n\t333.444.555-0"
+   },
+   {
+    "seletor": "td",
+    "left": 1186,
+    "right": 1417,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID\n(11) 997654321"
+   },
+   {
+    "seletor": "div",
+    "left": 1202,
+    "right": 1401,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1433,
+    "right": 1492,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1496,
+    "right": 1561,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr9",
+    "sobra": 265,
+    "overflowX": "auto",
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.tabs",
+    "left": 288,
+    "right": 1612,
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "button.tab",
+    "left": 1342,
+    "right": 1444,
+    "texto": "Criptoativos"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "th",
+    "left": 1255,
+    "right": 1415,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1415,
+    "texto": "1\t01\t11\t\nAJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM "
+   },
+   {
+    "seletor": "td",
+    "left": 1255,
+    "right": 1415,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1271,
+    "right": 1399,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1334,
+    "right": 1399,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1415,
+    "texto": "TOTAIS\tR$ 107.537,85\tR$ 444.846,93\tR$ 337.309,08\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div.toolbar",
+    "sobra": 274,
+    "overflowX": "visible",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div",
+    "sobra": 434,
+    "overflowX": "hidden",
+    "texto": "AJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM 15/05/202"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.page-body.animate-in",
+    "sobra": 246,
+    "overflowX": "auto",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div.table-container.rdzra",
+    "sobra": 78,
+    "overflowX": "auto",
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1382,
+    "right": 1393,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1283,
+    "right": 1388,
+    "texto": "IRRF"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1548,
+    "texto": "Tributável recebido de pessoa jurídica\t31/12/2025\t55.566.677"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1283,
+    "right": 1388,
+    "texto": "R$ 4.104,14"
+   },
+   {
+    "seletor": "td",
+    "left": 1388,
+    "right": 1548,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1404,
+    "right": 1532,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1404,
+    "right": 1463,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1467,
+    "right": 1532,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrc",
+    "sobra": 236,
+    "overflowX": "auto",
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1403,
+    "right": 1414,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "th",
+    "left": 1290,
+    "right": 1409,
+    "texto": "DESCRIÇÃO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1569,
+    "texto": "10\nMédicos no Brasil\n\t31/12/2025\tAJU PAG MEDICO\nPDF, página "
+   },
+   {
+    "seletor": "td",
+    "left": 1290,
+    "right": 1409,
+    "texto": "AJU PAG MEDICO"
+   },
+   {
+    "seletor": "div",
+    "left": 1425,
+    "right": 1553,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1425,
+    "right": 1484,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1488,
+    "right": 1553,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1569,
+    "texto": "TOTAIS\tR$ 26.137,88\tR$ 1.323,35\t\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrd",
+    "sobra": 232,
+    "overflowX": "auto",
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "th",
+    "left": 1306,
+    "right": 1431,
+    "texto": "IMPOSTO PAGO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1431,
+    "texto": "▶\tAJU GCI IMOVEL URBANO SENTINELA\nPDF, página 14, linha 13\n\t"
+   },
+   {
+    "seletor": "td",
+    "left": 1306,
+    "right": 1431,
+    "texto": "R$ 0,00"
+   },
+   {
+    "seletor": "span.currency",
+    "left": 1369,
+    "right": 1415,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 119,
+    "overflowX": "auto",
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1423,
+    "right": 1434,
+    "texto": ""
+   },
+   {
+    "seletor": "table.rv-mensal",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "th",
+    "left": 1256,
+    "right": 1429,
+    "texto": "RESULTADO DAY-TRADE"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1803,
+    "texto": "Janeiro\nPDF, página 23, linha 5\n\tR$ 2.701,61\tR$ 0,00\tR$ 2.70"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1256,
+    "right": 1429,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "span",
+    "left": 1353,
+    "right": 1415,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "td",
+    "left": 1691,
+    "right": 1803,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "button.btn.btn-secondary.btn-sm",
+    "left": 1705,
+    "right": 1789,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "span.rv-zero",
+    "left": 1510,
+    "right": 1556,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrh.altura-natural",
+    "sobra": 491,
+    "overflowX": "auto",
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "escuro",
+  "tela": "Histórico de Alterações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1411,
+    "right": 1422,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1186,
+    "right": 1417,
+    "texto": "CONTATO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1577,
+    "texto": "AJU PES DEPENDENTE UM\nPDF, página 1, linha 23\n\t333.444.555-0"
+   },
+   {
+    "seletor": "td",
+    "left": 1186,
+    "right": 1417,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID\n(11) 997654321"
+   },
+   {
+    "seletor": "div",
+    "left": 1202,
+    "right": 1401,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1433,
+    "right": 1492,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1496,
+    "right": 1561,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrn",
+    "sobra": 265,
+    "overflowX": "auto",
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.tabs",
+    "left": 288,
+    "right": 1612,
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "button.tab",
+    "left": 1342,
+    "right": 1444,
+    "texto": "Criptoativos"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "th",
+    "left": 1255,
+    "right": 1415,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1415,
+    "texto": "1\t01\t11\t\nAJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM "
+   },
+   {
+    "seletor": "td",
+    "left": 1255,
+    "right": 1415,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1271,
+    "right": 1399,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1334,
+    "right": 1399,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1415,
+    "texto": "TOTAIS\tR$ 107.537,85\tR$ 444.846,93\tR$ 337.309,08\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div.toolbar",
+    "sobra": 274,
+    "overflowX": "visible",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div",
+    "sobra": 434,
+    "overflowX": "hidden",
+    "texto": "AJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM 15/05/202"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.page-body.animate-in",
+    "sobra": 246,
+    "overflowX": "auto",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div.table-container.rdzro",
+    "sobra": 78,
+    "overflowX": "auto",
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1382,
+    "right": 1393,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1283,
+    "right": 1388,
+    "texto": "IRRF"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1548,
+    "texto": "Tributável recebido de pessoa jurídica\t31/12/2025\t55.566.677"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1283,
+    "right": 1388,
+    "texto": "R$ 4.104,14"
+   },
+   {
+    "seletor": "td",
+    "left": 1388,
+    "right": 1548,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1404,
+    "right": 1532,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1404,
+    "right": 1463,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1467,
+    "right": 1532,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrq",
+    "sobra": 236,
+    "overflowX": "auto",
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1403,
+    "right": 1414,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "th",
+    "left": 1290,
+    "right": 1409,
+    "texto": "DESCRIÇÃO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1569,
+    "texto": "10\nMédicos no Brasil\n\t31/12/2025\tAJU PAG MEDICO\nPDF, página "
+   },
+   {
+    "seletor": "td",
+    "left": 1290,
+    "right": 1409,
+    "texto": "AJU PAG MEDICO"
+   },
+   {
+    "seletor": "div",
+    "left": 1425,
+    "right": 1553,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1425,
+    "right": 1484,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1488,
+    "right": 1553,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1569,
+    "texto": "TOTAIS\tR$ 26.137,88\tR$ 1.323,35\t\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrr",
+    "sobra": 232,
+    "overflowX": "auto",
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "th",
+    "left": 1306,
+    "right": 1431,
+    "texto": "IMPOSTO PAGO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1431,
+    "texto": "▶\tAJU GCI IMOVEL URBANO SENTINELA\nPDF, página 14, linha 13\n\t"
+   },
+   {
+    "seletor": "td",
+    "left": 1306,
+    "right": 1431,
+    "texto": "R$ 0,00"
+   },
+   {
+    "seletor": "span.currency",
+    "left": 1369,
+    "right": 1415,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 119,
+    "overflowX": "auto",
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1423,
+    "right": 1434,
+    "texto": ""
+   },
+   {
+    "seletor": "table.rv-mensal",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "th",
+    "left": 1256,
+    "right": 1429,
+    "texto": "RESULTADO DAY-TRADE"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1803,
+    "texto": "Janeiro\nPDF, página 23, linha 5\n\tR$ 2.701,61\tR$ 0,00\tR$ 2.70"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1256,
+    "right": 1429,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "span",
+    "left": 1353,
+    "right": 1415,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "td",
+    "left": 1691,
+    "right": 1803,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "button.btn.btn-secondary.btn-sm",
+    "left": 1705,
+    "right": 1789,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "span.rv-zero",
+    "left": 1510,
+    "right": 1556,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzrv.altura-natural",
+    "sobra": 491,
+    "overflowX": "auto",
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   }
+  ],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1366,
+  "paginaClientWidth": 1366,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1366x768",
+  "tema": "claro",
+  "tela": "Histórico de Alterações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1411,
+    "right": 1422,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1186,
+    "right": 1417,
+    "texto": "CONTATO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1577,
+    "texto": "AJU PES DEPENDENTE UM\nPDF, página 1, linha 23\n\t333.444.555-0"
+   },
+   {
+    "seletor": "td",
+    "left": 1186,
+    "right": 1417,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID\n(11) 997654321"
+   },
+   {
+    "seletor": "div",
+    "left": 1202,
+    "right": 1401,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1433,
+    "right": 1492,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1496,
+    "right": 1561,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr15",
+    "sobra": 351,
+    "overflowX": "auto",
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.tabs",
+    "left": 288,
+    "right": 1612,
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "button.tab",
+    "left": 1265,
+    "right": 1340,
+    "texto": "Fundos"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "th",
+    "left": 1255,
+    "right": 1415,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1415,
+    "texto": "1\t01\t11\t\nAJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM "
+   },
+   {
+    "seletor": "td",
+    "left": 1255,
+    "right": 1415,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1271,
+    "right": 1399,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1271,
+    "right": 1330,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1334,
+    "right": 1399,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1415,
+    "texto": "TOTAIS\tR$ 107.537,85\tR$ 444.846,93\tR$ 337.309,08\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div.toolbar",
+    "sobra": 360,
+    "overflowX": "visible",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div",
+    "sobra": 434,
+    "overflowX": "hidden",
+    "texto": "AJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM 15/05/202"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.page-body.animate-in",
+    "sobra": 332,
+    "overflowX": "auto",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div.table-container.rdzr16",
+    "sobra": 164,
+    "overflowX": "auto",
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1277,
+    "right": 1288,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 999,
+    "right": 1283,
+    "texto": "VALOR"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1548,
+    "texto": "Tributável recebido de pessoa jurídica\t31/12/2025\t55.566.677"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 999,
+    "right": 1283,
+    "texto": "R$ 51.101,11\nContribuição previdenciária oficial: R$ 5.102,1"
+   },
+   {
+    "seletor": "td",
+    "left": 1388,
+    "right": 1548,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1404,
+    "right": 1532,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1404,
+    "right": 1463,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1467,
+    "right": 1532,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr18",
+    "sobra": 322,
+    "overflowX": "auto",
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1284,
+    "right": 1295,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "th",
+    "left": 1099,
+    "right": 1290,
+    "texto": "PARCELA NÃO DEDUTÍVEL"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1569,
+    "texto": "10\nMédicos no Brasil\n\t31/12/2025\tAJU PAG MEDICO\nPDF, página "
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1099,
+    "right": 1290,
+    "texto": "R$ 101,22"
+   },
+   {
+    "seletor": "td",
+    "left": 1290,
+    "right": 1409,
+    "texto": "AJU PAG MEDICO"
+   },
+   {
+    "seletor": "div",
+    "left": 1425,
+    "right": 1553,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1425,
+    "right": 1484,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1488,
+    "right": 1553,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1569,
+    "texto": "TOTAIS\tR$ 26.137,88\tR$ 1.323,35\t\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr19",
+    "sobra": 318,
+    "overflowX": "auto",
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "button.tab",
+    "left": 1207,
+    "right": 1315,
+    "texto": "Participantes"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "th",
+    "left": 1139,
+    "right": 1299,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1299,
+    "texto": "AJU RUR FAZENDA BRASIL SENTINELA, ESTRADA AJU RURAL KM 22 - "
+   },
+   {
+    "seletor": "td",
+    "left": 1139,
+    "right": 1299,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1155,
+    "right": 1283,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1218,
+    "right": 1283,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.tabs",
+    "sobra": 63,
+    "overflowX": "auto",
+    "texto": "Imóveis Explorados\nBens da Atividade Rural\nDívidas Vinculada"
+   },
+   {
+    "seletor": "div.table-container",
+    "sobra": 48,
+    "overflowX": "auto",
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 34,
+    "overflowX": "auto",
+    "texto": "BEM\tTIPO\tGANHO/PREJUÍZO\tIMPOSTO DEVIDO\tIMPOSTO PAGO NO BRASI"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "th",
+    "left": 1168,
+    "right": 1306,
+    "texto": "IMPOSTO DEVIDO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1431,
+    "texto": "▶\tAJU GCI IMOVEL URBANO SENTINELA\nPDF, página 14, linha 13\n\t"
+   },
+   {
+    "seletor": "td",
+    "left": 1168,
+    "right": 1306,
+    "texto": "R$ 8.159,63"
+   },
+   {
+    "seletor": "span.currency",
+    "left": 1217,
+    "right": 1290,
+    "texto": "R$ 8.159,63"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 205,
+    "overflowX": "auto",
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1423,
+    "right": 1434,
+    "texto": ""
+   },
+   {
+    "seletor": "table.rv-mensal",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "th",
+    "left": 1256,
+    "right": 1429,
+    "texto": "RESULTADO DAY-TRADE"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1803,
+    "texto": "Janeiro\nPDF, página 23, linha 5\n\tR$ 2.701,61\tR$ 0,00\tR$ 2.70"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1256,
+    "right": 1429,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "span",
+    "left": 1353,
+    "right": 1415,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "td",
+    "left": 1691,
+    "right": 1803,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "button.btn.btn-secondary.btn-sm",
+    "left": 1705,
+    "right": 1789,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "span.rv-zero",
+    "left": 1510,
+    "right": 1556,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr1d.altura-natural",
+    "sobra": 577,
+    "overflowX": "auto",
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "escuro",
+  "tela": "Histórico de Alterações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1411,
+    "right": 1422,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1577,
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 1186,
+    "right": 1417,
+    "texto": "CONTATO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1577,
+    "texto": "AJU PES DEPENDENTE UM\nPDF, página 1, linha 23\n\t333.444.555-0"
+   },
+   {
+    "seletor": "td",
+    "left": 1186,
+    "right": 1417,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID\n(11) 997654321"
+   },
+   {
+    "seletor": "div",
+    "left": 1202,
+    "right": 1401,
+    "texto": "AJU.PES.DEP1@EXAMPLE.INVALID"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1433,
+    "right": 1492,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1496,
+    "right": 1561,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr1j",
+    "sobra": 351,
+    "overflowX": "auto",
+    "texto": "NOME\tCPF\tDATA DE NASCIMENTO\tRELAÇÃO DE DEPENDÊNCIA\tRAÇA/COR\t"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.tabs",
+    "left": 288,
+    "right": 1612,
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "button.tab",
+    "left": 1265,
+    "right": 1340,
+    "texto": "Fundos"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1415,
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   },
+   {
+    "seletor": "th",
+    "left": 1255,
+    "right": 1415,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1415,
+    "texto": "1\t01\t11\t\nAJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM "
+   },
+   {
+    "seletor": "td",
+    "left": 1255,
+    "right": 1415,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1271,
+    "right": 1399,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1271,
+    "right": 1330,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1334,
+    "right": 1399,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1415,
+    "texto": "TOTAIS\tR$ 107.537,85\tR$ 444.846,93\tR$ 337.309,08\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div.toolbar",
+    "sobra": 360,
+    "overflowX": "visible",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div",
+    "sobra": 434,
+    "overflowX": "hidden",
+    "texto": "AJU BEM IMOVEL APARTAMENTO SENTINELA, ADQUIRIDO EM 15/05/202"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.page-body.animate-in",
+    "sobra": 332,
+    "overflowX": "auto",
+    "texto": "Todos\nBens Imóveis\nBens Móveis\nParticipações Societárias\nApl"
+   },
+   {
+    "seletor": "div.table-container.rdzr1k",
+    "sobra": 164,
+    "overflowX": "auto",
+    "texto": "ITEM\tGRUPO\tCÓD.\tDISCRIMINAÇÃO\t31/12/2024\t31/12/2025\tVARIAÇÃO"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1277,
+    "right": 1288,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1548,
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   },
+   {
+    "seletor": "th",
+    "left": 999,
+    "right": 1283,
+    "texto": "VALOR"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1548,
+    "texto": "Tributável recebido de pessoa jurídica\t31/12/2025\t55.566.677"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 999,
+    "right": 1283,
+    "texto": "R$ 51.101,11\nContribuição previdenciária oficial: R$ 5.102,1"
+   },
+   {
+    "seletor": "td",
+    "left": 1388,
+    "right": 1548,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1404,
+    "right": 1532,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1404,
+    "right": 1463,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1467,
+    "right": 1532,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr1m",
+    "sobra": 322,
+    "overflowX": "auto",
+    "texto": "TIPO\tDATA\tCNPJ FONTE\tNOME FONTE PAGADORA\tBENEFICIÁRIO\tVALOR\t"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1284,
+    "right": 1295,
+    "texto": ""
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1569,
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   },
+   {
+    "seletor": "th",
+    "left": 1099,
+    "right": 1290,
+    "texto": "PARCELA NÃO DEDUTÍVEL"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1569,
+    "texto": "10\nMédicos no Brasil\n\t31/12/2025\tAJU PAG MEDICO\nPDF, página "
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1099,
+    "right": 1290,
+    "texto": "R$ 101,22"
+   },
+   {
+    "seletor": "td",
+    "left": 1290,
+    "right": 1409,
+    "texto": "AJU PAG MEDICO"
+   },
+   {
+    "seletor": "div",
+    "left": 1425,
+    "right": 1553,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-secondary",
+    "left": 1425,
+    "right": 1484,
+    "texto": "Editar"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1488,
+    "right": 1553,
+    "texto": "Excluir"
+   },
+   {
+    "seletor": "tfoot",
+    "left": 289,
+    "right": 1569,
+    "texto": "TOTAIS\tR$ 26.137,88\tR$ 1.323,35\t\t"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr1n",
+    "sobra": 318,
+    "overflowX": "auto",
+    "texto": "CÓD.\tDATA\tNOME BENEFICIÁRIO\tTITULARIDADE\tCPF/CNPJ\tVALOR PAGO"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "button.tab",
+    "left": 1207,
+    "right": 1315,
+    "texto": "Participantes"
+   },
+   {
+    "seletor": "table",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "thead",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "tr",
+    "left": 289,
+    "right": 1299,
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   },
+   {
+    "seletor": "th",
+    "left": 1139,
+    "right": 1299,
+    "texto": "AÇÕES"
+   },
+   {
+    "seletor": "tbody",
+    "left": 289,
+    "right": 1299,
+    "texto": "AJU RUR FAZENDA BRASIL SENTINELA, ESTRADA AJU RURAL KM 22 - "
+   },
+   {
+    "seletor": "td",
+    "left": 1139,
+    "right": 1299,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "div",
+    "left": 1155,
+    "right": 1283,
+    "texto": "Editar\nExcluir"
+   },
+   {
+    "seletor": "button.btn.btn-sm.btn-danger",
+    "left": 1218,
+    "right": 1283,
+    "texto": "Excluir"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.tabs",
+    "sobra": 63,
+    "overflowX": "auto",
+    "texto": "Imóveis Explorados\nBens da Atividade Rural\nDívidas Vinculada"
+   },
+   {
+    "seletor": "div.table-container",
+    "sobra": 48,
+    "overflowX": "auto",
+    "texto": "NOME E LOCALIZAÇÃO\tÁREA (HA)\tPARTICIPAÇÃO (%)\tCONDIÇÃO\tCÓDIG"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 34,
+    "overflowX": "auto",
+    "texto": "BEM\tTIPO\tGANHO/PREJUÍZO\tIMPOSTO DEVIDO\tIMPOSTO PAGO NO BRASI"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "table",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1431,
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   },
+   {
+    "seletor": "th",
+    "left": 1168,
+    "right": 1306,
+    "texto": "IMPOSTO DEVIDO"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1431,
+    "texto": "▶\tAJU GCI IMOVEL URBANO SENTINELA\nPDF, página 14, linha 13\n\t"
+   },
+   {
+    "seletor": "td",
+    "left": 1168,
+    "right": 1306,
+    "texto": "R$ 8.159,63"
+   },
+   {
+    "seletor": "span.currency",
+    "left": 1217,
+    "right": 1290,
+    "texto": "R$ 8.159,63"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container",
+    "sobra": 205,
+    "overflowX": "auto",
+    "texto": "\tBEM\tFICHA\tAQUISIÇÃO\tALIENAÇÃO\tCUSTO\tVALOR ALIENAÇÃO\tGANHO\tI"
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [
+   {
+    "seletor": "div.rdz-puxador",
+    "left": 1423,
+    "right": 1434,
+    "texto": ""
+   },
+   {
+    "seletor": "table.rv-mensal",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "thead",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "tr",
+    "left": 314,
+    "right": 1803,
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   },
+   {
+    "seletor": "th",
+    "left": 1256,
+    "right": 1429,
+    "texto": "RESULTADO DAY-TRADE"
+   },
+   {
+    "seletor": "tbody",
+    "left": 314,
+    "right": 1803,
+    "texto": "Janeiro\nPDF, página 23, linha 5\n\tR$ 2.701,61\tR$ 0,00\tR$ 2.70"
+   },
+   {
+    "seletor": "td.currency",
+    "left": 1256,
+    "right": 1429,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "span",
+    "left": 1353,
+    "right": 1415,
+    "texto": "R$ 701,62"
+   },
+   {
+    "seletor": "td",
+    "left": 1691,
+    "right": 1803,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "button.btn.btn-secondary.btn-sm",
+    "left": 1705,
+    "right": 1789,
+    "texto": "Mercados"
+   },
+   {
+    "seletor": "span.rv-zero",
+    "left": 1510,
+    "right": 1556,
+    "texto": "R$ 0,00"
+   }
+  ],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [
+   {
+    "seletor": "div.table-container.rdzr1r.altura-natural",
+    "sobra": 577,
+    "overflowX": "auto",
+    "texto": "MÊS\tRESULTADO LÍQUIDO\tPREJUÍZO ACUM. (MÊS ANTERIOR)\tBASE DE "
+   }
+  ],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 1280,
+  "paginaClientWidth": 1280,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "1280x720",
+  "tema": "claro",
+  "tela": "Histórico de Alterações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div",
+    "sobra": 30,
+    "overflowX": "hidden",
+    "texto": "AJU BEM VEICULO MODELO SENTINELA ANO 2025 COR AZUL; RENAVAM "
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "escuro",
+  "tela": "Histórico de Alterações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Importar Declaração"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Dashboard"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Titular e Dependentes"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   },
+   {
+    "seletor": "div",
+    "sobra": 30,
+    "overflowX": "hidden",
+    "texto": "AJU BEM VEICULO MODELO SENTINELA ANO 2025 COR AZUL; RENAVAM "
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Bens e Direitos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Dívidas e Ônus"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Rendimentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Pagamentos"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Despesas Gerais"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Doações"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Atividade Rural"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Relatório IRPF"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Ganhos de Capital"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Renda Variável"
+ },
+ {
+  "paginaRolaX": false,
+  "paginaScrollWidth": 2880,
+  "paginaClientWidth": 2880,
+  "fora": [],
+  "cortados": [
+   {
+    "seletor": "aside.sidebar",
+    "sobra": 13,
+    "overflowX": "visible",
+    "texto": "«\nCP\nCP-TEC\nAUDITORIA PDF TEC AJUSTE\nTrocar Perfil\nVISÃO GER"
+   }
+  ],
+  "comRolagemPropria": [],
+  "tamanho": "2880x1620",
+  "tema": "claro",
+  "tela": "Histórico de Alterações"
+ }
+]

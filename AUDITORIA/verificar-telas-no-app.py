@@ -34,6 +34,20 @@ def norm(t):
 def ok(cond, msg):
     achados.append(("OK  " if cond else "FALHA", msg))
 
+def fechar_avisos_estruturais(pg):
+    # Janela "Antes de usar estes numeros" (avisos estruturais do Dashboard,
+    # recurso de 03/09/2026). Nasce aberta assim que o Dashboard monta com
+    # aviso pendente e cobre a tela inteira: sem fechar, todo clique seguinte
+    # bate no overlay e o script trava. Nao repete na sessao depois do OK.
+    try:
+        botao = pg.get_by_role("button", name="OK, entendi")
+        if botao.count() and botao.first.is_visible():
+            botao.first.click()
+            pg.wait_for_timeout(400)
+    except Exception:
+        pass
+
+
 def novo_perfil(pg, pdf, nome):
     pg.get_by_role("button", name=re.compile("Trocar Perfil")).first.click()
     pg.wait_for_timeout(1200)
@@ -44,6 +58,7 @@ def novo_perfil(pg, pdf, nome):
     pg.locator("form input.form-control").first.fill(nome)
     pg.get_by_role("button", name="Criar e Entrar").click()
     pg.wait_for_timeout(2500)
+    fechar_avisos_estruturais(pg)
 
 def confirmar_importacao(pg):
     # O botão do modal de revisão NASCE DESABILITADO e só habilita quando a
@@ -67,10 +82,13 @@ with sync_playwright() as p:
     pg.locator("form input.form-control").first.fill("TESTE AJU 01")
     pg.get_by_role("button", name="Criar e Entrar").click()
     pg.wait_for_timeout(2500)
+    fechar_avisos_estruturais(pg)
 
     def ir(nome):
+        fechar_avisos_estruturais(pg)
         pg.get_by_role("button", name=re.compile(nome)).first.click()
         pg.wait_for_timeout(1200)
+        fechar_avisos_estruturais(pg)
         return norm(pg.inner_text("body"))
 
     t = ir("Rendimentos")
