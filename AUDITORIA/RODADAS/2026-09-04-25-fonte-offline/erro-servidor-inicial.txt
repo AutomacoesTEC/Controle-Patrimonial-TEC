@@ -1,0 +1,4 @@
+O preview solicitado na porta padrão 4173 encontrou essa porta ocupada por um
+processo anterior e o Vite iniciou na porta 4174. Antes da primeira medição, o
+fixture congelado foi ajustado somente para apontar ao preview correto. Produto,
+viewport, bloqueios de rede, modelo, seeds e commit-base permaneceram iguais.

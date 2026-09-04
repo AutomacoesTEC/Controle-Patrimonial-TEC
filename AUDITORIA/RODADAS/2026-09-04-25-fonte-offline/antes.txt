@@ -1,0 +1,1 @@
+{"titulo":"Controle Patrimonial TEC","larguraConteudo":560,"facesInter":[],"estilos":{"currency":{"variante":"tabular-nums","recursos":"\"tnum\""},"numero":{"variante":"normal","recursos":"normal"},"statValue":{"variante":"normal","recursos":"normal"}},"requisicoesGoogle":["https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"]}

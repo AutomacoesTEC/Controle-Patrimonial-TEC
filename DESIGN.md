@@ -143,7 +143,10 @@ rótulos de ação também atinjam 4,5:1.
 Fonte única, **Inter**, do título de página ao rótulo de tabela — sem
 fonte de destaque separada (nenhum serifado, nenhuma fonte "de
 marca" só para headlines). Hierarquia por peso e tamanho, não por
-troca de família.
+troca de família. Os pesos 400, 500, 600 e 700 são empacotados localmente
+com o aplicativo por `@fontsource/inter`; a interface não depende de Google
+Fonts nem de rede. Classes comuns de valor (`.currency`, `td.numero` e
+`.stat-value`) usam dígitos tabulares com `"tnum", "ss01"`.
 
 - `h1` (20px/700): título de página (`.page-header h2`).
 - `h2` (16px/600): título de card (`.card-title`).

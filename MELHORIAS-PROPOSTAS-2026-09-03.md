@@ -235,7 +235,7 @@ hoje no desktop.
 Base: `DESIGN.md` (paleta Ardósia, Inter, acento contido, sem travessão, sem
 emoji). Tudo abaixo respeita esse sistema; nada muda paleta.
 
-### B1. Fonte auto-hospedada, tabular e coerente com o app offline (P1)
+### B1. Fonte auto-hospedada, tabular e coerente com o app offline — CONCLUÍDO (P1)
 
 Evidência: `src/index.css` linha 1 importa a Inter do Google Fonts. No Electron
 sem internet, ou em rede corporativa que bloqueia o domínio, o app cai na
@@ -255,6 +255,14 @@ Proposta:
 
 Pronto quando: o app abre com a mesma fonte com a rede desligada e todas as
 colunas de valor alinham dígito sobre dígito.
+
+Concluído em 04/09/2026. A Inter 400/500/600/700 passou a ser empacotada por
+`@fontsource/inter`, o import externo foi removido e a regra comum de dígitos
+foi aplicada. No fixture com os domínios do Google bloqueados, as requisições
+externas caíram de 1 para 0, as faces Inter disponíveis passaram de 0 para 4 e
+os três seletores previstos passaram a `tabular-nums`, sem alterar a largura
+de controle de 560 px. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-25-fonte-offline/`; suíte em 885/885.
 
 ### B2. Dashboard: um número herói e o resto em segundo plano (P1)
 

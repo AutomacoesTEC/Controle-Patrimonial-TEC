@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-600.css';
+@import '@fontsource/inter/latin-700.css';
 /* Paleta da empresa: navy #283453, cinza #7b818a, cinza claro #bfc1c0.
    Tema escuro é o padrão (visual original); tema claro troca os tons de
    fundo/texto mas usa a mesma base de cor, para os dois lerem como o
@@ -538,7 +541,8 @@ textarea.form-control{resize:vertical;min-height:80px}
    quebrar linha logo depois do "-" (é um ponto de quebra Unicode válido),
    deixando o sinal sozinho numa linha e o valor na outra (achado real, aba
    Bens e Direitos, coluna Variação). thead th já tinha isso; faltava aqui. */
-.currency{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";white-space:nowrap}
+.currency,td.numero,.stat-value{font-variant-numeric:tabular-nums;font-feature-settings:"tnum","ss01"}
+.currency{white-space:nowrap}
 .currency.positive{color:var(--accent-success)}
 .currency.negative{color:var(--accent-danger)}
 :root[data-theme="light"] .currency.positive{color:#047857}
@@ -564,7 +568,7 @@ textarea.form-control{resize:vertical;min-height:80px}
    Aconteceu duas vezes, com os cabeçalhos de seção e depois com as notas, e
    as duas foram remendadas com um override. Ancorar na classe certa resolve
    a família toda de uma vez. Ver ATUALIZAÇÃO 32 e 33 do HANDOFF. */
-.demonstrativo-table td.currency{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.demonstrativo-table td.currency{text-align:right;white-space:nowrap}
 .demonstrativo-table tr:not(.demonstrativo-secao):not(.demonstrativo-destaque):hover td{background:rgba(148,163,184,0.04)}
 .demonstrativo-secao td{padding-top:20px;padding-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent-primary);border-bottom:2px solid var(--border-color)}
 .demonstrativo-secao-link{background:none;border:none;padding:0;margin:0;font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent-primary);cursor:pointer}
