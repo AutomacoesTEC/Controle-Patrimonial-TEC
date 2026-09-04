@@ -1,0 +1,4 @@
+status_concluido=1
+registros_com_origem_e_fonte=35/35
+telas_com_badge_filtro_exportacao=4/4
+snapshot_primeira_edicao=sim

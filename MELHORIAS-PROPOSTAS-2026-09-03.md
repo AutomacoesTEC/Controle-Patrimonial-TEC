@@ -47,7 +47,7 @@ Pendente deste item: backup automático periódico no app desktop (a proposta
 original citava Electron; como o app é pywebview, o mecanismo seria outro —
 não desenhado ainda).
 
-### A3. Proveniência por registro, não só por ano (P1)
+### A3. Proveniência por registro, não só por ano — CONCLUÍDO (P1)
 
 Evidência: a origem fica no ano (`importFormato`, `origem` do snapshot) e,
 para Renda Variável, em arrays separados (`...Oficial` e `...Manual`). Bens,
@@ -84,6 +84,10 @@ importado preserva o objeto original em `valorDeclarado`; o badge compartilhado
 acrescenta `Editado` e expõe o texto original. Edições seguintes não trocam o
 snapshot e itens manuais não o criam. Evidência pareada em
 `AUDITORIA/RODADAS/2026-09-04-47-valor-declarado/`.
+
+Fechamento: a fixture real tem origem e ponto documental em 35/35 itens das
+quatro coleções (7 bens, 2 dívidas, 18 rendimentos e 8 pagamentos); as quatro
+telas reutilizam badge/filtro e as quatro exportações incluem Origem.
 
 ### A4. Trilha de alterações: completar o que já existe (P2)
 
