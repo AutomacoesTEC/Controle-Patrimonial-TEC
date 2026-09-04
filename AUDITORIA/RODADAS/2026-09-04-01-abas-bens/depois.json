@@ -1,0 +1,34 @@
+[
+  {
+    "tamanho": "1366x768",
+    "tema": "escuro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1338, "sobra": 274, "overflowX": "auto" },
+    "pageBody": { "sobra": 0, "overflowX": "auto" },
+    "toolbar": { "sobra": 0, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1366x768",
+    "tema": "claro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1338, "sobra": 274, "overflowX": "auto" },
+    "pageBody": { "sobra": 0, "overflowX": "auto" },
+    "toolbar": { "sobra": 0, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1280x720",
+    "tema": "escuro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1252, "sobra": 360, "overflowX": "auto" },
+    "pageBody": { "sobra": 0, "overflowX": "auto" },
+    "toolbar": { "sobra": 0, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1280x720",
+    "tema": "claro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1252, "sobra": 360, "overflowX": "auto" },
+    "pageBody": { "sobra": 0, "overflowX": "auto" },
+    "toolbar": { "sobra": 0, "overflowX": "visible" }
+  }
+]

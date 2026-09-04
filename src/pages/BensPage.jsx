@@ -125,7 +125,7 @@ export default function BensPage({ onVoltar } = {}) {
       </div>
       <div className="page-body animate-in">
         <div className="toolbar">
-          <div className="tabs" style={{ marginBottom: 0 }}>
+          <div className="tabs tabs-bens" style={{ marginBottom: 0 }}>
             <button className={`tab ${grupoFilter === 'all' ? 'active' : ''}`} onClick={() => setGrupoFilter('all')}>Todos</button>
             {GRUPOS_BENS.map(g => (
               <button key={g.codigo} className={`tab ${grupoFilter === g.codigo ? 'active' : ''}`} onClick={() => setGrupoFilter(g.codigo)}>

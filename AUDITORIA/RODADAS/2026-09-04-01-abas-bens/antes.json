@@ -1,0 +1,34 @@
+[
+  {
+    "tamanho": "1366x768",
+    "tema": "escuro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1612, "sobra": 0, "overflowX": "auto" },
+    "pageBody": { "sobra": 246, "overflowX": "auto" },
+    "toolbar": { "sobra": 274, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1366x768",
+    "tema": "claro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1612, "sobra": 0, "overflowX": "auto" },
+    "pageBody": { "sobra": 246, "overflowX": "auto" },
+    "toolbar": { "sobra": 274, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1280x720",
+    "tema": "escuro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1612, "sobra": 0, "overflowX": "auto" },
+    "pageBody": { "sobra": 332, "overflowX": "auto" },
+    "toolbar": { "sobra": 360, "overflowX": "visible" }
+  },
+  {
+    "tamanho": "1280x720",
+    "tema": "claro",
+    "paginaRolaX": false,
+    "tabs": { "left": 288, "right": 1612, "sobra": 0, "overflowX": "auto" },
+    "pageBody": { "sobra": 332, "overflowX": "auto" },
+    "toolbar": { "sobra": 360, "overflowX": "visible" }
+  }
+]

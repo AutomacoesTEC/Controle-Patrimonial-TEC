@@ -369,6 +369,8 @@ textarea.form-control{resize:vertical;min-height:80px}
    programa do IRPF). margin-bottom:-1px encaixa o traço sobre a régua do
    container. */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border-color);margin-bottom:20px;overflow-x:auto;flex-shrink:0}
+.tabs-bens{min-width:0;max-width:100%}
+@media(max-width:1600px){.tabs-bens{flex:1 1 100%}}
 .tab{padding:9px 14px 11px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:color var(--transition-fast),border-color var(--transition-fast);border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--font-family);white-space:nowrap;margin-bottom:-1px}
 .tab:hover:not(.active):not(:disabled){color:var(--text-primary);border-bottom-color:var(--border-color)}
 .tab.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary);font-weight:600}
