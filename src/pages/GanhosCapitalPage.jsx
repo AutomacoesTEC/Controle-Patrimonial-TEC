@@ -11,6 +11,7 @@ import { novoId } from '../store/reducer';
 import Ajuda from '../components/Ajuda';
 import BemModal from '../components/BemModal';
 import SeletorBem from '../components/SeletorBem';
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import {
   blocosOperacaoGanhoCapital, parcelasDaOperacao, faixasDaOperacao,
   conferenciasGanhoCapital, conferenciaGanhoCapitalContraFichaExclusiva, NOME_FICHA_GC,
@@ -456,7 +457,7 @@ export default function GanhosCapitalPage() {
               </div>
             )}
 
-            <div className="table-container">
+            <TabelaRedimensionavel stickyRightColumns={5}>
               <table>
                 <thead>
                   <tr>
@@ -539,7 +540,7 @@ export default function GanhosCapitalPage() {
                   })}
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           </div>
         )}
 
