@@ -107,7 +107,10 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
 .sidebar-logo .logo-text{display:flex;flex-direction:column;white-space:nowrap;min-width:0}
 .sidebar-logo .logo-text h1{font-size:14px;font-weight:700;color:var(--text-primary);line-height:1.2;overflow:hidden;text-overflow:ellipsis}
 .sidebar-logo .logo-text span{font-size:11px;color:var(--text-muted);font-weight:400;overflow:hidden;text-overflow:ellipsis}
-.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto;overflow-x:hidden}
+.sidebar-nav-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
+.sidebar-nav{height:100%;padding:12px 10px 52px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--accent-primary) transparent}
+.sidebar-more{position:absolute;left:18px;right:18px;bottom:8px;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 10px;border:1px solid var(--border-color);border-radius:999px;background:var(--bg-card);color:var(--text-secondary);font:600 11px var(--font-family);cursor:pointer;box-shadow:var(--shadow-md);z-index:2}
+.sidebar-more:hover,.sidebar-more:focus-visible{color:var(--text-primary);border-color:var(--accent-primary)}
 .nav-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-secondary);padding:16px 14px 6px;white-space:nowrap}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);color:var(--text-secondary);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;transition:all var(--transition-fast);margin-bottom:2px;position:relative;overflow:hidden;border:none;background:transparent;width:100%;text-align:left;font-family:var(--font-family);white-space:nowrap}
 .nav-item:hover{background:var(--bg-card);color:var(--text-primary)}
@@ -118,7 +121,9 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    por ícone de traço em 03/09/2026 (ver NavIcons.jsx). */
 .nav-item-icone{justify-content:center;padding:11px 0}
 .nav-item-icone svg{width:20px;height:20px}
-.sidebar.collapsed .sidebar-nav{padding:12px 8px}
+.sidebar.collapsed .sidebar-nav{padding:12px 8px 52px}
+.sidebar.collapsed .sidebar-more{left:14px;right:14px;padding:7px}
+.sidebar.collapsed .sidebar-more-label{display:none}
 .sidebar.collapsed .nav-item.active::before{top:6px;bottom:6px}
 .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border-color);overflow:hidden}
 

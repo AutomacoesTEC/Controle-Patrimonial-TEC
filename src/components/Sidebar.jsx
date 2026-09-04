@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useData } from '../store/DataContext';
 import { hasWorkingData as hasWorkingDataCheck, snapshotHasData } from '../store/reducer';
 import ConfirmarDependentesModal from './ConfirmarDependentesModal';
@@ -34,6 +34,23 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
     .map(item => (item.somenteModalidade ? { ...item, label: NOME_CURTO_MODALIDADE[modalidade] } : item));
   let lastSection = '';
   const [confirmarDependentesOpen, setConfirmarDependentesOpen] = useState(false);
+  const navRef = useRef(null);
+  const [temMaisAbaixo, setTemMaisAbaixo] = useState(false);
+
+  const atualizarContinuidadeNav = () => {
+    const nav = navRef.current;
+    if (!nav) return;
+    setTemMaisAbaixo(nav.scrollTop + nav.clientHeight < nav.scrollHeight - 2);
+  };
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return undefined;
+    atualizarContinuidadeNav();
+    const observer = new ResizeObserver(atualizarContinuidadeNav);
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [collapsed, itensVisiveis.length]);
 
   const avancarAno = (proximoAno) => {
     dispatch({ type: 'ROLLOVER_ANO', payload: proximoAno });
@@ -105,25 +122,37 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
         )}
       </div>
 
-      <nav className="sidebar-nav">
-        {itensVisiveis.map(item => {
-          const showSection = !collapsed && item.section !== lastSection;
-          lastSection = item.section;
-          return (
-            <div key={item.id}>
-              {showSection && <div className="nav-section-label">{item.section}</div>}
-              <button
-                className={`nav-item ${collapsed ? 'nav-item-icone' : ''} ${activeView === item.id ? 'active' : ''}`}
-                onClick={() => onNavigate(item.id)}
-                title={collapsed ? item.label : undefined}
-                aria-label={collapsed ? item.label : undefined}
-              >
-                {collapsed ? <NavIcon id={item.id} /> : item.label}
-              </button>
-            </div>
-          );
-        })}
-      </nav>
+      <div className="sidebar-nav-wrap">
+        <nav ref={navRef} className="sidebar-nav" onScroll={atualizarContinuidadeNav}>
+          {itensVisiveis.map(item => {
+            const showSection = !collapsed && item.section !== lastSection;
+            lastSection = item.section;
+            return (
+              <div key={item.id}>
+                {showSection && <div className="nav-section-label">{item.section}</div>}
+                <button
+                  className={`nav-item ${collapsed ? 'nav-item-icone' : ''} ${activeView === item.id ? 'active' : ''}`}
+                  onClick={() => onNavigate(item.id)}
+                  title={collapsed ? item.label : undefined}
+                  aria-label={collapsed ? item.label : undefined}
+                >
+                  {collapsed ? <NavIcon id={item.id} /> : item.label}
+                </button>
+              </div>
+            );
+          })}
+        </nav>
+        {temMaisAbaixo && (
+          <button
+            type="button"
+            className="sidebar-more"
+            aria-label="Ver itens abaixo"
+            onClick={() => navRef.current?.scrollTo({ top: navRef.current.scrollHeight, behavior: 'smooth' })}
+          >
+            <span className="sidebar-more-label">Ver itens abaixo</span><span aria-hidden="true">↓</span>
+          </button>
+        )}
+      </div>
 
       <div className="sidebar-footer">
         {!collapsed && (
