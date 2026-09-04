@@ -47,7 +47,7 @@ export default function MovimentacaoBemForm({
   tipoInicial = 'venda_parcial',
   anoCalendario,
 }) {
-  const { dispatch, addToast } = useData();
+  const { dispatch, addToast, confirmar } = useData();
   const [movTipo, setMovTipo] = useState(tipoInicial);
   const [movValor, setMovValor] = useState('');
   const [movValorVenda, setMovValorVenda] = useState('');
@@ -110,7 +110,7 @@ export default function MovimentacaoBemForm({
     setEditingId(null);
   };
 
-  const handleRegistrar = () => {
+  const handleRegistrar = async () => {
     // Tipos com sinal '0' (venda_total/baixa em bens, quitacao em dívidas)
     // zeram o saldo e o campo "valor" fica desabilitado na tela — mas ainda
     // precisa guardar QUANTO estava sendo baixado (em bens, é o custo de
@@ -140,10 +140,12 @@ export default function MovimentacaoBemForm({
     // bloqueio: pode ser um valor anterior cadastrado errado, e quem decide
     // é a usuária.
     if (movTipo === 'venda_parcial' && valor > situacaoNaVespera + 0.005) {
-      const confirmaExcesso = confirm(
-        `O valor da venda (${formatCurrency(valor)}) é maior do que o bem valia em ${formatDate(movData)} (${formatCurrency(situacaoNaVespera)}).\n\n` +
-        `O saldo não fica negativo, mas o ganho de capital será calculado sobre o valor que você informou. Confirma mesmo assim?`
-      );
+      const confirmaExcesso = await confirmar({
+        titulo: 'Confirmar valor maior que o saldo do bem?',
+        texto: `O valor da venda (${formatCurrency(valor)}) é maior do que o bem valia em ${formatDate(movData)} (${formatCurrency(situacaoNaVespera)}).\n\n` +
+          `O saldo não fica negativo, mas o ganho de capital será calculado sobre o valor que você informou.`,
+        textoConfirmar: 'Confirmar',
+      });
       if (!confirmaExcesso) return;
     }
     // Confirmação, não bloqueio: pode ser uma movimentação legítima de
@@ -151,9 +153,11 @@ export default function MovimentacaoBemForm({
     // antes do "Avançar para o próximo ano"), então só avisa — não impede.
     const anoDaData = Number(movData.slice(0, 4));
     if (anoCalendario != null && anoDaData !== anoCalendario) {
-      const confirma = confirm(
-        `A data informada (${formatDate(movData)}) é de ${anoDaData}, diferente do ano-calendário selecionado (${anoCalendario}). Confirma mesmo assim?`
-      );
+      const confirma = await confirmar({
+        titulo: 'Confirmar data de outro ano-calendário?',
+        texto: `A data informada (${formatDate(movData)}) é de ${anoDaData}, diferente do ano-calendário selecionado (${anoCalendario}).`,
+        textoConfirmar: 'Confirmar',
+      });
       if (!confirma) return;
     }
     const movimentacao = { tipo: movTipo, valor, data: movData, descricao: movDescricao };
@@ -191,9 +195,15 @@ export default function MovimentacaoBemForm({
     setMovDescricao(mov.descricao || '');
   };
 
-  const handleExcluir = (mov) => {
+  const handleExcluir = async (mov) => {
     const rotulo = tipos[mov.tipo]?.label || mov.tipo;
-    if (!confirm(`EXCLUIR a movimentação "${rotulo}" de ${formatDate(mov.data)}?\n\nO valor é recalculado a partir do que sobrar. Essa ação não pode ser desfeita.`)) return;
+    const ok = await confirmar({
+      titulo: 'Excluir esta movimentação?',
+      texto: `A movimentação "${rotulo}" de ${formatDate(mov.data)} será excluída. O valor é recalculado a partir do que sobrar. Essa ação não pode ser desfeita.`,
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (!ok) return;
     dispatch({ type: DELETE_ACTION_POR_ACTION[actionType], payload: { bemId: bem.id, movId: mov.id } });
     addToast('Movimentação excluída.', 'info');
     if (editingId === mov.id) limparFormulario();

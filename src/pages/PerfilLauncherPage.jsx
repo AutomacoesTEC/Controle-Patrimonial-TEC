@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import ConfirmacaoModal from '../components/ConfirmacaoModal';
 import { formatCpfCnpj, mascaraCpf, iniciaisNome } from '../utils/formatters';
 import {
   PERFIS_STORAGE_KEY,
@@ -77,6 +78,22 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   const [previsualizacao, setPrevisualizacao] = useState(null);
   const [importando, setImportando] = useState(false);
   const [erroImportacao, setErroImportacao] = useState('');
+  // Esta tela aparece ANTES de qualquer DataProvider existir (nenhum perfil
+  // escolhido ainda, ver App.jsx), então não tem `useData()`/`confirmar()`
+  // disponível — replica aqui o mesmo padrão do DataContext.jsx
+  // (ConfirmacaoModal + Promise<boolean>) em vez do confirm() nativo.
+  const [confirmState, setConfirmState] = useState(null);
+  const resolverConfirmRef = useRef(null);
+  const confirmar = useCallback((opcoes = {}) => new Promise((resolve) => {
+    resolverConfirmRef.current = resolve;
+    setConfirmState({ ...opcoes });
+  }), []);
+  const responderConfirm = useCallback((ok) => {
+    setConfirmState(null);
+    const r = resolverConfirmRef.current;
+    resolverConfirmRef.current = null;
+    r?.(ok);
+  }, []);
   const fileRef = useRef();
 
   const persistir = (novaLista) => {
@@ -206,12 +223,14 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     }
   };
 
-  const handleExcluirPerfil = (e, perfil) => {
+  const handleExcluirPerfil = async (e, perfil) => {
     e.stopPropagation();
-    const confirmado = confirm(
-      `EXCLUIR o perfil "${perfil.apelido || perfil.nome || 'sem nome'}"?\n\n` +
-      `Todos os anos, bens, dívidas, rendimentos e dependentes cadastrados nele são apagados por completo. Essa ação não pode ser desfeita.`
-    );
+    const confirmado = await confirmar({
+      titulo: `Excluir o perfil "${perfil.apelido || perfil.nome || 'sem nome'}"?`,
+      texto: 'Todos os anos, bens, dívidas, rendimentos e dependentes cadastrados nele são apagados por completo. Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
     if (!confirmado) return;
     try {
       localStorage.removeItem(dataStorageKeyFor(perfil.id));
@@ -426,6 +445,12 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           onCancel={() => setPrevisualizacao(null)}
         />
       )}
+      <ConfirmacaoModal
+        open={!!confirmState}
+        {...confirmState}
+        onConfirmar={() => responderConfirm(true)}
+        onCancelar={() => responderConfirm(false)}
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useData } from '../store/DataContext';
 
 const EXIT_DURATION = 150; // bate com --transition-fast em index.css
 
@@ -28,11 +29,16 @@ export const useMarcarModalSujo = () => useContext(DirtyContext);
  * carrega sujeira de uma abertura anterior.
  */
 export default function Modal({ open, onClose, children, style }) {
+  const { confirmar } = useData();
   const [shouldRender, setShouldRender] = useState(open);
   const [closing, setClosing] = useState(false);
   const dirtyRef = useRef(false);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  // Trava reentrância: enquanto o ConfirmacaoModal (assíncrono) está
+  // aberto perguntando, um segundo Esc/clique não pode abrir outra
+  // pergunta em cima nem fechar o modal antes da resposta chegar.
+  const perguntandoRef = useRef(false);
 
   useEffect(() => {
     if (open) {
@@ -46,8 +52,19 @@ export default function Modal({ open, onClose, children, style }) {
     }
   }, [open]);
 
-  const fecharComGuarda = () => {
-    if (dirtyRef.current && !confirm('Você tem alterações não salvas nesta tela. Tem certeza que quer fechar sem salvar?')) return;
+  const fecharComGuarda = async () => {
+    if (perguntandoRef.current) return;
+    if (dirtyRef.current) {
+      perguntandoRef.current = true;
+      const ok = await confirmar({
+        titulo: 'Descartar alterações?',
+        texto: 'Você tem alterações não salvas nesta tela.',
+        textoConfirmar: 'Descartar',
+        perigo: true,
+      });
+      perguntandoRef.current = false;
+      if (!ok) return;
+    }
     onCloseRef.current();
   };
 

@@ -102,6 +102,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
 }
 
 function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario, garantirAnoCadastro, despacharEmAno }) {
+  const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_IMOVEL_VAZIO);
@@ -136,8 +137,14 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
     }
     setModalOpen(false);
   };
-  const handleDelete = (i) => {
-    if (confirm(`Excluir "${i.nomeLocalizacao || 'este imóvel'}"?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleDelete = async (i) => {
+    const ok = await confirmar({
+      titulo: `Excluir "${i.nomeLocalizacao || 'este imóvel'}"?`,
+      texto: 'Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (ok) {
       dispatch({ type: 'DELETE_IMOVEL_RURAL', payload: i.id });
       addToast('Imóvel excluído', 'info');
     }
@@ -295,6 +302,7 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
 }
 
 function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, despacharEmAno }) {
+  const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
   const [anoModalOpen, setAnoModalOpen] = useState(false);
@@ -324,9 +332,15 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
     setEditingBem(null);
   };
 
-  const handleDelete = (bem) => {
+  const handleDelete = async (bem) => {
     const nome = (bem.discriminacao || 'este bem').substring(0, 60);
-    if (confirm(`EXCLUIR "${nome}"?\n\nEsse bem sai do cadastro por completo, com todo o histórico de movimentações dele. Essa ação não pode ser desfeita.`)) {
+    const ok = await confirmar({
+      titulo: `Excluir "${nome}"?`,
+      texto: 'Esse bem sai do cadastro por completo, com todo o histórico de movimentações dele. Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (ok) {
       dispatch({ type: 'DELETE_BEM_RURAL', payload: bem.id });
       addToast('Bem excluído', 'info');
     }
@@ -399,6 +413,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
 // cadastro manual quanto na importação, não têm essa classificação por
 // código como as dívidas comuns).
 function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario }) {
+  const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_DIVIDA_RURAL_VAZIO);
@@ -436,8 +451,14 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
     setEditingId(null);
   };
 
-  const handleDelete = (d) => {
-    if (confirm(`EXCLUIR "${(d.discriminacao || 'esta dívida').substring(0, 60)}"?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleDelete = async (d) => {
+    const ok = await confirmar({
+      titulo: `Excluir "${(d.discriminacao || 'esta dívida').substring(0, 60)}"?`,
+      texto: 'Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (ok) {
       dispatch({ type: 'DELETE_DIVIDA_RURAL', payload: d.id });
       addToast('Dívida excluída', 'info');
     }
@@ -556,6 +577,7 @@ function LancamentosRuraisSection({
   origemRural = { temOficial: false, mesesSubstituidos: [], mesesOficiaisMantidos: [] },
   resultadoConsolidado = 0,
 }) {
+  const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_LANCAMENTO_VAZIO);
@@ -594,8 +616,14 @@ function LancamentosRuraisSection({
     }
     setModalOpen(false);
   };
-  const handleDelete = (l) => {
-    if (confirm(`Excluir este lançamento (${formatCurrency(l.valor)})?\n\nEssa ação não pode ser desfeita.`)) {
+  const handleDelete = async (l) => {
+    const ok = await confirmar({
+      titulo: `Excluir este lançamento (${formatCurrency(l.valor)})?`,
+      texto: 'Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
+    if (ok) {
       dispatch({ type: 'DELETE_LANCAMENTO_RURAL', payload: l.id });
       addToast('Lançamento excluído', 'info');
     }

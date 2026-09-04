@@ -25,7 +25,7 @@ function mesmoTitular(a, b) {
 }
 
 export default function ImportPage() {
-  const { state, dispatch, dispatchPersistido, addToast, perfilProtegido, persistencia } = useData();
+  const { state, dispatch, dispatchPersistido, addToast, perfilProtegido, persistencia, confirmar } = useData();
   const [importing, setImporting] = useState(false);
   const [importType, setImportType] = useState(null);
   const [importLog, setImportLog] = useState([]);
@@ -41,12 +41,14 @@ export default function ImportPage() {
     addToast(`Dados de ${ano} carregados!`, 'info');
   };
 
-  const handleDeleteYear = (e, ano) => {
+  const handleDeleteYear = async (e, ano) => {
     e.stopPropagation();
-    const confirmado = confirm(
-      `Excluir o ano-calendário ${ano} do histórico?\n\n` +
-      `Todos os bens, dívidas, rendimentos e pagamentos salvos desse ano serão apagados. Essa ação não pode ser desfeita.`
-    );
+    const confirmado = await confirmar({
+      titulo: `Excluir o ano-calendário ${ano} do histórico?`,
+      texto: 'Todos os bens, dívidas, rendimentos e pagamentos salvos desse ano serão apagados. Essa ação não pode ser desfeita.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+    });
     if (!confirmado) return;
     dispatch({ type: 'DELETE_HISTORICO_ANO', payload: ano });
     addToast(`Ano-calendário ${ano} excluído do histórico.`, 'info');
@@ -184,12 +186,15 @@ export default function ImportPage() {
         const titularDiferente = haViaComparar && !mesmoTitular(result.contribuinte, contribuinteExistente);
 
         if (titularDiferente) {
-          const prosseguirTitular = confirm(
-            `Esta declaração é de um titular DIFERENTE do já cadastrado para o ano-calendário ${anoDestino}.\n\n` +
-            `Cadastrado: ${contribuinteExistente.nome || '(sem nome)'} (CPF ${formatCpfCnpj(contribuinteExistente.cpf)})\n` +
-            `Nesta declaração: ${result.contribuinte.nome || '(sem nome)'} (CPF ${formatCpfCnpj(result.contribuinte.cpf)})\n\n` +
-            `Importar mesmo assim vai SUBSTITUIR todos os dados do titular atual (inclusive o que foi cadastrado manualmente) por este outro titular. Tem certeza que quer continuar?`
-          );
+          const prosseguirTitular = await confirmar({
+            titulo: 'Importar declaração de outro titular?',
+            texto: `Esta declaração é de um titular DIFERENTE do já cadastrado para o ano-calendário ${anoDestino}.\n\n` +
+              `Cadastrado: ${contribuinteExistente.nome || '(sem nome)'} (CPF ${formatCpfCnpj(contribuinteExistente.cpf)})\n` +
+              `Nesta declaração: ${result.contribuinte.nome || '(sem nome)'} (CPF ${formatCpfCnpj(result.contribuinte.cpf)})\n\n` +
+              `Importar mesmo assim vai SUBSTITUIR todos os dados do titular atual (inclusive o que foi cadastrado manualmente) por este outro titular.`,
+            textoConfirmar: 'Substituir titular',
+            perigo: true,
+          });
           if (!prosseguirTitular) {
             log('Importação cancelada: titular diferente do já cadastrado para este ano.', 'error');
             setImporting(false);
@@ -229,11 +234,14 @@ export default function ImportPage() {
 
         if (ehRetificadora) {
           const nomeTitular = existenteNoDestino.contribuinte?.nome || result.contribuinte?.nome || '';
-          const prosseguirRetificadora = confirm(
-            `Você já importou uma declaração para o ano-calendário ${anoDestino}${nomeTitular ? ` (titular ${nomeTitular})` : ''}. ` +
-            `Tem certeza que quer sobrescrever os dados importados dessa declaração anterior com esta retificadora? ` +
-            `Na próxima tela você revisa e confirma item a item. O que foi incluído manualmente não é tocado.`
-          );
+          const prosseguirRetificadora = await confirmar({
+            titulo: 'Sobrescrever com a declaração retificadora?',
+            texto: `Você já importou uma declaração para o ano-calendário ${anoDestino}${nomeTitular ? ` (titular ${nomeTitular})` : ''}. ` +
+              `Isso vai sobrescrever os dados importados dessa declaração anterior com esta retificadora. ` +
+              `Na próxima tela você revisa e confirma item a item. O que foi incluído manualmente não é tocado.`,
+            textoConfirmar: 'Sobrescrever',
+            perigo: true,
+          });
           if (!prosseguirRetificadora) {
             log('Importação cancelada. Dados existentes preservados.', 'error');
             setImporting(false);
@@ -273,15 +281,22 @@ export default function ImportPage() {
 
         let prosseguir = true;
         if (temDadosNoDestino) {
-          prosseguir = confirm(
-            (trocaAno
+          prosseguir = await confirmar({
+            titulo: 'Substituir os dados já cadastrados neste ano?',
+            texto: (trocaAno
               ? `Esta declaração é do ano-calendário ${anoDestino}. Já existem dados salvos para ${anoDestino}`
               : `Já existem dados cadastrados para o ano-calendário ${anoDestino}`) +
-            ` (${existenteNoDestino.bens?.length || 0} bens, ${existenteNoDestino.dividas?.length || 0} dívidas). ` +
-            `Importar esta declaração vai SUBSTITUIR esses dados. Lançamentos manuais feitos até agora serão perdidos. Deseja continuar?`
-          );
+              ` (${existenteNoDestino.bens?.length || 0} bens, ${existenteNoDestino.dividas?.length || 0} dívidas). ` +
+              `Importar esta declaração vai SUBSTITUIR esses dados. Lançamentos manuais feitos até agora serão perdidos.`,
+            textoConfirmar: 'Substituir',
+            perigo: true,
+          });
         } else if (trocaAno) {
-          prosseguir = confirm(`Esta declaração é do ano-calendário ${anoDestino}, diferente do ano atual (${state.anoCalendario}). Trocar para ${anoDestino} e importar?`);
+          prosseguir = await confirmar({
+            titulo: 'Trocar de ano-calendário e importar?',
+            texto: `Esta declaração é do ano-calendário ${anoDestino}, diferente do ano atual (${state.anoCalendario}).`,
+            textoConfirmar: 'Trocar e importar',
+          });
         }
 
         if (!prosseguir) {
