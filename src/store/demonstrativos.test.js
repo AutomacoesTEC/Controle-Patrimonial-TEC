@@ -113,9 +113,12 @@ describe('demonstrativoConciliacao — regressão contra a planilha real (2024, 
     // Δdívida da planilha (Contraídas−Pagtº) = 250025.00−531029.77 = −281004.77
     expect(d.varPatrimonial.deltaDivida).toBeCloseTo(-281004.77, 2);
     expect(d.varPatrimonial.total).toBeCloseTo(-928806.98, 2);
-    expect(d.rendimentos.totalGeral).toBeCloseTo(1830916.035, 2);
-    expect(d.saldoDeCaixaGeral).toBeCloseTo(877255.345, 2);
-    expect(d.saldoDeCaixa).toBeCloseTo(110980.225, 2);
+    // A fixture preserva um lançamento rural de 169301.505 para provar a
+    // fronteira monetária: os totais expostos pelo app fecham no centavo, não
+    // carregam o meio centavo para as comparações seguintes.
+    expect(d.rendimentos.totalGeral).toBe(1830916.04);
+    expect(d.saldoDeCaixaGeral).toBe(877255.35);
+    expect(d.saldoDeCaixa).toBe(110980.23);
   });
 });
 

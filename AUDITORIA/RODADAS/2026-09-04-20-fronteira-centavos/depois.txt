@@ -1,0 +1,8 @@
+RUN  v4.1.11
+
+✓ movimentações sucessivas não gravam centavos binários no saldo
+✓ fechamento elimina saldo fantasma inferior a um centavo
+✓ 25 sequências determinísticas fecham pelo mesmo total em centavos inteiros
+
+Test Files  1 passed (1)
+Tests       3 passed (3)

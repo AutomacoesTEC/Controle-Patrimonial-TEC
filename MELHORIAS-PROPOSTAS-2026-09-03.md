@@ -85,25 +85,19 @@ Proposta, condicionada a esse levantamento:
 Pronto quando: um teste percorre a lista de `case` do reducer e falha se uma
 ação que altera coleção fiscal não gera entrada no histórico.
 
-### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras (P1)
+### A5. Dinheiro em centavos inteiros, ou arredondamento nas fronteiras — CONCLUÍDO (P1)
 
-Evidência: todo valor é `parseFloat` somado em ponto flutuante
-(`src/store/demonstrativos.js`, `reducer.js` `REGISTRAR_MOVIMENTACAO_BEM`,
-`situacao_atual` recalculado por soma e subtração). Há apenas dez pontos com
-`toFixed(2)` ou `Math.round(x*100)` na pasta `store`. Com 73 bens e dezenas de
-movimentações, o Saldo de Caixa pode sair com centavos fantasmas (0,01 ou
-0,02), e o critério "perto de zero" do demonstrativo fica sujo.
+Implementada a alternativa menos invasiva: helper único
+`arredondarCentavos(x)` em `src/utils/formatters.js`, aplicado aos saldos que
+movimentações gravam no estado e aos totais expostos por
+`fecharDemonstrativo`. O fixture reproduziu `0.1 + 0.2` tanto no saldo do bem
+quanto no fechamento; 25 sequências determinísticas de 200 valores validam a
+soma contra centavos inteiros. Evidência pareada em
+`AUDITORIA/RODADAS/2026-09-04-20-fronteira-centavos/`.
 
-Proposta (a menos invasiva primeiro):
-- Helper único `arredondarCentavos(x)` em `src/utils/formatters.js`, aplicado
-  em todo resultado de soma que vira estado (`situacao_atual`, saldos de
-  dívida) e em todo total exibido (`fecharDemonstrativo`).
-- Teste de propriedade: somar N valores aleatórios com duas casas e conferir
-  que o resultado tem no máximo duas casas.
-- Longo prazo: guardar centavos inteiros no estado (migração via A1).
-
-Pronto quando: nenhum total na tela ou no `.xlsx` tem terceira casa decimal e a
-conciliação de referência (planilha da usuária) continua batendo.
+Permanece como evolução de longo prazo guardar centavos inteiros no estado,
+com migração via A1. A fronteira atual remove o resíduo observável sem impor
+essa migração aos perfis existentes.
 
 ### A6. Conferência de continuidade entre anos (P1, alto valor fiscal)
 

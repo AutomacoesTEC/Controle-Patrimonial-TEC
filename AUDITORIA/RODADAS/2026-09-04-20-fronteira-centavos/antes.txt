@@ -1,0 +1,11 @@
+RUN  v4.1.11
+
+× movimentações sucessivas não gravam centavos binários no saldo
+  expected 0.30000000000000004 to be 0.3
+× fechamento elimina saldo fantasma inferior a um centavo
+  expected 0.30000000000000004 to be 0.3
+× 25 sequências determinísticas fecham pelo mesmo total em centavos inteiros
+  seed 1: expected 101635.00000000003 to be 101635
+
+Test Files  1 failed (1)
+Tests       3 failed (3)

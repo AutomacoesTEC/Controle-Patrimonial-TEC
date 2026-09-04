@@ -103,6 +103,18 @@ export function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 }
 
+// O estado continua usando Number por compatibilidade, mas dinheiro não pode
+// carregar para a próxima operação o resíduo binário de uma soma. Esta é a
+// fronteira única para valores monetários calculados: converte o resultado
+// novamente à unidade mínima que o app aceita (centavo) e normaliza -0.
+export function arredondarCentavos(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  const margem = Number.EPSILON * Math.max(1, Math.abs(n));
+  const arredondado = Math.round((n + Math.sign(n) * margem) * 100) / 100;
+  return Object.is(arredondado, -0) ? 0 : arredondado;
+}
+
 export function formatCPF(cpf) {
   if (!cpf) return '';
   const nums = cpf.replace(/\D/g, '');
@@ -804,4 +816,3 @@ export const resumirMeses = (lista) => {
   return trechos.length === 1 ? trechos[0]
     : `${trechos.slice(0, -1).join(', ')} e ${trechos[trechos.length - 1]}`;
 };
-

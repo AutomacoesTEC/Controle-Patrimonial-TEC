@@ -11,6 +11,7 @@
 // montar componente.
 
 import { linhasComunsDoAno } from './rendaVariavelMensal';
+import { arredondarCentavos } from '../utils/formatters';
 
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
 
@@ -84,10 +85,10 @@ function aplicarMovimentoBem(situacao, m) {
 // declarado. É usado na importação de retificadora: o valor oficial novo é a
 // base, e somente os eventos manuais posteriores são reaplicados em ordem.
 export function reaplicarMovimentacoesBem(saldoDeclarado, movimentacoes = []) {
-  return ordenarPorData(movimentacoes).reduce(
+  return arredondarCentavos(ordenarPorData(movimentacoes).reduce(
     aplicarMovimentoBem,
     parseFloat(saldoDeclarado) || 0,
-  );
+  ));
 }
 
 // Mesma conta SEM o piso em zero. Serve só para MEDIR quanto do caminho de
@@ -153,7 +154,7 @@ export function situacaoBemAposExclusao(bem, movimentacoesRestantes) {
   const movsOriginais = bem.movimentacoes || [];
   const explicadoPelasMovimentacoes = ordenarPorData(movsOriginais).reduce(aplicarMovimentoBemSemPiso, bem.situacao_anterior);
   const saltoSemData = bem.situacao_atual - explicadoPelasMovimentacoes;
-  return ordenarPorData(movimentacoesRestantes).reduce(aplicarMovimentoBem, bem.situacao_anterior + saltoSemData);
+  return arredondarCentavos(ordenarPorData(movimentacoesRestantes).reduce(aplicarMovimentoBem, bem.situacao_anterior + saltoSemData));
 }
 
 // Reconstrói o saldo devedor de uma dívida numa data de corte, a partir da
@@ -174,10 +175,10 @@ function aplicarMovimentoDivida(saldo, m) {
 }
 
 export function reaplicarMovimentacoesDivida(saldoDeclarado, movimentacoes = []) {
-  return ordenarPorData(movimentacoes).reduce(
+  return arredondarCentavos(ordenarPorData(movimentacoes).reduce(
     aplicarMovimentoDivida,
     parseFloat(saldoDeclarado) || 0,
-  );
+  ));
 }
 
 // Sem piso, pelo mesmo motivo de `aplicarMovimentoBemSemPiso` (ver o
@@ -222,7 +223,7 @@ export function situacaoDividaAposExclusao(divida, movimentacoesRestantes) {
   const atual = parseFloat(divida.situacao_atual) || 0;
   const explicadoPelasMovimentacoes = ordenarPorData(movsOriginais).reduce(aplicarMovimentoDividaSemPiso, anterior);
   const saltoSemData = atual - explicadoPelasMovimentacoes;
-  return ordenarPorData(movimentacoesRestantes).reduce(aplicarMovimentoDivida, anterior + saltoSemData);
+  return arredondarCentavos(ordenarPorData(movimentacoesRestantes).reduce(aplicarMovimentoDivida, anterior + saltoSemData));
 }
 
 // Totais do card "Evolução Patrimonial" do Relatório para IRPF: uma FOTO do
@@ -947,15 +948,30 @@ export function fecharDemonstrativo({
   rendaVariavelPerda = 0, pagamentosEfetuados = 0, pagamentosDiversos = 0, totalDoacoes = 0,
   extras = {},
 }) {
-  const saldoDeCaixaGeral = varPatrimonial.total + rendimentos.totalGeral + ganhos.total + rendaVariavelPerda;
-  const saldoDeCaixa = saldoDeCaixaGeral - pagamentosEfetuados - pagamentosDiversos - totalDoacoes;
+  const arredondarNumeros = (objeto) => Object.fromEntries(Object.entries(objeto)
+    .map(([chave, valor]) => [chave, typeof valor === 'number' ? arredondarCentavos(valor) : valor]));
+  const varPatrimonialFechada = arredondarNumeros(varPatrimonial);
+  const rendimentosFechados = arredondarNumeros(rendimentos);
+  const ganhosFechados = arredondarNumeros(ganhos);
+  const rendaVariavelPerdaFechada = arredondarCentavos(rendaVariavelPerda);
+  const pagamentosEfetuadosFechados = arredondarCentavos(pagamentosEfetuados);
+  const pagamentosDiversosFechados = arredondarCentavos(pagamentosDiversos);
+  const totalDoacoesFechado = arredondarCentavos(totalDoacoes);
+  const saldoDeCaixaGeral = arredondarCentavos(varPatrimonialFechada.total
+    + rendimentosFechados.totalGeral + ganhosFechados.total + rendaVariavelPerdaFechada);
+  const saldoDeCaixa = arredondarCentavos(saldoDeCaixaGeral
+    - pagamentosEfetuadosFechados - pagamentosDiversosFechados - totalDoacoesFechado);
   return {
-    varPatrimonial, rendimentos, ganhos,
-    rendaVariavelPerda,
+    varPatrimonial: varPatrimonialFechada,
+    rendimentos: rendimentosFechados,
+    ganhos: ganhosFechados,
+    rendaVariavelPerda: rendaVariavelPerdaFechada,
     saldoDeCaixaGeral,
-    pagamentosEfetuados, pagamentosDiversos, totalDoacoes,
+    pagamentosEfetuados: pagamentosEfetuadosFechados,
+    pagamentosDiversos: pagamentosDiversosFechados,
+    totalDoacoes: totalDoacoesFechado,
     saldoDeCaixa,
-    ...extras,
+    ...arredondarNumeros(extras),
   };
 }
 

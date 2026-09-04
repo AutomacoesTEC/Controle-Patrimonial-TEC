@@ -15,6 +15,7 @@ import {
 // migracoes.js NÃO importa nada daqui (ver o comentário no topo dele): a
 // dependência é de mão única, reducer -> migracoes, só pela constante.
 import { VERSAO_ESQUEMA_ATUAL } from './migracoes';
+import { arredondarCentavos } from '../utils/formatters';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -967,6 +968,7 @@ export function reducer(state, action) {
           else if (mov.tipo === 'venda_parcial') situacao_atual = Math.max(0, situacao_atual - mov.valor);
           else if (mov.tipo === 'venda_total' || mov.tipo === 'baixa') situacao_atual = 0;
           else if (mov.tipo === 'ajuste') situacao_atual = mov.valor;
+          situacao_atual = arredondarCentavos(situacao_atual);
           return { ...b, situacao_atual, movimentacoes: [...(b.movimentacoes || []), mov] };
         }),
       };
@@ -994,6 +996,7 @@ export function reducer(state, action) {
           else if (mov.tipo === 'amortizacao') situacao_atual = Math.max(0, situacao_atual - mov.valor);
           else if (mov.tipo === 'quitacao') situacao_atual = 0;
           else if (mov.tipo === 'ajuste') situacao_atual = mov.valor;
+          situacao_atual = arredondarCentavos(situacao_atual);
           return { ...d, situacao_atual, movimentacoes: [...(d.movimentacoes || []), mov] };
         }),
       };
@@ -1090,6 +1093,7 @@ export function reducer(state, action) {
           else if (mov.tipo === 'amortizacao') situacao_atual = Math.max(0, situacao_atual - mov.valor);
           else if (mov.tipo === 'quitacao') situacao_atual = 0;
           else if (mov.tipo === 'ajuste') situacao_atual = mov.valor;
+          situacao_atual = arredondarCentavos(situacao_atual);
           return { ...d, situacao_atual, movimentacoes: [...(d.movimentacoes || []), mov] };
         }),
       };

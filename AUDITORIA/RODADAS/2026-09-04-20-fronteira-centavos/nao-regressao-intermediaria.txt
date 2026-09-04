@@ -1,0 +1,12 @@
+FAIL  src/store/demonstrativos.test.js
+
+expected 1830916.04 to be close to 1830916.035,
+received difference is 0.005000000121071935, but expected 0.005
+
+Test Files  1 failed | 37 passed (38)
+Tests       1 failed | 874 passed (875)
+
+A entrada congelada de 2024 inclui 169301.505 e a asserção anterior esperava
+três casas decimais. A expectativa foi corrigida para o centavo exibido pela
+planilha: 1830916.04; os demais fechamentos derivados passam a 877255.35 e
+110980.23. Nenhum valor de entrada foi alterado.
