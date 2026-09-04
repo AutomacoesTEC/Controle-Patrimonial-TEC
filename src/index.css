@@ -267,7 +267,9 @@ thead th{position:sticky;top:0;z-index:1;background:var(--bg-secondary);padding:
    acompanhando o scroll). Não persiste — some ao trocar de tela. */
 .rdz-camada{position:sticky;top:0;z-index:2;pointer-events:none}
 .rdz-colunas-fixas .rdz-camada{z-index:6}
+.rdz-camada-fixa{left:0;width:100%;z-index:7}
 .rdz-puxador{position:absolute;top:0;width:11px;margin-left:-6px;cursor:col-resize;pointer-events:auto;touch-action:none}
+.rdz-puxador-fixo{left:auto;margin-left:0;transform:translateX(50%)}
 .rdz-puxador::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:1px;background:transparent;transition:background var(--transition-fast)}
 .rdz-puxador:hover::before{background:var(--accent-primary)}
 body.rdz-arrastando{cursor:col-resize;user-select:none}

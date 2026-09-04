@@ -83,6 +83,7 @@ export default function TabelaRedimensionavel({
 
   let css = null;
   let divisorias = [];
+  let divisoriasFixas = [];
   if (larguras) {
     const total = larguras.reduce((a, b) => a + b, 0);
     const regras = [`.${cls}>table{table-layout:fixed;width:${total}px}`];
@@ -119,27 +120,55 @@ export default function TabelaRedimensionavel({
     css = regras.join('\n');
     let acc = 0;
     divisorias = larguras.slice(0, -1).map((w, i) => { acc += w; return { i, left: acc }; });
+    if (stickyRightColumns > 0) {
+      divisoriasFixas = divisorias
+        .filter(({ i }) => i >= inicioFixasDireita - 1)
+        .map(({ i }) => ({
+          i,
+          right: larguras.slice(i + 1).reduce((soma, w) => soma + w, 0),
+        }));
+      divisorias = divisorias.filter(({ i }) => i < inicioFixasDireita - 1);
+    }
   }
 
   return (
     <div ref={wrapRef} className={`table-container ${cls} ${stickyFirstColumn || stickyRightColumns ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
       {css && <style>{css}</style>}
       {larguras && alturaCab > 0 && (
-        <div className="rdz-camada" aria-hidden="true" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
-          {divisorias.map(({ i, left }) => (
-            <div
-              key={i}
-              className="rdz-puxador"
-              style={{ left: `${left}px`, height: `${alturaCab}px` }}
-              title="Arraste para ajustar a largura. Duplo clique volta ao padrão."
-              onPointerDown={iniciarArraste(i)}
-              onPointerMove={moverArraste}
-              onPointerUp={soltarArraste}
-              onPointerCancel={soltarArraste}
-              onDoubleClick={restaurarColuna(i)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="rdz-camada" aria-hidden="true" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
+            {divisorias.map(({ i, left }) => (
+              <div
+                key={i}
+                className="rdz-puxador"
+                style={{ left: `${left}px`, height: `${alturaCab}px` }}
+                title="Arraste para ajustar a largura. Duplo clique volta ao padrão."
+                onPointerDown={iniciarArraste(i)}
+                onPointerMove={moverArraste}
+                onPointerUp={soltarArraste}
+                onPointerCancel={soltarArraste}
+                onDoubleClick={restaurarColuna(i)}
+              />
+            ))}
+          </div>
+          {divisoriasFixas.length > 0 && (
+            <div className="rdz-camada rdz-camada-fixa" aria-hidden="true" style={{ height: 0 }}>
+              {divisoriasFixas.map(({ i, right }) => (
+                <div
+                  key={i}
+                  className="rdz-puxador rdz-puxador-fixo"
+                  style={{ right: `${right}px`, height: `${alturaCab}px` }}
+                  title="Arraste para ajustar a largura. Duplo clique volta ao padrão."
+                  onPointerDown={iniciarArraste(i)}
+                  onPointerMove={moverArraste}
+                  onPointerUp={soltarArraste}
+                  onPointerCancel={soltarArraste}
+                  onDoubleClick={restaurarColuna(i)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
       {children}
     </div>
