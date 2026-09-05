@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useRef, useMemo } from 'react';
@@ -23,7 +24,7 @@ export default function DividasPage({ onVoltar } = {}) {
   const [origemFilter, setOrigemFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const anoCadastro = form.data ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : state.anoCalendario;
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
@@ -163,7 +164,7 @@ export default function DividasPage({ onVoltar } = {}) {
             <form onSubmit={handleSave}>
               <div className="modal-body">
                 <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
-                <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
+                <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Código do credor</label><SeletorCodigo opcoes={CODIGOS_DIVIDA} value={form.codigo} onChange={v => upd('codigo', v)} placeholder="Selecione ou digite o código" /></div>
                 </div>

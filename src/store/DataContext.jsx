@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef, useState } from 'react';
+import { anoCadastroValido } from '../utils/dataCadastro';
 import { reducerComHistorico, initialState, snapshotHasData, hasWorkingData } from './reducer';
 import { dataStorageKeyFor, PERFIS_STORAGE_KEY, sincronizarPerfilComContribuinte } from './perfis';
 import { migrarEstadoPersistido, versaoDoEstado } from './migracoes';
@@ -368,6 +369,10 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
   // se a pessoa cancelou o aviso. Deixou de devolver um boolean "trocou de
   // ano" porque, fora do onboarding, não troca mais nada.
   const garantirAnoCadastro = useCallback(async (anoEscolhido) => {
+    if (!anoCadastroValido(anoEscolhido)) {
+      addToast('Informe uma data válida, com ano entre 0001 e 9999.', 'error');
+      return null;
+    }
     if (anoEscolhido === state.anoCalendario) return anoEscolhido;
     const semAnoAtivo = state.anoCalendario == null;
     const ok = await confirmar({
@@ -383,7 +388,7 @@ export function DataProvider({ perfilId, chave, initialData, children }) {
       dispatch({ type: existe ? 'SWITCH_ANO' : 'ROLLOVER_ANO', payload: anoEscolhido });
     }
     return anoEscolhido;
-  }, [state, confirmar]);
+  }, [state, confirmar, addToast]);
 
   // Sempre envolve em ADD_EM_ANO, mesmo quando `ano` já é o ativo: o reducer
   // trata os dois casos de forma idêntica a um dispatch direto (ver

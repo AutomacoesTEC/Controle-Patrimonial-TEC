@@ -35,3 +35,8 @@ Depois: primeira execução detectou uma regressão no contrato de importação 
 Comando depois: `node node_modules/vitest/vitest.mjs run src/store/limitesAnoAuditoria.test.js src/store/auditoriaIndependente20260905.test.js src/store/reducer.test.js src/store/fluxoAnual.test.js src/store/reducer.historicoCobertura.test.js src/store/DataContext.test.js src/store/backupPerfil.test.js src/store/continuidade.test.js src/store/migracoes.test.js`.
 
 MANTER: os 12 casos de limites agora terminam e passam, assim como continuidade/importação/backup/migração selecionados. A projeção distante cria no máximo dois snapshots; isso não é benchmark estatístico, é limite determinístico de materialização. A execução anterior interrompida continua registrada, sem alegação de medição pareada de duração.
+# Integração da interface
+
+Os formulários agora usam anoDaDataCadastro (ISO civil estrito), inclusive o cálculo do saldo durante digitação do movimento. DataContext recusa ano inválido antes de abrir confirmação; inputs possuem min/max de0001-01-01 a9999-12-31. Edições legadas sem data preservam o ano corrente, sem inventar data.
+
+Verificação adicional: validacao-cadastros.txt inclui26casos de parsing/limites; suite-congelada.txt registra1003aprovações e11falhas esperadas do Demonstrativo. O teste de navegador uso-congelado.txt registra16cenários aprovados sem alteração de src durante a execução. Execuções anteriores com modais desmontados durante desenvolvimento estão preservadas; não constituem prova de defeito no aplicativo.

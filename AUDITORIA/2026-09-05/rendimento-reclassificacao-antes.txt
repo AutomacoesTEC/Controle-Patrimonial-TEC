@@ -1,0 +1,35 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ × src/utils/camposRendimento.test.js > reclassificação de rendimento importado > trocar RRA duplicado para PJ remove a exclusão derivada do tipo anterior 37ms
+   → expected true to be false // Object.is equality
+ ✓ src/utils/camposRendimento.test.js > reclassificação de rendimento importado > editar apenas descrição do mesmo RRA mantém a proteção de duplicidade 2ms
+ ✓ src/utils/camposRendimento.test.js > reclassificação de rendimento importado > novo rendimento e alterações comuns mantêm normalização numérica 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/utils/camposRendimento.test.js > reclassificação de rendimento importado > trocar RRA duplicado para PJ remove a exclusão derivada do tipo anterior
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/utils/camposRendimento.test.js:9:30
+      7|   it('trocar RRA duplicado para PJ remove a exclusão derivada do tipo …
+      8|     const payload = prepararRendimentoParaSalvar({ ...original, tipo: …
+      9|     expect(payload.naoSomar).toBe(false);
+       |                              ^
+     10|     expect(totalRendimentos([payload], 0).totalGeral).toBe(1000);
+     11|     expect(payload.origem).toBe('importacao');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  15:52:59
+   Duration  579ms (transform 248ms, setup 0ms, import 303ms, tests 45ms, environment 0ms)
+

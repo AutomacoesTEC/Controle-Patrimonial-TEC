@@ -1,0 +1,12 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ✓ src/utils/camposRendimento.test.js > reclassificação de rendimento importado > trocar RRA duplicado para PJ remove a exclusão derivada do tipo anterior 4ms
+ ✓ src/utils/camposRendimento.test.js > reclassificação de rendimento importado > editar apenas descrição do mesmo RRA mantém a proteção de duplicidade 1ms
+ ✓ src/utils/camposRendimento.test.js > reclassificação de rendimento importado > novo rendimento e alterações comuns mantêm normalização numérica 1ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  15:53:36
+   Duration  304ms (transform 119ms, setup 0ms, import 145ms, tests 7ms, environment 0ms)
+

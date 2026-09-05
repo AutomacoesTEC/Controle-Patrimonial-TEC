@@ -32,7 +32,10 @@ with sync_playwright() as p:
         return page.evaluate("JSON.parse(localStorage.getItem('controle-patrimonial-data-uso'))")
 
     def esperar(js):
-        page.wait_for_function("() => {const s=JSON.parse(localStorage.getItem('controle-patrimonial-data-uso'));return " + js + ";}")
+        try:
+            page.wait_for_function("() => {const s=JSON.parse(localStorage.getItem('controle-patrimonial-data-uso'));return " + js + ";}")
+        except Exception as e:
+            raise AssertionError('Estado não atingido: '+js+'; tela: '+page.locator('body').inner_text()[-2200:]) from e
 
     def fechar():
         page.wait_for_timeout(400)
@@ -198,7 +201,7 @@ with sync_playwright() as p:
         esperar("s.historico[2026]?.imoveisRurais.some(x=>x.nomeLocalizacao==='Fazenda E2E')")
         fechar(); page.get_by_role('button',name='Bens da Atividade Rural',exact=True).click()
         page.get_by_role('button',name=re.compile('Novo Bem')).click(); pessoa()
-        preencher('Data do cadastro','2026-02-02'); preencher('Discriminação','Trator E2E'); preencher('Situação em 31/12 (Ano Atual)','50000,00'); salvar()
+        preencher('Data do cadastro','2026-02-02'); preencher('Código','16'); preencher('Discriminação','Trator E2E'); preencher('Situação em 31/12 (Ano Atual)','50000,00'); salvar()
         esperar("s.historico[2026]?.bensRurais.some(x=>x.discriminacao==='Trator E2E')")
         fechar(); page.get_by_role('button',name='Dívidas Vinculadas',exact=True).click()
         page.get_by_role('button',name=re.compile('Nova Dívida')).click(); pessoa()
@@ -224,6 +227,7 @@ with sync_playwright() as p:
     caso('Rural: edição de data transporta lançamento e permite exclusão',rural_edicao)
 
     def rv_cadastros():
+        ano(2026)
         navegar('Renda Variável','Incluir mês (Comuns)')
         page.get_by_role('button',name=re.compile('Incluir mês \\(Comuns\\)')).click()
         selecionar('Mês','3'); preencher('Resultado líquido comuns','1000,00'); preencher('Imposto pago (DARF), se diferente do apurado','150,00'); salvar()

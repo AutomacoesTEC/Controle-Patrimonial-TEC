@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
@@ -110,7 +111,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_IMOVEL_VAZIO);
-  const anoCadastro = form.dataAquisicao ? Number(form.dataAquisicao.slice(0, 4)) : anoCalendario;
+  const anoCadastro = form.dataAquisicao ? anoDaDataCadastro(form.dataAquisicao) : anoCalendario;
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_IMOVEL_VAZIO); setModalOpen(true); };
@@ -225,7 +226,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
                   </div>
                   <div className="form-group">
                     <label>Data de Aquisição</label>
-                    <input className="form-control" type="date" required={!editingId} value={form.dataAquisicao || ''} onChange={e => upd('dataAquisicao', e.target.value)} />
+                    <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId} value={form.dataAquisicao || ''} onChange={e => upd('dataAquisicao', e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -424,7 +425,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
       dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, titularidade: form.titularidade, beneficiario: form.beneficiario, cpf_titularidade: form.cpf_titularidade, cpf_beneficiario: form.cpf_beneficiario, nome_dependente: form.nome_dependente, dependenteId: form.dependenteId, data: form.data, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
       addToast('Dívida atualizada com sucesso!', 'success');
     } else {
-      const anoAlvo = await garantirAnoCadastro(Number(form.data?.slice(0, 4)));
+      const anoAlvo = await garantirAnoCadastro(anoDaDataCadastro(form.data));
       if (!anoAlvo) return;
       despacharEmAno(anoAlvo, {
         type: 'ADD_DIVIDA_RURAL',
@@ -524,7 +525,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
         <form onSubmit={handleSave}>
           <div className="modal-body">
                 <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(estadoFormulario, form.data || form.data_aquisicao || form.dataAquisicao)} />
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-group"><label>Discriminação</label><textarea className="form-control" value={form.discriminacao} onChange={e => upd('discriminacao', e.target.value)} /></div>
             {editingId && liveDivida ? (
               <>
@@ -580,7 +581,7 @@ function LancamentosRuraisSection({
 
   // Ano-calendário = ano da DATA do lançamento (campo separado tirado em
   // 03/09/2026). Lê os 4 primeiros caracteres do <input type="date">.
-  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : anoCalendario;
+  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : anoCalendario;
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_LANCAMENTO_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
@@ -752,7 +753,7 @@ function LancamentosRuraisSection({
                   </div>
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>

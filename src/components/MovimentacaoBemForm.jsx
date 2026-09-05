@@ -5,6 +5,7 @@ import { formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatt
 import MoneyInput from './MoneyInput';
 import Ajuda from './Ajuda';
 import { estadoNoAno, correspondenteNoAno } from '../store/reducer';
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 
 // Bloco de "registrar movimentação" de um bem (venda, compra, benfeitoria,
 // baixa, ajuste), reaproveitado entre Bens e Direitos (BemModal) e Bens da
@@ -93,8 +94,8 @@ export default function MovimentacaoBemForm({
   // anterior — é só o valor exibido no campo antes de a pessoa escolher a
   // data; o que vale no registro é sempre a reconstrução pela data.
   const situacaoNaVespera = useMemo(() => {
-    if (movData) {
-      const ano = Number(movData.slice(0, 4));
+    const ano = anoDaDataCadastro(movData);
+    if (ano) {
       const colecao = isDivida ? (actionType.endsWith('_RURAL') ? 'dividasRurais' : 'dividas') : (isBemRural ? 'bensRurais' : 'bens');
       const destino = estadoNoAno(state, ano);
       const alvo = correspondenteNoAno(destino[colecao], bem) || bem;
@@ -126,8 +127,8 @@ export default function MovimentacaoBemForm({
     // histórico, não uma baixa em cima do saldo atual, que já reflete essa
     // mesma movimentação).
     const zeraTudo = zeraOSaldo;
-    if (!movData) {
-      alert('Informe a data da movimentação.');
+    if (!anoDaDataCadastro(movData)) {
+      addToast('Informe uma data válida para a movimentação (ano de 0001 a 9999).', 'error');
       return;
     }
     // `situacaoNaVespera` (reconstruída pela data) no lugar de
@@ -156,7 +157,7 @@ export default function MovimentacaoBemForm({
     // Confirmação, não bloqueio: pode ser uma movimentação legítima de
     // virada de ano (ex.: venda em janeiro do ano seguinte lançada aqui
     // antes do "Avançar para o próximo ano"), então só avisa — não impede.
-    const anoDaData = Number(movData.slice(0, 4));
+    const anoDaData = anoDaDataCadastro(movData);
     if (anoCalendario != null && anoDaData !== anoCalendario) {
       const confirma = await confirmar({
         titulo: 'Confirmar data de outro ano-calendário?',
@@ -232,7 +233,7 @@ export default function MovimentacaoBemForm({
         </div>
         <div className="form-group">
           <label>Data</label>
-          <input className="form-control" type="date" value={movData} onChange={e => setMovData(e.target.value)} />
+          <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" value={movData} onChange={e => setMovData(e.target.value)} />
         </div>
         <div className="form-group">
           <label>

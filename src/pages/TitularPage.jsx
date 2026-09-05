@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import { useState, useEffect, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCpfCnpj, mascaraCpf, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, CODIGOS_DEPENDENCIA } from '../utils/formatters';
@@ -26,7 +27,7 @@ export default function TitularPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formDependente, setFormDependente] = useState(FORM_DEPENDENTE_VAZIO);
-  const anoCadastro = formDependente.data ? Number(formDependente.data.slice(0, 4)) : state.anoCalendario;
+  const anoCadastro = formDependente.data ? anoDaDataCadastro(formDependente.data) : state.anoCalendario;
   const updDependente = (f, v) => setFormDependente(p => ({ ...p, [f]: v }));
   const simNao = (v) => v === true ? 'Sim' : v === false ? 'Não' : '-';
   const enderecoCompleto = contribuinte
@@ -35,7 +36,7 @@ export default function TitularPage() {
     : '';
 
   const salvarTitular = async () => {
-    const ano = formTitular.data ? Number(formTitular.data.slice(0, 4)) : anoCalendario;
+    const ano = formTitular.data ? anoDaDataCadastro(formTitular.data) : anoCalendario;
     // Sem esta guarda, salvar o formulário vazio disparava SET_CONTRIBUINTE
     // com nome e CPF em branco e APAGAVA o titular que a importação tinha
     // preenchido.
@@ -100,7 +101,7 @@ export default function TitularPage() {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Titular</h3></div>
           <form onSubmit={handleSalvarTitular}>
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!contribuinte} value={formTitular.data || ''} onChange={e => setFormTitular(p => ({ ...p, data: e.target.value }))} /></div>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!contribuinte} value={formTitular.data || ''} onChange={e => setFormTitular(p => ({ ...p, data: e.target.value }))} /></div>
             <div className="form-row" style={{ padding: '0 16px' }}>
               <div className="form-group">
                 <label>Nome Completo</label>
@@ -206,7 +207,7 @@ export default function TitularPage() {
         <div className="modal-header"><h3>{editingId ? 'Editar Dependente' : 'Novo Dependente'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSalvarDependente}>
           <div className="modal-body">
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={formDependente.data || ''} onChange={e => updDependente('data', e.target.value)} /></div>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId} value={formDependente.data || ''} onChange={e => updDependente('data', e.target.value)} /></div>
             <div className="form-group"><label>Nome Completo</label><input className="form-control" value={formDependente.nome} onChange={e => updDependente('nome', e.target.value)} /></div>
             <div className="form-row">
               <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(formDependente.cpf)} onChange={e => updDependente('cpf', mascaraCpf(e.target.value))} placeholder="000.000.000-00" /></div>

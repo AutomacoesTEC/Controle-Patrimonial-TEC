@@ -1,4 +1,5 @@
-import { camposRendimento, rendimentoSemFonteObrigatoria, COLUNAS_COMPLEMENTARES_RENDIMENTO } from '../utils/camposRendimento';
+import { camposRendimento, rendimentoSemFonteObrigatoria, prepararRendimentoParaSalvar, COLUNAS_COMPLEMENTARES_RENDIMENTO } from '../utils/camposRendimento';
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
@@ -41,7 +42,7 @@ export default function RendimentosPage() {
 
   // Ano-calendário = ano da DATA do rendimento (campo separado tirado em
   // 03/09/2026). Lê os 4 primeiros caracteres do <input type="date">.
-  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : state.anoCalendario;
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
@@ -58,9 +59,7 @@ export default function RendimentosPage() {
     const falta = primeiroCampoVazio([['Tipo', form.tipo], [rendimentoSemFonteObrigatoria(form.tipo) ? 'Descrição da operação' : 'Nome Fonte Pagadora', rendimentoSemFonteObrigatoria(form.tipo) ? form.descricao : form.nome_fonte]])
       || primeiroValorZerado([['Valor', form.valor]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    const payload = { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0,
-      ...Object.fromEntries(camposRendimento(form.tipo).map(([campo]) => [campo, parseFloat(form[campo]) || 0])),
-    };
+    const payload = prepararRendimentoParaSalvar(form, rendimentos.find(r => r.id === editingId));
     if (editingId) {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
       if (!anoAlvo) return;
@@ -288,7 +287,7 @@ export default function RendimentosPage() {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>{form.tipo === 'tributavel_rra' ? 'Valor tributável (conforme apuração)' : 'Valor'}</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>{form.tipo === 'tributavel_pf_exterior' ? 'Carnê-leão pago' : 'IRRF'}</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>

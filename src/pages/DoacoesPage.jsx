@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
@@ -29,7 +30,7 @@ export default function DoacoesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const anoCadastro = form.data ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : state.anoCalendario;
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   const aba = ABAS[subView];
@@ -166,7 +167,7 @@ export default function DoacoesPage() {
         <form onSubmit={handleSave}>
           <div className="modal-body">
                 <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-row">
               <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} /></div>
               {aba.comCategoria && (

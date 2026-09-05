@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useRef } from 'react';
@@ -28,7 +29,7 @@ export default function PagamentosDiversosPage() {
   // o que a data já diz e podia divergir dela. Lê os 4 primeiros caracteres do
   // <input type="date"> (sempre YYYY-MM-DD) em vez de new Date().getFullYear(),
   // que num fuso negativo joga 01/01 para o ano anterior.
-  const anoCadastro = /^\d{4}-\d{2}-\d{2}$/.test(form.data || '') ? Number(form.data.slice(0, 4)) : state.anoCalendario;
+  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : state.anoCalendario;
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
@@ -135,7 +136,7 @@ export default function PagamentosDiversosPage() {
                   <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>

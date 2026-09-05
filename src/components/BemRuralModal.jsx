@@ -1,3 +1,4 @@
+import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from './SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useEffect } from 'react';
@@ -55,7 +56,7 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
     // item G do HANDOFF-2026-09-03.md.
     let anoAlvo = null;
     if (!isEditing) {
-      anoAlvo = await garantirAnoCadastro(Number(form.data?.slice(0, 4)));
+      anoAlvo = await garantirAnoCadastro(anoDaDataCadastro(form.data));
       if (!anoAlvo) return;
     }
     onSave({
@@ -75,7 +76,7 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
                 <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!isEditing} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!isEditing} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             {isEditing ? (
               // Bloco 1 "Dados do Bem" (mesmo critério do BemModal, versão
               // mais simples aqui: sem grupo/imóvel/veículo, só Código +
