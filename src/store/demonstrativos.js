@@ -10,7 +10,7 @@
 // Lógica pura, sem React, pelo mesmo motivo do reducer.js: testável sem
 // montar componente.
 
-import { linhasComunsDoAno } from './rendaVariavelMensal';
+import { linhasFinanceirasDoAno } from './rendaVariavelMensal';
 import { pessoaDoRegistro } from './titularidade';
 import { arredondarCentavos } from '../utils/formatters';
 
@@ -921,7 +921,7 @@ export function demonstrativoConciliacao(state, dataDe, dataAte) {
     { meses: state.receitasDespesasRuraisOficial, ano: state.anoCalendario });
   const rendimentos = totalRendimentos(state.rendimentos, resultadoRural, dataDe, dataAte);
   const ganhos = ganhosApuradosPeriodo(state, dataDe, dataAte);
-  const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(state), state.anoCalendario, dataDe, dataAte, state.rendimentos);
+  const rv = rendaVariavelDoPeriodo(linhasFinanceirasDoAno(state), state.anoCalendario, dataDe, dataAte, state.rendimentos);
   const totalDoacoes = totalDoacoesPeriodo(state);
   const pagamentosEfetuados = totalPagamentos(state.pagamentos, dataDe, dataAte);
   const pagamentosDiversos = totalPagamentosDiversos(state.pagamentosDiversos, dataDe, dataAte);

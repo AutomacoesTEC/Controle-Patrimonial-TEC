@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 11ms
+     × D05: perda FII de 4 mil reduz recursos em 4 mil 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D05: perda FII de 4 mil reduz recursos em 4 mil
+AssertionError: expected +0 to be -4000 // Object.is equality
+
+- Expected
++ Received
+
+- -4000
++ 0
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:56:33
+     54|   it('D05: perda FII de 4 mil reduz recursos em 4 mil', () => {
+     55|     const s = estado({ fiiFiagroMensalManual: [{ mes: 6, titular: true…
+     56|     expect(ano(s).saldoDeCaixa).toBe(-4000);
+       |                                 ^
+     57|   });
+     58|   it.fails('D06: doação datada em dezembro não pode sair do caixa de j…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:30:52
+   Duration  691ms (transform 446ms, setup 0ms, import 512ms, tests 11ms, environment 0ms)
+

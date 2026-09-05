@@ -51,7 +51,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     expect(ano(estado({ rendaVariavelMensalManual: [mensal], rendimentos: [renda('exclusivo_05', 10000, { beneficiario: 'Titular' })] })).saldoDeCaixa).toBe(10000);
     expect(ano(estado({ rendaVariavelMensalManual: [mensal], rendimentos: [renda('exclusivo_05', 10000, { beneficiario: 'Dependente', cpfDependente: '123' })] })).saldoDeCaixa).toBe(20000);
   });
-  it.fails('D05: perda FII de 4 mil reduz recursos em 4 mil', () => {
+  it('D05: perda FII de 4 mil reduz recursos em 4 mil', () => {
     const s = estado({ fiiFiagroMensalManual: [{ mes: 6, titular: true, resultadoLiquidoMes: -4000 }] });
     expect(ano(s).saldoDeCaixa).toBe(-4000);
   });

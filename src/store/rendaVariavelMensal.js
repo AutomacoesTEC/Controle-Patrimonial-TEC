@@ -37,3 +37,13 @@ export function linhasComunsDoAno(dados) {
 export function linhasFiiDoAno(dados) {
   return mesclarMensal(dados?.fiiFiagroMensalOficial, dados?.fiiFiagroMensalManual);
 }
+
+// Projeção financeira somente: não altera as fichas nem compensa prejuízo
+// tributário de FII com operações comuns. Cada modalidade conserva sua origem.
+export function linhasFinanceirasDoAno(dados) {
+  return [...linhasComunsDoAno(dados), ...linhasFiiDoAno(dados).map(l => ({
+    ...l, modalidadeFinanceira: 'fii',
+    comuns: { resultadoLiquidoMes: l.resultadoLiquidoMes || 0 },
+    consolidacao: { totalImpostoDevido: l.impostoDevido || 0 },
+  }))];
+}

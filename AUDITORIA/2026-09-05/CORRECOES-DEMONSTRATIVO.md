@@ -27,3 +27,9 @@ MANTER: D03-antes.txt registra 7.000; D03-depois.txt confirma 8.000. Corrigidos 
 Base cb9b1cd. Previsão: ganho mensal 10.000 sem outro rendimento gera ajuste +10.000; com os mesmos 10.000 já em exclusivos código 05, ajuste zero. Perdas continuam refletidas. Camada: integração do resultado mensal com rendimentos já informados, por pessoa. Não usar imposto devido como pagamento. Fixture D04 antes/depois; controles de sobreposição serão acrescidos, sem chamar esses novos controles de evidência pareada. A conciliação agregada sem identidade de operação exige revisão, não prova automática de caixa bancário.
 
 MANTER: D04 passou de zero a 10.000. Controles adicionais confirmam não duplicar o resumo da mesma pessoa e não abater o resumo de outro dependente. Saídas D04-antes.txt, D04-depois.txt e D04-controles.txt. A linha antes chamada perda agora mostra ajuste financeiro, inclusive positivo.
+
+## D05 — FII/Fiagro ignorado
+
+Base 636da29. Previsão: perda mensal FII de 4.000 produz ajuste -4.000, preservando a precedência manual/oficial da ficha mensal. Camada: inclusão da segunda modalidade no mesmo integrador financeiro RV, sem misturar a compensação fiscal de prejuízos entre modalidades. Fixture D05 idêntica antes/depois. Ganhos de alienação não se confundem com distribuições isentas dos fundos.
+
+MANTER: D05-antes.txt registra zero; D05-depois.txt confirma -4.000.

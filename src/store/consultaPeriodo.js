@@ -32,7 +32,7 @@ import {
   bemZeradoSemMovimentacaoNoAno,
 } from './demonstrativos';
 import { snapshotHasData } from './reducer';
-import { linhasComunsDoAno } from './rendaVariavelMensal';
+import { linhasFinanceirasDoAno } from './rendaVariavelMensal';
 
 const anoDeUmaData = (data) => Number(String(data).slice(0, 4));
 const maxData = (a, b) => (a >= b ? a : b);
@@ -207,7 +207,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // fichas separadas na declaração — daí a deduplicação por ano+mês para a
     // linha de meses, enquanto o resultado SOMA as duas (é o ganho líquido do
     // conjunto declarado, que é como a própria declaração consolida).
-    const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(dados), ano, trechoDe, trechoAte, dados.rendimentos);
+    const rv = rendaVariavelDoPeriodo(linhasFinanceirasDoAno(dados), ano, trechoDe, trechoAte, dados.rendimentos);
     for (const m of rv.meses) {
       if (!rendaVariavelMeses.some(x => x.ano === m.ano && x.mes === m.mes)) rendaVariavelMeses.push(m);
     }
