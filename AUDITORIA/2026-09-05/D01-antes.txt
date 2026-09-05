@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (16 tests | 1 failed | 15 skipped) 10ms
+     × D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil
+AssertionError: expected 10000 to be 8000 // Object.is equality
+
+- Expected
++ Received
+
+- 8000
++ 10000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:32:102
+     30|   });
+     31|   it('D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para …
+     32|     expect(totalRendimentos([renda('tributavel_pf_exterior', 10000, { …
+       |                                                                                                      ^
+     33|   });
+     34|   it.fails('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibil…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  17:24:26
+   Duration  805ms (transform 552ms, setup 0ms, import 616ms, tests 10ms, environment 0ms)
+

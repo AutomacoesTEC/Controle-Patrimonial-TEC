@@ -708,7 +708,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 <tr>
                   <td>
                     Tributáveis Recebidos de PF e do Exterior
-                    <Ajuda texto="Rendimentos recebidos de pessoa física, aluguéis, outros e do exterior, sujeitos ao carnê-leão. São tributáveis e entram no ajuste anual; o imposto pago mensalmente por carnê-leão é antecipação, e por isso não é descontado desta linha." />
+                    <Ajuda texto="Rendimentos de PF/exterior menos o Carnê-leão informado como pago. Ser antecipação do ajuste anual não elimina o desembolso. Não lance o mesmo imposto novamente em Despesas. O cadastro legado associa o pagamento à data do rendimento; confira a data efetiva antes de usar o recorte mensal." />
                   </td>
                   <td className="currency">{formatCurrency(demo.rendimentos.tributavelPfExterior)}</td>
                 </tr>

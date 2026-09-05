@@ -350,10 +350,10 @@ export function totalRendimentos(rendimentos, resultadoAtividadeRural, dataDe, d
   // Rendimentos recebidos de pessoa física e do exterior (carnê-leão). São
   // TRIBUTÁVEIS e entram no ajuste anual, por isso somam no total geral. O
   // imposto pago por carnê-leão fica guardado no `irrf` de cada lançamento,
-  // mas NÃO é descontado aqui: diferente da tributação exclusiva, ele não
-  // encerra a tributação do rendimento, é antecipação do imposto do ajuste.
+  // e reduz os recursos disponíveis, mesmo sendo antecipação do ajuste.
+  // Não representa imposto apenas devido: o campo do cadastro é "pago".
   const tributavelPfExterior = doPeriodo.filter(r => r.tipo === 'tributavel_pf_exterior')
-    .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+    .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
   // Rendimentos Recebidos Acumuladamente. Entram porque o dinheiro ENTROU no
   // período, que é o que este demonstrativo mede — independentemente da opção
   // de tributação do contribuinte (na fonte ou no ajuste), que muda como o

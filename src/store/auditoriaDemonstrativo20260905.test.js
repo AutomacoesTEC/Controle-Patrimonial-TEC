@@ -5,7 +5,8 @@ import { totalRendimentos, ganhosApuradosPeriodo, resultadoAtividadeRuralPeriodo
 import { aplicarIrrfDecimoTerceiro } from '../pages/importParsers';
 
 // Auditoria independente: fixtures sintéticas, sem dados de contribuintes.
-// it.fails preserva o oráculo contábil dos defeitos NÃO autorizados para correção.
+// it.fails preserva os defeitos ainda pendentes; cada correção autorizada
+// converte seu cenário em teste normal, sem enfraquecer a expectativa.
 // Reproduzir: node node_modules/vitest/vitest.mjs run src/store/auditoriaDemonstrativo20260905.test.js
 const estado = extra => ({ ...structuredClone(initialState), anoCalendario: 2026, ...extra });
 const ano = s => demonstrativoPeriodo(s, '2026-01-01', '2026-12-31');
@@ -27,7 +28,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     expect(ano(s).saldoDeCaixa).toBe(0);
     expect(ano(s).varPatrimonial.bensAte).toBe(110000);
   });
-  it.fails('D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil', () => {
+  it('D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil', () => {
     expect(totalRendimentos([renda('tributavel_pf_exterior', 10000, { irrf: 2000 })], 0).totalGeral).toBe(8000);
   });
   it.fails('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil', () => {
