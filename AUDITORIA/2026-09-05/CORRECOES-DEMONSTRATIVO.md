@@ -39,3 +39,9 @@ MANTER: D05-antes.txt registra zero; D05-depois.txt confirma -4.000.
 Base d33f32f. Previsão: doação de dezembro não reduz janeiro; com data entra somente no período efetivo. Doação anual sem dia só integra consulta que abrange o ano inteiro, não todos os meses. Camada: filtro temporal de doações. Fixture D06 antes/depois. D11 ainda exige levar desembolso de outro ano-base ao ano financeiro correto.
 
 MANTER: D06-antes.txt registra saída 1.000 em janeiro; D06-depois.txt confirma zero.
+
+## D07 — despesa rural adicional apagava o mês importado
+
+Base 4dc151f. Previsão: receita 10.000 menos despesa importada 2.000 menos complemento 100 resulta 7.900, não -100. Camada: precedência das fontes do livro-caixa. Padrão complementar; substituição da apuração mensal somente por escolha explícita. Fixture D07 antes/depois. Não migrar nem apagar lançamentos existentes; o relatório final deve recomendar revisar meses antes usados como substituição implícita.
+
+MANTER: D07-antes.txt registra -100; D07-depois.txt confirma 7.900. Formulário oferece escolha explícita e informação do efeito. A ausência de data não apaga mais o ano oficial inteiro.

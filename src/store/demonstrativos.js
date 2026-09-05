@@ -437,7 +437,7 @@ export function resultadoAtividadeRuralPeriodo(lancamentosRurais, dataDe, dataAt
   // (o manual manda no ano inteiro), que é a única que não corre o risco de
   // contar a mesma receita duas vezes. Só acontece com dado gravado antes de
   // a data existir no formulário — o cadastro atual sempre exige a data.
-  if (manuais.some(l => !l.data)) return totalManual;
+  // Data ausente não autoriza apagar o ano importado.
 
   // CORREÇÃO DE 24/08/2026, achado da auditoria independente. Antes, a
   // precedência entre livro-caixa manual e apuração importada era TUDO OU
@@ -451,7 +451,7 @@ export function resultadoAtividadeRuralPeriodo(lancamentosRurais, dataDe, dataAt
   // têm em comum: no mês em que a usuária lançou algo à mão, vale o que ela
   // lançou; nos demais, continua valendo o mês da declaração. Assim, corrigir
   // um mês não apaga os outros onze.
-  const mesesComManual = new Set(manuais.map(l => l.data.slice(0, 7)));
+  const mesesComManual = new Set(manuais.filter(l => l.tratamentoMes === 'substituir' && l.data).map(l => l.data.slice(0, 7)));
   const totalOficial = meses
     .filter(m => {
       const iso = ultimoDiaDoMes(ano, m.mes);
@@ -473,17 +473,16 @@ export function origemResultadoRural(lancamentosRurais, dataDe, dataAte, oficial
   const manuais = (lancamentosRurais || []).filter(l => noPeriodo(l.data, dataDe, dataAte));
   const { meses = [], ano } = oficial || {};
   const semData = manuais.some(l => !l.data);
-  const mesesComManual = semData ? null : new Set(manuais.map(l => l.data.slice(0, 7)));
+  const mesesComManual = new Set(manuais.filter(l => l.tratamentoMes === 'substituir' && l.data).map(l => l.data.slice(0, 7)));
   const oficiaisNoPeriodo = meses.filter(m => noPeriodo(ultimoDiaDoMes(ano, m.mes), dataDe, dataAte));
-  const substituidos = semData
-    ? oficiaisNoPeriodo.map(m => m.mes)
-    : oficiaisNoPeriodo.filter(m => mesesComManual.has(ultimoDiaDoMes(ano, m.mes).slice(0, 7))).map(m => m.mes);
+  const substituidos = oficiaisNoPeriodo.filter(m => mesesComManual.has(ultimoDiaDoMes(ano, m.mes).slice(0, 7))).map(m => m.mes);
   return {
     temManual: manuais.length > 0,
     temOficial: oficiaisNoPeriodo.length > 0,
     mesesSubstituidos: substituidos,
     mesesOficiaisMantidos: oficiaisNoPeriodo.filter(m => !substituidos.includes(m.mes)).map(m => m.mes),
-    anoInteiroManual: semData && manuais.length > 0,
+    anoInteiroManual: false,
+    temManualSemData: semData,
   };
 }
 

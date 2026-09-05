@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 10ms
+     × D07: uma despesa rural adicional não substitui receita importada do mesmo mês 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D07: uma despesa rural adicional não substitui receita importada do mesmo mês
+AssertionError: expected -100 to be 7900 // Object.is equality
+
+- Expected
++ Received
+
+- 7900
++ -100
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:64:136
+     62|   it('D07: uma despesa rural adicional não substitui receita importada…
+     63|     const oficial = { ano: 2026, meses: [{ mes: 6, receitaBruta: 10000…
+     64|     expect(resultadoAtividadeRuralPeriodo([{ data: '2026-06-10', tipo:…
+       |                                                                                                                                        ^
+     65|   });
+     66|   it.fails('D08: operações diferentes com mesma data e preço não são d…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:32:15
+   Duration  662ms (transform 428ms, setup 0ms, import 493ms, tests 10ms, environment 0ms)
+

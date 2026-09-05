@@ -59,7 +59,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     const s = estado({ doacoesEfetuadasOficial: [{ data: '2026-12-10', valor: 1000, origem: 'manual' }] });
     expect(demonstrativoPeriodo(s, '2026-01-01', '2026-01-31').totalDoacoes).toBe(0);
   });
-  it.fails('D07: uma despesa rural adicional não substitui receita importada do mesmo mês', () => {
+  it('D07: uma despesa rural adicional não substitui receita importada do mesmo mês', () => {
     const oficial = { ano: 2026, meses: [{ mes: 6, receitaBruta: 10000, despesaCusteioInvestimento: 2000 }] };
     expect(resultadoAtividadeRuralPeriodo([{ data: '2026-06-10', tipo: 'despesa', valor: 100 }], '2026-01-01', '2026-12-31', oficial)).toBe(7900);
   });

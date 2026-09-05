@@ -683,9 +683,9 @@ function LancamentosRuraisSection({
       {origemRural.temOficial && (
         <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', marginBottom: '16px', fontSize: '12.5px' }}>
           {origemRural.mesesSubstituidos.length === 0 ? (
-            <>Os cards abaixo somam só os lançamentos que você cadastrou à mão. Enquanto um mês não tiver lançamento manual, o Demonstrativo usa o mês correspondente da tabela acima, vinda da declaração.</>
+            <>Os cards abaixo mostram seus lançamentos manuais. No Demonstrativo, eles complementam a apuração importada. Um mês só é substituído quando essa opção é escolhida explicitamente no lançamento.</>
           ) : origemRural.anoInteiroManual ? (
-            <>Há lançamento manual sem data, então o Demonstrativo usa o livro-caixa manual para o ano inteiro e ignora a tabela acima. Informe a data dos lançamentos para voltar à substituição mês a mês.</>
+            <>Confira as datas e a origem dos lançamentos antes de conciliar o período.</>
           ) : (
             <>O Demonstrativo usa o seu livro-caixa em {origemRural.mesesSubstituidos.length === 1 ? 'um mês' : `${origemRural.mesesSubstituidos.length} meses`} ({origemRural.mesesSubstituidos.map(m => NOMES_MES[m - 1]).join(', ')}) e mantém a apuração da declaração nos outros {origemRural.mesesOficiaisMantidos.length}.</>
           )}
@@ -754,6 +754,12 @@ function LancamentosRuraisSection({
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <label htmlFor="tratamento-mes-rural">Tratamento do mês importado</label>
+                    <select id="tratamento-mes-rural" className="form-control" value={form.tratamentoMes || 'complementar'} onChange={e => upd('tratamentoMes', e.target.value)}>
+                      <option value="complementar">Complementar com este lançamento</option>
+                      <option value="substituir">Substituir o mês pelos lançamentos manuais</option>
+                    </select>
+                    <small>Substituir exclui a apuração importada desse mês do cálculo; informe todos os movimentos do mês antes de escolher essa opção.</small>
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
