@@ -1,0 +1,37 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/pages/variacaoPercentual.test.js (5 tests | 3 failed) 9ms
+   × D12: base 0 e variação 100000 resultam em null 6ms
+   × D12: base 0 e variação -10000 resultam em null 1ms
+   × D12: base 0 e variação 0 resultam em null 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/variacaoPercentual.test.js > D12: base 0 e variação 100000 resultam em null
+ FAIL  src/pages/variacaoPercentual.test.js > D12: base 0 e variação -10000 resultam em null
+ FAIL  src/pages/variacaoPercentual.test.js > D12: base 0 e variação 0 resultam em null
+AssertionError: expected +0 to be null // Object.is equality
+
+- Expected:
+null
+
++ Received:
+0
+
+ ❯ src/pages/variacaoPercentual.test.js:8:48
+      6| it.each([[0,100000,null],[0,-10000,null],[0,0,null],[100000,10000,10],…
+      7|   'D12: base %s e variação %s resultam em %s', (base, variacao, espera…
+      8|     expect(calcular({liquido:base}, variacao)).toBe(esperado);
+       |                                                ^
+      9|   });
+     10|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  17:38:44
+   Duration  208ms (transform 26ms, setup 0ms, import 41ms, tests 9ms, environment 0ms)
+

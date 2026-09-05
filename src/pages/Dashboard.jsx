@@ -404,7 +404,7 @@ export default function Dashboard({ onNavigate } = {}) {
   const tickIntervalX = Math.max(0, Math.ceil(evolucaoData.length / 6) - 1);
 
   const variacaoPeriodo = totIni && totFim ? totFim.liquido - totIni.liquido : 0;
-  const varPctPeriodo = totIni && totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : 0;
+  const varPctPeriodo = totIni && totIni.liquido !== 0 ? (variacaoPeriodo / Math.abs(totIni.liquido)) * 100 : null;
 
   // Distribuição por categoria na data "Até" — valor de cada bem RECONSTRUÍDO
   // naquela data (não o situacao_atual cru), senão a pizza discordaria dos
@@ -1048,7 +1048,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 <span className="stat-comparativo-valor">{formatCurrency(totIni?.liquido || 0)}</span>
               </div>
               <span className={`stat-change ${variacaoPeriodo >= 0 ? 'positive' : 'negative'}`}>
-                {variacaoPeriodo >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(variacaoPeriodo))} ({varPctPeriodo.toFixed(1)}%)
+                {variacaoPeriodo >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(variacaoPeriodo))} ({varPctPeriodo == null ? 'sem base percentual' : `${varPctPeriodo.toFixed(1)}% sobre o módulo da base inicial`})
               </span>
             </div>
           </div>

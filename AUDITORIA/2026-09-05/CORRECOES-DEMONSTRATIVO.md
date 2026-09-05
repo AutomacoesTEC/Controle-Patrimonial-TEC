@@ -69,3 +69,9 @@ MANTER: D10-antes.txt registra 20.000; D10-depois.txt confirma 15.000. A linha d
 Base 31bf657. A primeira metade do defeito (não descontar em 2025 doação datada em 2026) foi corrigida pelo filtro D06. Fixture ampliada ANTES desta mudança para exigir também saída 1.000 no ano financeiro de 2026, mesmo armazenada no snapshot fiscal 2025. Previsão: conservar a ficha original e somar pelo pagamento em consulta cruzada. Camada: seleção de fluxos entre snapshots. Sem data comprovada, doação diretamente na DAA não é presumida como saída no ano-base. A previsão pareada desta rodada se refere à fixture ampliada, não a um suposto novo antes do defeito já resolvido por D06.
 
 MANTER: D11-antes.txt demonstra omissão em 2026; D11-depois.txt confirma zero em 2025 e 1.000 em 2026. Preservação do cadastro fiscal sem migração.
+
+## D12 — percentual sem denominador
+
+Base 5eabaec. Previsão: base zero devolve indisponível, exibido como sem base percentual, nunca 0%; bases positiva/negativa preservam a convenção de módulo do saldo inicial. Camada: indicador matemático da tela. Fixture executa a expressão real extraída de Dashboard.jsx em cinco cenários fixos, antes/depois; não é teste visual. Nenhuma alteração monetária.
+
+MANTER: D12-antes.txt registra três falhas e dois controles; D12-depois.txt confirma cinco aprovados.
