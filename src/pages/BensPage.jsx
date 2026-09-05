@@ -1,4 +1,4 @@
-import { rotuloTitularidade } from '../store/titularidade';
+import { rotuloTitularidade, pessoaDoRegistro } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
@@ -24,6 +24,7 @@ export default function BensPage({ onVoltar } = {}) {
   const { bens, anoCalendario } = state;
   const [grupoFilter, setGrupoFilter] = useState('all');
   const [origemFilter, setOrigemFilter] = useState('all');
+  const [pessoaFilter, setPessoaFilter] = useState('todos');
   const [search, setSearch] = useState('');
   // null = ordem original (a da importação/cadastro). Clicar num cabeçalho
   // ordena por ele; clicar de novo no mesmo inverte a direção.
@@ -46,6 +47,7 @@ export default function BensPage({ onVoltar } = {}) {
       if (bemZeradoSemMovimentacaoNoAno(b)) return false;
       if (grupoFilter !== 'all' && b.grupo !== grupoFilter) return false;
       if (!correspondeFiltroOrigem(b, origemFilter)) return false;
+      if (pessoaFilter !== 'todos' && pessoaDoRegistro(b, state.dependentes) !== pessoaFilter) return false;
       if (search) {
         const s = search.toLowerCase();
         return (b.discriminacao || '').toLowerCase().includes(s) ||
@@ -54,7 +56,7 @@ export default function BensPage({ onVoltar } = {}) {
       }
       return true;
     });
-  }, [bens, grupoFilter, origemFilter, search]);
+  }, [bens, grupoFilter, origemFilter, pessoaFilter, state.dependentes, search]);
 
   const SORTERS = {
     grupo: b => b.grupo || '',
@@ -140,6 +142,13 @@ export default function BensPage({ onVoltar } = {}) {
             <option value="importacao">Declaração</option>
             <option value="manual">Manual</option>
           </select>
+          <select className="form-control filtro-origem" aria-label="Filtrar bens por titularidade" value={pessoaFilter} onChange={e => setPessoaFilter(e.target.value)}>
+            <option value="todos">Saldo geral</option>
+            <option value="titular">Titular</option>
+            {(state.dependentes || []).map(d => <option key={d.id || d.cpf} value={String(d.cpf || '').replace(/\D/g, '') || `id:${d.id}`}>Dependente: {d.nome}</option>)}
+            <option value="dependente-sem-identificacao">Dependente não identificado</option>
+            <option value="nao-informada">Titularidade não informada</option>
+          </select>
           <div className="toolbar-spacer" />
           <div className="search-box">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -147,14 +156,11 @@ export default function BensPage({ onVoltar } = {}) {
           </div>
         </div>
 
-        <TabelaRedimensionavel persistKey="bens">
-          <table className="tabela-acoes-fixas">
+        <TabelaRedimensionavel persistKey="bens-titularidade-v2">
+          <table className="tabela-acoes-fixas tabela-bens">
             <thead>
               <tr>
-                {/* Número do item impresso na ficha de Bens e Direitos. É por
-                    ele que se acha o bem no papel e no Demonstrativo da Lei
-                    14.754/2023, que identifica o bem só pelo número. */}
-                <th>Item</th>
+                <th>Titularidade</th>
                 <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('grupo')}>Grupo{sortField === 'grupo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
                 <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('codigo')}>Cód.{sortField === 'codigo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
                 <th style={{ minWidth: '300px', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('discriminacao')}>Discriminação{sortField === 'discriminacao' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
@@ -166,12 +172,12 @@ export default function BensPage({ onVoltar } = {}) {
             </thead>
             <tbody>
               {sorted.length === 0 ? (
-                <EstadoVazio colSpan={8} titulo="Nenhum bem cadastrado" contexto="Cadastre o primeiro bem ou importe uma declaração para começar o patrimônio deste perfil." acao="Cadastrar primeiro bem" onAcao={handleNovoClick} />
+                <EstadoVazio colSpan={8} titulo="Nenhum bem neste recorte" contexto="Confira os filtros ou cadastre um bem." acao="Cadastrar bem" onAcao={handleNovoClick} />
               ) : sorted.map(bem => {
                 const vari = (parseFloat(bem.situacao_atual) || 0) - (parseFloat(bem.situacao_anterior) || 0);
                 return (
                   <tr key={bem.id}>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{bem.numeroItem || ''}</td>
+                    <td>{rotuloTitularidade(bem, state.dependentes)}</td>
                     <td><span className={`badge badge-${GRUPOS_BENS.find(g => g.codigo === bem.grupo)?.cor || 'blue'}`}>{bem.grupo}</span></td>
                     <td>{bem.codigo_bem}</td>
                     <td style={{ maxWidth: '400px' }}>
@@ -179,7 +185,6 @@ export default function BensPage({ onVoltar } = {}) {
                         {bem.discriminacao || ''}
                       </div>
                       <BadgeOrigem item={bem} />
-                      <div className="titularidade-registro">{rotuloTitularidade(bem, state.dependentes)}</div>
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
                       {/* De quem o bem é e onde ele está: bem do dependente não é
@@ -214,7 +219,7 @@ export default function BensPage({ onVoltar } = {}) {
             {filtered.length > 0 && (
               <tfoot>
                 <tr style={{ background: 'var(--bg-secondary)' }}>
-                  <td colSpan={3} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAIS</td>
+                  <td colSpan={4} style={{ fontWeight: 700, borderTop: '2px solid var(--border-color)' }}>TOTAIS DO RECORTE</td>
                   <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totals.anterior)}</td>
                   <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className="currency">{formatCurrency(totals.atual)}</td>
                   <td style={{ textAlign: 'right', fontWeight: 700, borderTop: '2px solid var(--border-color)' }} className={`currency ${totals.variacao >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(totals.variacao)}</td>

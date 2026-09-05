@@ -436,6 +436,7 @@ tfoot td{padding:14px 16px;background:var(--bg-card-hover)}
 .form-control-invalid{border-color:var(--accent-danger)}
 .form-control-invalid:focus{border-color:var(--accent-danger);box-shadow:0 0 0 3px rgba(239,68,68,0.12)}
 textarea.form-control{resize:vertical;min-height:80px}
+.tabela-bens thead th:nth-child(-n+3),.tabela-bens tbody td:nth-child(-n+3){text-align:center}
 /* minmax 150px (não 200px): 200px fazia uma linha de 3-4 campos mais
    estreitos (UF/CEP/Data/Valor da movimentação) não caber na largura de um
    modal comum (700-800px) e quebrar sozinha pra uma segunda linha, deixando

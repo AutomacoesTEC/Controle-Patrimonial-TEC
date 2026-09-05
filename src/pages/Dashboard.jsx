@@ -10,7 +10,7 @@ import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComD
 import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosCompensaveis';
 import { conferirContinuidade } from '../store/continuidade';
 import { classificarPendenciasSaldo } from '../store/classificacaoSaldo';
-import { avaliarSaldoComTolerancia, normalizarToleranciaSaldo } from '../store/toleranciaSaldo';
+import { avaliarSaldoComTolerancia } from '../store/toleranciaSaldo';
 import { montarPainelIrrf } from '../store/painelIrrf';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
@@ -201,9 +201,7 @@ export default function Dashboard({ onNavigate } = {}) {
     [state, demo, de, ate]
   );
   const saldoHero = demo?.saldoDeCaixa || 0;
-  const toleranciaSaldo = normalizarToleranciaSaldo(state.toleranciaSaldo);
-  const patrimonioParaTolerancia = (demo?.varPatrimonial?.bensAte || 0) - (demo?.varPatrimonial?.dividaAte || 0);
-  const avaliacaoSaldo = avaliarSaldoComTolerancia(saldoHero, toleranciaSaldo, patrimonioParaTolerancia);
+  const avaliacaoSaldo = avaliarSaldoComTolerancia(saldoHero, { tipo: 'fixa', valor: 0 }, 0);
   const leituraSaldoHero = avaliacaoSaldo.fecha
     ? {
         classe: 'fecha',
@@ -539,37 +537,13 @@ export default function Dashboard({ onNavigate } = {}) {
         {demo && (
           <section className={`saldo-hero saldo-hero-${leituraSaldoHero.classe}`} aria-labelledby="saldo-hero-titulo">
             <div className="saldo-hero-contexto">
-              <span className="saldo-hero-rotulo" id="saldo-hero-titulo">Saldo de Caixa</span>
+              <span className="saldo-hero-rotulo" id="saldo-hero-titulo">Diferença de conciliação</span>
               <p>{leituraSaldoHero.explicacao}</p>
+              <small>Não representa saldo bancário disponível. Compara os recursos registrados com as saídas e a variação patrimonial fiscal.</small>
             </div>
             <div className="saldo-hero-leitura">
               <span className="saldo-hero-estado">{leituraSaldoHero.estado}</span>
               <strong className="saldo-hero-valor">{formatCurrency(saldoHero)}</strong>
-            </div>
-            <div className="saldo-hero-tolerancia">
-              <label htmlFor="tolerancia-saldo-tipo">Tolerância para “fecha”</label>
-              <div>
-                <select
-                  id="tolerancia-saldo-tipo"
-                  className="form-control"
-                  value={toleranciaSaldo.tipo}
-                  onChange={evento => dispatch({ type: 'SET_TOLERANCIA_SALDO', payload: { ...toleranciaSaldo, tipo: evento.target.value } })}
-                >
-                  <option value="fixa">Valor fixo</option>
-                  <option value="percentual">% do patrimônio</option>
-                </select>
-                <input
-                  className="form-control"
-                  type="number"
-                  min="0"
-                  max={toleranciaSaldo.tipo === 'percentual' ? '100' : undefined}
-                  step={toleranciaSaldo.tipo === 'percentual' ? '0.1' : '0.01'}
-                  value={toleranciaSaldo.valor}
-                  onChange={evento => dispatch({ type: 'SET_TOLERANCIA_SALDO', payload: { ...toleranciaSaldo, valor: evento.target.value } })}
-                  aria-label={toleranciaSaldo.tipo === 'percentual' ? 'Percentual de tolerância' : 'Valor fixo da tolerância'}
-                />
-              </div>
-              <small>Limite atual: {formatCurrency(avaliacaoSaldo.limite)}</small>
             </div>
           </section>
         )}

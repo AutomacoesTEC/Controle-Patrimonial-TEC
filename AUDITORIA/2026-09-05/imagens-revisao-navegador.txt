@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-imagens-revisao.py", line 30, in <module>
+    assert page.locator('.tabela-bens tbody tr').count() == 2
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

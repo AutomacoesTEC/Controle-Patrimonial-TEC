@@ -1,0 +1,1 @@
+{"resultado": "PASSOU", "filtros": "geral/titular/dependente", "alinhamento": ["center", "center", "center"], "edicao_recolhida": true, "cadastro_visivel": true, "residual_identificado": true, "errosJavascript": []}

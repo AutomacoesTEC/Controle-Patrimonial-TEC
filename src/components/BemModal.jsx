@@ -98,6 +98,11 @@ export default function BemModal({ open, bem, onSave, onClose }) {
   const isVeiculo = form.grupo === '02';
   const codigosDoGrupo = CODIGOS_POR_GRUPO[form.grupo] || [];
 
+  const camposIdentificacao = <>
+    <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data_aquisicao)} />
+    <div className="form-group"><label>Data de aquisição</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!isEditing} value={form.data_aquisicao || ''} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
+  </>;
+
   return (
     <Modal open={open} onClose={onClose} style={{ maxWidth: '800px' }}>
         <div className="modal-header">
@@ -106,8 +111,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
-            <div className="form-group"><label>Data de aquisição</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!isEditing} value={form.data_aquisicao || ''} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
+            {!isEditing && camposIdentificacao}
             {isEditing ? (
               // Bloco 1 "Dados do Bem": todos os campos de identificação
               // reunidos num card próprio, com Dados do Imóvel/Veículo
@@ -135,6 +139,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                 </div>
 
                 <div style={{ display: bloco1Expandido ? undefined : 'none' }}>
+                  {camposIdentificacao}
                   <div className="form-row">
                     <div className="form-group">
                       <label>Grupo</label>
