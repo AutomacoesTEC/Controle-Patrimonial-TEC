@@ -1,0 +1,62 @@
+vite v8.2.1 building client environment for production...
+[2Ktransforming...✓ 673 modules transformed.
+
+(!) outDir /tmp/cptec-validacao-build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../../../../../tmp/cptec-validacao-build/index.html                                        1.19 kB │ gzip:   0.51 kB
+../../../../../tmp/cptec-validacao-build/desktop.html                                      1.23 kB │ gzip:   0.53 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-400-normal-C38fXH4l.woff2     23.66 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-500-normal-Cerq10X2.woff2     24.27 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-700-normal-Yt3aPRUw.woff2     24.35 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-600-normal-LgqL8muc.woff2     24.45 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-400-normal-CyCys3Eg.woff      30.69 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-600-normal-CiBQ2DWP.woff      31.26 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-500-normal-BL9OpVg8.woff      31.28 kB
+../../../../../tmp/cptec-validacao-build/assets/inter-latin-700-normal-BLAVimhd.woff      31.32 kB
+../../../../../tmp/cptec-validacao-build/assets/pdf.worker.min-CHFwMXne.mjs            1,262.39 kB
+../../../../../tmp/cptec-validacao-build/assets/main-DKMBBDQo.css                         47.23 kB │ gzip:   9.18 kB
+../../../../../tmp/cptec-validacao-build/assets/pdf.worker.min-CycdM0Xo.js                 0.09 kB │ gzip:   0.10 kB
+../../../../../tmp/cptec-validacao-build/assets/validacao-BYasjM34.js                      0.34 kB │ gzip:   0.23 kB
+../../../../../tmp/cptec-validacao-build/assets/EstadoVazio-BnP2zQRZ.js                    0.56 kB │ gzip:   0.29 kB
+../../../../../tmp/cptec-validacao-build/assets/BadgeOrigem-BixtyM4i.js                    0.56 kB │ gzip:   0.34 kB
+../../../../../tmp/cptec-validacao-build/assets/MoneyInput-Bt_GeLVY.js                     1.00 kB │ gzip:   0.56 kB
+../../../../../tmp/cptec-validacao-build/assets/preload-helper-HclGiUj8.js                 1.21 kB │ gzip:   0.67 kB
+../../../../../tmp/cptec-validacao-build/assets/SeletorCodigo-DUEW_T5M.js                  1.66 kB │ gzip:   0.86 kB
+../../../../../tmp/cptec-validacao-build/assets/Ajuda-DFh_FPo6.js                          1.78 kB │ gzip:   0.83 kB
+../../../../../tmp/cptec-validacao-build/assets/titularidade-7Y_wu6mS.js                   2.04 kB │ gzip:   0.90 kB
+../../../../../tmp/cptec-validacao-build/assets/Modal-Crit3J2O.js                          2.31 kB │ gzip:   1.10 kB
+../../../../../tmp/cptec-validacao-build/assets/SeletorTitularidade-BxkEg_5z.js            2.39 kB │ gzip:   0.83 kB
+../../../../../tmp/cptec-validacao-build/assets/modalidadeDeclaracao-AxqK2Fv8.js           2.85 kB │ gzip:   1.29 kB
+../../../../../tmp/cptec-validacao-build/assets/HistoricoPage-D4-c2Va6.js                  3.35 kB │ gzip:   1.40 kB
+../../../../../tmp/cptec-validacao-build/assets/react-dom-B83oIjHE.js                      3.55 kB │ gzip:   1.35 kB
+../../../../../tmp/cptec-validacao-build/assets/DateInput-DYHrYLKD.js                      3.64 kB │ gzip:   1.67 kB
+../../../../../tmp/cptec-validacao-build/assets/TabelaRedimensionavel-jOeKwRci.js          3.91 kB │ gzip:   1.62 kB
+../../../../../tmp/cptec-validacao-build/assets/consultaPeriodo-TItJTq5d.js                5.34 kB │ gzip:   2.24 kB
+../../../../../tmp/cptec-validacao-build/assets/PagamentosDiversosPage-CslYA9T3.js         5.81 kB │ gzip:   2.14 kB
+../../../../../tmp/cptec-validacao-build/assets/ModalidadePage-DbXetd_K.js                 6.02 kB │ gzip:   2.09 kB
+../../../../../tmp/cptec-validacao-build/assets/BensPage-DRAHpPSF.js                       8.36 kB │ gzip:   2.91 kB
+../../../../../tmp/cptec-validacao-build/assets/RevisaoImportacaoModal-BkiaNUyn.js         8.58 kB │ gzip:   3.08 kB
+../../../../../tmp/cptec-validacao-build/assets/DoacoesPage-C5MPH6xN.js                    8.59 kB │ gzip:   2.83 kB
+../../../../../tmp/cptec-validacao-build/assets/MovimentacaoBemForm-CHzyensz.js            8.69 kB │ gzip:   3.05 kB
+../../../../../tmp/cptec-validacao-build/assets/PagamentosPage-CCBkw4jS.js                 9.03 kB │ gzip:   2.88 kB
+../../../../../tmp/cptec-validacao-build/assets/DividasPage-pq-SoHJE.js                    9.43 kB │ gzip:   2.97 kB
+../../../../../tmp/cptec-validacao-build/assets/TitularPage-CmrrKx52.js                    9.90 kB │ gzip:   2.85 kB
+../../../../../tmp/cptec-validacao-build/assets/RendimentosPage-6ZZmTbLD.js               13.02 kB │ gzip:   4.24 kB
+../../../../../tmp/cptec-validacao-build/assets/BemModal-CK-GzLw0.js                      13.12 kB │ gzip:   2.40 kB
+../../../../../tmp/cptec-validacao-build/assets/ImportPage-4TmJFBag.js                    21.11 kB │ gzip:   7.06 kB
+../../../../../tmp/cptec-validacao-build/assets/RelatorioPage-BOS_X6B5.js                 23.26 kB │ gzip:   6.10 kB
+../../../../../tmp/cptec-validacao-build/assets/GanhosCapitalPage-CizppE2p.js             29.97 kB │ gzip:   8.43 kB
+../../../../../tmp/cptec-validacao-build/assets/RendaVariavelPage-CILHrBhu.js             34.28 kB │ gzip:   8.11 kB
+../../../../../tmp/cptec-validacao-build/assets/AtividadeRuralPage-BN9lc0Vk.js            45.65 kB │ gzip:   8.48 kB
+../../../../../tmp/cptec-validacao-build/assets/DataContext-y2wTM7ea.js                  100.81 kB │ gzip:  28.88 kB
+../../../../../tmp/cptec-validacao-build/assets/importParsers-C42YANYa.js                114.03 kB │ gzip:  35.27 kB
+../../../../../tmp/cptec-validacao-build/assets/main-BJ4YALMY.js                         225.32 kB │ gzip:  70.01 kB
+../../../../../tmp/cptec-validacao-build/assets/exportXlsx-u9eA1Lmz.js                   338.14 kB │ gzip: 110.27 kB
+../../../../../tmp/cptec-validacao-build/assets/pdf-BL9Pr2D5.js                          427.32 kB │ gzip: 127.41 kB
+../../../../../tmp/cptec-validacao-build/assets/Dashboard-DiNzIDNN.js                    442.39 kB │ gzip: 126.08 kB
+../../../../../tmp/cptec-validacao-build/assets/leitorRegistrosDbk-B3oKE5ml.js           489.07 kB │ gzip:  63.54 kB
+
+✓ built in 710ms

@@ -1,0 +1,14 @@
+{"funcao": "Titular: editar nome, CPF e data com criação do primeiro ano", "resultado": "PASSOU", "evidencia": {"ano_pela_data": 2026, "nome_cpf_data_persistidos": true}}
+{
+  "resultados": [
+    {
+      "funcao": "Titular: editar nome, CPF e data com criação do primeiro ano",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "ano_pela_data": 2026,
+        "nome_cpf_data_persistidos": true
+      }
+    }
+  ],
+  "artefatos_temporarios_externos": "/tmp/cptec-perfis-auditoria-d6jbmjxy"
+}

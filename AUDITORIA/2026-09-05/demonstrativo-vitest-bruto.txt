@@ -1,0 +1,25 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > PJ: bruto 120 mil menos INSS 10 mil e IRRF 15 mil disponibiliza 95 mil 7ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > compra financiada de 80 mil com empréstimo de 60 mil consome 20 mil 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > venda à vista por 70 mil de bem que custou 100 mil libera 70 mil 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > saldo de banco declarado absorve recursos: conciliação zero não significa banco zero 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil 15ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D04: RV mensal positiva de 10 mil gera recursos sem redigitar exclusivo 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D05: perda FII de 4 mil reduz recursos em 4 mil 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D06: doação datada em dezembro não pode sair do caixa de janeiro 2ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D07: uma despesa rural adicional não substitui receita importada do mesmo mês 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D08: operações diferentes com mesma data e preço não são duplicatas 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D09: foto anual sem data da alteração não pode inventar variação em todos os meses 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > continuidade: estoques nas pontas e fluxos de dois anos se conciliam 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D10: ganho de capital importado em exclusivos e operação não pode somar duas vezes 1ms
+ ✓ src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D11: doação diretamente na declaração de 2025 paga em 2026 não sai do caixa 2025 1ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 11 expected fail (16)
+   Start at  15:45:32
+   Duration  1.14s (transform 686ms, setup 0ms, import 783ms, tests 45ms, environment 0ms)
+

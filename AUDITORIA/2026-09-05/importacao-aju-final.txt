@@ -1,0 +1,21 @@
+{"funcao": "Importação PDF AJU completa, fonte e impressão de dois relatórios", "resultado": "PASSOU", "evidencia": {"bens": 7, "dividas": 2, "rendimentos": 18, "pagamentos": 8, "dependentes": 1, "bensRurais": 1, "dividasRurais": 1, "rendaVariavelMensalOficial": 13, "fiiFiagroMensalOficial": 9}}
+{
+  "resultados": [
+    {
+      "funcao": "Importação PDF AJU completa, fonte e impressão de dois relatórios",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "bens": 7,
+        "dividas": 2,
+        "rendimentos": 18,
+        "pagamentos": 8,
+        "dependentes": 1,
+        "bensRurais": 1,
+        "dividasRurais": 1,
+        "rendaVariavelMensalOficial": 13,
+        "fiiFiagroMensalOficial": 9
+      }
+    }
+  ],
+  "artefatos_temporarios_externos": "/tmp/cptec-perfis-auditoria-mc97pg28"
+}

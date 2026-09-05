@@ -1,0 +1,5 @@
+{"inicio":0,"fim":100000,"variacao":100000,"percentualAtual":"0.0%","percentualDefinido":false}
+{"inicio":0,"fim":-10000,"variacao":-10000,"percentualAtual":"0.0%","percentualDefinido":false}
+{"inicio":0,"fim":0,"variacao":0,"percentualAtual":"0.0%","percentualDefinido":false}
+{"inicio":100000,"fim":110000,"variacao":10000,"percentualAtual":"10.0%","percentualDefinido":true}
+{"inicio":-100000,"fim":-50000,"variacao":50000,"percentualAtual":"50.0%","percentualDefinido":true}

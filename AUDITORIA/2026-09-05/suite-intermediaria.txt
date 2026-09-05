@@ -1,0 +1,30 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+stderr | src/irpf/pdfSinteticoAju01.audit.test.js > prova de cobertura do PDF sintético AJU-01 > fixa a identidade do documento oficial textual auditado
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+ ❯ src/irpf/pdfSinteticoAju01.audit.test.js (4 tests | 1 failed) 6354ms
+     × fixa a identidade do documento oficial textual auditado 5021ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/irpf/pdfSinteticoAju01.audit.test.js > prova de cobertura do PDF sintético AJU-01 > fixa a identidade do documento oficial textual auditado
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/irpf/pdfSinteticoAju01.audit.test.js:28:3
+     26|
+     27| describe.skipIf(!temPdf)('prova de cobertura do PDF sintético AJU-01',…
+     28|   it('fixa a identidade do documento oficial textual auditado', async …
+       |   ^
+     29|     const { bytes, paginas } = await extrairPaginas();
+     30|     const hash = createHash('sha256').update(bytes).digest('hex');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 55 passed (56)
+      Tests  1 failed | 928 passed (929)
+   Start at  15:36:48
+   Duration  38.36s (transform 6.26s, setup 0ms, import 11.13s, tests 70.29s, environment 12ms)
+
