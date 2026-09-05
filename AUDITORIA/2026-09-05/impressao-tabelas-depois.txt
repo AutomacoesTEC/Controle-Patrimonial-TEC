@@ -1,0 +1,101 @@
+{
+  "medidas": [
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Saldo"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 742,
+      "larguraContainer": 744,
+      "excesso": 0,
+      "ultimoTitulo": "Movimentações no ano"
+    }
+  ],
+  "artefatos_externos": "/tmp/cptec-impressao-ditrrebr"
+}

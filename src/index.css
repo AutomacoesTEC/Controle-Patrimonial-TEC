@@ -721,4 +721,10 @@ textarea.form-control{resize:vertical;min-height:80px}
   .demonstrativo-secao-link{color:#1d4ed8;text-decoration:none}
   .currency.positive{color:#047857}
   .currency.negative{color:#b91c1c}
+  .table-container,.card .table-container{display:block;overflow:visible;max-height:none;height:auto;min-height:0;flex:none}
+  .table-container>table{width:100%!important;min-width:0;table-layout:auto}
+  .table-container th,.table-container td{position:static!important;min-width:0!important;max-width:none!important;overflow-wrap:anywhere}
+  .table-container th{white-space:normal}
+  .table-container tr{break-inside:avoid}
+  .rdz-camada{display:none!important}
 }

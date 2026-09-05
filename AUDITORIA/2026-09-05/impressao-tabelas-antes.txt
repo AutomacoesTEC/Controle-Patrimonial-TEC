@@ -1,0 +1,106 @@
+{
+  "medidas": [
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 330,
+      "larguraContainer": 332,
+      "excesso": 0,
+      "ultimoTitulo": null
+    },
+    {
+      "larguraTabela": 1071,
+      "larguraContainer": 744,
+      "excesso": 328,
+      "ultimoTitulo": "Saldo"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Descrição"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 1071,
+      "larguraContainer": 744,
+      "excesso": 328,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 1072,
+      "larguraContainer": 744,
+      "excesso": 329,
+      "ultimoTitulo": "Movimentações no ano"
+    },
+    {
+      "larguraTabela": 1073,
+      "larguraContainer": 744,
+      "excesso": 330,
+      "ultimoTitulo": "Movimentações no ano"
+    }
+  ],
+  "artefatos_externos": "/tmp/cptec-impressao-9oemxm95"
+}
+Traceback (most recent call last):
+  File "/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-impressao.py", line 32, in <module>
+    assert all(x['excesso']<2 for x in medidas),'Tabela cortada na largura de impressão'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tabela cortada na largura de impressão

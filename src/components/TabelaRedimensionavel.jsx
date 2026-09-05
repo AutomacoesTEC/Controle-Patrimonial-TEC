@@ -149,7 +149,7 @@ export default function TabelaRedimensionavel({
   return (
     <>
     <div ref={wrapRef} className={`table-container ${cls} ${stickyFirstColumn || fixasDireita ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
-      {css && <style>{css}</style>}
+      {css && <style media="screen">{css}</style>}
       {larguras && alturaCab > 0 && (
         <>
           <div className="rdz-camada" aria-hidden="true" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
