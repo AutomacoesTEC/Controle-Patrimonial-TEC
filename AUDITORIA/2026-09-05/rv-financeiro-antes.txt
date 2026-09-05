@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/rvFinanceiro.test.js (3 tests | 1 failed) 11ms
+   × RV: retenção do mês e DARF confirmado reduzem recursos uma vez 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/rvFinanceiro.test.js > RV: retenção do mês e DARF confirmado reduzem recursos uma vez
+AssertionError: expected 10000 to be 8500 // Object.is equality
+
+- Expected
++ Received
+
+- 8500
++ 10000
+
+ ❯ src/store/rvFinanceiro.test.js:10:142
+      8| it('RV: imposto devido não é desembolso',()=>expect(calcular({totalImp…
+      9| it('RV: retenção do mês e DARF confirmado reduzem recursos uma vez',()…
+     10|   expect(calcular({irFonteLei11033Mes:100,irFonteLei11033MesesAnterior…
+       |                                                                                                                                              ^
+     11| });
+     12| it('RV: valor legado automático não é confirmação de DARF pago',()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  17:49:48
+   Duration  504ms (transform 260ms, setup 0ms, import 304ms, tests 11ms, environment 0ms)
+

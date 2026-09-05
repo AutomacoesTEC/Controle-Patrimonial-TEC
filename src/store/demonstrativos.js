@@ -1040,9 +1040,14 @@ export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, 
     const doMes = (m.comuns?.resultadoLiquidoMes || 0) + (m.daytrade?.resultadoLiquidoMes || 0);
     resultado += doMes;
     const chave = pessoaFinanceira(m);
-    const acumulado = porPessoa.get(chave) || { liquido: 0, positivos: 0 };
+    const acumulado = porPessoa.get(chave) || { liquido: 0, positivos: 0, tributos: 0 };
     acumulado.liquido += doMes;
     acumulado.positivos += Math.max(doMes, 0);
+    const c = m.consolidacao || {};
+    // IRRF corrente saiu; crédito de período anterior não sai outra vez.
+    // Manual legado pode ter impostoPago auto-preenchido pelo antigo modal.
+    const darf = m.origem !== 'manual' || m.pagamentoDarfConfirmado === true ? Number(c.impostoPago) || 0 : 0;
+    acumulado.tributos += Math.max(0, Number(c.irFonteLei11033Mes) || 0) + Math.max(0, Number(c.irFonteDayTradeMes) || 0) + Math.max(0, darf);
     porPessoa.set(chave, acumulado);
     if (doMes < 0) perda += doMes;
     imposto += m.consolidacao?.totalImpostoDevido || 0;
@@ -1052,11 +1057,11 @@ export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, 
   // complementamos o resultado líquido mensal ainda não representado.
   // Resultado negativo permanece financeiro, não prejuízo fiscal transportado.
   let ajusteFinanceiro = 0;
-  for (const [chave, { liquido, positivos }] of porPessoa) {
+  for (const [chave, { liquido, positivos, tributos }] of porPessoa) {
     const declarado = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*5$/.test(r.tipo || '')
       && pessoaFinanceira(r) === chave && noPeriodo(r.data, dataDe, dataAte))
       .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
-    ajusteFinanceiro += liquido - Math.min(positivos, Math.max(declarado, 0));
+    ajusteFinanceiro += liquido - tributos - Math.min(Math.max(positivos - tributos, 0), Math.max(declarado, 0));
   }
   return { meses, resultado, imposto, perda, comValor, ajusteFinanceiro };
 }

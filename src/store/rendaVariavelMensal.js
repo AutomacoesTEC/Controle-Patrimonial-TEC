@@ -44,6 +44,6 @@ export function linhasFinanceirasDoAno(dados) {
   return [...linhasComunsDoAno(dados), ...linhasFiiDoAno(dados).map(l => ({
     ...l, modalidadeFinanceira: 'fii',
     comuns: { resultadoLiquidoMes: l.resultadoLiquidoMes || 0 },
-    consolidacao: { totalImpostoDevido: l.impostoDevido || 0 },
+    consolidacao: { totalImpostoDevido: l.impostoDevido || 0, impostoPago: l.impostoPago || 0, irFonteLei11033Mes: l.impostoRetidoNoMes || 0 },
   }))];
 }

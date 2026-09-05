@@ -51,6 +51,7 @@ export default function RendaVariavelMesModal({
   const [origemCarry, setOrigemCarry] = useState('nenhum');
   const [impostoPago, setImpostoPago] = useState(0);
   const [impostoPagoSujo, setImpostoPagoSujo] = useState(false);
+  const [pagamentoConfirmado, setPagamentoConfirmado] = useState(false);
 
   const beneficiarioAtivo = beneficiarios.find(b => b.chave === benChave) || beneficiarios[0];
 
@@ -76,7 +77,10 @@ export default function RendaVariavelMesModal({
   useEffect(() => {
     if (!open || !beneficiarioAtivo) return;
     setImpostoPagoSujo(false);
+    setImpostoPago(0);
+    setPagamentoConfirmado(false);
     if (existente && existente.origem === 'manual') {
+      setPagamentoConfirmado(existente.pagamentoDarfConfirmado === true);
       setOrigemCarry('lançamento existente');
       if (ficha === 'fii') {
         const v = existente.resultadoLiquidoMes || 0;
@@ -151,14 +155,11 @@ export default function RendaVariavelMesModal({
   ]);
 
   const impostoPagarCalculado = ficha === 'fii' ? (linhaCalculada?.impostoAPagar || 0) : (linhaCalculada?.consolidacao?.impostoPagar || 0);
-  useEffect(() => {
-    if (!impostoPagoSujo) setImpostoPago(impostoPagarCalculado);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [impostoPagarCalculado]);
+  // Não copiar imposto apurado para imposto pago: apuração não prova quitação.
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    const linhaFinal = { ...linhaCalculada };
+    const linhaFinal = { ...linhaCalculada, pagamentoDarfConfirmado: pagamentoConfirmado };
     if (ficha === 'fii') {
       linhaFinal.impostoPago = Number(impostoPago) || 0;
     } else {
@@ -274,8 +275,10 @@ export default function RendaVariavelMesModal({
 
           <div className="form-row">
             <div className="form-group">
-              <label>Imposto pago (DARF), se diferente do apurado</label>
+              <label>Imposto efetivamente pago (DARF)</label>
               <MoneyInput value={impostoPago} onChange={v => { setImpostoPago(v); setImpostoPagoSujo(true); }} />
+              <label><input type="checkbox" checked={pagamentoConfirmado} onChange={e => setPagamentoConfirmado(e.target.checked)} /> Confirmo o pagamento deste DARF</label>
+              <small>O imposto devido não comprova pagamento. Sem confirmação, o valor manual não reduz os recursos do Demonstrativo. Não repita o mesmo DARF em Despesas.</small>
             </div>
           </div>
 
