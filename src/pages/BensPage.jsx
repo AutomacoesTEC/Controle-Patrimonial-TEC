@@ -4,7 +4,6 @@ import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
 import { formatCurrency, formatCpfCnpj, GRUPOS_BENS, marcadoresDoBem, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import { exportBensToXlsx } from '../utils/exportXlsx';
 import BemModal from '../components/BemModal';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import EstadoVazio from '../components/EstadoVazio';
 import BadgeOrigem from '../components/BadgeOrigem';
@@ -35,12 +34,9 @@ export default function BensPage({ onVoltar } = {}) {
   };
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
 
   const abrirNovo = () => { setEditingBem(null); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
 
@@ -233,11 +229,6 @@ export default function BensPage({ onVoltar } = {}) {
         bem={editingBem}
         onSave={handleSave}
         onClose={() => { setModalOpen(false); setEditingBem(null); }}
-      />
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={() => { setAnoModalOpen(false); pendingActionRef.current?.(); pendingActionRef.current = null; }}
       />
     </>
   );

@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
@@ -35,8 +34,6 @@ export default function RendimentosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   // Ano-calendário = ano da DATA do rendimento (campo separado tirado em
@@ -45,7 +42,6 @@ export default function RendimentosPage() {
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (r) => {
@@ -61,7 +57,9 @@ export default function RendimentosPage() {
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0 };
     if (editingId) {
-      dispatch({ type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'UPDATE_RENDIMENTO', payload: { ...payload, id: editingId } });
       addToast('Rendimento atualizado!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -285,7 +283,7 @@ export default function RendimentosPage() {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>IRRF</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
@@ -294,11 +292,6 @@ export default function RendimentosPage() {
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

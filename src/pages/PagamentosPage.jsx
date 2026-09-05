@@ -3,7 +3,6 @@ import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
 import SeletorCodigo from '../components/SeletorCodigo';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
@@ -26,8 +25,6 @@ export default function PagamentosPage() {
   const [origemFilter, setOrigemFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   // Ano-calendário = ano da DATA do pagamento (a usuária tirou o campo separado
@@ -36,7 +33,6 @@ export default function PagamentosPage() {
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (p) => {
@@ -52,7 +48,9 @@ export default function PagamentosPage() {
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor_pago: parseFloat(form.valor_pago) || 0, parcela_nao_dedutivel: parseFloat(form.parcela_nao_dedutivel) || 0 };
     if (editingId) {
-      dispatch({ type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'UPDATE_PAGAMENTO', payload: { ...payload, id: editingId } });
       addToast('Pagamento atualizado!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -190,7 +188,7 @@ export default function PagamentosPage() {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor Pago</label><MoneyInput value={form.valor_pago} onChange={v => upd('valor_pago', v)} /></div>
                   <div className="form-group"><label>Parcela Não Dedutível</label><MoneyInput value={form.parcela_nao_dedutivel} onChange={v => upd('parcela_nao_dedutivel', v)} /></div>
@@ -200,11 +198,6 @@ export default function PagamentosPage() {
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

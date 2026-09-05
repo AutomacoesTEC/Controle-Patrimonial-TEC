@@ -1,0 +1,108 @@
+[
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 8,
+        "alcas": 7,
+        "fixas": 1
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Bens e Direitos"
+  },
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 6,
+        "alcas": 5,
+        "fixas": 0
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Dívidas e Ônus"
+  },
+  {
+    "compactos": 0,
+    "abasVerticais": 0,
+    "tabelas": [],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Rendimentos"
+  },
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 9,
+        "alcas": 8,
+        "fixas": 4
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Pagamentos"
+  },
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 5,
+        "alcas": 4,
+        "fixas": 0
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Despesas Gerais"
+  },
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 6,
+        "alcas": 5,
+        "fixas": 0
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Doações"
+  },
+  {
+    "compactos": 0,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 8,
+        "alcas": 0,
+        "fixas": 1
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Atividade Rural"
+  },
+  {
+    "compactos": 1,
+    "abasVerticais": 0,
+    "tabelas": [
+      {
+        "colunas": 8,
+        "alcas": 7,
+        "fixas": 1
+      }
+    ],
+    "camposAno": 0,
+    "camposData": 1,
+    "ficha": "Titular e Dependentes"
+  }
+]

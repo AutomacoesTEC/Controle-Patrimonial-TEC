@@ -12,6 +12,7 @@ import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 // movimentação usa a coleção `bensRurais` em vez de `bens`.
 const FORM_VAZIO = {
   codigo: '',
+  data: '',
   discriminacao: '',
   situacao_anterior: '',
   situacao_atual: '',
@@ -30,11 +31,6 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
     if (open) setForm(bem || FORM_VAZIO);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bem]);
-  const [anoCadastro, setAnoCadastro] = useState(() => state.anoCalendario);
-  useEffect(() => {
-    if (open && !isEditing) setAnoCadastro(state.anoCalendario);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   // Mesmo colapsável do BemModal (ver comentário lá): Bloco 1 "Dados do Bem"
   // começa COLAPSADO na edição (03/09/2026) — quem abre veio pela movimentação.
@@ -56,7 +52,7 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
     // item G do HANDOFF-2026-09-03.md.
     let anoAlvo = null;
     if (!isEditing) {
-      anoAlvo = await garantirAnoCadastro(anoCadastro);
+      anoAlvo = await garantirAnoCadastro(Number(form.data?.slice(0, 4)));
       if (!anoAlvo) return;
     }
     onSave({
@@ -75,17 +71,7 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {!isEditing && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Ano-calendário</label>
-                  <input
-                    className="form-control" type="number"
-                    value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                  />
-                </div>
-              </div>
-            )}
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!isEditing} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             {isEditing ? (
               // Bloco 1 "Dados do Bem" (mesmo critério do BemModal, versão
               // mais simples aqui: sem grupo/imóvel/veículo, só Código +

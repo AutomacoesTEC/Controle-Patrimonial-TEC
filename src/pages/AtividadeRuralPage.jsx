@@ -4,7 +4,6 @@ import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividade
 import { formatCurrency, formatDate, formatCpfCnpj, MOVIMENTACAO_DIVIDA_TIPOS, descreverDocumentoParticipante, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
 import BemRuralModal from '../components/BemRuralModal';
 import Modal from '../components/Modal';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import DateInput from '../components/DateInput';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
@@ -17,7 +16,7 @@ const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', 
 // Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
 // forçaria trocar de ano ao salvar num exercício de trabalho diferente.
 const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: '', valor: '', descricao: '' };
-const FORM_DIVIDA_RURAL_VAZIO = { discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
+const FORM_DIVIDA_RURAL_VAZIO = { data: '', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 // Mesmo critério de BensPage.jsx (ver comentário lá): um bem da Atividade Rural que já entrou no
 // ano com as duas situações zeradas e nenhuma movimentação registrada NESTE ano não tem mais nada
@@ -107,14 +106,11 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_IMOVEL_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
+  const anoCadastro = form.dataAquisicao ? Number(form.dataAquisicao.slice(0, 4)) : anoCalendario;
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
-  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_IMOVEL_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_IMOVEL_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (i) => {
@@ -206,11 +202,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
             <div className="modal-header"><h3>{editingId ? 'Editar Imóvel' : 'Novo Imóvel'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
+                
                 <div className="form-group"><label>Nome e Localização</label><input className="form-control" value={form.nomeLocalizacao} onChange={e => upd('nomeLocalizacao', e.target.value)} placeholder="Ex: Fazenda Santa Rita, Uberaba" /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Área (ha)</label><input className="form-control" type="number" step="0.01" value={form.area} onChange={e => upd('area', e.target.value)} /></div>
@@ -228,18 +220,13 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
                   </div>
                   <div className="form-group">
                     <label>Data de Aquisição</label>
-                    <DateInput value={form.dataAquisicao} onChange={v => upd('dataAquisicao', v)} />
+                    <input className="form-control" type="date" required={!editingId} value={form.dataAquisicao || ''} onChange={e => upd('dataAquisicao', e.target.value)} />
                   </div>
                 </div>
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }
@@ -306,12 +293,9 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
   const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
 
   const abrirNovoBem = () => { setEditingBem(null); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovoBem; setAnoModalOpen(true); return; }
     abrirNovoBem();
   };
 
@@ -400,11 +384,6 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
         </table>
       </div>
       <BemRuralModal open={modalOpen} bem={editingBem} onSave={handleSave} onClose={() => { setModalOpen(false); setEditingBem(null); }} />
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={() => { setAnoModalOpen(false); pendingActionRef.current?.(); pendingActionRef.current = null; }}
-      />
     </>
   );
 }
@@ -414,7 +393,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
 // cadastro manual quanto na importação, não têm essa classificação por
 // código como as dívidas comuns).
 function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario }) {
-  const { confirmar } = useData();
+  const { confirmar, garantirAnoCadastro, despacharEmAno } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_DIVIDA_RURAL_VAZIO);
@@ -425,21 +404,24 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
   const abrirNovo = () => { setEditingId(null); setForm(FORM_DIVIDA_RURAL_VAZIO); setModalOpen(true); };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ discriminacao: d.discriminacao || '', situacao_anterior: '', situacao_atual: '', valor_pago: d.valor_pago || '' });
+    setForm({ data: d.data || '', discriminacao: d.discriminacao || '', situacao_anterior: '', situacao_atual: '', valor_pago: d.valor_pago || '' });
     setModalOpen(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const falta = primeiroCampoVazio([['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     if (editingId) {
-      dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
+      dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, data: form.data, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
       addToast('Dívida atualizada com sucesso!', 'success');
     } else {
-      dispatch({
+      const anoAlvo = await garantirAnoCadastro(Number(form.data?.slice(0, 4)));
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, {
         type: 'ADD_DIVIDA_RURAL',
         payload: {
+          data: form.data,
           discriminacao: form.discriminacao,
           situacao_anterior: parseFloat(form.situacao_anterior) || 0,
           situacao_atual: parseFloat(form.situacao_atual) || 0,
@@ -532,6 +514,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
         <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-group"><label>Discriminação</label><textarea className="form-control" value={form.discriminacao} onChange={e => upd('discriminacao', e.target.value)} /></div>
             {editingId && liveDivida ? (
               <>
@@ -582,8 +565,6 @@ function LancamentosRuraisSection({
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_LANCAMENTO_VAZIO);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   // Ano-calendário = ano da DATA do lançamento (campo separado tirado em
@@ -592,7 +573,6 @@ function LancamentosRuraisSection({
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_LANCAMENTO_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (l) => {
@@ -607,7 +587,9 @@ function LancamentosRuraisSection({
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0 };
     if (editingId) {
-      dispatch({ type: 'UPDATE_LANCAMENTO_RURAL', payload: { ...payload, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'UPDATE_LANCAMENTO_RURAL', payload: { ...payload, id: editingId } });
       addToast('Lançamento atualizado!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -758,7 +740,7 @@ function LancamentosRuraisSection({
                   </div>
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
@@ -767,11 +749,6 @@ function LancamentosRuraisSection({
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

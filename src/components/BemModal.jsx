@@ -60,11 +60,6 @@ export default function BemModal({ open, bem, onSave, onClose }) {
   // sem isso, o valor inicial (capturado só na 1ª montagem) ficava
   // desatualizado depois de qualquer virada de ano, e salvar disparava uma
   // troca de ano indevida pro valor velho.
-  const [anoCadastro, setAnoCadastro] = useState(() => state.anoCalendario);
-  useEffect(() => {
-    if (open && !isEditing) setAnoCadastro(state.anoCalendario);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   // Bloco 1 ("Dados do Bem") começa COLAPSADO na edição (pedido da usuária em
   // 03/09/2026): quem abre "Editar Bem" veio para registrar movimentação (Bloco
@@ -88,7 +83,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
     // HANDOFF-2026-09-03.md.
     let anoAlvo = null;
     if (!isEditing) {
-      anoAlvo = await garantirAnoCadastro(anoCadastro);
+      anoAlvo = await garantirAnoCadastro(Number(form.data_aquisicao?.slice(0, 4)));
       if (!anoAlvo) return;
     }
     onSave({
@@ -114,17 +109,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {!isEditing && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Ano-calendário</label>
-                  <input
-                    className="form-control" type="number"
-                    value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                  />
-                </div>
-              </div>
-            )}
+            <div className="form-group"><label>Data de aquisição</label><input className="form-control" type="date" required={!isEditing} value={form.data_aquisicao || ''} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
             {isEditing ? (
               // Bloco 1 "Dados do Bem": todos os campos de identificação
               // reunidos num card próprio, com Dados do Imóvel/Veículo
@@ -209,7 +194,6 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                       <div className="form-row">
                         <div className="form-group"><label>Inscrição Municipal (IPTU)</label><input className="form-control" value={form.inscricao_municipal} onChange={e => upd('inscricao_municipal', e.target.value)} /></div>
                         <div className="form-group"><label>CIB (Rural)</label><input className="form-control" value={form.cib} onChange={e => upd('cib', e.target.value)} /></div>
-                        <div className="form-group"><label>Data Aquisição</label><input className="form-control" type="date" value={form.data_aquisicao} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
                       </div>
                       <div className="form-row">
                         <div className="form-group" style={{ gridColumn: 'span 2' }}><label>Logradouro</label><input className="form-control" value={form.logradouro} onChange={e => upd('logradouro', e.target.value)} /></div>
@@ -236,7 +220,6 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                       </div>
                       <div className="form-row">
                         <div className="form-group"><label>RENAVAM</label><input className="form-control" value={form.renavam} onChange={e => upd('renavam', e.target.value)} /></div>
-                        <div className="form-group"><label>Data Aquisição</label><input className="form-control" type="date" value={form.data_aquisicao} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
                       </div>
                     </>
                   )}
@@ -296,7 +279,6 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                     <div className="form-row">
                       <div className="form-group"><label>Inscrição Municipal (IPTU)</label><input className="form-control" value={form.inscricao_municipal} onChange={e => upd('inscricao_municipal', e.target.value)} /></div>
                       <div className="form-group"><label>CIB (Rural)</label><input className="form-control" value={form.cib} onChange={e => upd('cib', e.target.value)} /></div>
-                      <div className="form-group"><label>Data Aquisição</label><input className="form-control" type="date" value={form.data_aquisicao} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
                     </div>
                     <div className="form-row">
                       <div className="form-group" style={{ gridColumn: 'span 2' }}><label>Logradouro</label><input className="form-control" value={form.logradouro} onChange={e => upd('logradouro', e.target.value)} /></div>
@@ -323,7 +305,6 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                     </div>
                     <div className="form-row">
                       <div className="form-group"><label>RENAVAM</label><input className="form-control" value={form.renavam} onChange={e => upd('renavam', e.target.value)} /></div>
-                      <div className="form-group"><label>Data Aquisição</label><input className="form-control" type="date" value={form.data_aquisicao} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
                     </div>
                   </>
                 )}

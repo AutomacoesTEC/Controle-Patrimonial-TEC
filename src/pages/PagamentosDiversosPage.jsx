@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import Modal from '../components/Modal';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
@@ -20,8 +19,6 @@ export default function PagamentosDiversosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   // O ano-calendário do lançamento é o ANO DA DATA informada — a usuária pediu
@@ -33,7 +30,6 @@ export default function PagamentosDiversosPage() {
 
   const abrirNovo = () => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (p) => {
@@ -49,7 +45,9 @@ export default function PagamentosDiversosPage() {
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = { ...form, valor: parseFloat(form.valor) || 0 };
     if (editingId) {
-      dispatch({ type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'UPDATE_PAGAMENTO_DIVERSO', payload: { ...payload, id: editingId } });
       addToast('Despesa atualizada!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -134,7 +132,7 @@ export default function PagamentosDiversosPage() {
                   <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>
                   <div className="form-group">
                     <label>Data</label>
-                    <input className="form-control" type="date" value={form.data} onChange={e => upd('data', e.target.value)} />
+                    <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
                   <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                 </div>
@@ -142,11 +140,6 @@ export default function PagamentosDiversosPage() {
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

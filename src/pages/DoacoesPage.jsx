@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, truncarComReticencias } from '../utils/formatters';
 import Modal from '../components/Modal';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { exportListaToXlsx } from '../utils/exportXlsx';
@@ -20,7 +19,7 @@ const ABAS = {
   ecaIdoso: { titulo: 'Doações Diretamente na Declaração (ECA e Pessoa Idosa)', colecao: 'doacoesEcaIdosoOficial', addAction: 'ADD_DOACAO_ECA_IDOSO', updateAction: 'UPDATE_DOACAO_ECA_IDOSO', deleteAction: 'DELETE_DOACAO_ECA_IDOSO', comCategoria: true },
 };
 
-const FORM_VAZIO = { codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
+const FORM_VAZIO = { data: '', codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
 
 export default function DoacoesPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -28,23 +27,20 @@ export default function DoacoesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(state.anoCalendario);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
+  const anoCadastro = form.data ? Number(form.data.slice(0, 4)) : state.anoCalendario;
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   const aba = ABAS[subView];
   const itens = state[aba.colecao] || [];
   const total = useMemo(() => itens.reduce((s, d) => s + (parseFloat(d.valor) || 0), 0), [itens]);
 
-  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const abrirNovo = (ano = state.anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   const handleNovoClick = () => {
-    if (state.anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ codigo: d.codigo || '', nome_beneficiario: d.nome_beneficiario || '', cpf_cnpj: d.cpf_cnpj || '', valor: d.valor ?? '', descricao: d.descricao || '', categoria: d.categoria || 'eca' });
+    setForm({ data: d.data || '', codigo: d.codigo || '', nome_beneficiario: d.nome_beneficiario || '', cpf_cnpj: d.cpf_cnpj || '', valor: d.valor ?? '', descricao: d.descricao || '', categoria: d.categoria || 'eca' });
     setModalOpen(true);
   };
 
@@ -54,6 +50,7 @@ export default function DoacoesPage() {
       || primeiroValorZerado([['Valor', form.valor]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = {
+      data: form.data,
       codigo: form.codigo,
       nome_beneficiario: form.nome_beneficiario,
       cpf_cnpj: (form.cpf_cnpj || '').replace(/\D/g, ''),
@@ -62,7 +59,9 @@ export default function DoacoesPage() {
       ...(aba.comCategoria ? { categoria: form.categoria } : {}),
     };
     if (editingId) {
-      dispatch({ type: aba.updateAction, payload: { ...payload, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: aba.updateAction, payload: { ...payload, id: editingId } });
       addToast('Doação atualizada!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -163,11 +162,7 @@ export default function DoacoesPage() {
         <div className="modal-header"><h3>{editingId ? 'Editar Doação' : 'Nova Doação'}: {aba.titulo}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
-            {!editingId && (
-              <div className="form-row">
-                <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro ?? ''} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-              </div>
-            )}
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-row">
               <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} /></div>
               {aba.comCategoria && (
@@ -191,11 +186,6 @@ export default function DoacoesPage() {
           <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
         </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

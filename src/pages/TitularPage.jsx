@@ -3,12 +3,11 @@ import { useData } from '../store/DataContext';
 import { formatCpfCnpj, mascaraCpf, formatDate, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, CODIGOS_DEPENDENCIA } from '../utils/formatters';
 import Modal from '../components/Modal';
 import SeletorCodigo from '../components/SeletorCodigo';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import DateInput from '../components/DateInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 
-const FORM_DEPENDENTE_VAZIO = { nome: '', cpf: '', dataNascimento: '', parentesco: '' };
+const FORM_DEPENDENTE_VAZIO = { data: '', nome: '', cpf: '', dataNascimento: '', parentesco: '' };
 
 // Titular e dependentes são por ano-calendário (como o resto da
 // declaração): mudar de ano na sidebar troca de titular/dependentes junto
@@ -19,17 +18,15 @@ export default function TitularPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   const { contribuinte, dependentes, anoCalendario } = state;
 
-  const [formTitular, setFormTitular] = useState({ nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
+  const [formTitular, setFormTitular] = useState({ data: contribuinte?.data || '', nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
   useEffect(() => {
-    setFormTitular({ nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
+    setFormTitular({ data: contribuinte?.data || '', nome: contribuinte?.nome || '', cpf: contribuinte?.cpf || '' });
   }, [contribuinte, anoCalendario]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formDependente, setFormDependente] = useState(FORM_DEPENDENTE_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
+  const anoCadastro = formDependente.data ? Number(formDependente.data.slice(0, 4)) : state.anoCalendario;
   const updDependente = (f, v) => setFormDependente(p => ({ ...p, [f]: v }));
   const simNao = (v) => v === true ? 'Sim' : v === false ? 'Não' : '-';
   const enderecoCompleto = contribuinte
@@ -37,7 +34,8 @@ export default function TitularPage() {
       contribuinte.municipio, contribuinte.uf, contribuinte.cep].filter(Boolean).join(', ')
     : '';
 
-  const salvarTitular = async (ano = anoCalendario) => {
+  const salvarTitular = async () => {
+    const ano = formTitular.data ? Number(formTitular.data.slice(0, 4)) : anoCalendario;
     // Sem esta guarda, salvar o formulário vazio disparava SET_CONTRIBUINTE
     // com nome e CPF em branco e APAGAVA o titular que a importação tinha
     // preenchido.
@@ -45,23 +43,21 @@ export default function TitularPage() {
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const anoAlvo = await garantirAnoCadastro(ano);
     if (!anoAlvo) return;
-    despacharEmAno(anoAlvo, { type: 'SET_CONTRIBUINTE', payload: { nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
+    despacharEmAno(anoAlvo, { type: 'SET_CONTRIBUINTE', payload: { data: formTitular.data, nome: formTitular.nome.trim(), cpf: formTitular.cpf.replace(/\D/g, '') } });
     addToast('Titular atualizado!', 'success');
   };
   const handleSalvarTitular = (e) => {
     e.preventDefault();
-    if (anoCalendario == null) { pendingActionRef.current = salvarTitular; setAnoModalOpen(true); return; }
     salvarTitular();
   };
 
-  const abrirNovoDependente = (ano = anoCalendario) => { setEditingId(null); setFormDependente(FORM_DEPENDENTE_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const abrirNovoDependente = (ano = anoCalendario) => { setEditingId(null); setFormDependente(FORM_DEPENDENTE_VAZIO); setModalOpen(true); };
   const handleNovoDependenteClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovoDependente; setAnoModalOpen(true); return; }
     abrirNovoDependente();
   };
   const abrirEdicaoDependente = (d) => {
     setEditingId(d.id);
-    setFormDependente({ nome: d.nome || '', cpf: d.cpf || '', dataNascimento: d.dataNascimento || '', parentesco: d.parentesco || '' });
+    setFormDependente({ data: d.data || '', nome: d.nome || '', cpf: d.cpf || '', dataNascimento: d.dataNascimento || '', parentesco: d.parentesco || '' });
     setModalOpen(true);
   };
 
@@ -73,7 +69,9 @@ export default function TitularPage() {
     const falta = primeiroCampoVazio([['Nome Completo', formDependente.nome]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     if (editingId) {
-      dispatch({ type: 'UPDATE_DEPENDENTE', payload: { ...formDependente, id: editingId } });
+      const anoAlvo = await garantirAnoCadastro(anoCadastro);
+      if (!anoAlvo) return;
+      despacharEmAno(anoAlvo, { type: 'UPDATE_DEPENDENTE', payload: { ...formDependente, id: editingId } });
       addToast('Dependente atualizado!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -102,6 +100,7 @@ export default function TitularPage() {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Titular</h3></div>
           <form onSubmit={handleSalvarTitular}>
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!contribuinte} value={formTitular.data || ''} onChange={e => setFormTitular(p => ({ ...p, data: e.target.value }))} /></div>
             <div className="form-row" style={{ padding: '0 16px' }}>
               <div className="form-group">
                 <label>Nome Completo</label>
@@ -207,11 +206,7 @@ export default function TitularPage() {
         <div className="modal-header"><h3>{editingId ? 'Editar Dependente' : 'Novo Dependente'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSalvarDependente}>
           <div className="modal-body">
-            {!editingId && (
-              <div className="form-row">
-                <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-              </div>
-            )}
+            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={formDependente.data || ''} onChange={e => updDependente('data', e.target.value)} /></div>
             <div className="form-group"><label>Nome Completo</label><input className="form-control" value={formDependente.nome} onChange={e => updDependente('nome', e.target.value)} /></div>
             <div className="form-row">
               <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(formDependente.cpf)} onChange={e => updDependente('cpf', mascaraCpf(e.target.value))} placeholder="000.000.000-00" /></div>
@@ -225,11 +220,6 @@ export default function TitularPage() {
           <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
         </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }

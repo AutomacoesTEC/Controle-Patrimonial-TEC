@@ -3,7 +3,6 @@ import { useData } from '../store/DataContext';
 import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias, CODIGOS_DIVIDA, describeDividaCodigo } from '../utils/formatters';
 import Modal from '../components/Modal';
 import SeletorCodigo from '../components/SeletorCodigo';
-import AnoCalendarioModal from '../components/AnoCalendarioModal';
 import MovimentacaoBemForm from '../components/MovimentacaoBemForm';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
@@ -13,7 +12,7 @@ import EstadoVazio from '../components/EstadoVazio';
 import BadgeOrigem from '../components/BadgeOrigem';
 import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRegistro';
 
-const FORM_VAZIO = { codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
+const FORM_VAZIO = { data: '', codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 export default function DividasPage({ onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -22,9 +21,7 @@ export default function DividasPage({ onVoltar } = {}) {
   const [origemFilter, setOrigemFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const [anoCadastro, setAnoCadastro] = useState(anoCalendario);
-  const [anoModalOpen, setAnoModalOpen] = useState(false);
-  const pendingActionRef = useRef(null);
+  const anoCadastro = form.data ? Number(form.data.slice(0, 4)) : state.anoCalendario;
 
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
@@ -33,19 +30,18 @@ export default function DividasPage({ onVoltar } = {}) {
   // amortização registrada no modal desfaria o efeito dela.
   const liveDivida = editingId ? state.dividas.find(d => d.id === editingId) : null;
 
-  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setAnoCadastro(ano); setModalOpen(true); };
+  const abrirNovo = (ano = anoCalendario) => { setEditingId(null); setForm(FORM_VAZIO); setModalOpen(true); };
   // Sem ano-calendário ainda, o primeiro registro é quem pergunta qual ano
   // (ver AnoCalendarioModal); a ação real só roda depois de confirmado, com
   // o ano que acabou de ser escolhido — não com `anoCalendario` capturado
   // aqui, que nesse instante ainda é null (React só atualiza no próximo
   // render, depois do dispatch do ROLLOVER_ANO).
   const handleNovoClick = () => {
-    if (anoCalendario == null) { pendingActionRef.current = abrirNovo; setAnoModalOpen(true); return; }
     abrirNovo();
   };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ codigo: d.codigo, discriminacao: d.discriminacao || '', situacao_anterior: d.situacao_anterior, situacao_atual: d.situacao_atual, valor_pago: d.valor_pago || '' });
+    setForm({ data: d.data || '', codigo: d.codigo, discriminacao: d.discriminacao || '', situacao_anterior: d.situacao_anterior, situacao_atual: d.situacao_atual, valor_pago: d.valor_pago || '' });
     setModalOpen(true);
   };
 
@@ -164,11 +160,7 @@ export default function DividasPage({ onVoltar } = {}) {
             <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                {!editingId && (
-                  <div className="form-row">
-                    <div className="form-group"><label>Ano-calendário</label><input className="form-control" type="number" value={anoCadastro} onChange={e => setAnoCadastro(e.target.value === '' ? '' : parseInt(e.target.value, 10))} /></div>
-                  </div>
-                )}
+                <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Código do credor</label><SeletorCodigo opcoes={CODIGOS_DIVIDA} value={form.codigo} onChange={v => upd('codigo', v)} placeholder="Selecione ou digite o código" /></div>
                 </div>
@@ -209,11 +201,6 @@ export default function DividasPage({ onVoltar } = {}) {
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">{editingId ? 'Salvar Dados da Dívida' : 'Salvar'}</button></div>
             </form>
       </Modal>
-      <AnoCalendarioModal
-        open={anoModalOpen}
-        onClose={() => setAnoModalOpen(false)}
-        onConfirm={anoConfirmado => { setAnoModalOpen(false); pendingActionRef.current?.(anoConfirmado); pendingActionRef.current = null; }}
-      />
     </>
   );
 }
