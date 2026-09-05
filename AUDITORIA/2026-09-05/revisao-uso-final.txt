@@ -1,0 +1,86 @@
+{"funcao": "Bens: benfeitoria em 2026, base 2025 intacta, troca e recarga", "resultado": "PASSOU"}
+{"funcao": "Pagamentos: cadastro por data com dependente identificado", "resultado": "PASSOU"}
+{"funcao": "Pagamentos: edição da data move entre anos e exclusão funciona", "resultado": "PASSOU"}
+{"funcao": "Despesas: cadastro com data e dependente", "resultado": "PASSOU"}
+{"funcao": "Doações: data e identificação do doador", "resultado": "PASSOU"}
+{"funcao": "Rendimentos PJ: cadastro com previdência e dependente", "resultado": "PASSOU"}
+{"funcao": "Rendimentos: campos variam entre PJ, PF/exterior, RRA e isentos", "resultado": "PASSOU"}
+{"funcao": "Bens: aquisição cria patrimônio no ano da data e informa dependente", "resultado": "PASSOU"}
+{"funcao": "Dívidas: cadastro datado e titularidade", "resultado": "PASSOU"}
+{"funcao": "Demonstrativo: visão geral, titular e dependente sem erro de renderização", "resultado": "PASSOU"}
+{"funcao": "Tabelas: arraste real nas divisórias, sem Compacto", "resultado": "PASSOU"}
+{"funcao": "Dependentes: inclusão, edição e exclusão sem remover os demais", "resultado": "PASSOU"}
+{"funcao": "Rural: quatro cadastros datados com dependente em ano não ativo", "resultado": "PASSOU"}
+{"funcao": "Rural: edição de data transporta lançamento e permite exclusão", "resultado": "PASSOU"}
+{"funcao": "Renda variável: meses comuns e FII com DARF informado", "resultado": "PASSOU"}
+{"funcao": "Exportações: seis fichas XLSX e backup JSON baixados", "resultado": "PASSOU"}
+{
+  "resultados": [
+    {
+      "funcao": "Bens: benfeitoria em 2026, base 2025 intacta, troca e recarga",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Pagamentos: cadastro por data com dependente identificado",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Pagamentos: edição da data move entre anos e exclusão funciona",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Despesas: cadastro com data e dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Doações: data e identificação do doador",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Rendimentos PJ: cadastro com previdência e dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Rendimentos: campos variam entre PJ, PF/exterior, RRA e isentos",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Bens: aquisição cria patrimônio no ano da data e informa dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Dívidas: cadastro datado e titularidade",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Demonstrativo: visão geral, titular e dependente sem erro de renderização",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Tabelas: arraste real nas divisórias, sem Compacto",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Dependentes: inclusão, edição e exclusão sem remover os demais",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Rural: quatro cadastros datados com dependente em ano não ativo",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Rural: edição de data transporta lançamento e permite exclusão",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Renda variável: meses comuns e FII com DARF informado",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Exportações: seis fichas XLSX e backup JSON baixados",
+      "resultado": "PASSOU"
+    }
+  ],
+  "errosJavascript": [],
+  "downloadsTemporarios": "/tmp/cptec-auditoria-downloads-o9p664yw"
+}

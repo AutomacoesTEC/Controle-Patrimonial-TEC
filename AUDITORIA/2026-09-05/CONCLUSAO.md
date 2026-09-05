@@ -1,5 +1,7 @@
 # Entrega das alterações e auditoria
 
+Nota posterior: este documento registra a entrega anterior à autorização das correções do Demonstrativo. A revisão seguinte está em [ENTREGA-REVISAO.md](ENTREGA-REVISAO.md); os limites e estados históricos abaixo não substituem essa atualização.
+
 Data: 05/09/2026. Aplicativo CP-TEC. Escopo executado no código-fonte e no navegador local; nenhuma base real foi usada para testes de escrita. O fluxo adotado é base patrimonial do ano-calendário2025, fatos datados em2026 e relatório preparatório para a declaração de2027.
 
 ## Resultado por requisito

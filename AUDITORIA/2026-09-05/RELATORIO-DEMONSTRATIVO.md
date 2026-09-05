@@ -2,6 +2,8 @@
 
 Data: 05/09/2026. Estado: **RELATÓRIO PRÉVIO; CORREÇÕES DO MOTOR NÃO APLICADAS**.
 
+**Nota posterior:** este é o relatório histórico anterior à autorização. O usuário autorizou a correção dos achados; a execução posterior está em [CORRECOES-DEMONSTRATIVO.md](CORRECOES-DEMONSTRATIVO.md), com complementos em [INTEGRACAO-RESULTADOS.md](INTEGRACAO-RESULTADOS.md). Os valores “Atual” abaixo são os do diagnóstico original, não os da versão corrigida.
+
 O Demonstrativo funciona como conciliação de origens e aplicações patrimoniais. Não é, atualmente, um livro de movimentação bancária. A aritmética básica fecha nos cenários de salário líquido, compra financiada, venda com perda e continuidade anual. Encontramos 11 divergências reproduzidas em testes do motor e um achado adicional no indicador percentual (D12), descritos abaixo. Nenhuma fórmula de produção foi alterada por esta auditoria.
 
 ## Escopo e evidência

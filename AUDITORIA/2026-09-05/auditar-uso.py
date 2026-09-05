@@ -230,10 +230,10 @@ with sync_playwright() as p:
         ano(2026)
         navegar('Renda Variável','Incluir mês (Comuns)')
         page.get_by_role('button',name=re.compile('Incluir mês \\(Comuns\\)')).click()
-        selecionar('Mês','3'); preencher('Resultado líquido comuns','1000,00'); preencher('Imposto pago (DARF), se diferente do apurado','150,00'); salvar()
+        selecionar('Mês','3'); preencher('Resultado líquido comuns','1000,00'); preencher('Imposto efetivamente pago (DARF)','150,00'); page.get_by_label('Confirmo o pagamento deste DARF').check(); salvar()
         esperar('s.rendaVariavelMensalManual.some(x=>Number(x.mes)===3)')
         fechar(); page.get_by_role('button',name=re.compile('Incluir mês \\(FII\\)')).click()
-        selecionar('Mês','4'); preencher('Resultado líquido do mês','500,00'); preencher('Imposto pago (DARF), se diferente do apurado','100,00'); salvar()
+        selecionar('Mês','4'); preencher('Resultado líquido do mês','500,00'); preencher('Imposto efetivamente pago (DARF)','100,00'); page.get_by_label('Confirmo o pagamento deste DARF').check(); salvar()
         esperar('s.fiiFiagroMensalManual.some(x=>Number(x.mes)===4)')
         assert estado()['anoCalendario']==2026
     caso('Renda variável: meses comuns e FII com DARF informado',rv_cadastros)
