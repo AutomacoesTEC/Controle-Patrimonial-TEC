@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  17:45:48
+   Duration  654ms (transform 590ms, setup 0ms, import 693ms, tests 19ms, environment 0ms)
+

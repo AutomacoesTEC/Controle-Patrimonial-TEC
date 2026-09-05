@@ -1,0 +1,53 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/conciliacaoResultados.test.js (3 tests | 2 failed) 11ms
+   × RV: resumo do ganho não absorve perda de outro mês 8ms
+   × GCAP: resumo do ganho não absorve perda de outra venda 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/conciliacaoResultados.test.js > RV: resumo do ganho não absorve perda de outro mês
+AssertionError: expected 6000 to be -4000 // Object.is equality
+
+- Expected
++ Received
+
+- -4000
++ 6000
+
+ ❯ src/store/conciliacaoResultados.test.js:6:129
+      4| it('RV: resumo do ganho não absorve perda de outro mês', () => {
+      5|   const meses = [10000, -4000].map((v,i) => ({mes:i+1,titular:true,com…
+      6|   expect(rendaVariavelDoPeriodo(meses,2026,de,ate,[{tipo:'exclusivo_05…
+       |                                                                                                                                 ^
+      7| });
+      8| it('GCAP: resumo do ganho não absorve perda de outra venda', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/store/conciliacaoResultados.test.js > GCAP: resumo do ganho não absorve perda de outra venda
+AssertionError: expected 6000 to be -4000 // Object.is equality
+
+- Expected
++ Received
+
+- -4000
++ 6000
+
+ ❯ src/store/conciliacaoResultados.test.js:10:118
+      8| it('GCAP: resumo do ganho não absorve perda de outra venda', () => {
+      9|   const apuracaoGanhoCapital = [10000,-4000].map((v,i)=>({id:i,bem:`Be…
+     10|   expect(ganhosApuradosPeriodo({apuracaoGanhoCapital,rendimentos:[{tip…
+       |                                                                                                                      ^
+     11| });
+     12| it('GCAP: rendimento do dependente não elimina ganho do titular', () =…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  17:44:32
+   Duration  334ms (transform 136ms, setup 0ms, import 164ms, tests 11ms, environment 0ms)
+

@@ -16,6 +16,13 @@ import { arredondarCentavos } from '../utils/formatters';
 
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
 
+// Só os resumos fiscais legados sem beneficiário usam a convenção titular.
+const pessoaFinanceira = r => {
+  if (r.titular === true) return 'titular';
+  const chave = pessoaDoRegistro(r);
+  return chave === 'nao-informada' ? 'titular' : chave;
+};
+
 // Bem com situação anterior E atual zeradas e nenhuma movimentação no ano: ele
 // não existe neste ano-calendário — foi vendido ou baixado num ano anterior e o
 // rollover só carregou o zero adiante. Não aparece nas listagens nem entra nas
@@ -543,7 +550,7 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos 
       // operação contra a Apuração do Ganho de Capital da declaração (ver o
       // casamento logo abaixo). Sem ele, a mesma venda relançada à mão era
       // contada duas vezes.
-      vendas.push({ bemId: b.id, operacaoId: m.operacaoId, apuracaoGanhoCapitalId: m.apuracaoGanhoCapitalId, bem: b.discriminacao, data: m.data, ganhoBruto, irrf, valorVenda: m.valorVenda, ganhoLiquido: ganhoBruto - irrf, semIrrf: ganhoBruto > 0 && m.irrfVenda == null });
+      vendas.push({ pessoa: pessoaFinanceira(b), bemId: b.id, operacaoId: m.operacaoId, apuracaoGanhoCapitalId: m.apuracaoGanhoCapitalId, bem: b.discriminacao, data: m.data, ganhoBruto, irrf, valorVenda: m.valorVenda, ganhoLiquido: ganhoBruto - irrf, semIrrf: ganhoBruto > 0 && m.irrfVenda == null });
     }
   }
 
@@ -602,7 +609,7 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos 
     }
     const ganhoBruto = (g.valorAlienacao || 0) - (g.custoAquisicao || 0);
     vendas.push({
-      bem: g.bem, data: g.dataAlienacao, ganhoBruto, irrf: 0, valorVenda: g.valorAlienacao || 0,
+      pessoa: pessoaFinanceira(g), bem: g.bem, data: g.dataAlienacao, ganhoBruto, irrf: 0, valorVenda: g.valorAlienacao || 0,
       ganhoLiquido: ganhoBruto, semIrrf: ganhoBruto > 0, daDeclaracao: true,
     });
   }
@@ -617,16 +624,20 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos 
     // lançou aquela venda à mão, o texto não entra de novo.
     if (vendasManuais.some(m => m.bemId === v.id && m.data === v.data && mesmoValor(m.valorVenda, v.valorVenda))) continue;
     vendas.push({
-      bem: v.bem, data: v.data, ganhoBruto: v.ganho, irrf: 0, valorVenda: v.valorVenda,
+      pessoa: pessoaFinanceira((bens || []).find(b => b.id === v.id) || {}), bem: v.bem, data: v.data, ganhoBruto: v.ganho, irrf: 0, valorVenda: v.valorVenda,
       ganhoLiquido: v.ganho, semIrrf: v.ganho > 0, daDiscriminacao: true,
       custo: v.custo, baseCusto: v.baseCusto,
     });
   }
 
   const totalOperacoes = vendas.reduce((s, v) => s + v.ganhoLiquido, 0);
-  const resumoFiscal = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && noPeriodo(r.data, dataDe, dataAte))
-    .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
-  const jaNosRendimentos = Math.min(Math.max(totalOperacoes, 0), Math.max(resumoFiscal, 0));
+  let jaNosRendimentos = 0;
+  for (const pessoa of new Set(vendas.map(v => v.pessoa))) {
+    const positivos = vendas.filter(v => v.pessoa === pessoa).reduce((s,v) => s + Math.max(v.ganhoLiquido, 0), 0);
+    const resumoFiscal = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && pessoaFinanceira(r) === pessoa && noPeriodo(r.data, dataDe, dataAte))
+      .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
+    jaNosRendimentos += Math.min(positivos, Math.max(resumoFiscal, 0));
+  }
   return {
     vendas,
     total: totalOperacoes - jaNosRendimentos,
@@ -1021,11 +1032,6 @@ export function totalDoacoesPeriodo(dados, dataDe, dataAte) {
 export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, dataAte, rendimentos = []) {
   const meses = [];
   const porPessoa = new Map();
-  const pessoa = r => {
-    if (r.titular === true) return 'titular';
-    const chave = pessoaDoRegistro(r);
-    return chave === 'nao-informada' ? 'titular' : chave;
-  };
   let resultado = 0, imposto = 0, perda = 0, comValor = false;
   for (const m of (rendaVariavelMensalOficial || [])) {
     if (!noPeriodo(ultimoDiaDoMes(ano, m.mes), dataDe, dataAte)) continue;
@@ -1033,8 +1039,11 @@ export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, 
     if (!m.comuns && !m.daytrade) continue;
     const doMes = (m.comuns?.resultadoLiquidoMes || 0) + (m.daytrade?.resultadoLiquidoMes || 0);
     resultado += doMes;
-    const chave = pessoa(m);
-    porPessoa.set(chave, (porPessoa.get(chave) || 0) + doMes);
+    const chave = pessoaFinanceira(m);
+    const acumulado = porPessoa.get(chave) || { liquido: 0, positivos: 0 };
+    acumulado.liquido += doMes;
+    acumulado.positivos += Math.max(doMes, 0);
+    porPessoa.set(chave, acumulado);
     if (doMes < 0) perda += doMes;
     imposto += m.consolidacao?.totalImpostoDevido || 0;
     comValor = true;
@@ -1043,11 +1052,11 @@ export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, 
   // complementamos o resultado líquido mensal ainda não representado.
   // Resultado negativo permanece financeiro, não prejuízo fiscal transportado.
   let ajusteFinanceiro = 0;
-  for (const [chave, liquido] of porPessoa) {
+  for (const [chave, { liquido, positivos }] of porPessoa) {
     const declarado = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*5$/.test(r.tipo || '')
-      && pessoa(r) === chave && noPeriodo(r.data, dataDe, dataAte))
+      && pessoaFinanceira(r) === chave && noPeriodo(r.data, dataDe, dataAte))
       .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
-    ajusteFinanceiro += liquido - Math.min(Math.max(liquido, 0), Math.max(declarado, 0));
+    ajusteFinanceiro += liquido - Math.min(positivos, Math.max(declarado, 0));
   }
   return { meses, resultado, imposto, perda, comValor, ajusteFinanceiro };
 }

@@ -1,0 +1,537 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/demonstrativos.test.js (94 tests | 10 failed) 156ms
+     × bug real: bem sem NENHUMA movimentação (recém-importado) não trava na situação anterior do lado "até" 23ms
+     × bug real: salto inicial sem data não some quando o bem também tem movimentação depois 2ms
+     × o IRRF do 13º sai só pelo bloco de tributação exclusiva, nunca também pelo de PJ 1ms
+     × DÍVIDA cadastrada com saldo no formulário e depois amortizada 2ms
+     × BEM cadastrado com valor no formulário e depois vendido em parte 1ms
+     × anterior e atual zerados com venda registrada: infere o valor antes da venda 1ms
+     × o lançamento manual substitui SÓ O MÊS dele; os demais meses importados continuam valendo 1ms
+     × um único lançamento manual não apaga o ano inteiro importado 1ms
+     × lançamento manual SEM data mantém a regra antiga (ano inteiro manual), para nunca duplicar 2ms
+     × a MESMA venda relançada à mão não é contada duas vezes 7ms
+ ❯ src/store/consultaPeriodo.test.js (32 tests | 4 failed) 82ms
+     × soma as 3 fichas de doação e reduz o Saldo de Caixa pelo total 14ms
+     × só a PERDA da renda variável entra no Saldo de Caixa; o ganho não, para não duplicar a ficha de exclusivos 2ms
+     × mês de renda variável com ganho puro não mexe no Saldo de Caixa 3ms
+     × entra em linha própria e soma no total geral 2ms
+ ❯ src/store/demonstrativo.golden.test.js (3 tests | 3 failed) 74ms
+     × ano-2025 52ms
+     × primeiro-semestre-2025 7ms
+     × periodo-2025-2026 11ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/consultaPeriodo.test.js > demonstrativoPeriodo — Doações reduzem o Saldo de Caixa; Renda Variável só sinaliza (sem valor) > soma as 3 fichas de doação e reduz o Saldo de Caixa pelo total
+AssertionError: expected 1500 to be 1700 // Object.is equality
+
+- Expected
++ Received
+
+- 1700
++ 1500
+
+ ❯ src/store/consultaPeriodo.test.js:225:37
+    223|     const semDoacoes = demonstrativoPeriodo(estadoDoisAnos(), '2025-01…
+    224|     const comDoacoes = demonstrativoPeriodo(estadoComDoacoesERendaVari…
+    225|     expect(comDoacoes.totalDoacoes).toBe(1700); // 1000 + 500 + 200
+       |                                     ^
+    226|     expect(comDoacoes.saldoDeCaixa).toBe(semDoacoes.saldoDeCaixa - 170…
+    227|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  src/store/consultaPeriodo.test.js > demonstrativoPeriodo — Renda Variável importada por PDF, com valores > só a PERDA da renda variável entra no Saldo de Caixa; o ganho não, para não duplicar a ficha de exclusivos
+AssertionError: expected 1254.6 to be close to -245.4, received difference is 1500, but expected 0.005
+ ❯ src/store/consultaPeriodo.test.js:296:36
+    294|     const com = demonstrativoPeriodo(estadoComPdf(), '2025-01-01', '20…
+    295|     // A única perda das três fichas é a do dependente em julho: -245,…
+    296|     expect(com.rendaVariavelPerda).toBeCloseTo(-245.4, 2);
+       |                                    ^
+    297|     expect(com.saldoDeCaixa).toBeCloseTo(sem.saldoDeCaixa - 245.4, 2);
+    298|     expect(com.saldoDeCaixaGeral).toBeCloseTo(sem.saldoDeCaixaGeral - …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  src/store/consultaPeriodo.test.js > demonstrativoPeriodo — Renda Variável importada por PDF, com valores > mês de renda variável com ganho puro não mexe no Saldo de Caixa
+AssertionError: expected 1500 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1500
+
+ ❯ src/store/consultaPeriodo.test.js:313:36
+    311|     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '…
+    312|     const com = demonstrativoPeriodo(s, '2025-01-01', '2025-12-31');
+    313|     expect(com.rendaVariavelPerda).toBe(0);
+       |                                    ^
+    314|     expect(com.saldoDeCaixa).toBe(sem.saldoDeCaixa);
+    315|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  src/store/consultaPeriodo.test.js > demonstrativoPeriodo — RRA soma nos rendimentos > entra em linha própria e soma no total geral
+AssertionError: expected 91000 to be 100000 // Object.is equality
+
+- Expected
++ Received
+
+- 100000
++ 91000
+
+ ❯ src/store/consultaPeriodo.test.js:423:43
+    421|     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '…
+    422|     const com = demonstrativoPeriodo(comRra(), '2025-01-01', '2025-12-…
+    423|     expect(com.rendimentos.tributavelRra).toBe(100000);
+       |                                           ^
+    424|     expect(com.rendimentos.totalGeral).toBe(sem.rendimentos.totalGeral…
+    425|     // E NÃO se mistura com os rendimentos de pessoa jurídica.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > ano-2025
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -7,13 +7,15 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": true,
++       "jaNosRendimentos": 92162.65,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 3,
+-       "total": 102003.03,
++       "total": 9840.38,
++       "totalOperacoes": 102003.03,
+        "vendas": [
+          {
+            "bem": "AJU GCI IMOVEL URBANO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-08-18",
+@@ -47,11 +49,11 @@
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 26137.88,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -98,30 +100,30 @@
+        {
+          "ano": 2025,
+          "mes": 12,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 4303.54,
++     "rendaVariavelResultado": 10137.59,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 142197.69,
+-       "exclusivoIrrf": 610.42,
+-       "exclusivoLiquido": 141587.27,
++       "exclusivoIrrf": 0,
++       "exclusivoLiquido": 142197.69,
+        "isentoValor": 45523.7,
+-       "totalGeral": 260666.23,
++       "totalGeral": 261276.65,
+        "tributavelPJ": 51989.6,
+        "tributavelPfExterior": 0,
+        "tributavelPjBruto": 63302.32,
+        "tributavelPjIrrf": 5008.38,
+        "tributavelPjPrevidencia": 6304.34,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -51787.27,
+-     "saldoDeCaixaGeral": -7536.78,
++     "saldoDeCaixa": -137532.06,
++     "saldoDeCaixaGeral": -93885.48,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 17508.7,
+      "varPatrimonial": {
+        "bensAte": 444846.93,
+        "bensDe": 107537.85,
+        "deltaBens": 337309.08,
+        "deltaDivida": -31996.97,
+
+ ❯ src/store/demonstrativo.golden.test.js:35:25
+     33|   test.each(CASOS)('%s', (nome) => {
+     34|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     35|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     36|   });
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > primeiro-semestre-2025
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -7,20 +7,22 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": false,
++       "jaNosRendimentos": 0,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 0,
+        "total": 0,
++       "totalOperacoes": 0,
+        "vendas": [],
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 0,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -43,12 +45,12 @@
+        {
+          "ano": 2025,
+          "mes": 6,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 8325.73,
++     "rendaVariavelResultado": 8325.73,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 0,
+        "exclusivoIrrf": 0,
+        "exclusivoLiquido": 0,
+@@ -59,26 +61,26 @@
+        "tributavelPjBruto": 0,
+        "tributavelPjIrrf": 0,
+        "tributavelPjPrevidencia": 0,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -366752.99,
+-     "saldoDeCaixaGeral": -348640.38,
++     "saldoDeCaixa": 29891.39,
++     "saldoDeCaixaGeral": 29891.39,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 0,
+      "varPatrimonial": {
+-       "bensAte": 444846.93,
++       "bensAte": 107537.85,
+        "bensDe": 107537.85,
+-       "deltaBens": 337309.08,
+-       "deltaDivida": -31996.97,
+-       "deltaDividaComum": -22997.98,
+-       "deltaDividaRural": -8998.99,
+-       "dividaAte": 112010.64,
+-       "dividaComumAte": 79608.47,
++       "deltaBens": 0,
++       "deltaDivida": 0,
++       "deltaDividaComum": 0,
++       "deltaDividaRural": 0,
++       "dividaAte": 144007.61,
++       "dividaComumAte": 102606.45,
+        "dividaComumDe": 102606.45,
+        "dividaDe": 144007.61,
+-       "dividaRuralAte": 32402.17,
++       "dividaRuralAte": 41401.16,
+        "dividaRuralDe": 41401.16,
+-       "total": -369306.05,
++       "total": 0,
+      },
+    },
+  }
+
+ ❯ src/store/demonstrativo.golden.test.js:35:25
+     33|   test.each(CASOS)('%s', (nome) => {
+     34|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     35|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     36|   });
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > periodo-2025-2026
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -8,13 +8,15 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": true,
++       "jaNosRendimentos": 92162.65,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 3,
+-       "total": 102003.03,
++       "total": 9840.38,
++       "totalOperacoes": 102003.03,
+        "vendas": [
+          {
+            "bem": "AJU GCI IMOVEL URBANO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-08-18",
+@@ -48,11 +50,11 @@
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 26137.88,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -99,30 +101,30 @@
+        {
+          "ano": 2025,
+          "mes": 12,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 4303.54,
++     "rendaVariavelResultado": 10137.59,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 142197.69,
+-       "exclusivoIrrf": 610.42,
+-       "exclusivoLiquido": 141587.27,
++       "exclusivoIrrf": 0,
++       "exclusivoLiquido": 142197.69,
+        "isentoValor": 45523.7,
+-       "totalGeral": 260666.23,
++       "totalGeral": 261276.65,
+        "tributavelPJ": 51989.6,
+        "tributavelPfExterior": 0,
+        "tributavelPjBruto": 63302.32,
+        "tributavelPjIrrf": 5008.38,
+        "tributavelPjPrevidencia": 6304.34,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -51787.27,
+-     "saldoDeCaixaGeral": -7536.78,
++     "saldoDeCaixa": -137532.06,
++     "saldoDeCaixaGeral": -93885.48,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 17508.7,
+      "varPatrimonial": {
+        "bensAte": 444846.93,
+        "bensDe": 107537.85,
+        "deltaBens": 337309.08,
+        "deltaDivida": -31996.97,
+
+ ❯ src/store/demonstrativo.golden.test.js:35:25
+     33|   test.each(CASOS)('%s', (nome) => {
+     34|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     35|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     36|   });
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > situacaoBemAteData — reconstrução de bem por data > bug real: bem sem NENHUMA movimentação (recém-importado) não trava na situação anterior do lado "até"
+AssertionError: expected 1000 to be 5000 // Object.is equality
+
+- Expected
++ Received
+
+- 5000
++ 1000
+
+ ❯ src/store/demonstrativos.test.js:142:73
+    140|     const bemSemMovimentacao = { situacao_anterior: 1000, situacao_atu…
+    141|     expect(situacaoBemAteData(bemSemMovimentacao, '2025-12-31', 'ate')…
+    142|     expect(situacaoBemAteData(bemSemMovimentacao, '2025-06-01', 'ate')…
+       |                                                                         ^
+    143|     // do lado "de", sem informação melhor, assume que ainda não mudou
+    144|     expect(situacaoBemAteData(bemSemMovimentacao, '2025-01-01', 'de'))…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > situacaoBemAteData — reconstrução de bem por data > bug real: salto inicial sem data não some quando o bem também tem movimentação depois
+AssertionError: expected +0 to be 100000 // Object.is equality
+
+- Expected
++ Received
+
+- 100000
++ 0
+
+ ❯ src/store/demonstrativos.test.js:187:79
+    185|     // "ate" antes da movimentação: já conta o salto sem data (100000)…
+    186|     // compra de 15/06 ainda não entra.
+    187|     expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-03-01', …
+       |                                                                               ^
+    188|     // "ate" depois da movimentação: bate com o valor real, 150000.
+    189|     expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-12-31', …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > totalRendimentos > o IRRF do 13º sai só pelo bloco de tributação exclusiva, nunca também pelo de PJ
+AssertionError: expected 4556.29 to be close to 4281.39, received difference is 274.89999999999964, but expected 0.005
+ ❯ src/store/demonstrativos.test.js:329:32
+    327|     const r = totalRendimentos(rendimentos, 0, '2025-01-01', '2025-12-…
+    328|     expect(r.tributavelPJ).toBeCloseTo(54393.72, 2);
+    329|     expect(r.exclusivoLiquido).toBeCloseTo(4281.39, 2);
+       |                                ^
+    330|     expect(r.totalGeral).toBeCloseTo(58675.11, 2);
+    331|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > reconstrução por data não conta a movimentação duas vezes > DÍVIDA cadastrada com saldo no formulário e depois amortizada
+AssertionError: expected +0 to be 800000 // Object.is equality
+
+- Expected
++ Received
+
+- 800000
++ 0
+
+ ❯ src/store/demonstrativos.test.js:411:64
+    409|     expect(situacaoDividaAteData(divida, '2026-12-31', 'ate')).toBe(60…
+    410|     // Antes da amortização, o saldo é o total contratado.
+    411|     expect(situacaoDividaAteData(divida, '2026-08-09', 'ate')).toBe(80…
+       |                                                                ^
+    412|     // Início do período: a dívida ainda não existia.
+    413|     expect(situacaoDividaAteData(divida, '2026-01-01', 'de')).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > reconstrução por data não conta a movimentação duas vezes > BEM cadastrado com valor no formulário e depois vendido em parte
+AssertionError: expected +0 to be 350000 // Object.is equality
+
+- Expected
++ Received
+
+- 350000
++ 0
+
+ ❯ src/store/demonstrativos.test.js:424:58
+    422|     // Antes do fix devolvia 150.000.
+    423|     expect(situacaoBemAteData(bem, '2026-12-31', 'ate')).toBe(250000);
+    424|     expect(situacaoBemAteData(bem, '2026-08-09', 'ate')).toBe(350000);
+       |                                                          ^
+    425|   });
+    426|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > reconstrução por data não conta a movimentação duas vezes > anterior e atual zerados com venda registrada: infere o valor antes da venda
+AssertionError: expected +0 to be 100000 // Object.is equality
+
+- Expected
++ Received
+
+- 100000
++ 0
+
+ ❯ src/store/demonstrativos.test.js:480:58
+    478|       movimentacoes: [{ id: 1, tipo: 'venda_parcial', valor: 100000, d…
+    479|     };
+    480|     expect(situacaoBemAteData(bem, '2026-05-31', 'ate')).toBe(100000);
+       |                                                          ^
+    481|     expect(situacaoBemAteData(bem, '2026-12-31', 'ate')).toBe(0);
+    482|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > resultado da Atividade Rural: livro-caixa manual ou apuração importada > o lançamento manual substitui SÓ O MÊS dele; os demais meses importados continuam valendo
+AssertionError: expected 3337930.0100000002 to be close to 3288489.85, received difference is 49440.16000000015, but expected 0.005
+ ❯ src/store/demonstrativos.test.js:664:15
+    662|       .filter(m => m.mes !== 4 && m.mes !== 7)
+    663|       .reduce((s, m) => s + m.receitaBruta - m.despesaCusteioInvestime…
+    664|     expect(r).toBeCloseTo(4900000 + oficialSemAbrilEJulho, 2);
+       |               ^
+    665|     // E o resultado NÃO é só o manual, que era o comportamento antigo.
+    666|     expect(r).not.toBeCloseTo(4900000, 2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > resultado da Atividade Rural: livro-caixa manual ou apuração importada > um único lançamento manual não apaga o ano inteiro importado
+AssertionError: expected -1562169.9899999998 to be close to -1797509.0499999996, received difference is 235339.05999999982, but expected 0.005
+ ❯ src/store/demonstrativos.test.js:676:15
+    674|       .filter(m => m.mes !== 6)
+    675|       .reduce((s, m) => s + m.receitaBruta - m.despesaCusteioInvestime…
+    676|     expect(r).toBeCloseTo(semJunho - 100, 2);
+       |               ^
+    677|     expect(r).not.toBe(-100);
+    678|     expect(junho).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > resultado da Atividade Rural: livro-caixa manual ou apuração importada > lançamento manual SEM data mantém a regra antiga (ano inteiro manual), para nunca duplicar
+AssertionError: expected -1560835.9899999998 to be 1234 // Object.is equality
+
+- Expected
++ Received
+
+- 1234
++ -1560835.9899999998
+
+ ❯ src/store/demonstrativos.test.js:687:15
+    685|     const semData = [{ tipo: 'receita', valor: 1234 }];
+    686|     const r = resultadoAtividadeRuralPeriodo(semData, null, null, { me…
+    687|     expect(r).toBe(1234);
+       |               ^
+    688|   });
+    689|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/17]⎯
+
+ FAIL  src/store/demonstrativos.test.js > Ganhos Apurados: movimentação lançada ou apuração da declaração > a MESMA venda relançada à mão não é contada duas vezes
+AssertionError: expected [ { bemId: undefined, …(9) }, …(3) ] to have a length of 3 but got 4
+
+- Expected
++ Received
+
+- 3
++ 4
+
+ ❯ src/store/demonstrativos.test.js:767:22
+    765|     }];
+    766|     const g = ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital: apur…
+    767|     expect(g.vendas).toHaveLength(3); // a manual + as 2 restantes da …
+       |                      ^
+    768|     expect(g.vendas.filter(v => v.daDeclaracao)).toHaveLength(2);
+    769|     expect(g.total).toBeCloseTo(-241779.86, 2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/17]⎯
+
+
+ Test Files  3 failed | 65 passed (68)
+      Tests  17 failed | 1015 passed (1032)
+   Start at  17:38:46
+   Duration  36.89s (transform 7.52s, setup 0ms, import 13.60s, tests 63.55s, environment 13ms)
+
