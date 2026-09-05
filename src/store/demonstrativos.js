@@ -539,7 +539,7 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital }, dataDe, da
       // operação contra a Apuração do Ganho de Capital da declaração (ver o
       // casamento logo abaixo). Sem ele, a mesma venda relançada à mão era
       // contada duas vezes.
-      vendas.push({ bem: b.discriminacao, data: m.data, ganhoBruto, irrf, valorVenda: m.valorVenda, ganhoLiquido: ganhoBruto - irrf, semIrrf: ganhoBruto > 0 && m.irrfVenda == null });
+      vendas.push({ bemId: b.id, operacaoId: m.operacaoId, apuracaoGanhoCapitalId: m.apuracaoGanhoCapitalId, bem: b.discriminacao, data: m.data, ganhoBruto, irrf, valorVenda: m.valorVenda, ganhoLiquido: ganhoBruto - irrf, semIrrf: ganhoBruto > 0 && m.irrfVenda == null });
     }
   }
 
@@ -588,7 +588,10 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital }, dataDe, da
   const possiveisDuplicidades = [];
   for (const g of (apuracaoGanhoCapital || [])) {
     if (!noPeriodo(g.dataAlienacao, dataDe, dataAte)) continue;
-    const jaLancada = vendasManuais.some(v => v.data === g.dataAlienacao && mesmoValor(v.valorVenda, g.valorAlienacao));
+    const jaLancada = vendasManuais.some(v =>
+      (g.id != null && v.apuracaoGanhoCapitalId === g.id)
+      || (g.operacaoId && v.operacaoId === g.operacaoId)
+      || (g.bemId != null && v.bemId === g.bemId && v.data === g.dataAlienacao && mesmoValor(v.valorVenda, g.valorAlienacao)));
     if (jaLancada) continue;
     if (vendasManuais.some(v => v.data === g.dataAlienacao)) {
       possiveisDuplicidades.push({ bem: g.bem, data: g.dataAlienacao, valorAlienacao: g.valorAlienacao || 0 });
@@ -608,7 +611,7 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital }, dataDe, da
   for (const v of vendasDaDiscriminacaoPeriodo({ bens, apuracaoGanhoCapital }, dataDe, dataAte)) {
     // Mesma trava de duplicidade das operações oficiais: se a usuária já
     // lançou aquela venda à mão, o texto não entra de novo.
-    if (vendasManuais.some(m => m.data === v.data && mesmoValor(m.valorVenda, v.valorVenda))) continue;
+    if (vendasManuais.some(m => m.bemId === v.id && m.data === v.data && mesmoValor(m.valorVenda, v.valorVenda))) continue;
     vendas.push({
       bem: v.bem, data: v.data, ganhoBruto: v.ganho, irrf: 0, valorVenda: v.valorVenda,
       ganhoLiquido: v.ganho, semIrrf: v.ganho > 0, daDiscriminacao: true,

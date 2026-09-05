@@ -63,7 +63,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     const oficial = { ano: 2026, meses: [{ mes: 6, receitaBruta: 10000, despesaCusteioInvestimento: 2000 }] };
     expect(resultadoAtividadeRuralPeriodo([{ data: '2026-06-10', tipo: 'despesa', valor: 100 }], '2026-01-01', '2026-12-31', oficial)).toBe(7900);
   });
-  it.fails('D08: operações diferentes com mesma data e preço não são duplicatas', () => {
+  it('D08: operações diferentes com mesma data e preço não são duplicatas', () => {
     const s = estado({
       bens: [bem(10000, 0, [{ tipo: 'venda_total', data: '2026-06-10', valor: 10000, valorVenda: 15000 }])],
       apuracaoGanhoCapital: [{ bem: 'Outro bem sintético', dataAlienacao: '2026-06-10', custoAquisicao: 12000, valorAlienacao: 15000 }],

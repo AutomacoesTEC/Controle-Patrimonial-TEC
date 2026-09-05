@@ -45,3 +45,9 @@ MANTER: D06-antes.txt registra saída 1.000 em janeiro; D06-depois.txt confirma 
 Base 4dc151f. Previsão: receita 10.000 menos despesa importada 2.000 menos complemento 100 resulta 7.900, não -100. Camada: precedência das fontes do livro-caixa. Padrão complementar; substituição da apuração mensal somente por escolha explícita. Fixture D07 antes/depois. Não migrar nem apagar lançamentos existentes; o relatório final deve recomendar revisar meses antes usados como substituição implícita.
 
 MANTER: D07-antes.txt registra -100; D07-depois.txt confirma 7.900. Formulário oferece escolha explícita e informação do efeito. A ausência de data não apaga mais o ano oficial inteiro.
+
+## D08 — duas vendas diferentes eliminadas por data/preço
+
+Base e81b8b6. Previsão: duas vendas de 15.000 no mesmo dia, custos 10.000 e 12.000, somam ganho 8.000. Camada: identidade da conciliação de alienações. Coincidência monetária/temporal sozinha vira pendência, não exclusão; vínculo explícito de operação/bem pode eliminar duplicação. Fixture D08 antes/depois. Sem inventar chaves para dados históricos.
+
+MANTER: D08-antes.txt registra ganho 5.000; D08-depois.txt confirma 8.000. Casos legados sem identidade permanecem visíveis e sinalizados para conferência, não suprimidos.

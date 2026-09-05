@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 54ms
+     × D08: operações diferentes com mesma data e preço não são duplicatas 51ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D08: operações diferentes com mesma data e preço não são duplicatas
+AssertionError: expected 5000 to be 8000 // Object.is equality
+
+- Expected
++ Received
+
+- 8000
++ 5000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:71:72
+     69|       apuracaoGanhoCapital: [{ bem: 'Outro bem sintético', dataAlienac…
+     70|     });
+     71|     expect(ganhosApuradosPeriodo(s, '2026-01-01', '2026-12-31').total)…
+       |                                                                        ^
+     72|   });
+     73|   it.fails('D09: foto anual sem data da alteração não pode inventar va…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:34:11
+   Duration  903ms (transform 548ms, setup 0ms, import 640ms, tests 54ms, environment 0ms)
+
