@@ -136,10 +136,10 @@ describe('situacaoBemAteData — reconstrução de bem por data', () => {
     expect(situacaoBemAteData(bem, null)).toBe(1800);
   });
 
-  test('bug real: bem sem NENHUMA movimentação (recém-importado) não trava na situação anterior do lado "até"', () => {
+  test('D09: foto anual preserva fechamento sem inventar posição em junho', () => {
     const bemSemMovimentacao = { situacao_anterior: 1000, situacao_atual: 5000, movimentacoes: [] };
     expect(situacaoBemAteData(bemSemMovimentacao, '2025-12-31', 'ate')).toBe(5000);
-    expect(situacaoBemAteData(bemSemMovimentacao, '2025-06-01', 'ate')).toBe(5000);
+    expect(situacaoBemAteData(bemSemMovimentacao, '2025-06-01', 'ate')).toBe(1000);
     // do lado "de", sem informação melhor, assume que ainda não mudou
     expect(situacaoBemAteData(bemSemMovimentacao, '2025-01-01', 'de')).toBe(1000);
   });
@@ -176,15 +176,14 @@ describe('situacaoBemAteData — reconstrução de bem por data', () => {
   // movimentação datada — a reconstrução esquecia esse salto inicial sem
   // data assim que existia QUALQUER movimentação, porque só olhava as
   // movimentações registradas partindo de situacao_anterior.
-  test('bug real: salto inicial sem data não some quando o bem também tem movimentação depois', () => {
+  test('D09: salto sem data aparece no fechamento anual, não em março', () => {
     const bemComSaltoEMovimentacao = {
       situacao_anterior: 0,
       situacao_atual: 150000, // 0 -> 100000 (cadastro direto) -> 150000 (+50000 comprado depois)
       movimentacoes: [{ tipo: 'compra', valor: 50000, data: '2025-06-15' }],
     };
-    // "ate" antes da movimentação: já conta o salto sem data (100000), a
-    // compra de 15/06 ainda não entra.
-    expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-03-01', 'ate')).toBe(100000);
+    // Abertura conhecida zero; salto sem data não prova posição em março.
+    expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-03-01', 'ate')).toBe(0);
     // "ate" depois da movimentação: bate com o valor real, 150000.
     expect(situacaoBemAteData(bemComSaltoEMovimentacao, '2025-12-31', 'ate')).toBe(150000);
     // "de": convenção conservadora de sempre, nem o salto nem a compra
@@ -326,8 +325,8 @@ describe('totalRendimentos', () => {
     ];
     const r = totalRendimentos(rendimentos, 0, '2025-01-01', '2025-12-31');
     expect(r.tributavelPJ).toBeCloseTo(54393.72, 2);
-    expect(r.exclusivoLiquido).toBeCloseTo(4281.39, 2);
-    expect(r.totalGeral).toBeCloseTo(58675.11, 2);
+    expect(r.exclusivoLiquido).toBeCloseTo(4556.29, 2); // D03: 13º já líquido
+    expect(r.totalGeral).toBeCloseTo(58950.01, 2);
   });
 
   // Números reais da declaração de referência B (exercício 2026): 7 fontes de PJ entre titular e dependente, somando
@@ -407,8 +406,8 @@ describe('reconstrução por data não conta a movimentação duas vezes', () =>
     };
     // Antes do fix devolvia 400.000 (amortização descontada duas vezes).
     expect(situacaoDividaAteData(divida, '2026-12-31', 'ate')).toBe(600000);
-    // Antes da amortização, o saldo é o total contratado.
-    expect(situacaoDividaAteData(divida, '2026-08-09', 'ate')).toBe(800000);
+    // Sem data da contratação, a projeção não inventa ingresso em agosto.
+    expect(situacaoDividaAteData(divida, '2026-08-09', 'ate')).toBe(0);
     // Início do período: a dívida ainda não existia.
     expect(situacaoDividaAteData(divida, '2026-01-01', 'de')).toBe(0);
   });
@@ -421,7 +420,7 @@ describe('reconstrução por data não conta a movimentação duas vezes', () =>
     };
     // Antes do fix devolvia 150.000.
     expect(situacaoBemAteData(bem, '2026-12-31', 'ate')).toBe(250000);
-    expect(situacaoBemAteData(bem, '2026-08-09', 'ate')).toBe(350000);
+    expect(situacaoBemAteData(bem, '2026-08-09', 'ate')).toBe(0); // aquisição não datada
   });
 
   test('mesmo caso, mas com a entrada registrada como movimentação: continua certo', () => {
@@ -471,13 +470,13 @@ describe('reconstrução por data não conta a movimentação duas vezes', () =>
   // venda, em vez de responder zero o tempo todo. É a resposta mais fiel ao
   // que a movimentação afirma, e fica documentada aqui porque é a única
   // mudança de comportamento que o fix traz fora do bug.
-  test('anterior e atual zerados com venda registrada: infere o valor antes da venda', () => {
+  test('D09: saída sem aquisição não comprova posição anterior à venda', () => {
     const bem = {
       situacao_anterior: 0,
       situacao_atual: 0,
       movimentacoes: [{ id: 1, tipo: 'venda_parcial', valor: 100000, data: '2026-06-01' }],
     };
-    expect(situacaoBemAteData(bem, '2026-05-31', 'ate')).toBe(100000);
+    expect(situacaoBemAteData(bem, '2026-05-31', 'ate')).toBe(0);
     expect(situacaoBemAteData(bem, '2026-12-31', 'ate')).toBe(0);
   });
 
@@ -652,10 +651,10 @@ describe('resultado da Atividade Rural: livro-caixa manual ou apuração importa
   // resultado de -460.078,43 para -100,00 e movia o Saldo de Caixa Geral em
   // R$ 459.978,43 (nesta declaração de referência, R$ 1.562.069,99).
   // A precedência agora é POR MÊS: só o mês corrigido à mão deixa de valer.
-  test('o lançamento manual substitui SÓ O MÊS dele; os demais meses importados continuam valendo', () => {
+  test('substituição EXPLÍCITA troca só o mês; demais meses continuam valendo', () => {
     const manuais = [
-      { tipo: 'receita', valor: 8000000, data: '2025-07-30' },
-      { tipo: 'despesa', valor: 3100000, data: '2025-04-12' },
+      { tipo: 'receita', valor: 8000000, data: '2025-07-30', tratamentoMes: 'substituir' },
+      { tipo: 'despesa', valor: 3100000, data: '2025-04-12', tratamentoMes: 'substituir' },
     ];
     const r = resultadoAtividadeRuralPeriodo(manuais, '2025-01-01', '2025-12-31', { meses: mesesReais, ano: 2025 });
     const oficialSemAbrilEJulho = mesesReais
@@ -673,18 +672,18 @@ describe('resultado da Atividade Rural: livro-caixa manual ou apuração importa
     const semJunho = mesesReais
       .filter(m => m.mes !== 6)
       .reduce((s, m) => s + m.receitaBruta - m.despesaCusteioInvestimento, 0);
-    expect(r).toBeCloseTo(semJunho - 100, 2);
+    expect(r).toBeCloseTo(semJunho + junho.receitaBruta - junho.despesaCusteioInvestimento - 100, 2);
     expect(r).not.toBe(-100);
     expect(junho).toBeTruthy();
   });
 
-  test('lançamento manual SEM data mantém a regra antiga (ano inteiro manual), para nunca duplicar', () => {
+  test('D07: lançamento sem data não apaga a apuração importada', () => {
     // Dado gravado antes de a data existir no formulário: não dá para saber
     // qual mês ele corrige, e somar os dois lados contaria a mesma receita
     // duas vezes. Sem filtro de período, `noPeriodo` aceita o item sem data.
     const semData = [{ tipo: 'receita', valor: 1234 }];
     const r = resultadoAtividadeRuralPeriodo(semData, null, null, { meses: mesesReais, ano: 2025 });
-    expect(r).toBe(1234);
+    expect(r).toBeCloseTo(1234 + mesesReais.reduce((s,m) => s + m.receitaBruta - m.despesaCusteioInvestimento, 0), 2);
   });
 
   test('a apuração importada respeita o recorte do período, mês a mês', () => {
@@ -761,10 +760,10 @@ describe('Ganhos Apurados: movimentação lançada ou apuração da declaração
     // apuração não traz. Vale a movimentação, e a operação oficial sai.
     const bens = [{
       discriminacao: 'JEEP COMANDER OVERLAND PLACA RUP 6A678',
-      movimentacoes: [{ id: 1, tipo: 'venda_total', valor: 269655.86, valorVenda: 199000, data: '2025-02-07' }],
+      movimentacoes: [{ id: 1, apuracaoGanhoCapitalId: 'venda-jeep', tipo: 'venda_total', valor: 269655.86, valorVenda: 199000, data: '2025-02-07' }],
     }];
-    const g = ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital: apuracaoReal }, '2025-01-01', '2025-12-31');
-    expect(g.vendas).toHaveLength(3); // a manual + as 2 restantes da declaração
+    const g = ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital: apuracaoReal.map((g,i) => i === 0 ? {...g,id:'venda-jeep'} : g) }, '2025-01-01', '2025-12-31');
+    expect(g.vendas).toHaveLength(3); // vínculo explícito, não só preço/data
     expect(g.vendas.filter(v => v.daDeclaracao)).toHaveLength(2);
     expect(g.total).toBeCloseTo(-241779.86, 2);
     expect(g.possiveisDuplicidades).toHaveLength(0);

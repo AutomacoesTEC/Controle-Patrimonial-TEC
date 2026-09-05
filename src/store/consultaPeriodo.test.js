@@ -219,11 +219,11 @@ describe('demonstrativoPeriodo — Doações reduzem o Saldo de Caixa; Renda Var
     return s;
   }
 
-  test('soma as 3 fichas de doação e reduz o Saldo de Caixa pelo total', () => {
+  test('doações anuais entram, DAA sem pagamento comprovado fica fora', () => {
     const semDoacoes = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
     const comDoacoes = demonstrativoPeriodo(estadoComDoacoesERendaVariavel(), '2025-01-01', '2025-12-31');
-    expect(comDoacoes.totalDoacoes).toBe(1700); // 1000 + 500 + 200
-    expect(comDoacoes.saldoDeCaixa).toBe(semDoacoes.saldoDeCaixa - 1700);
+    expect(comDoacoes.totalDoacoes).toBe(1500); // 1000 + 500; DAA pendente
+    expect(comDoacoes.saldoDeCaixa).toBe(semDoacoes.saldoDeCaixa - 1500);
   });
 
   test('lista os meses de Renda Variável sem inventar valor nenhum', () => {
@@ -289,13 +289,13 @@ describe('demonstrativoPeriodo — Renda Variável importada por PDF, com valore
   // outra coisa: o GANHO já entra pela ficha de exclusivos (código 05) e
   // somá-lo aqui contaria duas vezes. A PERDA não vai para ficha nenhuma, e
   // era a única parte que sumia do fluxo.
-  test('só a PERDA da renda variável entra no Saldo de Caixa; o ganho não, para não duplicar a ficha de exclusivos', () => {
+  test('D04: resultado RV entra integralmente quando não há resumo exclusivo', () => {
     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
     const com = demonstrativoPeriodo(estadoComPdf(), '2025-01-01', '2025-12-31');
     // A única perda das três fichas é a do dependente em julho: -245,40.
-    expect(com.rendaVariavelPerda).toBeCloseTo(-245.4, 2);
-    expect(com.saldoDeCaixa).toBeCloseTo(sem.saldoDeCaixa - 245.4, 2);
-    expect(com.saldoDeCaixaGeral).toBeCloseTo(sem.saldoDeCaixaGeral - 245.4, 2);
+    expect(com.rendaVariavelPerda).toBeCloseTo(1254.6, 2);
+    expect(com.saldoDeCaixa).toBeCloseTo(sem.saldoDeCaixa + 1254.6, 2);
+    expect(com.saldoDeCaixaGeral).toBeCloseTo(sem.saldoDeCaixaGeral + 1254.6, 2);
     // Os 1.500,00 de ganho do titular continuam FORA: quem os traz é a ficha
     // de exclusivos, não esta.
     expect(com.rendaVariavelResultado).toBeCloseTo(1254.6, 2);
@@ -305,13 +305,13 @@ describe('demonstrativoPeriodo — Renda Variável importada por PDF, com valore
     expect(com.rendimentos.totalGeral).toBe(sem.rendimentos.totalGeral);
   });
 
-  test('mês de renda variável com ganho puro não mexe no Saldo de Caixa', () => {
+  test('D04: mês com ganho puro acrescenta recursos sem exigir redigitação', () => {
     const s = estadoDoisAnos();
     s.rendaVariavelMensalOficial = [ficha(7, true, 1000, 500, 275)];
     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
     const com = demonstrativoPeriodo(s, '2025-01-01', '2025-12-31');
-    expect(com.rendaVariavelPerda).toBe(0);
-    expect(com.saldoDeCaixa).toBe(sem.saldoDeCaixa);
+    expect(com.rendaVariavelPerda).toBe(1500);
+    expect(com.saldoDeCaixa).toBe(sem.saldoDeCaixa + 1500);
   });
 });
 
@@ -420,8 +420,8 @@ describe('demonstrativoPeriodo — RRA soma nos rendimentos', () => {
   test('entra em linha própria e soma no total geral', () => {
     const sem = demonstrativoPeriodo(estadoDoisAnos(), '2025-01-01', '2025-12-31');
     const com = demonstrativoPeriodo(comRra(), '2025-01-01', '2025-12-31');
-    expect(com.rendimentos.tributavelRra).toBe(100000);
-    expect(com.rendimentos.totalGeral).toBe(sem.rendimentos.totalGeral + 100000);
+    expect(com.rendimentos.tributavelRra).toBe(91000); // D02: menos IRRF 9.000
+    expect(com.rendimentos.totalGeral).toBe(sem.rendimentos.totalGeral + 91000);
     // E NÃO se mistura com os rendimentos de pessoa jurídica.
     expect(com.rendimentos.tributavelPJ).toBe(sem.rendimentos.tributavelPJ);
   });
