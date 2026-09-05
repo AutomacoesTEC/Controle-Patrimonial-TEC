@@ -133,25 +133,37 @@ function linhasDoHistorico(alteracoes) {
   });
 }
 
+export function nomeAbaExcel(nome, existentes = []) {
+  const base = String(nome || 'Dados').replace(/[\\/?*\[\]:]/g, ' ').trim().replace(/^'+|'+$/g, '').slice(0, 31).replace(/'+$/g, '') || 'Dados';
+  let candidato = base;
+  let numero = 2;
+  while (existentes.some(n => n.toLocaleLowerCase() === candidato.toLocaleLowerCase())) {
+    const sufixo = ` (${numero++})`;
+    candidato = base.slice(0, 31 - sufixo.length) + sufixo;
+  }
+  return candidato;
+}
+
 export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoCalendario, opcoes = {}) {
   const wb = XLSX.utils.book_new();
+  const adicionarAba = (planilha, titulo) => XLSX.utils.book_append_sheet(wb, planilha, nomeAbaExcel(titulo, wb.SheetNames));
   const dados = linhas.map(linha => {
     const obj = {};
     colunas.forEach(([cabecalho, valor]) => { obj[cabecalho] = valor(linha); });
     return obj;
   });
   const ws = XLSX.utils.json_to_sheet(dados);
-  XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+  adicionarAba(ws, nomeAba);
   if (opcoes.historico) {
     const cabecalhos = ['Data/hora', 'Ano-calendário', 'Alteração', 'Campo', 'Antes', 'Depois'];
     const wsHistorico = XLSX.utils.json_to_sheet(linhasDoHistorico(opcoes.historico), { header: cabecalhos });
     wsHistorico['!cols'] = [{ wch: 26 }, { wch: 16 }, { wch: 48 }, { wch: 24 }, { wch: 32 }, { wch: 32 }];
-    XLSX.utils.book_append_sheet(wb, wsHistorico, 'Histórico de Alterações');
+    adicionarAba(wsHistorico, 'Histórico de Alterações');
   }
   if (opcoes.dadosRelatorio) {
     for (const { nome, linhas } of abasRelatorioCompleto(opcoes.dadosRelatorio)) {
       const ficha = XLSX.utils.json_to_sheet(linhas);
-      XLSX.utils.book_append_sheet(wb, ficha, nome);
+      adicionarAba(ficha, nome);
     }
   }
   const today = new Date().toISOString().split('T')[0];
