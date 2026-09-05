@@ -28,13 +28,14 @@
         "demaisTributaveis": 21565.66,
         "isentoValor": 45523.7,
         "exclusivoBruto": 142197.69,
-        "exclusivoIrrf": 610.42,
-        "exclusivoLiquido": 141587.27,
-        "totalGeral": 260666.23
+        "exclusivoIrrf": 0,
+        "exclusivoLiquido": 142197.69,
+        "totalGeral": 261276.65
       },
       "ganhos": {
         "vendas": [
           {
+            "pessoa": "titular",
             "bem": "AJU GCI IMOVEL URBANO SENTINELA",
             "data": "2025-08-18",
             "ganhoBruto": 60001.01000000001,
@@ -45,6 +46,7 @@
             "daDeclaracao": true
           },
           {
+            "pessoa": "titular",
             "bem": "AJU GCM VEICULO SENTINELA",
             "data": "2025-09-19",
             "ganhoBruto": 12001.009999999998,
@@ -55,6 +57,7 @@
             "daDeclaracao": true
           },
           {
+            "pessoa": "titular",
             "bem": "",
             "data": "2025-10-20",
             "ganhoBruto": 30001.009999999995,
@@ -65,17 +68,19 @@
             "daDeclaracao": true
           }
         ],
-        "total": 102003.03,
+        "total": 9840.38,
+        "totalOperacoes": 102003.03,
+        "jaNosRendimentos": 92162.65,
         "semIrrfCount": 3,
         "daDeclaracao": true,
         "possiveisDuplicidades": []
       },
-      "rendaVariavelPerda": -899.99,
-      "saldoDeCaixaGeral": -7536.78,
+      "rendaVariavelPerda": 1346.44,
+      "saldoDeCaixaGeral": -96842.58,
       "pagamentosEfetuados": 26137.88,
       "pagamentosDiversos": 0,
-      "totalDoacoes": 18112.61,
-      "saldoDeCaixa": -51787.27,
+      "totalDoacoes": 17508.7,
+      "saldoDeCaixa": -140489.16,
       "temDoacaoImportada": true,
       "rendaVariavelMeses": [
         {
@@ -127,8 +132,8 @@
           "mes": 12
         }
       ],
-      "rendaVariavelResultado": 7426.76,
-      "rendaVariavelImposto": 1345.35,
+      "rendaVariavelResultado": 10137.59,
+      "rendaVariavelImposto": 1705.71,
       "rendaVariavelComValor": true,
       "pendenciasAlienacao": [],
       "aplicacoesSemRendimento": [],
@@ -144,18 +149,18 @@
     "demonstrativo": {
       "varPatrimonial": {
         "bensDe": 107537.85,
-        "bensAte": 444846.93,
-        "deltaBens": 337309.08,
+        "bensAte": 107537.85,
+        "deltaBens": 0,
         "dividaComumDe": 102606.45,
-        "dividaComumAte": 79608.47,
-        "deltaDividaComum": -22997.98,
+        "dividaComumAte": 102606.45,
+        "deltaDividaComum": 0,
         "dividaRuralDe": 41401.16,
-        "dividaRuralAte": 32402.17,
-        "deltaDividaRural": -8998.99,
+        "dividaRuralAte": 41401.16,
+        "deltaDividaRural": 0,
         "dividaDe": 144007.61,
-        "dividaAte": 112010.64,
-        "deltaDivida": -31996.97,
-        "total": -369306.05
+        "dividaAte": 144007.61,
+        "deltaDivida": 0,
+        "total": 0
       },
       "rendimentos": {
         "tributavelPjBruto": 0,
@@ -174,16 +179,18 @@
       "ganhos": {
         "vendas": [],
         "total": 0,
+        "totalOperacoes": 0,
+        "jaNosRendimentos": 0,
         "semIrrfCount": 0,
         "daDeclaracao": false,
         "possiveisDuplicidades": []
       },
-      "rendaVariavelPerda": -899.99,
-      "saldoDeCaixaGeral": -348640.38,
+      "rendaVariavelPerda": 5746.65,
+      "saldoDeCaixaGeral": 27312.31,
       "pagamentosEfetuados": 0,
       "pagamentosDiversos": 0,
-      "totalDoacoes": 18112.61,
-      "saldoDeCaixa": -366752.99,
+      "totalDoacoes": 0,
+      "saldoDeCaixa": 27312.31,
       "temDoacaoImportada": true,
       "rendaVariavelMeses": [
         {
@@ -211,8 +218,8 @@
           "mes": 6
         }
       ],
-      "rendaVariavelResultado": 7426.76,
-      "rendaVariavelImposto": 1345.35,
+      "rendaVariavelResultado": 8325.73,
+      "rendaVariavelImposto": 1705.71,
       "rendaVariavelComValor": true,
       "pendenciasAlienacao": [],
       "aplicacoesSemRendimento": [],
@@ -251,13 +258,14 @@
         "demaisTributaveis": 21565.66,
         "isentoValor": 45523.7,
         "exclusivoBruto": 142197.69,
-        "exclusivoIrrf": 610.42,
-        "exclusivoLiquido": 141587.27,
-        "totalGeral": 260666.23
+        "exclusivoIrrf": 0,
+        "exclusivoLiquido": 142197.69,
+        "totalGeral": 261276.65
       },
       "ganhos": {
         "vendas": [
           {
+            "pessoa": "titular",
             "bem": "AJU GCI IMOVEL URBANO SENTINELA",
             "data": "2025-08-18",
             "ganhoBruto": 60001.01000000001,
@@ -268,6 +276,7 @@
             "daDeclaracao": true
           },
           {
+            "pessoa": "titular",
             "bem": "AJU GCM VEICULO SENTINELA",
             "data": "2025-09-19",
             "ganhoBruto": 12001.009999999998,
@@ -278,6 +287,7 @@
             "daDeclaracao": true
           },
           {
+            "pessoa": "titular",
             "bem": "",
             "data": "2025-10-20",
             "ganhoBruto": 30001.009999999995,
@@ -288,17 +298,19 @@
             "daDeclaracao": true
           }
         ],
-        "total": 102003.03,
+        "total": 9840.38,
+        "totalOperacoes": 102003.03,
+        "jaNosRendimentos": 92162.65,
         "semIrrfCount": 3,
         "daDeclaracao": true,
         "possiveisDuplicidades": []
       },
-      "rendaVariavelPerda": -899.99,
-      "saldoDeCaixaGeral": -7536.78,
+      "rendaVariavelPerda": 1346.44,
+      "saldoDeCaixaGeral": -96842.58,
       "pagamentosEfetuados": 26137.88,
       "pagamentosDiversos": 0,
-      "totalDoacoes": 18112.61,
-      "saldoDeCaixa": -51787.27,
+      "totalDoacoes": 17508.7,
+      "saldoDeCaixa": -140489.16,
       "temDoacaoImportada": true,
       "rendaVariavelMeses": [
         {
@@ -350,8 +362,8 @@
           "mes": 12
         }
       ],
-      "rendaVariavelResultado": 7426.76,
-      "rendaVariavelImposto": 1345.35,
+      "rendaVariavelResultado": 10137.59,
+      "rendaVariavelImposto": 1705.71,
       "rendaVariavelComValor": true,
       "pendenciasAlienacao": [],
       "aplicacoesSemRendimento": [],

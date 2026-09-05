@@ -1,0 +1,341 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/demonstrativo.golden.test.js (4 tests | 3 failed) 28ms
+     × ano-2025 14ms
+     × primeiro-semestre-2025 4ms
+     × periodo-2025-2026 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > ano-2025
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -7,51 +7,56 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": true,
++       "jaNosRendimentos": 92162.65,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 3,
+-       "total": 102003.03,
++       "total": 9840.38,
++       "totalOperacoes": 102003.03,
+        "vendas": [
+          {
+            "bem": "AJU GCI IMOVEL URBANO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-08-18",
+            "ganhoBruto": 60001.01000000001,
+            "ganhoLiquido": 60001.01000000001,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 160602.42,
+          },
+          {
+            "bem": "AJU GCM VEICULO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-09-19",
+            "ganhoBruto": 12001.009999999998,
+            "ganhoLiquido": 12001.009999999998,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 42612.45,
+          },
+          {
+            "bem": "",
+            "daDeclaracao": true,
+            "data": "2025-10-20",
+            "ganhoBruto": 30001.009999999995,
+            "ganhoLiquido": 30001.009999999995,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 70622.48,
+          },
+        ],
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 26137.88,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -98,30 +103,30 @@
+        {
+          "ano": 2025,
+          "mes": 12,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 1346.44,
++     "rendaVariavelResultado": 10137.59,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 142197.69,
+-       "exclusivoIrrf": 610.42,
+-       "exclusivoLiquido": 141587.27,
++       "exclusivoIrrf": 0,
++       "exclusivoLiquido": 142197.69,
+        "isentoValor": 45523.7,
+-       "totalGeral": 260666.23,
++       "totalGeral": 261276.65,
+        "tributavelPJ": 51989.6,
+        "tributavelPfExterior": 0,
+        "tributavelPjBruto": 63302.32,
+        "tributavelPjIrrf": 5008.38,
+        "tributavelPjPrevidencia": 6304.34,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -51787.27,
+-     "saldoDeCaixaGeral": -7536.78,
++     "saldoDeCaixa": -140489.16,
++     "saldoDeCaixaGeral": -96842.58,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 17508.7,
+      "varPatrimonial": {
+        "bensAte": 444846.93,
+        "bensDe": 107537.85,
+        "deltaBens": 337309.08,
+        "deltaDivida": -31996.97,
+
+ ❯ src/store/demonstrativo.golden.test.js:56:25
+     54|   test.each(CASOS)('%s', (nome) => {
+     55|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     56|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     57|   });
+     58| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > primeiro-semestre-2025
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -7,20 +7,22 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": false,
++       "jaNosRendimentos": 0,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 0,
+        "total": 0,
++       "totalOperacoes": 0,
+        "vendas": [],
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 0,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -43,12 +45,12 @@
+        {
+          "ano": 2025,
+          "mes": 6,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 5746.65,
++     "rendaVariavelResultado": 8325.73,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 0,
+        "exclusivoIrrf": 0,
+        "exclusivoLiquido": 0,
+@@ -59,26 +61,26 @@
+        "tributavelPjBruto": 0,
+        "tributavelPjIrrf": 0,
+        "tributavelPjPrevidencia": 0,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -366752.99,
+-     "saldoDeCaixaGeral": -348640.38,
++     "saldoDeCaixa": 27312.31,
++     "saldoDeCaixaGeral": 27312.31,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 0,
+      "varPatrimonial": {
+-       "bensAte": 444846.93,
++       "bensAte": 107537.85,
+        "bensDe": 107537.85,
+-       "deltaBens": 337309.08,
+-       "deltaDivida": -31996.97,
+-       "deltaDividaComum": -22997.98,
+-       "deltaDividaRural": -8998.99,
+-       "dividaAte": 112010.64,
+-       "dividaComumAte": 79608.47,
++       "deltaBens": 0,
++       "deltaDivida": 0,
++       "deltaDividaComum": 0,
++       "deltaDividaRural": 0,
++       "dividaAte": 144007.61,
++       "dividaComumAte": 102606.45,
+        "dividaComumDe": 102606.45,
+        "dividaDe": 144007.61,
+-       "dividaRuralAte": 32402.17,
++       "dividaRuralAte": 41401.16,
+        "dividaRuralDe": 41401.16,
+-       "total": -369306.05,
++       "total": 0,
+      },
+    },
+  }
+
+ ❯ src/store/demonstrativo.golden.test.js:56:25
+     54|   test.each(CASOS)('%s', (nome) => {
+     55|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     56|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     57|   });
+     58| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/store/demonstrativo.golden.test.js > golden completo do Demonstrativo AJU-01 > periodo-2025-2026
+AssertionError: expected { de: '2025-01-01', …(2) } to deeply equal { de: '2025-01-01', …(2) }
+
+- Expected
++ Received
+
+@@ -8,51 +8,56 @@
+      ],
+      "anosSemDado": [],
+      "aplicacoesSemRendimento": [],
+      "ganhos": {
+        "daDeclaracao": true,
++       "jaNosRendimentos": 92162.65,
+        "possiveisDuplicidades": [],
+        "semIrrfCount": 3,
+-       "total": 102003.03,
++       "total": 9840.38,
++       "totalOperacoes": 102003.03,
+        "vendas": [
+          {
+            "bem": "AJU GCI IMOVEL URBANO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-08-18",
+            "ganhoBruto": 60001.01000000001,
+            "ganhoLiquido": 60001.01000000001,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 160602.42,
+          },
+          {
+            "bem": "AJU GCM VEICULO SENTINELA",
+            "daDeclaracao": true,
+            "data": "2025-09-19",
+            "ganhoBruto": 12001.009999999998,
+            "ganhoLiquido": 12001.009999999998,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 42612.45,
+          },
+          {
+            "bem": "",
+            "daDeclaracao": true,
+            "data": "2025-10-20",
+            "ganhoBruto": 30001.009999999995,
+            "ganhoLiquido": 30001.009999999995,
+            "irrf": 0,
++           "pessoa": "titular",
+            "semIrrf": true,
+            "valorVenda": 70622.48,
+          },
+        ],
+      },
+      "pagamentosDiversos": 0,
+      "pagamentosEfetuados": 26137.88,
+      "pendenciasAlienacao": [],
+      "rendaVariavelComValor": true,
+-     "rendaVariavelImposto": 1345.35,
++     "rendaVariavelImposto": 1705.71,
+      "rendaVariavelMeses": [
+        {
+          "ano": 2025,
+          "mes": 1,
+        },
+@@ -99,30 +104,30 @@
+        {
+          "ano": 2025,
+          "mes": 12,
+        },
+      ],
+-     "rendaVariavelPerda": -899.99,
+-     "rendaVariavelResultado": 7426.76,
++     "rendaVariavelPerda": 1346.44,
++     "rendaVariavelResultado": 10137.59,
+      "rendimentos": {
+        "demaisTributaveis": 21565.66,
+        "exclusivoBruto": 142197.69,
+-       "exclusivoIrrf": 610.42,
+-       "exclusivoLiquido": 141587.27,
++       "exclusivoIrrf": 0,
++       "exclusivoLiquido": 142197.69,
+        "isentoValor": 45523.7,
+-       "totalGeral": 260666.23,
++       "totalGeral": 261276.65,
+        "tributavelPJ": 51989.6,
+        "tributavelPfExterior": 0,
+        "tributavelPjBruto": 63302.32,
+        "tributavelPjIrrf": 5008.38,
+        "tributavelPjPrevidencia": 6304.34,
+        "tributavelRra": 0,
+      },
+-     "saldoDeCaixa": -51787.27,
+-     "saldoDeCaixaGeral": -7536.78,
++     "saldoDeCaixa": -140489.16,
++     "saldoDeCaixaGeral": -96842.58,
+      "temDoacaoImportada": true,
+-     "totalDoacoes": 18112.61,
++     "totalDoacoes": 17508.7,
+      "varPatrimonial": {
+        "bensAte": 444846.93,
+        "bensDe": 107537.85,
+        "deltaBens": 337309.08,
+        "deltaDivida": -31996.97,
+
+ ❯ src/store/demonstrativo.golden.test.js:56:25
+     54|   test.each(CASOS)('%s', (nome) => {
+     55|     const esperado = lerJson('demonstrativo-aju01.golden.json');
+     56|     expect(atual[nome]).toEqual(esperado[nome]);
+       |                         ^
+     57|   });
+     58| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  17:54:05
+   Duration  563ms (transform 305ms, setup 0ms, import 373ms, tests 28ms, environment 0ms)
+
