@@ -1,4 +1,5 @@
 import { anoDaDataCadastro } from '../utils/dataCadastro';
+import { anoFiscalDoacao } from '../utils/anoDoacao';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
@@ -30,7 +31,7 @@ export default function DoacoesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
-  const anoCadastro = form.data ? anoDaDataCadastro(form.data) : state.anoCalendario;
+  const anoCadastro = form.data ? anoFiscalDoacao({data:form.data,diretamenteNaDeclaracao:subView === 'ecaIdoso',editando:editingId != null,anoAtivo:state.anoCalendario}) : state.anoCalendario;
   const upd = (f, v) => setForm(p => ({ ...p, [f]: v }));
 
   const aba = ABAS[subView];
@@ -60,7 +61,7 @@ export default function DoacoesPage() {
       cpf_cnpj: (form.cpf_cnpj || '').replace(/\D/g, ''),
       valor: parseFloat(form.valor) || 0,
       descricao: form.descricao,
-      ...(aba.comCategoria ? { categoria: form.categoria } : {}),
+      ...(aba.comCategoria ? { categoria: form.categoria, anoBaseFiscal: anoCadastro } : {}),
     };
     if (editingId) {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
@@ -88,6 +89,9 @@ export default function DoacoesPage() {
     itens,
     [
       ['Código', d => d.codigo || ''],
+      ['Data do pagamento', d => d.data || 'Não informada'],
+      ['Ano-base fiscal', d => d.anoBaseFiscal || state.anoCalendario],
+      ['Titularidade', d => rotuloTitularidade(d, state.dependentes)],
       ...(aba.comCategoria ? [['Categoria', d => d.categoria === 'idoso' ? 'Pessoa Idosa' : 'ECA']] : []),
       ['Beneficiário', d => d.nome_beneficiario || ''],
       ['CPF/CNPJ', d => formatCpfCnpj(d.cpf_cnpj)],
@@ -110,6 +114,7 @@ export default function DoacoesPage() {
         </div>
       </div>
       <div className="page-body animate-in altura-tabelas-adaptativa">
+        {aba.comCategoria && <p className="card">Esta ficha é a destinação diretamente na declaração, não uma doação comum durante o ano. O ano-base fiscal do documento é preservado; o Demonstrativo usa a data do pagamento. Para novo cadastro, a data determina o ano-base anterior. Confira o documento em caso de declaração antiga ou em atraso.</p>}
         <div className="tabs" style={{ marginBottom: '20px' }}>
           {Object.entries(ABAS).map(([key, meta]) => (
             <button key={key} className={`tab ${subView === key ? 'active' : ''}`} onClick={() => setSubView(key)}>{meta.titulo}</button>

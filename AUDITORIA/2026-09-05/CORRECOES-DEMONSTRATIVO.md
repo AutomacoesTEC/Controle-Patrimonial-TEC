@@ -70,6 +70,8 @@ Base 31bf657. A primeira metade do defeito (não descontar em 2025 doação data
 
 MANTER: D11-antes.txt demonstra omissão em 2026; D11-depois.txt confirma zero em 2025 e 1.000 em 2026. Preservação do cadastro fiscal sem migração.
 
+Integração posterior do cadastro: DoacoesPage ainda movia a ficha fiscal ao editar a data de pagamento. O helper anoFiscalDoacao conserva o ano ativo da DAA importada; em cadastro novo deriva o ano-base anterior a partir do pagamento, sem seletor anual. A ficha informa essa convenção e pede conferir o documento para DAA antiga/em atraso. Doações comuns continuam no ano da data. Três testes de contrato e os 17 da auditoria passaram (daa-cadastro-validacao.txt); navegador confirmou edição em 2025 com pagamento em 2026 sem transportar o registro (revisao-navegador-final-reteste.txt). Não houve execução anterior dessa fixture específica de interface; a evidência é diagnóstico do caminho de código e verificação posterior, não ensaio pareado. MANTER.
+
 ## D12 — percentual sem denominador
 
 Base 5eabaec. Previsão: base zero devolve indisponível, exibido como sem base percentual, nunca 0%; bases positiva/negativa preservam a convenção de módulo do saldo inicial. Camada: indicador matemático da tela. Fixture executa a expressão real extraída de Dashboard.jsx em cinco cenários fixos, antes/depois; não é teste visual. Nenhuma alteração monetária.
