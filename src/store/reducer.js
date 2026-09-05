@@ -17,6 +17,7 @@ import {
 import { VERSAO_ESQUEMA_ATUAL } from './migracoes';
 import { arredondarCentavos } from '../utils/formatters';
 import { normalizarToleranciaSaldo, TOLERANCIA_SALDO_PADRAO } from './toleranciaSaldo';
+import { anoCadastroValido, anoDaDataCadastro } from '../utils/dataCadastro';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -317,6 +318,7 @@ function atualizarPreservandoDeclarado(item, payload) {
 // Projeta um ano de trabalho sem mudar a seleção da interface. Somente saldos
 // atravessam anos; fluxos e fichas da declaração continuam no ano de origem.
 export function estadoNoAno(state, ano) {
+  if (!anoCadastroValido(ano)) throw new Error('Informe um ano inteiro entre 1 e 9999.');
   if (ano === state.anoCalendario) return state;
   if (state.historico?.[ano]) return {
     ...initialState, ...state.historico[ano], anoCalendario: ano,
@@ -329,7 +331,9 @@ export function estadoNoAno(state, ano) {
   };
   const anterior = Math.max(...anteriores);
   let projetado = estadoNoAno(state, anterior);
-  for (let a = anterior + 1; a <= ano; a += 1) {
+  // Materializa a primeira abertura e o destino, sem gerar milhares de
+  // anos vazios se a data estiver distante. Fluxos zeram na primeira virada.
+  for (const a of new Set([anterior + 1, ano])) {
     projetado = reducer(projetado, { type: 'ROLLOVER_ANO', payload: a });
   }
   return projetado;
@@ -342,7 +346,7 @@ const colecaoMovimento = (tipo) => tipo.includes('DIVIDA')
 export function correspondenteNoAno(lista, item) {
   if (!item) return null;
   const chave = item.chaveContinuidade || item.chaveImportacao || item.controle;
-  const exato = lista.find(b => b.id === item.id || (chave && [b.chaveContinuidade, b.chaveImportacao, b.controle].includes(chave)));
+  const exato = lista.find(b => b.id === item.id || (chave && [b.id, b.chaveContinuidade, b.chaveImportacao, b.controle].includes(chave)));
   if (exato) return exato;
   // Compatibilidade com anos criados antes da chave de continuidade. Não
   // escolhe arbitrariamente entre bens com a mesma descrição.
@@ -359,7 +363,73 @@ function guardarAno(state, destino) {
   return { ...state, historico };
 }
 
+const COLECOES_SALDOS = ['bens', 'dividas', 'bensRurais', 'dividasRurais'];
+const anoExistente = (state, ano) => ano === state.anoCalendario ? state : state.historico?.[ano];
+
+// Aberturas derivadas são dependências do fechamento anterior. Recompõe só
+// anos manuais já existentes, em ordem, conservando o evento do próprio ano.
+// Um ano importado permanece autoridade documental e interrompe a cadeia.
+function atualizarContinuidadeManual(antes, depois) {
+  const anos = [...new Set([...Object.keys(depois.historico || {}).map(Number), depois.anoCalendario])]
+    .filter(Number.isInteger).sort((a, b) => a - b);
+  let resultado = depois;
+  for (let pos = 1; pos < anos.length; pos += 1) {
+    const ano = anos[pos];
+    const anterior = anos[pos - 1];
+    const destino = anoExistente(resultado, ano);
+    if ((destino.origemAnoAtual ?? destino.origem) !== 'manual') continue;
+    const fonteAntes = anoExistente(antes, anterior);
+    const fonteDepois = anoExistente(resultado, anterior);
+    if (!fonteAntes || !fonteDepois) continue;
+    let atualizado = destino;
+    for (const campo of COLECOES_SALDOS) {
+      const anteriores = fonteAntes[campo] || [];
+      const atuais = fonteDepois[campo] || [];
+      if (anteriores === atuais || JSON.stringify(anteriores) === JSON.stringify(atuais)) continue;
+      const divida = campo.startsWith('dividas');
+      const reaplicar = divida ? reaplicarMovimentacoesDivida : reaplicarMovimentacoesBem;
+      const lista = (destino[campo] || []).map(item => {
+        const velho = correspondenteNoAno(anteriores, item);
+        const novo = correspondenteNoAno(atuais, item);
+        if (!velho || velho.situacao_atual === novo?.situacao_atual) return item;
+        // Não deslocar um saldo inicial independente que foi digitado à mão.
+        // Chave de continuidade carimbada na virada prova que é derivado.
+        if (!item.chaveContinuidade && item.situacao_anterior !== velho.situacao_atual) return item;
+        const abertura = novo?.situacao_atual || 0;
+        if (item.situacao_anterior === abertura) return item;
+        const movimentos = item.movimentacoes || [];
+        const deltaSemData = arredondarCentavos((item.situacao_atual || 0) - reaplicar(item.situacao_anterior || 0, movimentos));
+        return { ...item, situacao_anterior: abertura,
+          situacao_atual: arredondarCentavos(reaplicar(abertura + deltaSemData, movimentos)) };
+      });
+      // Um bem/dívida cadastrado tardiamente no ano anterior também passa
+      // a integrar os anos manuais já abertos. Fluxos nunca são copiados.
+      for (const item of atuais) {
+        if (correspondenteNoAno(anteriores, item) || correspondenteNoAno(lista, item)) continue;
+        lista.push({ ...item, id: novoId(), chaveContinuidade: item.chaveContinuidade || item.chaveImportacao || item.controle || item.id,
+          situacao_anterior: item.situacao_atual, movimentacoes: [], ...(divida ? { valor_pago: 0 } : {}) });
+      }
+      if (lista.length !== (destino[campo] || []).length || lista.some((item, i) => item !== destino[campo][i])) atualizado = { ...atualizado, [campo]: lista };
+    }
+    if (atualizado !== destino) resultado = ano === resultado.anoCalendario
+      ? { ...resultado, ...atualizado }
+      : { ...resultado, historico: { ...resultado.historico, [ano]: atualizado } };
+  }
+  return resultado;
+}
+
 export function reducer(state, action) {
+  const anoAlvo = ['SWITCH_ANO', 'LOAD_HISTORICO', 'ROLLOVER_ANO', 'DELETE_HISTORICO_ANO'].includes(action.type)
+    ? action.payload : action.type === 'ADD_EM_ANO' ? action.payload.ano
+      : action.type === 'IMPORT_DECLARACAO' ? (action.payload.anoCalendario ?? undefined)
+        : action.type === 'RECONCILIAR_IMPORTACAO' ? action.payload.anoCalendario : undefined;
+  if (anoAlvo !== undefined && !anoCadastroValido(anoAlvo)) throw new Error('Informe um ano inteiro entre 1 e 9999.');
+  const depois = aplicarAcao(state, action);
+  if (['SWITCH_ANO', 'LOAD_HISTORICO', 'ROLLOVER_ANO', 'SUBSTITUIR_ESTADO_PERSISTIDO', 'DELETE_HISTORICO_ANO'].includes(action.type)) return depois;
+  return atualizarContinuidadeManual(state, depois);
+}
+
+function aplicarAcao(state, action) {
   switch (action.type) {
     // Estado já calculado e gravado com sucesso pelo DataContext. Esta ação
     // não recalcula ids nem histórico: persistência e memória recebem o mesmo
@@ -424,19 +494,19 @@ export function reducer(state, action) {
     case 'ADD_DOACAO_EFETUADA':
       return { ...state, doacoesEfetuadasOficial: [...state.doacoesEfetuadasOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_EFETUADA':
-      return { ...state, doacoesEfetuadasOficial: state.doacoesEfetuadasOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
+      return { ...state, doacoesEfetuadasOficial: state.doacoesEfetuadasOficial.map(d => d.id === action.payload.id ? atualizarPreservandoDeclarado(d, action.payload) : d) };
     case 'DELETE_DOACAO_EFETUADA':
       return { ...state, doacoesEfetuadasOficial: state.doacoesEfetuadasOficial.filter(d => d.id !== action.payload) };
     case 'ADD_DOACAO_PARTIDO':
       return { ...state, doacoesPartidosOficial: [...state.doacoesPartidosOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_PARTIDO':
-      return { ...state, doacoesPartidosOficial: state.doacoesPartidosOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
+      return { ...state, doacoesPartidosOficial: state.doacoesPartidosOficial.map(d => d.id === action.payload.id ? atualizarPreservandoDeclarado(d, action.payload) : d) };
     case 'DELETE_DOACAO_PARTIDO':
       return { ...state, doacoesPartidosOficial: state.doacoesPartidosOficial.filter(d => d.id !== action.payload) };
     case 'ADD_DOACAO_ECA_IDOSO':
       return { ...state, doacoesEcaIdosoOficial: [...state.doacoesEcaIdosoOficial, { ...action.payload, id: novoId(), origem: 'manual' }] };
     case 'UPDATE_DOACAO_ECA_IDOSO':
-      return { ...state, doacoesEcaIdosoOficial: state.doacoesEcaIdosoOficial.map(d => d.id === action.payload.id ? { ...d, ...action.payload } : d) };
+      return { ...state, doacoesEcaIdosoOficial: state.doacoesEcaIdosoOficial.map(d => d.id === action.payload.id ? atualizarPreservandoDeclarado(d, action.payload) : d) };
     case 'DELETE_DOACAO_ECA_IDOSO':
       return { ...state, doacoesEcaIdosoOficial: state.doacoesEcaIdosoOficial.filter(d => d.id !== action.payload) };
     case 'LOAD_HISTORICO': {
@@ -794,8 +864,21 @@ export function reducer(state, action) {
         return [item.codigo, item.beneficiario, item.cpf_beneficiario, documento || textoChave(item.nome_beneficiario)].join('|');
       };
       const substituirImportados = (listaBase, novaLista, campo) => {
+        if (novaLista === undefined) return listaBase;
         const preservados = (listaBase || []).filter(item => item.origem === 'manual');
         const legados = (listaBase || []).filter(item => item.origem === 'origem_legacy');
+        const anterioresImportados = (listaBase || []).filter(item => item.origem === 'importacao');
+        const importadosPorChave = new Map();
+        for (const item of anterioresImportados) {
+          const chave = chaveLancamento(campo, item.valorDeclarado || item);
+          if (!importadosPorChave.has(chave)) importadosPorChave.set(chave, []);
+          importadosPorChave.get(chave).push(item);
+        }
+        const contagemNovos = new Map();
+        for (const item of novaLista || []) {
+          const chave = chaveLancamento(campo, item);
+          contagemNovos.set(chave, (contagemNovos.get(chave) || 0) + 1);
+        }
         const legadosPorChave = new Map();
         for (const item of legados) {
           const chave = chaveLancamento(campo, item);
@@ -804,11 +887,37 @@ export function reducer(state, action) {
         }
         const consumidos = new Set();
         const importados = (novaLista || []).map(item => {
-          const candidatos = legadosPorChave.get(chaveLancamento(campo, item)) || [];
+          const chave = chaveLancamento(campo, item);
+          const importadosCorrespondentes = importadosPorChave.get(chave) || [];
+          const antigo = importadosCorrespondentes.length === 1 && contagemNovos.get(chave) === 1 ? importadosCorrespondentes[0] : null;
+          if (antigo) {
+            consumidos.add(antigo);
+            const complementos = {};
+            const pendencias = [...(antigo.ajustesLocaisRetificadora || [])];
+            if (antigo.valorDeclarado) {
+              for (const [chaveCampo, valorLocal] of Object.entries(antigo)) {
+                if (['id', 'origem', 'valorDeclarado', 'ajustesLocaisRetificadora'].includes(chaveCampo)) continue;
+                const valorAnterior = antigo.valorDeclarado[chaveCampo];
+                if (JSON.stringify(valorLocal) === JSON.stringify(valorAnterior)) continue;
+                if (!Object.prototype.hasOwnProperty.call(item, chaveCampo) || JSON.stringify(item[chaveCampo]) === JSON.stringify(valorAnterior)) {
+                  complementos[chaveCampo] = valorLocal;
+                } else if (JSON.stringify(item[chaveCampo]) !== JSON.stringify(valorLocal)) {
+                  pendencias.push({ campo: chaveCampo, valorLocal, valorDeclarado: item[chaveCampo] });
+                }
+              }
+            }
+            return { ...item, ...complementos, id: antigo.id, origem: 'importacao',
+              ...(antigo.valorDeclarado ? { valorDeclarado: { ...item, id: antigo.id, origem: 'importacao' } } : {}),
+              ...(pendencias.length ? { ajustesLocaisRetificadora: pendencias } : {}) };
+          }
+          const candidatos = legadosPorChave.get(chave) || [];
           const legado = candidatos.shift();
           if (legado) consumidos.add(legado);
           return { ...item, id: legado?.id ?? novoId(), origem: 'importacao' };
         });
+        if (anterioresImportados.some(item => item.valorDeclarado && !consumidos.has(item))) {
+          throw new Error('A retificadora remove ou não identifica com segurança um lançamento que recebeu alterações manuais. Revise esse lançamento antes de confirmar a importação.');
+        }
         return [...preservados, ...legados.filter(item => !consumidos.has(item)), ...importados];
       };
 
@@ -1306,7 +1415,8 @@ export function reducer(state, action) {
     }
     case 'SALVAR_MOVIMENTACAO_DATADA': {
       const { actionType, bemId, movId, movimentacao } = action.payload;
-      const ano = Number(movimentacao.data.slice(0, 4));
+      const ano = anoDaDataCadastro(movimentacao?.data);
+      if (!ano) throw new Error('Informe uma data válida para a movimentação.');
       const colecao = colecaoMovimento(actionType);
       const item = state[colecao].find(b => b.id === bemId);
       let origem = state;
