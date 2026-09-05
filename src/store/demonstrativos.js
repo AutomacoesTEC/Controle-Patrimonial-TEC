@@ -118,7 +118,7 @@ const ordenarPorData = (movs) =>
 
 export function situacaoBemAteData(bem, dataCorte, lado = 'ate') {
   const movs = bem.movimentacoes || [];
-  if (!dataCorte || movs.length === 0) {
+  if (!dataCorte) {
     return lado === 'de' ? bem.situacao_anterior : bem.situacao_atual;
   }
   // As movimentações registradas explicam só uma PARTE do caminho de
@@ -135,7 +135,10 @@ export function situacaoBemAteData(bem, dataCorte, lado = 'ate') {
 
   const corteReal = lado === 'de' ? diaAnterior(dataCorte) : dataCorte;
   const movsAteCorte = ordenarPorData(movs.filter(m => emDataOuAntes(m.data, corteReal)));
-  const inicio = bem.situacao_anterior + (lado === 'ate' ? saltoSemData : 0);
+  const fimDoAno = `${dataCorte.slice(0, 4)}-12-31`;
+  if (corteReal >= fimDoAno) return bem.situacao_atual;
+  const aquisicao = bem.situacao_anterior === 0 && bem.data_aquisicao?.startsWith(dataCorte.slice(0, 4)) ? bem.data_aquisicao : null;
+  const inicio = bem.situacao_anterior + (aquisicao && corteReal >= aquisicao ? saltoSemData : 0);
   return movsAteCorte.reduce(aplicarMovimentoBem, inicio);
 }
 
@@ -201,7 +204,7 @@ export function situacaoDividaAteData(divida, dataCorte, lado = 'ate') {
   const movs = divida.movimentacoes || [];
   const anterior = parseFloat(divida.situacao_anterior) || 0;
   const atual = parseFloat(divida.situacao_atual) || 0;
-  if (!dataCorte || movs.length === 0) {
+  if (!dataCorte) {
     return lado === 'de' ? anterior : atual;
   }
   // Mesmo raciocínio de situacaoBemAteData: o salto sem data (dívida
@@ -213,7 +216,8 @@ export function situacaoDividaAteData(divida, dataCorte, lado = 'ate') {
 
   const corteReal = lado === 'de' ? diaAnterior(dataCorte) : dataCorte;
   const movsAteCorte = ordenarPorData(movs.filter(m => emDataOuAntes(m.data, corteReal)));
-  const inicio = anterior + (lado === 'ate' ? saltoSemData : 0);
+  if (corteReal >= `${dataCorte.slice(0, 4)}-12-31`) return atual;
+  const inicio = anterior;
   return movsAteCorte.reduce(aplicarMovimentoDivida, inicio);
 }
 

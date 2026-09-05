@@ -1,0 +1,26 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 7ms
+     × D09: foto anual sem data da alteração não pode inventar variação em todos os meses 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D09: foto anual sem data da alteração não pode inventar variação em todos os meses
+AssertionError: expected 20000 to be less than or equal to 10000
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:77:50
+     75|     const variacoes = [1, 2].map(m => situacaoBemAteData(b, `2026-0${m…
+     76|     // Um único acréscimo anual não pode ser contado duas vezes em mes…
+     77|     expect(variacoes.reduce((s, v) => s + v, 0)).toBeLessThanOrEqual(1…
+       |                                                  ^
+     78|   });
+     79|   it('continuidade: estoques nas pontas e fluxos de dois anos se conci…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:35:26
+   Duration  662ms (transform 426ms, setup 0ms, import 493ms, tests 7ms, environment 0ms)
+

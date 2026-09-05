@@ -540,6 +540,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <span className="saldo-hero-rotulo" id="saldo-hero-titulo">Diferença de conciliação</span>
               <p>{leituraSaldoHero.explicacao}</p>
               <small>Não representa saldo bancário disponível. Compara os recursos registrados com as saídas e a variação patrimonial fiscal.</small>
+              <small style={{ display: 'block' }}>Saldos anuais sem movimentos datados não comprovam a posição mensal. Entre janeiro e novembro, a projeção utiliza somente a abertura e os eventos datados; a diferença anual aparece no fechamento de 31/12, sem presumir que ocorreu em dezembro.</small>
             </div>
             <div className="saldo-hero-leitura">
               <span className="saldo-hero-estado">{leituraSaldoHero.estado}</span>

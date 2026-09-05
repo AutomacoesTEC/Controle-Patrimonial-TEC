@@ -70,7 +70,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     });
     expect(ganhosApuradosPeriodo(s, '2026-01-01', '2026-12-31').total).toBe(8000);
   });
-  it.fails('D09: foto anual sem data da alteração não pode inventar variação em todos os meses', () => {
+  it('D09: foto anual sem data da alteração não pode inventar variação em todos os meses', () => {
     const b = bem(10000, 20000);
     const variacoes = [1, 2].map(m => situacaoBemAteData(b, `2026-0${m}-28`, 'ate') - situacaoBemAteData(b, `2026-0${m}-01`, 'de'));
     // Um único acréscimo anual não pode ser contado duas vezes em meses disjuntos.

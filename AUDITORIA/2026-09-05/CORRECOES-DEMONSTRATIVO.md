@@ -51,3 +51,9 @@ MANTER: D07-antes.txt registra -100; D07-depois.txt confirma 7.900. Formulário 
 Base e81b8b6. Previsão: duas vendas de 15.000 no mesmo dia, custos 10.000 e 12.000, somam ganho 8.000. Camada: identidade da conciliação de alienações. Coincidência monetária/temporal sozinha vira pendência, não exclusão; vínculo explícito de operação/bem pode eliminar duplicação. Fixture D08 antes/depois. Sem inventar chaves para dados históricos.
 
 MANTER: D08-antes.txt registra ganho 5.000; D08-depois.txt confirma 8.000. Casos legados sem identidade permanecem visíveis e sinalizados para conferência, não suprimidos.
+
+## D09 — foto anual repetida nos meses
+
+Base 993d994. Previsão: uma diferença anual sem data não reaparece em janeiro e fevereiro. Camada: reconstrução temporal do estoque. Preservar foto de 31/12 e abertura, projetar apenas movimentos datados no meio do ano; diferenças não explicadas são evidência anual, não evento presumido em cada mês. Novo bem com abertura zero e data de aquisição pode ser situado nessa data. Consultas devem avisar a limitação de saldos anuais não decompostos. Fixture D09 antes/depois; controles anuais e de movimentos na suíte completa.
+
+MANTER: D09-antes.txt registra 20.000 repetidos; D09-depois.txt passa. Aviso explícito diferencia projeção e posição mensal comprovada. A foto final continua pertencendo a 31/12, sem inventar data de negócio.
