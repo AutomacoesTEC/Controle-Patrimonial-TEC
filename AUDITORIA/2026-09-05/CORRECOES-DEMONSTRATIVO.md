@@ -63,3 +63,9 @@ MANTER: D09-antes.txt registra 20.000 repetidos; D09-depois.txt passa. Aviso exp
 Base c7f378a. Previsão: venda 15.000/custo 10.000 com ganho 5.000 também em exclusivos disponibiliza 15.000, não 20.000. Camada: integração do resumo fiscal com ganhos de operações. Manter valores fiscais e operações, exibir dedução de sobreposição na conciliação. Fixture D10 antes/depois. Resumo agregado não prova identidade por operação; coincidências devem permanecer sujeitas a conferência.
 
 MANTER: D10-antes.txt registra 20.000; D10-depois.txt confirma 15.000. A linha de dedução fica visível, sem apagar o rendimento oficial.
+
+## D11 — ano fiscal versus desembolso da DAA
+
+Base 31bf657. A primeira metade do defeito (não descontar em 2025 doação datada em 2026) foi corrigida pelo filtro D06. Fixture ampliada ANTES desta mudança para exigir também saída 1.000 no ano financeiro de 2026, mesmo armazenada no snapshot fiscal 2025. Previsão: conservar a ficha original e somar pelo pagamento em consulta cruzada. Camada: seleção de fluxos entre snapshots. Sem data comprovada, doação diretamente na DAA não é presumida como saída no ano-base. A previsão pareada desta rodada se refere à fixture ampliada, não a um suposto novo antes do defeito já resolvido por D06.
+
+MANTER: D11-antes.txt demonstra omissão em 2026; D11-depois.txt confirma zero em 2025 e 1.000 em 2026. Preservação do cadastro fiscal sem migração.

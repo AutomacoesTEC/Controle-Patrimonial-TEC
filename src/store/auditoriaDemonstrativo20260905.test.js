@@ -90,8 +90,9 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     // Sem imposto pago: recebimento efetivo da venda é 15 mil.
     expect(ano(s).saldoDeCaixa).toBe(15000);
   });
-  it.fails('D11: doação diretamente na declaração de 2025 paga em 2026 não sai do caixa 2025', () => {
+  it('D11: doação diretamente na declaração de 2025 paga em 2026 não sai do caixa 2025', () => {
     const s = estado({ anoCalendario: 2025, doacoesEcaIdosoOficial: [{ data: '2026-05-10', valor: 1000 }] });
     expect(demonstrativoPeriodo(s, '2025-01-01', '2025-12-31').totalDoacoes).toBe(0);
+    expect(demonstrativoPeriodo(s, '2026-01-01', '2026-12-31').totalDoacoes).toBe(1000);
   });
 });

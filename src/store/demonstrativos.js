@@ -996,7 +996,7 @@ export function totalDoacoesPeriodo(dados, dataDe, dataAte) {
   const ano = dados.anoCalendario || Number((dataDe || dataAte || '').slice(0, 4));
   const anual = (!dataDe || dataDe <= `${ano}-01-01`) && (!dataAte || dataAte >= `${ano}-12-31`);
   return ['doacoesEfetuadasOficial', 'doacoesPartidosOficial', 'doacoesEcaIdosoOficial']
-    .flatMap(c => dados[c] || [])
+    .flatMap(c => (dados[c] || []).filter(d => c !== 'doacoesEcaIdosoOficial' || d.data))
     .filter(d => d.data ? noPeriodo(d.data, dataDe, dataAte) : anual)
     .reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
 }

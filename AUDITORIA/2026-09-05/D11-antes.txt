@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 12ms
+     × D11: doação diretamente na declaração de 2025 paga em 2026 não sai do caixa 2025 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D11: doação diretamente na declaração de 2025 paga em 2026 não sai do caixa 2025
+AssertionError: expected +0 to be 1000 // Object.is equality
+
+- Expected
++ Received
+
+- 1000
++ 0
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:96:78
+     94|     const s = estado({ anoCalendario: 2025, doacoesEcaIdosoOficial: [{…
+     95|     expect(demonstrativoPeriodo(s, '2025-01-01', '2025-12-31').totalDo…
+     96|     expect(demonstrativoPeriodo(s, '2026-01-01', '2026-12-31').totalDo…
+       |                                                                              ^
+     97|   });
+     98| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:37:55
+   Duration  728ms (transform 469ms, setup 0ms, import 539ms, tests 12ms, environment 0ms)
+

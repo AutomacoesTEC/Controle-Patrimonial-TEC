@@ -135,7 +135,11 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   let rendaVariavelPerda = 0;
   let pagamentosEfetuados = 0;
   let pagamentosDiversos = 0;
-  let totalDoacoes = 0;
+  // Uma doação pode estar na ficha fiscal anterior e ser paga neste ano.
+  // O snapshot ativo prevalece sobre sua cópia histórica, somando uma vez.
+  const snapshotsDoacoes = { ...(state.historico || {}), [state.anoCalendario]: state };
+  let totalDoacoes = Object.entries(snapshotsDoacoes).reduce((s, [ano, dados]) =>
+    s + totalDoacoesPeriodo({ ...dados, anoCalendario: Number(ano) }, dataDe, dataAte), 0);
   // Só as doações que vieram do ARQUIVO carregam a ressalva de layout não
   // confirmado. Doação cadastrada à mão (ADD_DOACAO_*, que marca
   // origem 'manual') foi digitada pela usuária e não tem layout nenhum a
@@ -187,7 +191,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // pessoa física, então reduz o Saldo de Caixa igual Pagamentos —
     // ficaria de fora da reconciliação (e o Saldo de Caixa pareceria
     // "sobrando" dinheiro que na verdade virou doação).
-    totalDoacoes += totalDoacoesPeriodo({ ...dados, anoCalendario: ano }, trechoDe, trechoAte);
+    // Total de doações apurado acima pela data efetiva, inclusive outro ano-base.
     // Importada = sem a marca 'manual' (o import grava a lista direto, sem
     // carimbar origem, então "não é manual" é o teste que também vale para
     // dado gravado antes desta distinção existir).
