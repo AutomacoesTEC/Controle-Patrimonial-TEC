@@ -1,8 +1,9 @@
+import { camposRendimento, rendimentoSemFonteObrigatoria, COLUNAS_COMPLEMENTARES_RENDIMENTO } from '../utils/camposRendimento';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
-import { formatCurrency, formatCpfCnpj, mascaraCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
+import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
 import Modal from '../components/Modal';
 import MoneyInput from '../components/MoneyInput';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
@@ -54,10 +55,12 @@ export default function RendimentosPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    const falta = primeiroCampoVazio([['Tipo', form.tipo], ['Nome Fonte Pagadora', form.nome_fonte]])
+    const falta = primeiroCampoVazio([['Tipo', form.tipo], [rendimentoSemFonteObrigatoria(form.tipo) ? 'Descrição da operação' : 'Nome Fonte Pagadora', rendimentoSemFonteObrigatoria(form.tipo) ? form.descricao : form.nome_fonte]])
       || primeiroValorZerado([['Valor', form.valor]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
-    const payload = { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0 };
+    const payload = { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0,
+      ...Object.fromEntries(camposRendimento(form.tipo).map(([campo]) => [campo, parseFloat(form[campo]) || 0])),
+    };
     if (editingId) {
       const anoAlvo = await garantirAnoCadastro(anoCadastro);
       if (!anoAlvo) return;
@@ -111,6 +114,9 @@ export default function RendimentosPage() {
       ['Contribuição previdenciária oficial', r => r.contribuicaoPrevidenciaria || 0],
       ['13º salário (tributação exclusiva)', r => r.decimoTerceiro || 0],
       ['IRRF sobre o 13º salário', r => r.irrfDecimoTerceiro || 0],
+      ...COLUNAS_COMPLEMENTARES_RENDIMENTO.map(([campo, rotulo]) => [rotulo, r => r[campo] ?? '']),
+      ['Forma de tributação do RRA', r => r.formaTributacaoRra || ''],
+      ['Descrição', r => r.descricao || ''],
     ],
     'Rendimentos', 'rendimentos', state.anoCalendario
   );
@@ -276,7 +282,7 @@ export default function RendimentosPage() {
                   
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>CNPJ Fonte Pagadora</label><input className="form-control" inputMode="numeric" placeholder="00.000.000/0000-00" value={mascaraCnpj(form.cnpj_fonte)} onChange={e => upd('cnpj_fonte', mascaraCnpj(e.target.value))} /></div>
+                  <div className="form-group"><label>CPF/CNPJ da fonte pagadora</label><input className="form-control" inputMode="numeric" placeholder="CPF ou CNPJ" value={mascaraCpfCnpj(form.cnpj_fonte)} onChange={e => upd('cnpj_fonte', mascaraCpfCnpj(e.target.value))} /></div>
                   <div className="form-group"><label>Nome Fonte Pagadora</label><input className="form-control" value={form.nome_fonte} onChange={e => upd('nome_fonte', e.target.value)} /></div>
                 </div>
                 <div className="form-row">
@@ -284,9 +290,22 @@ export default function RendimentosPage() {
                     <label>Data</label>
                     <input className="form-control" type="date" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
-                  <div className="form-group"><label>Valor</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
-                  <div className="form-group"><label>IRRF</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
+                  <div className="form-group"><label>{form.tipo === 'tributavel_rra' ? 'Valor tributável (conforme apuração)' : 'Valor'}</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
+                  <div className="form-group"><label>{form.tipo === 'tributavel_pf_exterior' ? 'Carnê-leão pago' : 'IRRF'}</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
                 </div>
+                <div className="form-row">
+                  {camposRendimento(form.tipo).map(([campo, rotulo, tipo]) => <div className="form-group" key={campo}>
+                    <label>{rotulo}</label>
+                    {tipo === 'numero' ? <input className="form-control" type="number" min="0" step="0.1" value={form[campo] ?? ''} onChange={e => upd(campo, e.target.value)} />
+                      : <MoneyInput value={form[campo] ?? ''} onChange={v => upd(campo, v)} />}
+                  </div>)}
+                </div>
+                {form.tipo === 'tributavel_rra' && <div className="form-group"><label>Forma de tributação do RRA</label>
+                  <select className="form-control" value={form.formaTributacaoRra || ''} onChange={e => upd('formaTributacaoRra', e.target.value)}>
+                    <option value="">Conforme comprovante</option><option value="ajuste">Ajuste anual</option><option value="exclusiva">Exclusiva na fonte</option>
+                  </select>
+                </div>}
+                <div className="form-group"><label>Descrição da operação</label><textarea className="form-control" value={form.descricao || ''} onChange={e => upd('descricao', e.target.value)} /></div>
               </div>
               <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button><button type="submit" className="btn btn-primary">Salvar</button></div>
             </form>

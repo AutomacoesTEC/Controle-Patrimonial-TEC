@@ -1,0 +1,72 @@
+{"funcao": "Bens: benfeitoria em 2026, base 2025 intacta, troca e recarga", "resultado": "FALHOU", "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Registrar\", exact=True)\n"}
+{"funcao": "Pagamentos: cadastro por data com dependente identificado", "resultado": "PASSOU"}
+{"funcao": "Pagamentos: edição da data move entre anos e exclusão funciona", "resultado": "FALHOU", "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"}
+{"funcao": "Despesas: cadastro com data e dependente", "resultado": "PASSOU"}
+{"funcao": "Doações: data e identificação do doador", "resultado": "FALHOU", "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"}
+{"funcao": "Rendimentos PJ: cadastro com previdência e dependente", "resultado": "PASSOU"}
+{"funcao": "Rendimentos: campos variam entre PJ, PF/exterior, RRA e isentos", "resultado": "FALHOU", "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"}
+{"funcao": "Bens: aquisição cria patrimônio no ano da data e informa dependente", "resultado": "PASSOU"}
+{"funcao": "Dívidas: cadastro datado e titularidade", "resultado": "FALHOU", "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"}
+{"funcao": "Demonstrativo: visão geral, titular e dependente sem erro de renderização", "resultado": "PASSOU"}
+{"funcao": "Tabelas: arraste real nas divisórias, sem Compacto", "resultado": "PASSOU"}
+{"funcao": "Exportações: seis fichas XLSX e backup JSON baixados", "resultado": "FALHOU", "erro": "Locator.wait_for: Timeout 10000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Exportar .xlsx\", exact=True).first to be visible\n"}
+{
+  "resultados": [
+    {
+      "funcao": "Bens: benfeitoria em 2026, base 2025 intacta, troca e recarga",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Registrar\", exact=True)\n"
+    },
+    {
+      "funcao": "Pagamentos: cadastro por data com dependente identificado",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Pagamentos: edição da data move entre anos e exclusão funciona",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+    },
+    {
+      "funcao": "Despesas: cadastro com data e dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Doações: data e identificação do doador",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+    },
+    {
+      "funcao": "Rendimentos PJ: cadastro com previdência e dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Rendimentos: campos variam entre PJ, PF/exterior, RRA e isentos",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+    },
+    {
+      "funcao": "Bens: aquisição cria patrimônio no ano da data e informa dependente",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Dívidas: cadastro datado e titularidade",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\".modal-close:visible\").last\n    - locator resolved to <button class=\"modal-close\">✕</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n  - element was detached from the DOM, retrying\n"
+    },
+    {
+      "funcao": "Demonstrativo: visão geral, titular e dependente sem erro de renderização",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Tabelas: arraste real nas divisórias, sem Compacto",
+      "resultado": "PASSOU"
+    },
+    {
+      "funcao": "Exportações: seis fichas XLSX e backup JSON baixados",
+      "resultado": "FALHOU",
+      "erro": "Locator.wait_for: Timeout 10000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Exportar .xlsx\", exact=True).first to be visible\n"
+    }
+  ],
+  "errosJavascript": [],
+  "downloadsTemporarios": "/tmp/cptec-auditoria-downloads-pa8rgpdw"
+}
