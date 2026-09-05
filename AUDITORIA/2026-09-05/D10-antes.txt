@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 13ms
+     × D10: ganho de capital importado em exclusivos e operação não pode somar duas vezes 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D10: ganho de capital importado em exclusivos e operação não pode somar duas vezes
+AssertionError: expected 20000 to be 15000 // Object.is equality
+
+- Expected
++ Received
+
+- 15000
++ 20000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:91:33
+     89|     });
+     90|     // Sem imposto pago: recebimento efetivo da venda é 15 mil.
+     91|     expect(ano(s).saldoDeCaixa).toBe(15000);
+       |                                 ^
+     92|   });
+     93|   it.fails('D11: doação diretamente na declaração de 2025 paga em 2026…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:36:50
+   Duration  655ms (transform 415ms, setup 0ms, import 479ms, tests 13ms, environment 0ms)
+

@@ -57,3 +57,9 @@ MANTER: D08-antes.txt registra ganho 5.000; D08-depois.txt confirma 8.000. Casos
 Base 993d994. Previsão: uma diferença anual sem data não reaparece em janeiro e fevereiro. Camada: reconstrução temporal do estoque. Preservar foto de 31/12 e abertura, projetar apenas movimentos datados no meio do ano; diferenças não explicadas são evidência anual, não evento presumido em cada mês. Novo bem com abertura zero e data de aquisição pode ser situado nessa data. Consultas devem avisar a limitação de saldos anuais não decompostos. Fixture D09 antes/depois; controles anuais e de movimentos na suíte completa.
 
 MANTER: D09-antes.txt registra 20.000 repetidos; D09-depois.txt passa. Aviso explícito diferencia projeção e posição mensal comprovada. A foto final continua pertencendo a 31/12, sem inventar data de negócio.
+
+## D10 — ganho de capital em duas fichas
+
+Base c7f378a. Previsão: venda 15.000/custo 10.000 com ganho 5.000 também em exclusivos disponibiliza 15.000, não 20.000. Camada: integração do resumo fiscal com ganhos de operações. Manter valores fiscais e operações, exibir dedução de sobreposição na conciliação. Fixture D10 antes/depois. Resumo agregado não prova identidade por operação; coincidências devem permanecer sujeitas a conferência.
+
+MANTER: D10-antes.txt registra 20.000; D10-depois.txt confirma 15.000. A linha de dedução fica visível, sem apagar o rendimento oficial.

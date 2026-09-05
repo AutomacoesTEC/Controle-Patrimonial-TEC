@@ -81,7 +81,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     const s = estado({ historico: { 2025: anterior }, bens: [bem(10000, 15000)], rendimentos: [renda('isento_09', 5000)] });
     expect(demonstrativoPeriodo(s, '2025-01-01', '2026-12-31').saldoDeCaixa).toBe(0);
   });
-  it.fails('D10: ganho de capital importado em exclusivos e operação não pode somar duas vezes', () => {
+  it('D10: ganho de capital importado em exclusivos e operação não pode somar duas vezes', () => {
     const s = estado({
       bens: [bem(10000, 0)],
       rendimentos: [renda('exclusivo_0002', 5000)],

@@ -531,7 +531,7 @@ const ultimoDiaDoMes = (ano, mes) => {
 //
 // Achado na auditoria de 21/08/2026, confirmado na fonte oficial antes de
 // mexer, e decidido junto com o chefe da usuária.
-export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital }, dataDe, dataAte) {
+export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos = [] }, dataDe, dataAte) {
   const vendas = [];
   for (const b of (bens || [])) {
     for (const m of (b.movimentacoes || [])) {
@@ -623,9 +623,15 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital }, dataDe, da
     });
   }
 
+  const totalOperacoes = vendas.reduce((s, v) => s + v.ganhoLiquido, 0);
+  const resumoFiscal = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && noPeriodo(r.data, dataDe, dataAte))
+    .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
+  const jaNosRendimentos = Math.min(Math.max(totalOperacoes, 0), Math.max(resumoFiscal, 0));
   return {
     vendas,
-    total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0),
+    total: totalOperacoes - jaNosRendimentos,
+    totalOperacoes,
+    jaNosRendimentos,
     semIrrfCount: vendas.filter(v => v.semIrrf).length,
     daDeclaracao: vendas.length > 0 && vendas.every(v => v.daDeclaracao || v.daDiscriminacao),
     possiveisDuplicidades,

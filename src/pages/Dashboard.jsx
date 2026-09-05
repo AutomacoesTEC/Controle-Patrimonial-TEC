@@ -783,6 +783,7 @@ export default function Dashboard({ onNavigate } = {}) {
               {demo.ganhos.vendas.map((v, i) => (
                 <tr key={i}><td title={v.bem || ''}>{v.ganhoLiquido >= 0 ? 'GANHO APURADO NA VENDA DE' : 'PERDA APURADA NA VENDA DE'} {nomeCurtoBem(v.bem)}</td><td className={`currency ${v.ganhoLiquido >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganhoLiquido)}</td></tr>
               ))}
+              {demo.ganhos.jaNosRendimentos > 0 && <tr><td>Menos: ganho já incluído nos rendimentos exclusivos (conferir resumo agregado)</td><td className="currency negative">{formatCurrency(-demo.ganhos.jaNosRendimentos)}</td></tr>}
               <tr>
                 <td>
                   Ganho/perda líquido de IRRF nas vendas do período ({demo.ganhos.vendas.length} venda(s))

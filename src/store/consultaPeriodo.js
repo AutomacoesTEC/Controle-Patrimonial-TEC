@@ -127,6 +127,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   // Fluxos: cada ano do intervalo contribui com o trecho que lhe cabe.
   const rend = { tributavelPjBruto: 0, tributavelPjPrevidencia: 0, tributavelPjIrrf: 0, tributavelPJ: 0, tributavelPfExterior: 0, tributavelRra: 0, demaisTributaveis: 0, isentoValor: 0, exclusivoBruto: 0, exclusivoIrrf: 0, exclusivoLiquido: 0, totalGeral: 0 };
   const vendas = [];
+  let ganhosJaNosRendimentos = 0;
   const possiveisDuplicidades = [];
   const pendenciasAlienacao = [];
   const aplicacoesSemRendimento = [];
@@ -167,6 +168,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     for (const k of Object.keys(rend)) rend[k] += r[k];
 
     const g = ganhosApuradosPeriodo(dados, trechoDe, trechoAte);
+    ganhosJaNosRendimentos += g.jaNosRendimentos || 0;
     vendas.push(...g.vendas);
     semIrrfCount += g.semIrrfCount;
     possiveisDuplicidades.push(...(g.possiveisDuplicidades || []));
@@ -225,7 +227,9 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
   // tela usa isso só para dizer de onde saiu o número.
   const ganhos = {
     vendas,
-    total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0),
+    total: vendas.reduce((s, v) => s + v.ganhoLiquido, 0) - ganhosJaNosRendimentos,
+    totalOperacoes: vendas.reduce((s, v) => s + v.ganhoLiquido, 0),
+    jaNosRendimentos: ganhosJaNosRendimentos,
     semIrrfCount,
     daDeclaracao: vendas.length > 0 && vendas.every(v => v.daDeclaracao),
     possiveisDuplicidades,
