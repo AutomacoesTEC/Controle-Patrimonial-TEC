@@ -11,6 +11,7 @@
 // montar componente.
 
 import { linhasComunsDoAno } from './rendaVariavelMensal';
+import { pessoaDoRegistro } from './titularidade';
 import { arredondarCentavos } from '../utils/formatters';
 
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
@@ -920,13 +921,13 @@ export function demonstrativoConciliacao(state, dataDe, dataAte) {
     { meses: state.receitasDespesasRuraisOficial, ano: state.anoCalendario });
   const rendimentos = totalRendimentos(state.rendimentos, resultadoRural, dataDe, dataAte);
   const ganhos = ganhosApuradosPeriodo(state, dataDe, dataAte);
-  const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(state), state.anoCalendario, dataDe, dataAte);
+  const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(state), state.anoCalendario, dataDe, dataAte, state.rendimentos);
   const totalDoacoes = totalDoacoesPeriodo(state);
   const pagamentosEfetuados = totalPagamentos(state.pagamentos, dataDe, dataAte);
   const pagamentosDiversos = totalPagamentosDiversos(state.pagamentosDiversos, dataDe, dataAte);
   return fecharDemonstrativo({
     varPatrimonial, rendimentos, ganhos,
-    rendaVariavelPerda: rv.perda,
+    rendaVariavelPerda: rv.ajusteFinanceiro,
     pagamentosEfetuados, pagamentosDiversos, totalDoacoes,
     extras: {
       rendaVariavelMeses: rv.meses,
@@ -1000,8 +1001,14 @@ export const totalDoacoesPeriodo = (dados) => somaDoacoes(dados.doacoesEfetuadas
 //     compensar em meses seguintes), então não entra por caminho nenhum — e é
 //     dinheiro que saiu do caixa de verdade.
 // Por isso só o resultado NEGATIVO de cada mês é levado ao saldo.
-export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, dataAte) {
+export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, dataAte, rendimentos = []) {
   const meses = [];
+  const porPessoa = new Map();
+  const pessoa = r => {
+    if (r.titular === true) return 'titular';
+    const chave = pessoaDoRegistro(r);
+    return chave === 'nao-informada' ? 'titular' : chave;
+  };
   let resultado = 0, imposto = 0, perda = 0, comValor = false;
   for (const m of (rendaVariavelMensalOficial || [])) {
     if (!noPeriodo(ultimoDiaDoMes(ano, m.mes), dataDe, dataAte)) continue;
@@ -1009,9 +1016,21 @@ export function rendaVariavelDoPeriodo(rendaVariavelMensalOficial, ano, dataDe, 
     if (!m.comuns && !m.daytrade) continue;
     const doMes = (m.comuns?.resultadoLiquidoMes || 0) + (m.daytrade?.resultadoLiquidoMes || 0);
     resultado += doMes;
+    const chave = pessoa(m);
+    porPessoa.set(chave, (porPessoa.get(chave) || 0) + doMes);
     if (doMes < 0) perda += doMes;
     imposto += m.consolidacao?.totalImpostoDevido || 0;
     comValor = true;
   }
-  return { meses, resultado, imposto, perda, comValor };
+  // O código 05 é o resumo fiscal de ganhos RV. Quando existe, só
+  // complementamos o resultado líquido mensal ainda não representado.
+  // Resultado negativo permanece financeiro, não prejuízo fiscal transportado.
+  let ajusteFinanceiro = 0;
+  for (const [chave, liquido] of porPessoa) {
+    const declarado = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*5$/.test(r.tipo || '')
+      && pessoa(r) === chave && noPeriodo(r.data, dataDe, dataAte))
+      .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
+    ajusteFinanceiro += liquido - Math.min(Math.max(liquido, 0), Math.max(declarado, 0));
+  }
+  return { meses, resultado, imposto, perda, comValor, ajusteFinanceiro };
 }

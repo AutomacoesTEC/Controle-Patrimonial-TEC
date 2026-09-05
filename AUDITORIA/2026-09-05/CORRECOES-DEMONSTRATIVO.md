@@ -21,3 +21,9 @@ MANTER: D02-antes.txt registra 20.000; D02-depois.txt confirma 17.000.
 Base bc73fc8. Previsão: valor oficial líquido 8.000 permanecerá 8.000 mesmo com IRRF informativo 1.000; códigos 01/08, com dois ou quatro dígitos, mesma regra nos dados legados e novos. Camada: interpretação do valor líquido oficial, sem reescrever arquivos importados. Fonte conferida: [SC 24/2013, p. 6](https://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=38509), que orienta valor líquido na linha de 13º. Fixture D03, antes/depois sob o mesmo comando. IRRF continua armazenado e exportado, porém não descontado novamente.
 
 MANTER: D03-antes.txt registra 7.000; D03-depois.txt confirma 8.000. Corrigidos comentário do importador e rótulos de cadastro/demonstrativo.
+
+## D04 — ganho mensal RV ausente
+
+Base cb9b1cd. Previsão: ganho mensal 10.000 sem outro rendimento gera ajuste +10.000; com os mesmos 10.000 já em exclusivos código 05, ajuste zero. Perdas continuam refletidas. Camada: integração do resultado mensal com rendimentos já informados, por pessoa. Não usar imposto devido como pagamento. Fixture D04 antes/depois; controles de sobreposição serão acrescidos, sem chamar esses novos controles de evidência pareada. A conciliação agregada sem identidade de operação exige revisão, não prova automática de caixa bancário.
+
+MANTER: D04 passou de zero a 10.000. Controles adicionais confirmam não duplicar o resumo da mesma pessoa e não abater o resumo de outro dependente. Saídas D04-antes.txt, D04-depois.txt e D04-controles.txt. A linha antes chamada perda agora mostra ajuste financeiro, inclusive positivo.

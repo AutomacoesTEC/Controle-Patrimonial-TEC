@@ -207,7 +207,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // fichas separadas na declaração — daí a deduplicação por ano+mês para a
     // linha de meses, enquanto o resultado SOMA as duas (é o ganho líquido do
     // conjunto declarado, que é como a própria declaração consolida).
-    const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(dados), ano, trechoDe, trechoAte);
+    const rv = rendaVariavelDoPeriodo(linhasComunsDoAno(dados), ano, trechoDe, trechoAte, dados.rendimentos);
     for (const m of rv.meses) {
       if (!rendaVariavelMeses.some(x => x.ano === m.ano && x.mes === m.mes)) rendaVariavelMeses.push(m);
     }
@@ -215,7 +215,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     rendaVariavelImposto += rv.imposto;
     // Só a perda entra no caixa; o ganho já vem pela ficha de exclusivos.
     // Ver o comentário de rendaVariavelDoPeriodo em demonstrativos.js.
-    rendaVariavelPerda += rv.perda;
+    rendaVariavelPerda += rv.ajusteFinanceiro;
     rendaVariavelComValor = rendaVariavelComValor || rv.comValor;
   }
 

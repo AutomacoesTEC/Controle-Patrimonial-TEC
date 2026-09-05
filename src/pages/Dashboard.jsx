@@ -748,7 +748,7 @@ export default function Dashboard({ onNavigate } = {}) {
                       ? `Renda Variável, ficha mensal: ${resumirMeses(demo.rendaVariavelMeses)}`
                       : `Renda Variável, ficha registrada em: ${resumirMeses(demo.rendaVariavelMeses)}`}
                     {demo.rendaVariavelComValor ? (
-                      <Ajuda texto="Ganho líquido ou perda somando as fichas do titular e dos dependentes nos meses do período, lido da declaração importada. Só a PARTE NEGATIVA entra no Saldo de Caixa, na linha logo abaixo: o ganho, quando existe, o contribuinte informa na ficha de tributação exclusiva (código 05) e ele já está contado ali. Somá-lo aqui contaria a mesma entrada duas vezes. A perda não vai para ficha nenhuma e é dinheiro que saiu de verdade." />
+                      <Ajuda texto="Resultado mensal das operações, separado do imposto devido. A linha de ajuste acrescenta o resultado ainda não representado no resumo de rendimentos da mesma pessoa. A comparação é agregada: confira operações, retenções e pagamentos quando houver fontes incompletas ou divergentes." />
                     ) : (
                       <Ajuda texto="Os meses em que a declaração tem ficha de Renda Variável, sem o valor do ganho ou da perda. Não entra em nenhum total desta tela." />
                     )}
@@ -797,13 +797,13 @@ export default function Dashboard({ onNavigate } = {}) {
               {/* Perda em renda variável: dinheiro que saiu e não aparece em
                   ficha nenhuma da declaração. Ver a Ajuda da linha de Renda
                   Variável no card de Rendimentos, e o achado 12. */}
-              {demo.rendaVariavelPerda < 0 && (
+              {demo.rendaVariavelPerda !== 0 && (
                 <tr>
                   <td>
-                    Perda líquida em Renda Variável no período
+                    Ajuste do resultado de Renda Variável no período
                     <Ajuda texto="Soma dos meses que fecharam negativos nas fichas de Renda Variável. Entra no caixa porque é dinheiro que saiu; o ganho dos meses positivos não entra aqui, já vem pela ficha de tributação exclusiva." />
                   </td>
-                  <td className="currency negative">{formatCurrency(demo.rendaVariavelPerda)}</td>
+                  <td className={`currency ${demo.rendaVariavelPerda < 0 ? 'negative' : 'positive'}`}>{formatCurrency(demo.rendaVariavelPerda)}</td>
                 </tr>
               )}
               {/* Venda financiada de ano anterior é uma distorção temporal,

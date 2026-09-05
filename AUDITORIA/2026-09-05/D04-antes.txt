@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (16 tests | 1 failed | 15 skipped) 11ms
+     × D04: RV mensal positiva de 10 mil gera recursos sem redigitar exclusivo 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D04: RV mensal positiva de 10 mil gera recursos sem redigitar exclusivo
+AssertionError: expected +0 to be 10000 // Object.is equality
+
+- Expected
++ Received
+
+- 10000
++ 0
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:47:33
+     45|     const s = estado({ rendaVariavelMensalManual: [{ mes: 6, titular: …
+     46|     // Imposto devido não prova pagamento; nesta fixture não houve pag…
+     47|     expect(ano(s).saldoDeCaixa).toBe(10000);
+       |                                 ^
+     48|   });
+     49|   it.fails('D05: perda FII de 4 mil reduz recursos em 4 mil', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  17:28:42
+   Duration  648ms (transform 416ms, setup 0ms, import 478ms, tests 11ms, environment 0ms)
+

@@ -41,10 +41,15 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     ]);
     expect(totalRendimentos(rs, 0).totalGeral).toBe(8000);
   });
-  it.fails('D04: RV mensal positiva de 10 mil gera recursos sem redigitar exclusivo', () => {
+  it('D04: RV mensal positiva de 10 mil gera recursos sem redigitar exclusivo', () => {
     const s = estado({ rendaVariavelMensalManual: [{ mes: 6, titular: true, comuns: { resultadoLiquidoMes: 10000 }, consolidacao: { totalImpostoDevido: 1500 } }] });
     // Imposto devido não prova pagamento; nesta fixture não houve pagamento.
     expect(ano(s).saldoDeCaixa).toBe(10000);
+  });
+  it('D04 controle: RV já resumida em exclusivos não duplica e outra pessoa não é compensada', () => {
+    const mensal = { mes: 6, titular: true, comuns: { resultadoLiquidoMes: 10000 } };
+    expect(ano(estado({ rendaVariavelMensalManual: [mensal], rendimentos: [renda('exclusivo_05', 10000, { beneficiario: 'Titular' })] })).saldoDeCaixa).toBe(10000);
+    expect(ano(estado({ rendaVariavelMensalManual: [mensal], rendimentos: [renda('exclusivo_05', 10000, { beneficiario: 'Dependente', cpfDependente: '123' })] })).saldoDeCaixa).toBe(20000);
   });
   it.fails('D05: perda FII de 4 mil reduz recursos em 4 mil', () => {
     const s = estado({ fiiFiagroMensalManual: [{ mes: 6, titular: true, resultadoLiquidoMes: -4000 }] });
