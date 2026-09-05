@@ -1,0 +1,133 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/fluxoAnual.test.js (6 tests | 6 failed) 17ms
+     × primeiro pagamento em 2026 herda saldos e dependentes, sem repetir fluxos nem trocar a visão 9ms
+     × benfeitoria de 2026 deixa 2025 intacto e sobrevive à troca de ano e serialização 1ms
+     × movimenta o bem correspondente quando 2026 já foi criado com outro id 2ms
+     × amortização entra em 2026 sem reduzir o saldo declarado de 2025 1ms
+     × editar a data de um pagamento move o registro uma vez para o ano de destino 2ms
+     × pular para 2027 preserva os saldos de abertura dos anos intermediários 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > primeiro pagamento em 2026 herda saldos e dependentes, sem repetir fluxos nem trocar a visão
+AssertionError: expected undefined to be 100000 // Object.is equality
+
+- Expected:
+100000
+
++ Received:
+undefined
+
+ ❯ src/store/fluxoAnual.test.js:23:58
+     21|     expect(s.anoCalendario).toBe(2025);
+     22|     expect(s.bens).toEqual(antes.bens);
+     23|     expect(s.historico[2026].bens[0]?.situacao_anterior).toBe(100000);
+       |                                                          ^
+     24|     expect(s.historico[2026].dividas[0]?.situacao_anterior).toBe(50000…
+     25|     expect(s.historico[2026].dependentes).toEqual(antes.dependentes);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > benfeitoria de 2026 deixa 2025 intacto e sobrevive à troca de ano e serialização
+AssertionError: expected undefined to be 120000 // Object.is equality
+
+- Expected:
+120000
+
++ Received:
+undefined
+
+ ❯ src/store/fluxoAnual.test.js:32:56
+     30|     let s = movimento(antes, '2026-04-10');
+     31|     expect(s.bens).toEqual(antes.bens);
+     32|     expect(s.historico[2026]?.bens[0]?.situacao_atual).toBe(120000);
+       |                                                        ^
+     33|     s = reducer(JSON.parse(JSON.stringify(s)), { type: 'SWITCH_ANO', p…
+     34|     expect(s.bens[0].movimentacoes).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > movimenta o bem correspondente quando 2026 já foi criado com outro id
+AssertionError: expected 100000 to be 120000 // Object.is equality
+
+- Expected
++ Received
+
+- 120000
++ 100000
+
+ ❯ src/store/fluxoAnual.test.js:43:54
+     41|     s = reducer(s, { type: 'SWITCH_ANO', payload: 2025 });
+     42|     s = movimento(s, '2026-08-01');
+     43|     expect(s.historico[2026].bens[0].situacao_atual).toBe(120000);
+       |                                                      ^
+     44|   });
+     45|   it('amortização entra em 2026 sem reduzir o saldo declarado de 2025'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > amortização entra em 2026 sem reduzir o saldo declarado de 2025
+AssertionError: expected undefined to be 45000 // Object.is equality
+
+- Expected:
+45000
+
++ Received:
+undefined
+
+ ❯ src/store/fluxoAnual.test.js:51:59
+     49|     } });
+     50|     expect(s.dividas[0].situacao_atual).toBe(50000);
+     51|     expect(s.historico[2026]?.dividas[0]?.situacao_atual).toBe(45000);
+       |                                                           ^
+     52|   });
+     53|   it('editar a data de um pagamento move o registro uma vez para o ano…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > editar a data de um pagamento move o registro uma vez para o ano de destino
+AssertionError: expected [ { id: 7, data: '2025-08-01', …(2) } ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/store/fluxoAnual.test.js:57:26
+     55|     s.pagamentos = [{ id: 7, data: '2025-08-01', valor_pago: 100, nome…
+     56|     s = emAno(s, 2026, { type: 'UPDATE_PAGAMENTO', payload: { id: 7, d…
+     57|     expect(s.pagamentos).toHaveLength(0);
+       |                          ^
+     58|     expect(s.historico[2026].pagamentos).toEqual([expect.objectContain…
+     59|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/store/fluxoAnual.test.js > ciclo anual com fixture 2025 e eventos datados em 2026 > pular para 2027 preserva os saldos de abertura dos anos intermediários
+AssertionError: expected undefined to be 100000 // Object.is equality
+
+- Expected:
+100000
+
++ Received:
+undefined
+
+ ❯ src/store/fluxoAnual.test.js:62:59
+     60|   it('pular para 2027 preserva os saldos de abertura dos anos intermed…
+     61|     const s = emAno(base(), 2027, { type: 'ADD_RENDIMENTO', payload: {…
+     62|     expect(s.historico[2026]?.bens[0]?.situacao_anterior).toBe(100000);
+       |                                                           ^
+     63|     expect(s.historico[2027].bens[0]?.situacao_anterior).toBe(100000);
+     64|     expect(s.historico[2027].rendimentos).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed (6)
+   Start at  15:21:02
+   Duration  1.34s (transform 300ms, setup 0ms, import 353ms, tests 17ms, environment 0ms)
+

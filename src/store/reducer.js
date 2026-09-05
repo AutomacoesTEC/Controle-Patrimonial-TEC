@@ -314,6 +314,51 @@ function atualizarPreservandoDeclarado(item, payload) {
   return { ...item, valorDeclarado: declarado, ...payload };
 }
 
+// Projeta um ano de trabalho sem mudar a seleção da interface. Somente saldos
+// atravessam anos; fluxos e fichas da declaração continuam no ano de origem.
+export function estadoNoAno(state, ano) {
+  if (ano === state.anoCalendario) return state;
+  if (state.historico?.[ano]) return {
+    ...initialState, ...state.historico[ano], anoCalendario: ano,
+    historico: state.historico, origemAnoAtual: state.historico[ano].origem,
+  };
+  const anteriores = [...Object.keys(state.historico || {}).map(Number), state.anoCalendario]
+    .filter(a => Number.isInteger(a) && a < ano);
+  if (!anteriores.length) return {
+    ...initialState, anoCalendario: ano, historico: state.historico || {}, origemAnoAtual: 'manual',
+  };
+  const anterior = Math.max(...anteriores);
+  let projetado = estadoNoAno(state, anterior);
+  for (let a = anterior + 1; a <= ano; a += 1) {
+    projetado = reducer(projetado, { type: 'ROLLOVER_ANO', payload: a });
+  }
+  return projetado;
+}
+
+const colecaoMovimento = (tipo) => tipo.includes('DIVIDA')
+  ? (tipo.endsWith('_RURAL') ? 'dividasRurais' : 'dividas')
+  : (tipo.endsWith('_RURAL') ? 'bensRurais' : 'bens');
+
+export function correspondenteNoAno(lista, item) {
+  if (!item) return null;
+  const chave = item.chaveContinuidade || item.chaveImportacao || item.controle;
+  const exato = lista.find(b => b.id === item.id || (chave && [b.chaveContinuidade, b.chaveImportacao, b.controle].includes(chave)));
+  if (exato) return exato;
+  // Compatibilidade com anos criados antes da chave de continuidade. Não
+  // escolhe arbitrariamente entre bens com a mesma descrição.
+  const campos = ['discriminacao', 'grupo', 'codigo_bem', 'codigo', 'beneficiario', 'cpf_beneficiario'];
+  const candidatos = lista.filter(b => campos.every(c => String(b[c] || '') === String(item[c] || '')));
+  return candidatos.length === 1 ? candidatos[0] : null;
+}
+
+function guardarAno(state, destino) {
+  if (destino.anoCalendario === state.anoCalendario) return destino;
+  const historico = { ...destino.historico, ...state.historico, [destino.anoCalendario]: snapshotYear(destino) };
+  // A versão viva do ano ativo tem precedência sobre qualquer cópia arquivada.
+  if (!state.historico[state.anoCalendario]) delete historico[state.anoCalendario];
+  return { ...state, historico };
+}
+
 export function reducer(state, action) {
   switch (action.type) {
     // Estado já calculado e gravado com sucesso pelo DataContext. Esta ação
@@ -523,10 +568,10 @@ export function reducer(state, action) {
         // filtrar por data (bug real, achado auditando o motor de Ganhos de
         // Capital; confirmado rodando o reducer de verdade, ver
         // reducer.test.js).
-        bens: state.bens.map(b => ({ ...b, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
-        dividas: state.dividas.map(d => ({ ...d, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
-        bensRurais: state.bensRurais.map(b => ({ ...b, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
-        dividasRurais: state.dividasRurais.map(d => ({ ...d, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
+        bens: state.bens.map(b => ({ ...b, chaveContinuidade: b.chaveContinuidade || b.chaveImportacao || b.controle || b.id, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
+        dividas: state.dividas.map(d => ({ ...d, chaveContinuidade: d.chaveContinuidade || d.chaveImportacao || d.controle || d.id, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
+        bensRurais: state.bensRurais.map(b => ({ ...b, chaveContinuidade: b.chaveContinuidade || b.chaveImportacao || b.controle || b.id, id: novoId(), situacao_anterior: b.situacao_atual, movimentacoes: [] })),
+        dividasRurais: state.dividasRurais.map(d => ({ ...d, chaveContinuidade: d.chaveContinuidade || d.chaveImportacao || d.controle || d.id, id: novoId(), situacao_anterior: d.situacao_atual, valor_pago: 0, movimentacoes: [] })),
         rendimentos: [],
         pagamentos: [],
         lancamentosRurais: [],
@@ -1247,18 +1292,33 @@ export function reducer(state, action) {
       // genuinamente novo, incluindo os dois campos que "atravessam anos"
       // (imoveisRurais, prejuizoRuralAcompensar — ver comentário de
       // blankYear), herdados do valor corrente do state.
-      const snapshotAnoAlvo = state.historico[ano] || {
-        ...blankYear,
-        imoveisRurais: state.imoveisRurais,
-        prejuizoRuralAcompensar: state.prejuizoRuralAcompensar,
-        origem: null,
-        savedAt: new Date().toISOString(),
-        versaoEsquema: VERSAO_ESQUEMA_ATUAL,
-      };
-      return {
-        ...state,
-        historico: { ...state.historico, [ano]: reducer(snapshotAnoAlvo, acaoInterna) },
-      };
+      let origem = state;
+      let destino = estadoNoAno(state, ano);
+      const colecao = COLECAO_POR_EDICAO[acaoInterna.type];
+      const item = colecao && state[colecao]?.find(i => i.id === acaoInterna.payload.id);
+      if (item) {
+        // Editar a data de um fluxo transporta o registro, com seu id e campos
+        // importados preservados, sem deixar cópia no ano anterior.
+        origem = { ...state, [colecao]: state[colecao].filter(i => i.id !== item.id) };
+        destino = { ...destino, [colecao]: [...destino[colecao].filter(i => i.id !== item.id), item] };
+      }
+      return guardarAno(origem, reducer(destino, acaoInterna));
+    }
+    case 'SALVAR_MOVIMENTACAO_DATADA': {
+      const { actionType, bemId, movId, movimentacao } = action.payload;
+      const ano = Number(movimentacao.data.slice(0, 4));
+      const colecao = colecaoMovimento(actionType);
+      const item = state[colecao].find(b => b.id === bemId);
+      let origem = state;
+      if (movId && ano !== state.anoCalendario) origem = reducer(state, {
+        type: actionType.replace('REGISTRAR_', 'DELETE_'), payload: { bemId, movId },
+      });
+      const destino = estadoNoAno(origem, ano);
+      const alvo = correspondenteNoAno(destino[colecao], item);
+      if (!alvo) throw new Error('Não foi possível identificar este bem ou dívida no ano da data. Abra o ano de destino e selecione o registro correspondente.');
+      const tipo = movId && ano === state.anoCalendario ? actionType.replace('REGISTRAR_', 'UPDATE_') : actionType;
+      const atualizado = reducer(destino, { type: tipo, payload: { bemId: alvo.id, movId, movimentacao } });
+      return guardarAno(origem, atualizado);
     }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, action.payload] };
@@ -1300,6 +1360,12 @@ const CAMPOS_TECNICOS_HISTORICO = new Set(['id', 'origem', 'origemDocumento', 'v
 const LIMITE_HISTORICO = 300;
 
 function mudancasDaAcao(stateAntes, stateDepois, action) {
+  if (action.type === 'ADD_EM_ANO') {
+    const { ano, action: interna } = action.payload;
+    const anterior = COLECAO_POR_EDICAO[interna.type] && stateAntes[COLECAO_POR_EDICAO[interna.type]]?.some(i => i.id === interna.payload?.id)
+      ? stateAntes : estadoNoAno(stateAntes, ano);
+    return mudancasDaAcao(anterior, estadoNoAno(stateDepois, ano), interna);
+  }
   const colecao = COLECAO_POR_EDICAO[action.type];
   if (!colecao) return [];
   const antes = buscar(stateAntes, colecao, action.payload?.id);
@@ -1397,6 +1463,8 @@ function descreverAcao(state, action) {
     // da chamada recursiva precisam olhar o snapshot do ANO-ALVO (não o
     // `state` ativo) quando o ano é diferente, senão UPDATE/DELETE nesse ano
     // nunca acham o item para descrever.
+    case 'SALVAR_MOVIMENTACAO_DATADA':
+      return `${p.movId ? 'Corrigiu' : 'Registrou'} movimentação ${p.movimentacao.tipo} de ${p.movimentacao.data}, no ano ${p.movimentacao.data.slice(0, 4)}`;
     case 'ADD_EM_ANO': {
       const { ano, action: interna } = p;
       const baseParaDescricao = ano === state.anoCalendario ? state : (state.historico[ano] || blankYear);
@@ -1434,7 +1502,8 @@ export function reducerComHistorico(state, action) {
   const entrada = {
     id: novoId(),
     data: new Date().toISOString(),
-    anoCalendario: novoEstado.anoCalendario,
+    anoCalendario: action.type === 'ADD_EM_ANO' ? action.payload.ano
+      : action.type === 'SALVAR_MOVIMENTACAO_DATADA' ? Number(action.payload.movimentacao.data.slice(0, 4)) : novoEstado.anoCalendario,
     descricao,
     mudancas: mudancasDaAcao(state, novoEstado, action),
   };

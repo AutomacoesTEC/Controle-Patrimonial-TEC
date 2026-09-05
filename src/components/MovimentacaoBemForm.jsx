@@ -4,6 +4,7 @@ import { situacaoBemAteData, situacaoDividaAteData } from '../store/demonstrativ
 import { formatCurrency, formatDate, MOVIMENTACAO_TIPOS } from '../utils/formatters';
 import MoneyInput from './MoneyInput';
 import Ajuda from './Ajuda';
+import { estadoNoAno, correspondenteNoAno } from '../store/reducer';
 
 // Bloco de "registrar movimentação" de um bem (venda, compra, benfeitoria,
 // baixa, ajuste), reaproveitado entre Bens e Direitos (BemModal) e Bens da
@@ -47,7 +48,7 @@ export default function MovimentacaoBemForm({
   tipoInicial = 'venda_parcial',
   anoCalendario,
 }) {
-  const { dispatch, addToast, confirmar } = useData();
+  const { state, dispatch, addToast, confirmar } = useData();
   const [movTipo, setMovTipo] = useState(tipoInicial);
   const [movValor, setMovValor] = useState('');
   const [movValorVenda, setMovValorVenda] = useState('');
@@ -93,11 +94,15 @@ export default function MovimentacaoBemForm({
   // data; o que vale no registro é sempre a reconstrução pela data.
   const situacaoNaVespera = useMemo(() => {
     if (movData) {
-      return isDivida ? situacaoDividaAteData(bem, movData, 'de') : situacaoBemAteData(bem, movData, 'de');
+      const ano = Number(movData.slice(0, 4));
+      const colecao = isDivida ? (actionType.endsWith('_RURAL') ? 'dividasRurais' : 'dividas') : (isBemRural ? 'bensRurais' : 'bens');
+      const destino = estadoNoAno(state, ano);
+      const alvo = correspondenteNoAno(destino[colecao], bem) || bem;
+      return isDivida ? situacaoDividaAteData(alvo, movData, 'de') : situacaoBemAteData(alvo, movData, 'de');
     }
     const atual = parseFloat(bem.situacao_atual) || 0;
     return atual > 0 ? atual : (parseFloat(bem.situacao_anterior) || 0);
-  }, [bem, movData, isDivida]);
+  }, [bem, movData, isDivida, isBemRural, actionType, state]);
 
   // Tipos que zeram o saldo (venda total, baixa, quitação) numa movimentação
   // NOVA: o valor não é digitado, vem da situação na véspera.
@@ -170,13 +175,13 @@ export default function MovimentacaoBemForm({
     // progressiva) — usado só para o Demonstrativo de Conciliação
     // Patrimonial do Dashboard calcular o "ganho líquido de IRRF".
     if (isVenda && movIrrfVenda !== '') movimentacao.irrfVenda = parseFloat(movIrrfVenda) || 0;
-    if (editingId) {
-      dispatch({ type: UPDATE_ACTION_POR_ACTION[actionType], payload: { bemId: bem.id, movId: editingId, movimentacao } });
-      addToast('Movimentação corrigida.', 'success');
-    } else {
-      dispatch({ type: actionType, payload: { bemId: bem.id, movimentacao } });
-      addToast('Movimentação registrada.', 'success');
+    const colecao = isDivida ? (actionType.endsWith('_RURAL') ? 'dividasRurais' : 'dividas') : (isBemRural ? 'bensRurais' : 'bens');
+    if (!correspondenteNoAno(estadoNoAno(state, anoDaData)[colecao], bem)) {
+      addToast('Não foi possível identificar este bem ou dívida no ano da data. Abra o ano de destino e selecione o registro correspondente.', 'error');
+      return;
     }
+    dispatch({ type: 'SALVAR_MOVIMENTACAO_DATADA', payload: { actionType, bemId: bem.id, movId: editingId, movimentacao } });
+    addToast(`Movimentação ${editingId ? 'corrigida' : 'registrada'} em ${anoDaData}.`, 'success');
     limparFormulario();
   };
 
