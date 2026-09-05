@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, MOVIMENTACAO_DIVIDA_TIPOS, descreverOrigemDocumento, truncarComReticencias, CODIGOS_DIVIDA, describeDividaCodigo } from '../utils/formatters';
@@ -12,7 +14,7 @@ import EstadoVazio from '../components/EstadoVazio';
 import BadgeOrigem from '../components/BadgeOrigem';
 import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRegistro';
 
-const FORM_VAZIO = { data: '', codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
+const FORM_VAZIO = { beneficiario: 'Titular', data: '', codigo: '13', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 export default function DividasPage({ onVoltar } = {}) {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -41,7 +43,7 @@ export default function DividasPage({ onVoltar } = {}) {
   };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ data: d.data || '', codigo: d.codigo, discriminacao: d.discriminacao || '', situacao_anterior: d.situacao_anterior, situacao_atual: d.situacao_atual, valor_pago: d.valor_pago || '' });
+    setForm({ ...d, data: d.data || '', codigo: d.codigo, discriminacao: d.discriminacao || '', situacao_anterior: d.situacao_anterior, situacao_atual: d.situacao_atual, valor_pago: d.valor_pago || '' });
     setModalOpen(true);
   };
 
@@ -123,7 +125,7 @@ export default function DividasPage({ onVoltar } = {}) {
                   </td>
                   <td title={d.discriminacao || ''}>
                     {truncarComReticencias(d.discriminacao, 100)}
-                    <div><BadgeOrigem item={d} /></div>
+                    <div><BadgeOrigem item={d} /><div className="titularidade-registro">{rotuloTitularidade(d, state.dependentes)}</div></div>
                     {/* Página e linha da declaração impressa, mesmo tratamento
                         que Bens, Rendimentos e Pagamentos já tinham. */}
                     {descreverOrigemDocumento(d) && (
@@ -160,6 +162,7 @@ export default function DividasPage({ onVoltar } = {}) {
             <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
                 <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Código do credor</label><SeletorCodigo opcoes={CODIGOS_DIVIDA} value={form.codigo} onChange={v => upd('codigo', v)} placeholder="Selecione ou digite o código" /></div>

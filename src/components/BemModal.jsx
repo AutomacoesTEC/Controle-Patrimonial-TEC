@@ -1,3 +1,5 @@
+import SeletorTitularidade from './SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { GRUPOS_BENS, CODIGOS_POR_GRUPO, formatCurrency, mascaraCnpj } from '../utils/formatters';
@@ -109,6 +111,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
             <div className="form-group"><label>Data de aquisição</label><input className="form-control" type="date" required={!isEditing} value={form.data_aquisicao || ''} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
             {isEditing ? (
               // Bloco 1 "Dados do Bem": todos os campos de identificação
@@ -151,13 +154,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                       <label>Código do Bem</label>
                       <SeletorCodigo opcoes={codigosDoGrupo} value={form.codigo_bem} onChange={v => upd('codigo_bem', v)} placeholder="Selecione ou digite o código" />
                     </div>
-                    <div className="form-group">
-                      <label>Beneficiário</label>
-                      <select className="form-control" value={form.beneficiario} onChange={e => upd('beneficiario', e.target.value)}>
-                        <option value="Titular">Titular</option>
-                        <option value="Dependente">Dependente</option>
-                      </select>
-                    </div>
+                    
                   </div>
                 </div>
 
@@ -241,13 +238,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                     <label>Código do Bem</label>
                     <SeletorCodigo opcoes={codigosDoGrupo} value={form.codigo_bem} onChange={v => upd('codigo_bem', v)} placeholder="Selecione ou digite o código" />
                   </div>
-                  <div className="form-group">
-                    <label>Beneficiário</label>
-                    <select className="form-control" value={form.beneficiario} onChange={e => upd('beneficiario', e.target.value)}>
-                      <option value="Titular">Titular</option>
-                      <option value="Dependente">Dependente</option>
-                    </select>
-                  </div>
+                  
                 </div>
 
                 <div className="form-group">

@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, truncarComReticencias } from '../utils/formatters';
@@ -19,7 +21,7 @@ const ABAS = {
   ecaIdoso: { titulo: 'Doações Diretamente na Declaração (ECA e Pessoa Idosa)', colecao: 'doacoesEcaIdosoOficial', addAction: 'ADD_DOACAO_ECA_IDOSO', updateAction: 'UPDATE_DOACAO_ECA_IDOSO', deleteAction: 'DELETE_DOACAO_ECA_IDOSO', comCategoria: true },
 };
 
-const FORM_VAZIO = { data: '', codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
+const FORM_VAZIO = { beneficiario: 'Titular', data: '', codigo: '', nome_beneficiario: '', cpf_cnpj: '', valor: '', descricao: '', categoria: 'eca' };
 
 export default function DoacoesPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -40,7 +42,7 @@ export default function DoacoesPage() {
   };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ data: d.data || '', codigo: d.codigo || '', nome_beneficiario: d.nome_beneficiario || '', cpf_cnpj: d.cpf_cnpj || '', valor: d.valor ?? '', descricao: d.descricao || '', categoria: d.categoria || 'eca' });
+    setForm({ ...d, data: d.data || '', codigo: d.codigo || '', nome_beneficiario: d.nome_beneficiario || '', cpf_cnpj: d.cpf_cnpj || '', valor: d.valor ?? '', descricao: d.descricao || '', categoria: d.categoria || 'eca' });
     setModalOpen(true);
   };
 
@@ -50,6 +52,7 @@ export default function DoacoesPage() {
       || primeiroValorZerado([['Valor', form.valor]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     const payload = {
+      ...form,
       data: form.data,
       codigo: form.codigo,
       nome_beneficiario: form.nome_beneficiario,
@@ -132,7 +135,7 @@ export default function DoacoesPage() {
                 <tr key={d.id}>
                   <td>{d.codigo}</td>
                   {aba.comCategoria && <td>{d.categoria === 'idoso' ? 'Pessoa Idosa' : 'ECA'}</td>}
-                  <td title={d.nome_beneficiario || ''}>{truncarComReticencias(d.nome_beneficiario, 80)}</td>
+                  <td title={d.nome_beneficiario || ''}>{truncarComReticencias(d.nome_beneficiario, 80)}<div className="titularidade-registro">{rotuloTitularidade(d, state.dependentes)}</div><small>{d.data || 'Data não informada'}</small></td>
                   <td>{formatCpfCnpj(d.cpf_cnpj)}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(d.valor)}</td>
                   <td title={d.descricao || ''}>{truncarComReticencias(d.descricao, 60)}</td>
@@ -162,6 +165,7 @@ export default function DoacoesPage() {
         <div className="modal-header"><h3>{editingId ? 'Editar Doação' : 'Nova Doação'}: {aba.titulo}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
             <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-row">
               <div className="form-group"><label>Código</label><input className="form-control" value={form.codigo} onChange={e => upd('codigo', e.target.value)} /></div>

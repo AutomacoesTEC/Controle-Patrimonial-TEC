@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, CATEGORIAS_RENDIMENTO, RENDIMENTO_TIPOS_CONHECIDOS, descreverOrigemDocumento, codigosDoRendimento, colunasDaFontePagadora, descreverComunicacaoNaoResidente, descreverBeneficiarioRendimento, truncarComReticencias} from '../utils/formatters';
@@ -22,7 +24,7 @@ const TIPOS_CADASTRO_POR_CATEGORIA = Object.entries(RENDIMENTO_TIPOS_CONHECIDOS)
 
 // Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
 // forçaria trocar de ano ao salvar num exercício de trabalho diferente.
-const FORM_VAZIO = { tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: '' };
+const FORM_VAZIO = { beneficiario: 'Titular', tipo: 'tributavel_pj', cnpj_fonte: '', nome_fonte: '', beneficiario: 'Titular', valor: '', irrf: '', data: '' };
 
 export default function RendimentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -46,7 +48,7 @@ export default function RendimentosPage() {
   };
   const abrirEdicao = (r) => {
     setEditingId(r.id);
-    setForm({ tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || '' });
+    setForm({ ...r, tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || '' });
     setModalOpen(true);
   };
 
@@ -256,6 +258,7 @@ export default function RendimentosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Rendimento' : 'Novo Rendimento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
@@ -270,11 +273,7 @@ export default function RendimentosPage() {
                       })}
                     </select>
                   </div>
-                  <div className="form-group"><label>Beneficiário</label>
-                    <select className="form-control" value={form.beneficiario} onChange={e => upd('beneficiario', e.target.value)}>
-                      <option>Titular</option><option>Dependente</option>
-                    </select>
-                  </div>
+                  
                 </div>
                 <div className="form-row">
                   <div className="form-group"><label>CNPJ Fonte Pagadora</label><input className="form-control" inputMode="numeric" placeholder="00.000.000/0000-00" value={mascaraCnpj(form.cnpj_fonte)} onChange={e => upd('cnpj_fonte', mascaraCnpj(e.target.value))} /></div>

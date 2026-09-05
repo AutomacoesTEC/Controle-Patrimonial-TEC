@@ -1,3 +1,4 @@
+import { filtrarPorPessoa } from '../store/titularidade';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
@@ -123,7 +124,14 @@ function periodoTodoHistorico(state) {
 }
 
 export default function Dashboard({ onNavigate } = {}) {
-  const { state, dispatch } = useData();
+  const { state: estadoCompleto, dispatch } = useData();
+  const [pessoaSelecionada, setPessoaSelecionada] = useState('todos');
+  const state = useMemo(() => filtrarPorPessoa(estadoCompleto, pessoaSelecionada), [estadoCompleto, pessoaSelecionada]);
+  const pessoas = useMemo(() => {
+    const lista = [estadoCompleto, ...Object.values(estadoCompleto.historico || {})].flatMap(a => a.dependentes || []);
+    return [...new Map(lista.map(d => [String(d.cpf || '').replace(/\D/g, '') || `id:${d.id}`, d])).entries()];
+  }, [estadoCompleto]);
+  const nomeRecorte = pessoaSelecionada === 'todos' ? 'Visão geral' : pessoaSelecionada === 'titular' ? 'Titular' : pessoas.find(([id]) => id === pessoaSelecionada)?.[1].nome || 'Dependente';
   // Categoria ('bens' | 'dividaComum' | 'dividaRural') cuja "Variação de..."
   // foi clicada — abre o modal com a lista de movimentações que compõem
   // aquele saldo. null = modal fechado.
@@ -478,7 +486,7 @@ export default function Dashboard({ onNavigate } = {}) {
       <div className="page-body animate-in">
         <header className="print-header">
           <div>
-            <strong>Demonstrativo de Conciliação Patrimonial</strong>
+            <strong>Demonstrativo de Conciliação Patrimonial: {nomeRecorte}</strong>
             <span>{state.contribuinte?.nome || 'Titular não informado'}</span>
           </div>
           <dl>
@@ -490,6 +498,13 @@ export default function Dashboard({ onNavigate } = {}) {
 
         <div className="card dashboard-periodo-controles" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Período da consulta</h3></div>
+          <div className="form-group"><label>Visão do demonstrativo</label>
+            <select className="form-control" aria-label="Visão do demonstrativo" value={pessoaSelecionada} onChange={e => setPessoaSelecionada(e.target.value)}>
+              <option value="todos">Visão geral</option><option value="titular">Titular</option>
+              {pessoas.map(([id, d]) => <option key={id} value={id}>Dependente: {d.nome}</option>)}
+            </select>
+          </div>
+          {pessoaSelecionada !== 'todos' && <p role="status">Recorte de {nomeRecorte}. Dados sem titularidade identificada e totais fiscais agregados permanecem somente na visão geral.</p>}
           <div className="form-row" style={{ alignItems: 'end', marginBottom: 0 }}>
             <div className="form-group">
               <label>De</label>

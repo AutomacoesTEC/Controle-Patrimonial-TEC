@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate } from '../utils/formatters';
@@ -11,7 +13,7 @@ import EstadoVazio from '../components/EstadoVazio';
 // Data começa vazia: o ano-calendário do lançamento sai dela, e pré-preencher
 // "hoje" forçaria trocar de ano ao salvar quando o exercício de trabalho é
 // outro. Enquanto vazia, o lançamento entra no ano-calendário ativo.
-const FORM_VAZIO = { descricao: '', categoria: '', valor: '', data: '' };
+const FORM_VAZIO = { beneficiario: 'Titular', descricao: '', categoria: '', valor: '', data: '' };
 
 export default function PagamentosDiversosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -34,7 +36,7 @@ export default function PagamentosDiversosPage() {
   };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
-    setForm({ descricao: p.descricao || '', categoria: p.categoria || '', valor: p.valor, data: p.data || '' });
+    setForm({ ...p, descricao: p.descricao || '', categoria: p.categoria || '', valor: p.valor, data: p.data || '' });
     setModalOpen(true);
   };
 
@@ -98,7 +100,7 @@ export default function PagamentosDiversosPage() {
                 <EstadoVazio colSpan={5} titulo="Nenhuma despesa cadastrada" contexto="Registre a primeira despesa geral para incluí-la na conciliação de caixa." acao="Cadastrar primeira despesa" onAcao={handleNovoClick} />
               ) : pagamentosDiversos.map(p => (
                 <tr key={p.id}>
-                  <td>{p.descricao}</td>
+                  <td>{p.descricao}<div className="titularidade-registro">{rotuloTitularidade(p, state.dependentes)}</div></td>
                   <td>{p.categoria}</td>
                   <td>{p.data ? new Date(p.data + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
                   <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(p.valor)}</td>
@@ -127,6 +129,7 @@ export default function PagamentosDiversosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Despesa' : 'Nova Despesa'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
                 <div className="form-group"><label>Descrição</label><input className="form-control" value={form.descricao} onChange={e => upd('descricao', e.target.value)} placeholder="Ex: Cartão de crédito Nubank" /></div>
                 <div className="form-row">
                   <div className="form-group"><label>Categoria</label><input className="form-control" value={form.categoria} onChange={e => upd('categoria', e.target.value)} placeholder="Ex: Cartão, Seguro, IPVA, Condomínio..." /></div>

@@ -1,3 +1,4 @@
+import { rotuloTitularidade } from '../store/titularidade';
 import { useState, useMemo, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno } from '../store/demonstrativos';
@@ -178,6 +179,7 @@ export default function BensPage({ onVoltar } = {}) {
                         {bem.discriminacao || ''}
                       </div>
                       <BadgeOrigem item={bem} />
+                      <div className="titularidade-registro">{rotuloTitularidade(bem, state.dependentes)}</div>
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
                       {/* De quem o bem é e onde ele está: bem do dependente não é

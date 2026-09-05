@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj, mascaraCpfCnpj, formatDate, CODIGOS_PAGAMENTO, describePagamentoCodigo, descreverTitularidade, TITULARIDADE_PAGAMENTO, descreverOrigemDocumento, truncarComReticencias} from '../utils/formatters';
@@ -16,7 +18,7 @@ import { correspondeFiltroOrigem, rotuloOrigemRegistro } from '../utils/origemRe
 // dedução diferentes, e o campo em branco é honesto ("não informado").
 // Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
 // forçaria trocar de ano ao salvar num exercício de trabalho diferente.
-const FORM_VAZIO = { codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: '', titularidadeNome: '', data: '' };
+const FORM_VAZIO = { beneficiario: 'Titular', codigo: '21', nome_beneficiario: '', cpf_cnpj: '', valor_pago: '', parcela_nao_dedutivel: '', descricao: '', titularidade: 'titular', titularidadeNome: '', data: '' };
 
 export default function PagamentosPage() {
   const { state, dispatch, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
@@ -37,7 +39,7 @@ export default function PagamentosPage() {
   };
   const abrirEdicao = (p) => {
     setEditingId(p.id);
-    setForm({ codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', titularidade: p.titularidade || '', titularidadeNome: p.titularidadeNome || '', data: p.data || '' });
+    setForm({ ...p, codigo: p.codigo, nome_beneficiario: p.nome_beneficiario || '', cpf_cnpj: p.cpf_cnpj || '', valor_pago: p.valor_pago, parcela_nao_dedutivel: p.parcela_nao_dedutivel || '', descricao: p.descricao || '', titularidade: p.titularidade || '', titularidadeNome: p.titularidadeNome || '', data: p.data || '' });
     setModalOpen(true);
   };
 
@@ -156,6 +158,7 @@ export default function PagamentosPage() {
             <div className="modal-header"><h3>{editingId ? 'Editar Pagamento' : 'Novo Pagamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} permitirAlimentando />
                 <div className="form-row">
                   <div className="form-group">
                     <label>Código</label>
@@ -164,27 +167,6 @@ export default function PagamentosPage() {
                   <div className="form-group"><label>CPF/CNPJ Beneficiário</label><input className="form-control" inputMode="numeric" placeholder="000.000.000-00 ou 00.000.000/0000-00" value={mascaraCpfCnpj(form.cpf_cnpj)} onChange={e => upd('cpf_cnpj', mascaraCpfCnpj(e.target.value))} /></div>
                 </div>
                 <div className="form-group"><label>Nome do Beneficiário</label><input className="form-control" value={form.nome_beneficiario} onChange={e => upd('nome_beneficiario', e.target.value)} /></div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Titularidade</label>
-                    <select className="form-control" value={form.titularidade} onChange={e => upd('titularidade', e.target.value)}>
-                      <option value="">Não informada</option>
-                      {Object.entries(TITULARIDADE_PAGAMENTO).map(([valor, rotulo]) => (
-                        <option key={valor} value={valor}>{rotulo}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Nome do dependente ou alimentando</label>
-                    <input
-                      className="form-control"
-                      value={form.titularidadeNome}
-                      onChange={e => upd('titularidadeNome', e.target.value)}
-                      disabled={form.titularidade !== 'dependente' && form.titularidade !== 'alimentando'}
-                      placeholder={form.titularidade === 'dependente' || form.titularidade === 'alimentando' ? '' : 'Só para dependente ou alimentando'}
-                    />
-                  </div>
-                </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Data</label>

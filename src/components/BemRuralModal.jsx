@@ -1,3 +1,5 @@
+import SeletorTitularidade from './SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency } from '../utils/formatters';
@@ -11,6 +13,7 @@ import { primeiroCampoVazio, mensagemObrigatorio } from '../utils/validacao';
 // real só pede um código numérico + discriminação pra esses bens), e a
 // movimentação usa a coleção `bensRurais` em vez de `bens`.
 const FORM_VAZIO = {
+  beneficiario: 'Titular',
   codigo: '',
   data: '',
   discriminacao: '',
@@ -71,6 +74,7 @@ export default function BemRuralModal({ open, bem, onSave, onClose }) {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data || form.data_aquisicao || form.dataAquisicao)} />
             <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!isEditing} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             {isEditing ? (
               // Bloco 1 "Dados do Bem" (mesmo critério do BemModal, versão

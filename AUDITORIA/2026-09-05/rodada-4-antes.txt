@@ -1,0 +1,25 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/titularidade.test.js (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/titularidade.test.js [ src/store/titularidade.test.js ]
+Error: Cannot find module './titularidade' imported from /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/src/store/titularidade.test.js
+ ❯ src/store/titularidade.test.js:3:1
+      1| import { describe, it, expect } from 'vitest';
+      2| import { initialState } from './reducer';
+      3| import { filtrarPorPessoa, rotuloTitularidade } from './titularidade';
+       | ^
+      4|
+      5| const dependentes = [{ id: 1, nome: 'Ana', cpf: '33344455508' }, { id:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  15:32:35
+   Duration  422ms (transform 212ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

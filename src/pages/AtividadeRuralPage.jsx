@@ -1,3 +1,5 @@
+import SeletorTitularidade from '../components/SeletorTitularidade';
+import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
@@ -13,11 +15,11 @@ import { primeiroCampoVazio, primeiroValorZerado, mensagemObrigatorio } from '..
 import EstadoVazio from '../components/EstadoVazio';
 
 const NOMES_MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-const FORM_IMOVEL_VAZIO = { nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '', dataAquisicao: '' };
+const FORM_IMOVEL_VAZIO = { beneficiario: 'Titular', nomeLocalizacao: '', area: '', participacao: '100', condicaoExploracao: '', codigoAtividade: '', cib: '', dataAquisicao: '' };
 // Data vazia por padrão: o ano-calendário sai dela; pré-preencher "hoje"
 // forçaria trocar de ano ao salvar num exercício de trabalho diferente.
-const FORM_LANCAMENTO_VAZIO = { tipo: 'receita', data: '', valor: '', descricao: '' };
-const FORM_DIVIDA_RURAL_VAZIO = { data: '', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
+const FORM_LANCAMENTO_VAZIO = { beneficiario: 'Titular', tipo: 'receita', data: '', valor: '', descricao: '' };
+const FORM_DIVIDA_RURAL_VAZIO = { beneficiario: 'Titular', data: '', discriminacao: '', situacao_anterior: '', situacao_atual: '', valor_pago: '' };
 
 // Mesmo critério de BensPage.jsx (ver comentário lá): um bem da Atividade Rural que já entrou no
 // ano com as duas situações zeradas e nenhuma movimentação registrada NESTE ano não tem mais nada
@@ -103,6 +105,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
 }
 
 function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario, garantirAnoCadastro, despacharEmAno }) {
+  const { state: estadoFormulario } = useData();
   const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -116,7 +119,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
   };
   const abrirEdicao = (i) => {
     setEditingId(i.id);
-    setForm({ nomeLocalizacao: i.nomeLocalizacao || '', area: i.area || '', participacao: i.participacao ?? '100', condicaoExploracao: i.condicaoExploracao || '', codigoAtividade: i.codigoAtividade || '', cib: i.cib || '', dataAquisicao: i.dataAquisicao || '' });
+    setForm({ ...i, nomeLocalizacao: i.nomeLocalizacao || '', area: i.area || '', participacao: i.participacao ?? '100', condicaoExploracao: i.condicaoExploracao || '', codigoAtividade: i.codigoAtividade || '', cib: i.cib || '', dataAquisicao: i.dataAquisicao || '' });
     setModalOpen(true);
   };
   const handleSave = async (e) => {
@@ -203,6 +206,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
             <div className="modal-header"><h3>{editingId ? 'Editar Imóvel' : 'Novo Imóvel'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(estadoFormulario, form.data || form.data_aquisicao || form.dataAquisicao)} />
                 
                 <div className="form-group"><label>Nome e Localização</label><input className="form-control" value={form.nomeLocalizacao} onChange={e => upd('nomeLocalizacao', e.target.value)} placeholder="Ex: Fazenda Santa Rita, Uberaba" /></div>
                 <div className="form-row">
@@ -240,6 +244,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
 // tabela com offsetHeight:2px). Aba separada evita o conflito de layout
 // sem mexer no CSS compartilhado.
 function ParticipantesRuraisSection({ participantesRuraisOficial }) {
+  const { state: estadoFormulario } = useData();
   // Os DOIS caminhos entregam o vínculo com o imóvel desde 24/08/2026: o PDF
   // pelo aninhamento impresso sob cada fazenda, o .DBK pela chave NR_CHAVE_AR
   // dos registros 50 e 57. A coluna só some se a importação não trouxer o
@@ -291,6 +296,7 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
 }
 
 function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, despacharEmAno }) {
+  const { state: estadoFormulario } = useData();
   const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
@@ -394,6 +400,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
 // cadastro manual quanto na importação, não têm essa classificação por
 // código como as dívidas comuns).
 function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario }) {
+  const { state: estadoFormulario } = useData();
   const { confirmar, garantirAnoCadastro, despacharEmAno } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -405,7 +412,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
   const abrirNovo = () => { setEditingId(null); setForm(FORM_DIVIDA_RURAL_VAZIO); setModalOpen(true); };
   const abrirEdicao = (d) => {
     setEditingId(d.id);
-    setForm({ data: d.data || '', discriminacao: d.discriminacao || '', situacao_anterior: '', situacao_atual: '', valor_pago: d.valor_pago || '' });
+    setForm({ ...d, data: d.data || '', discriminacao: d.discriminacao || '', situacao_anterior: '', situacao_atual: '', valor_pago: d.valor_pago || '' });
     setModalOpen(true);
   };
 
@@ -414,7 +421,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
     const falta = primeiroCampoVazio([['Discriminação', form.discriminacao]]);
     if (falta) { addToast(mensagemObrigatorio(falta), 'error'); return; }
     if (editingId) {
-      dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, data: form.data, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
+      dispatch({ type: 'UPDATE_DIVIDA_RURAL', payload: { id: editingId, titularidade: form.titularidade, beneficiario: form.beneficiario, cpf_titularidade: form.cpf_titularidade, cpf_beneficiario: form.cpf_beneficiario, nome_dependente: form.nome_dependente, dependenteId: form.dependenteId, data: form.data, discriminacao: form.discriminacao, valor_pago: parseFloat(form.valor_pago) || 0 } });
       addToast('Dívida atualizada com sucesso!', 'success');
     } else {
       const anoAlvo = await garantirAnoCadastro(Number(form.data?.slice(0, 4)));
@@ -422,6 +429,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
       despacharEmAno(anoAlvo, {
         type: 'ADD_DIVIDA_RURAL',
         payload: {
+          ...form,
           data: form.data,
           discriminacao: form.discriminacao,
           situacao_anterior: parseFloat(form.situacao_anterior) || 0,
@@ -515,6 +523,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
         <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(estadoFormulario, form.data || form.data_aquisicao || form.dataAquisicao)} />
             <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" required={!editingId} value={form.data || ''} onChange={e => upd('data', e.target.value)} /></div>
             <div className="form-group"><label>Discriminação</label><textarea className="form-control" value={form.discriminacao} onChange={e => upd('discriminacao', e.target.value)} /></div>
             {editingId && liveDivida ? (
@@ -562,6 +571,7 @@ function LancamentosRuraisSection({
   origemRural = { temOficial: false, mesesSubstituidos: [], mesesOficiaisMantidos: [] },
   resultadoConsolidado = 0,
 }) {
+  const { state: estadoFormulario } = useData();
   const { confirmar } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -578,7 +588,7 @@ function LancamentosRuraisSection({
   };
   const abrirEdicao = (l) => {
     setEditingId(l.id);
-    setForm({ tipo: l.tipo, data: l.data || '', valor: l.valor, descricao: l.descricao || '' });
+    setForm({ ...l, tipo: l.tipo, data: l.data || '', valor: l.valor, descricao: l.descricao || '' });
     setModalOpen(true);
   };
   const handleSave = async (e) => {
@@ -732,6 +742,7 @@ function LancamentosRuraisSection({
             <div className="modal-header"><h3>{editingId ? 'Editar Lançamento' : 'Novo Lançamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
               <div className="modal-body">
+                <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(estadoFormulario, form.data || form.data_aquisicao || form.dataAquisicao)} />
                 <div className="form-row">
                   <div className="form-group"><label>Tipo</label>
                     <select className="form-control" value={form.tipo} onChange={e => upd('tipo', e.target.value)}>
@@ -755,6 +766,7 @@ function LancamentosRuraisSection({
 }
 
 function ResultadoSection({ receitaTotal, despesaTotal, resultadoDoAno, prejuizoRuralAcompensar, dispatch, addToast, apuracaoResultadoRuralOficial }) {
+  const { state: estadoFormulario } = useData();
   const [valorCompensar, setValorCompensar] = useState('');
 
   const compensar = () => {
@@ -897,6 +909,7 @@ const formatCabecas = (v) => (v || 0).toLocaleString('pt-BR', { minimumFractionD
 // o que a PRÓPRIA declaração apurou, sem cadastro manual equivalente no
 // app hoje.
 function RebanhoSection({ movimentacaoRebanhoOficial }) {
+  const { state: estadoFormulario } = useData();
   return (
     <div className="card" style={{ marginBottom: '20px' }}>
       <div className="card-header">
