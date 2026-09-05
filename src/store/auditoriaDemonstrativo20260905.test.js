@@ -55,7 +55,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
     const s = estado({ fiiFiagroMensalManual: [{ mes: 6, titular: true, resultadoLiquidoMes: -4000 }] });
     expect(ano(s).saldoDeCaixa).toBe(-4000);
   });
-  it.fails('D06: doação datada em dezembro não pode sair do caixa de janeiro', () => {
+  it('D06: doação datada em dezembro não pode sair do caixa de janeiro', () => {
     const s = estado({ doacoesEfetuadasOficial: [{ data: '2026-12-10', valor: 1000, origem: 'manual' }] });
     expect(demonstrativoPeriodo(s, '2026-01-01', '2026-01-31').totalDoacoes).toBe(0);
   });

@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (17 tests | 1 failed | 16 skipped) 11ms
+     × D06: doação datada em dezembro não pode sair do caixa de janeiro 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D06: doação datada em dezembro não pode sair do caixa de janeiro
+AssertionError: expected 1000 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:60:78
+     58|   it('D06: doação datada em dezembro não pode sair do caixa de janeiro…
+     59|     const s = estado({ doacoesEfetuadasOficial: [{ data: '2026-12-10',…
+     60|     expect(demonstrativoPeriodo(s, '2026-01-01', '2026-01-31').totalDo…
+       |                                                                              ^
+     61|   });
+     62|   it.fails('D07: uma despesa rural adicional não substitui receita imp…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:31:39
+   Duration  657ms (transform 427ms, setup 0ms, import 491ms, tests 11ms, environment 0ms)
+

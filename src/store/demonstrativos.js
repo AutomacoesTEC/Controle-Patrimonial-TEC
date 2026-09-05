@@ -922,7 +922,7 @@ export function demonstrativoConciliacao(state, dataDe, dataAte) {
   const rendimentos = totalRendimentos(state.rendimentos, resultadoRural, dataDe, dataAte);
   const ganhos = ganhosApuradosPeriodo(state, dataDe, dataAte);
   const rv = rendaVariavelDoPeriodo(linhasFinanceirasDoAno(state), state.anoCalendario, dataDe, dataAte, state.rendimentos);
-  const totalDoacoes = totalDoacoesPeriodo(state);
+  const totalDoacoes = totalDoacoesPeriodo(state, dataDe, dataAte);
   const pagamentosEfetuados = totalPagamentos(state.pagamentos, dataDe, dataAte);
   const pagamentosDiversos = totalPagamentosDiversos(state.pagamentosDiversos, dataDe, dataAte);
   return fecharDemonstrativo({
@@ -980,9 +980,14 @@ export function fecharDemonstrativo({
   };
 }
 
-const somaDoacoes = (lista) => (lista || []).reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
-export const totalDoacoesPeriodo = (dados) => somaDoacoes(dados.doacoesEfetuadasOficial)
-  + somaDoacoes(dados.doacoesPartidosOficial) + somaDoacoes(dados.doacoesEcaIdosoOficial);
+export function totalDoacoesPeriodo(dados, dataDe, dataAte) {
+  const ano = dados.anoCalendario || Number((dataDe || dataAte || '').slice(0, 4));
+  const anual = (!dataDe || dataDe <= `${ano}-01-01`) && (!dataAte || dataAte >= `${ano}-12-31`);
+  return ['doacoesEfetuadasOficial', 'doacoesPartidosOficial', 'doacoesEcaIdosoOficial']
+    .flatMap(c => dados[c] || [])
+    .filter(d => d.data ? noPeriodo(d.data, dataDe, dataAte) : anual)
+    .reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
+}
 
 // Renda Variável do período, e a PARTE DELA QUE ENTRA NO CAIXA.
 //

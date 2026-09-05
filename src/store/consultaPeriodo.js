@@ -185,7 +185,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     // pessoa física, então reduz o Saldo de Caixa igual Pagamentos —
     // ficaria de fora da reconciliação (e o Saldo de Caixa pareceria
     // "sobrando" dinheiro que na verdade virou doação).
-    totalDoacoes += totalDoacoesPeriodo(dados);
+    totalDoacoes += totalDoacoesPeriodo({ ...dados, anoCalendario: ano }, trechoDe, trechoAte);
     // Importada = sem a marca 'manual' (o import grava a lista direto, sem
     // carimbar origem, então "não é manual" é o teste que também vale para
     // dado gravado antes desta distinção existir).

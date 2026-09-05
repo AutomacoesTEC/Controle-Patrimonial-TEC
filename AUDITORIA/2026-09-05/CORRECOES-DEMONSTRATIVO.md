@@ -33,3 +33,9 @@ MANTER: D04 passou de zero a 10.000. Controles adicionais confirmam não duplica
 Base 636da29. Previsão: perda mensal FII de 4.000 produz ajuste -4.000, preservando a precedência manual/oficial da ficha mensal. Camada: inclusão da segunda modalidade no mesmo integrador financeiro RV, sem misturar a compensação fiscal de prejuízos entre modalidades. Fixture D05 idêntica antes/depois. Ganhos de alienação não se confundem com distribuições isentas dos fundos.
 
 MANTER: D05-antes.txt registra zero; D05-depois.txt confirma -4.000.
+
+## D06 — data das doações ignorada
+
+Base d33f32f. Previsão: doação de dezembro não reduz janeiro; com data entra somente no período efetivo. Doação anual sem dia só integra consulta que abrange o ano inteiro, não todos os meses. Camada: filtro temporal de doações. Fixture D06 antes/depois. D11 ainda exige levar desembolso de outro ano-base ao ano financeiro correto.
+
+MANTER: D06-antes.txt registra saída 1.000 em janeiro; D06-depois.txt confirma zero.
