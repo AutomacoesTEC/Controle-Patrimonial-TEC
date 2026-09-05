@@ -31,7 +31,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
   it('D01: carnê-leão pago de 2 mil reduz recebimentos de 10 mil para 8 mil', () => {
     expect(totalRendimentos([renda('tributavel_pf_exterior', 10000, { irrf: 2000 })], 0).totalGeral).toBe(8000);
   });
-  it.fails('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil', () => {
+  it('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil', () => {
     expect(totalRendimentos([renda('tributavel_rra', 20000, { irrf: 3000 })], 0).totalGeral).toBe(17000);
   });
   it.fails('D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil', () => {

@@ -716,7 +716,7 @@ export default function Dashboard({ onNavigate } = {}) {
               {demo.rendimentos.tributavelRra !== 0 && (
                 <tr>
                   <td>
-                    Recebidos Acumuladamente (RRA)
+                    Recebidos Acumuladamente (RRA), após IRRF
                     <Ajuda texto="Rendimentos de anos anteriores pagos de uma vez, por decisão judicial ou administrativa. O valor é o tributável informado na ficha, já líquido da contribuição previdenciária, da pensão alimentícia e da parcela isenta de quem tem 65 anos ou mais. Entra aqui porque o dinheiro foi recebido no período; a opção de tributação escolhida (na fonte ou no ajuste) muda o cálculo do imposto, não o fato de a renda ter entrado." />
                   </td>
                   <td className="currency">{formatCurrency(demo.rendimentos.tributavelRra)}</td>

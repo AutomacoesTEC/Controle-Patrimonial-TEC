@@ -361,7 +361,7 @@ export function totalRendimentos(rendimentos, resultadoAtividadeRural, dataDe, d
   // TRIBUTÁVEL informado na ficha, já líquido de previdência, pensão e da
   // parcela isenta de quem tem 65 anos ou mais.
   const tributavelRra = doPeriodo.filter(r => r.tipo === 'tributavel_rra')
-    .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+    .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
   const isento = somaPorPrefixo('isento');
   const exclusivo = somaPorPrefixo('exclusivo');
   const exclusivoLiquido = exclusivo.valor - exclusivo.irrf;

@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (16 tests | 1 failed | 15 skipped) 9ms
+     × D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil
+AssertionError: expected 20000 to be 17000 // Object.is equality
+
+- Expected
++ Received
+
+- 17000
++ 20000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:35:94
+     33|   });
+     34|   it('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17…
+     35|     expect(totalRendimentos([renda('tributavel_rra', 20000, { irrf: 30…
+       |                                                                                              ^
+     36|   });
+     37|   it.fails('D03: 13º importado já líquido de 8 mil não sofre nova rete…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  17:25:48
+   Duration  639ms (transform 415ms, setup 0ms, import 474ms, tests 9ms, environment 0ms)
+
