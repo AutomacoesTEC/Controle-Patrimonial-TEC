@@ -1,4 +1,5 @@
 import { anoDaDataCadastro } from '../utils/dataCadastro';
+import { prepararBemParaSalvar } from '../utils/cadastroBem';
 import SeletorTitularidade from './SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
 import { useState, useEffect } from 'react';
@@ -89,15 +90,8 @@ export default function BemModal({ open, bem, onSave, onClose }) {
       anoAlvo = await garantirAnoCadastro(anoDaDataCadastro(form.data_aquisicao));
       if (!anoAlvo) return;
     }
-    onSave({
-      ...form,
-      // Em edição, o valor só muda por movimentação registrada (abaixo);
-      // salvar o formulário principal não pode reverter isso, então usa o
-      // valor vivo do estado, não o que o formulário carregava na abertura.
-      situacao_anterior: isEditing ? liveBem.situacao_anterior : (parseFloat(form.situacao_anterior) || 0),
-      situacao_atual: isEditing ? liveBem.situacao_atual : (parseFloat(form.situacao_atual) || 0),
-      movimentacoes: isEditing ? liveBem.movimentacoes : undefined,
-    }, anoAlvo);
+    // Edição usa saldos vivos; aquisição nova não existia no ano anterior.
+    onSave(prepararBemParaSalvar(form, liveBem), anoAlvo);
   };
 
   const isImovel = form.grupo === '01';
@@ -251,7 +245,8 @@ export default function BemModal({ open, bem, onSave, onClose }) {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Situação em 31/12 (Ano Anterior)</label>
-                    <MoneyInput value={form.situacao_anterior} onChange={v => upd('situacao_anterior', v)} />
+                    <input className="form-control" value="R$ 0,00" readOnly />
+                    <small>Zero no ano anterior à aquisição. Saldos de declarações importadas são preservados.</small>
                   </div>
                   <div className="form-group">
                     <label>Situação em 31/12 (Ano Atual)</label>
