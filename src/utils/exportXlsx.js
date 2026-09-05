@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import { formatCpfCnpj, formatDate, describeRendimentoTipo, MOVIMENTACAO_TIPOS } from './formatters';
 import { rotuloOrigemRegistro } from './origemRegistro';
+import { abasRelatorioCompleto } from './relatorioCompleto';
 
 const resumoMovimentacoes = (bem) => (bem.movimentacoes || []).map(m =>
   `${MOVIMENTACAO_TIPOS[m.tipo]?.label || m.tipo} em ${formatDate(m.data)}`
@@ -146,6 +147,12 @@ export function exportListaToXlsx(linhas, colunas, nomeAba, prefixoArquivo, anoC
     const wsHistorico = XLSX.utils.json_to_sheet(linhasDoHistorico(opcoes.historico), { header: cabecalhos });
     wsHistorico['!cols'] = [{ wch: 26 }, { wch: 16 }, { wch: 48 }, { wch: 24 }, { wch: 32 }, { wch: 32 }];
     XLSX.utils.book_append_sheet(wb, wsHistorico, 'Histórico de Alterações');
+  }
+  if (opcoes.dadosRelatorio) {
+    for (const { nome, linhas } of abasRelatorioCompleto(opcoes.dadosRelatorio)) {
+      const ficha = XLSX.utils.json_to_sheet(linhas);
+      XLSX.utils.book_append_sheet(wb, ficha, nome);
+    }
   }
   const today = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `${prefixoArquivo}_${anoCalendario || ''}_${today}.xlsx`);
