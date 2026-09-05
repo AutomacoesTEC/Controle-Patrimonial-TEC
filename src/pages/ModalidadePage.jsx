@@ -1,3 +1,4 @@
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatCpfCnpj } from '../utils/formatters';
@@ -21,7 +22,7 @@ function BlocoTexto({ bloco }) {
       <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
         {bloco.titulo}
       </div>
-      <table style={{ width: '100%', fontSize: '13px' }}>
+      <TabelaRedimensionavel><table style={{ width: '100%', fontSize: '13px' }}>
         <tbody>
           {bloco.linhas.map((l, i) => (
             <tr key={i}>
@@ -30,7 +31,7 @@ function BlocoTexto({ bloco }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></TabelaRedimensionavel>
     </div>
   );
 }
@@ -124,7 +125,7 @@ export default function ModalidadePage() {
             {modalidade === MODALIDADES.ESPOLIO && herdeiros.length > 0 && (
               <div className="card" style={{ marginBottom: '20px' }}>
                 <div className="card-header"><h3 className="card-title">Herdeiros e meeiro</h3></div>
-                <div className="table-container">
+                <TabelaRedimensionavel>
                   <table>
                     <thead><tr><th>CPF ou CNPJ</th><th>Nome</th></tr></thead>
                     <tbody>
@@ -136,7 +137,7 @@ export default function ModalidadePage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </TabelaRedimensionavel>
               </div>
             )}
 
@@ -158,7 +159,7 @@ export default function ModalidadePage() {
                     />
                   </div>
                 )}
-                <div className="table-container">
+                <TabelaRedimensionavel>
                   <table>
                     <thead>
                       <tr>
@@ -185,7 +186,7 @@ export default function ModalidadePage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </TabelaRedimensionavel>
               </div>
             )}
           </>

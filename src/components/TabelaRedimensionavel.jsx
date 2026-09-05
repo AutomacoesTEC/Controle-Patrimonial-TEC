@@ -16,7 +16,6 @@ import { useId, useLayoutEffect, useRef, useState } from 'react';
 // sticky na rolagem sem nenhum cálculo de scroll.
 
 const MIN_COL = 56;
-const DENSIDADE_STORAGE_KEY = 'cp-tec-tabelas-compactas';
 
 export default function TabelaRedimensionavel({
   children,
@@ -26,6 +25,7 @@ export default function TabelaRedimensionavel({
   stickyRightColumns = 0,
   initialColumnWidths = {},
   persistKey,
+  constLayoutKey,
 }) {
   const wrapRef = useRef(null);
   const rawId = useId();
@@ -35,22 +35,22 @@ export default function TabelaRedimensionavel({
   // a tabela renderiza no layout automático de sempre até a primeira medição.
   const [larguras, setLarguras] = useState(null);
   const [alturaCab, setAlturaCab] = useState(0);
-  const [compacta, setCompacta] = useState(() => {
-    if (!persistKey) return false;
-    try {
-      return JSON.parse(localStorage.getItem(DENSIDADE_STORAGE_KEY) || '{}')[persistKey] === true;
-    } catch { return false; }
-  });
+  const [temAcoes, setTemAcoes] = useState(false);
   const iniciaisRef = useRef(null);
   const dragRef = useRef(null);
+
+  useLayoutEffect(() => () => document.body.classList.remove('rdz-arrastando'), []);
 
   useLayoutEffect(() => {
     const cont = wrapRef.current;
     const table = cont?.querySelector(':scope > table');
-    const headRow = table?.tHead?.rows?.[0];
+    const headRow = table?.tHead?.rows?.[0] || table?.tBodies?.[0]?.rows?.[0];
     if (!cont || !table || !headRow || headRow.cells.length < 2) return;
 
+    const acao = headRow.cells[headRow.cells.length - 1].textContent.trim().toLowerCase() === 'ações';
+    setTemAcoes(acao);
     let medidas = Array.from(headRow.cells).map(th => th.getBoundingClientRect().width);
+    if (acao) medidas[medidas.length - 1] = Math.max(176, medidas.at(-1));
     // Se a tabela não chega a encher o container, distribui a sobra nas
     // colunas antes de congelar, pra não ficar um vão à direita.
     const soma = medidas.reduce((a, b) => a + b, 0);
@@ -69,7 +69,7 @@ export default function TabelaRedimensionavel({
     iniciaisRef.current = medidas;
     setLarguras(medidas);
     setAlturaCab(Math.round(headRow.getBoundingClientRect().height));
-  }, []);
+  }, [persistKey, constLayoutKey]);
 
   const iniciarArraste = (i) => (e) => {
     dragRef.current = { i, x0: e.clientX, w0: larguras[i] };
@@ -94,17 +94,8 @@ export default function TabelaRedimensionavel({
     e.preventDefault();
     setLarguras(prev => { const n = prev.slice(); n[i] = iniciaisRef.current[i]; return n; });
   };
-  const alternarDensidade = () => {
-    setCompacta(anterior => {
-      const proximo = !anterior;
-      try {
-        const salvo = JSON.parse(localStorage.getItem(DENSIDADE_STORAGE_KEY) || '{}');
-        localStorage.setItem(DENSIDADE_STORAGE_KEY, JSON.stringify({ ...salvo, [persistKey]: proximo }));
-      } catch { /* armazenamento indisponível: mantém a preferência nesta montagem */ }
-      return proximo;
-    });
-  };
 
+  const fixasDireita = stickyRightColumns || (temAcoes ? 1 : 0);
   let css = null;
   let divisorias = [];
   let divisoriasFixas = [];
@@ -114,11 +105,11 @@ export default function TabelaRedimensionavel({
     larguras.forEach((w, i) => {
       regras.push(
         `.${cls}>table>thead>tr>th:nth-child(${i + 1}),` +
-        `.${cls}>table>tbody>tr>td:nth-child(${i + 1})` +
+        `.${cls}>table>tbody>tr:first-child>td:nth-child(${i + 1}):not([colspan])` +
         `{width:${w}px;min-width:${w}px;max-width:${w}px}`
       );
     });
-    const inicioFixasDireita = Math.max(0, larguras.length - stickyRightColumns);
+    const inicioFixasDireita = Math.max(0, larguras.length - fixasDireita);
     let deslocamentoDireita = 0;
     for (let i = larguras.length - 1; i >= inicioFixasDireita; i -= 1) {
       regras.push(
@@ -144,7 +135,7 @@ export default function TabelaRedimensionavel({
     css = regras.join('\n');
     let acc = 0;
     divisorias = larguras.slice(0, -1).map((w, i) => { acc += w; return { i, left: acc }; });
-    if (stickyRightColumns > 0) {
+    if (fixasDireita > 0) {
       divisoriasFixas = divisorias
         .filter(({ i }) => i >= inicioFixasDireita - 1)
         .map(({ i }) => ({
@@ -157,12 +148,7 @@ export default function TabelaRedimensionavel({
 
   return (
     <>
-      {persistKey && (
-        <div className="tabela-densidade">
-          <button type="button" className="btn btn-sm btn-secondary" aria-pressed={compacta} onClick={alternarDensidade}>Compacto</button>
-        </div>
-      )}
-    <div ref={wrapRef} className={`table-container ${cls} ${compacta ? 'tabela-compacta' : ''} ${stickyFirstColumn || stickyRightColumns ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
+    <div ref={wrapRef} className={`table-container ${cls} ${stickyFirstColumn || fixasDireita ? 'rdz-colunas-fixas' : ''} ${className}`.trim()} style={style}>
       {css && <style>{css}</style>}
       {larguras && alturaCab > 0 && (
         <>

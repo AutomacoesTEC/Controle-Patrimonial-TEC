@@ -323,7 +323,6 @@ body{font-family:var(--font-family);background:var(--bg-primary);color:var(--tex
    pai flex pra valer, então fica inerte — o comportamento ali não muda. */
 .table-container{overflow:auto;flex:1;min-height:0;border-radius:var(--radius-md);border:1px solid var(--border-color);position:relative}
 .tabela-densidade{display:flex;justify-content:flex-end;margin:0 0 8px}
-.table-container.tabela-compacta tbody td{padding:8px 12px}
 /* Cadastros curtos não precisam esticar o contêiner até o rodapé. O
    flex-shrink continua ativo: se a tabela crescer além do espaço restante,
    o próprio contêiner encolhe e preserva sua rolagem interna. */
@@ -480,7 +479,7 @@ textarea.form-control{resize:vertical;min-height:80px}
    accent e um traço de 2px embaixo, padrão universal de aba (inclusive o do
    programa do IRPF). margin-bottom:-1px encaixa o traço sobre a régua do
    container. */
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border-color);margin-bottom:20px;overflow-x:auto;flex-shrink:0}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border-color);margin-bottom:20px;overflow-x:auto;overflow-y:hidden;flex-shrink:0}
 .tabs-bens{min-width:0;max-width:100%}
 @media(max-width:1600px){.tabs-bens{flex:1 1 100%}}
 .tab{padding:9px 14px 11px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:color var(--transition-fast),border-color var(--transition-fast);border:none;border-bottom:2px solid transparent;background:transparent;font-family:var(--font-family);white-space:nowrap;margin-bottom:-1px}

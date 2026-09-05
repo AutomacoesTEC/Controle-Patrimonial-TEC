@@ -1,3 +1,4 @@
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useRef, useMemo } from 'react';
 import { useData } from '../store/DataContext';
 import { bemZeradoSemMovimentacaoNoAno, origemResultadoRural, resultadoAtividadeRuralPeriodo } from '../store/demonstrativos';
@@ -167,7 +168,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
         <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
         <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Imóvel</button>
       </div>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table className="tabela-acoes-fixas">
           <thead><tr><th>Nome e Localização</th><th>Área (ha)</th><th>Participação (%)</th><th>Condição</th><th>Código Atividade</th><th>CIB</th><th>Data Aquisição</th><th>Ações</th></tr></thead>
           <tbody>
@@ -197,7 +198,7 @@ function ImoveisRuraisSection({ imoveisRurais, dispatch, addToast, anoCalendario
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Imóvel' : 'Novo Imóvel'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
@@ -256,7 +257,7 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
           ? `A declaração lista ${participantesRuraisOficial.length} participante(s) de imóveis explorados em condomínio ou parceria, com o imóvel de cada um.`
           : `A declaração lista ${participantesRuraisOficial.length} participante(s) de imóveis explorados em condomínio ou parceria, mas o arquivo importado não indica a qual imóvel cada um se refere. Confira o vínculo na declaração original.`}
       </p>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table>
           <thead><tr><th>Nome</th><th>CPF</th>{temVinculo && <th>Imóvel</th>}</tr></thead>
           <tbody>
@@ -284,7 +285,7 @@ function ParticipantesRuraisSection({ participantesRuraisOficial }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
     </div>
   );
 }
@@ -355,7 +356,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
           <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Bem</button>
         </div>
       </div>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table className="tabela-acoes-fixas">
           <thead><tr><th>Código</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th>Ações</th></tr></thead>
           <tbody>
@@ -382,7 +383,7 @@ function BensRuraisSection({ bensRurais, dispatch, addToast, anoCalendario, desp
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
       <BemRuralModal open={modalOpen} bem={editingBem} onSave={handleSave} onClose={() => { setModalOpen(false); setEditingBem(null); }} />
     </>
   );
@@ -471,7 +472,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
           <button className="btn btn-primary" onClick={abrirNovo}>＋ Nova Dívida</button>
         </div>
       </div>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table className="tabela-acoes-fixas">
           <thead><tr><th style={{ minWidth: '300px' }}>Discriminação</th><th style={{ textAlign: 'right' }}>Situação Anterior</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th style={{ textAlign: 'right' }}>Valor Pago</th><th>Ações</th></tr></thead>
           <tbody>
@@ -509,7 +510,7 @@ function DividasRuraisSection({ dividasRurais, dispatch, addToast, anoCalendario
             </tfoot>
           )}
         </table>
-      </div>
+      </TabelaRedimensionavel>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <div className="modal-header"><h3>{editingId ? 'Editar Dívida' : 'Nova Dívida'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
         <form onSubmit={handleSave}>
@@ -636,7 +637,7 @@ function LancamentosRuraisSection({
             <h3 className="card-title">Receitas e Despesas Mensais</h3>
             <span className="badge badge-blue" title="Lida da declaração importada (.DBK ou PDF), não depende de lançamento nenhum feito no app">Da declaração original</span>
           </div>
-          <div className="table-container">
+          <TabelaRedimensionavel>
             <table>
               <thead><tr><th>Mês</th><th style={{ textAlign: 'right' }}>Receita Bruta</th><th style={{ textAlign: 'right' }}>Despesa de Custeio/Investimento</th></tr></thead>
               <tbody>
@@ -656,7 +657,7 @@ function LancamentosRuraisSection({
                 </tr>
               </tfoot>
             </table>
-          </div>
+          </TabelaRedimensionavel>
         </div>
       )}
       {/* ACHADO 03 da auditoria de 24/08/2026. Estes três cards mostram o
@@ -704,7 +705,7 @@ function LancamentosRuraisSection({
         <button className="btn btn-secondary" onClick={handleExport}>Exportar .xlsx</button>
         <button className="btn btn-primary" onClick={handleNovoClick}>＋ Novo Lançamento</button>
       </div>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table className="tabela-acoes-fixas">
           <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th style={{ textAlign: 'right' }}>Valor</th><th>Ações</th></tr></thead>
           <tbody>
@@ -726,7 +727,7 @@ function LancamentosRuraisSection({
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
             <div className="modal-header"><h3>{editingId ? 'Editar Lançamento' : 'Novo Lançamento'}</h3><button className="modal-close" onClick={() => setModalOpen(false)}>✕</button></div>
             <form onSubmit={handleSave}>
@@ -902,7 +903,7 @@ function RebanhoSection({ movimentacaoRebanhoOficial }) {
         <h3 className="card-title">Movimentação do Rebanho</h3>
         <span className="badge badge-blue" title="Lida da declaração importada, pelo PDF ou pelo arquivo .DBK, e não depende de lançamento nenhum feito no app">Da declaração original</span>
       </div>
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table>
           <thead>
             <tr>
@@ -934,7 +935,7 @@ function RebanhoSection({ movimentacaoRebanhoOficial }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import TabelaRedimensionavel from './TabelaRedimensionavel';
 import { useMemo, useState, useEffect } from 'react';
 import Modal from './Modal';
 import { formatCurrency, truncarComReticencias } from '../utils/formatters';
@@ -179,7 +180,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
     <div className="card" style={{ marginBottom: '20px' }}>
       <div className="card-header"><h3 className="card-title">{titulo}</h3></div>
       {(novos || []).length > 0 && (
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead>
               <tr>
@@ -227,7 +228,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
               })}
             </tbody>
           </table>
-        </div>
+        </TabelaRedimensionavel>
       )}
 
       {antigosOrfaos.length > 0 && (
@@ -235,7 +236,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
           <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase' }}>
             Itens da declaração anterior sem correspondência na retificadora
           </p>
-          <div className="table-container">
+          <TabelaRedimensionavel>
             <table>
               <thead>
                 <tr><th>Item</th><th style={{ textAlign: 'right' }}>Situação Atual</th><th>Movimentação</th><th>O que fazer</th></tr>
@@ -267,7 +268,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                 })}
               </tbody>
             </table>
-          </div>
+          </TabelaRedimensionavel>
         </div>
       )}
     </div>

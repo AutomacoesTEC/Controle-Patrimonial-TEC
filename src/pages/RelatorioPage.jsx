@@ -1,3 +1,4 @@
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCpfCnpj, GRUPOS_BENS, MOVIMENTACAO_TIPOS, descreverTipoDemonstrativoExterior, truncarComReticencias } from '../utils/formatters';
@@ -53,7 +54,7 @@ function CardDoacoes({ titulo, itens, comCategoria = false, comParcelaNaoDedutiv
           essa ressalva.
         </p>
       )}
-      <div className="table-container">
+      <TabelaRedimensionavel>
         <table>
           <thead>
             <tr>
@@ -84,7 +85,7 @@ function CardDoacoes({ titulo, itens, comCategoria = false, comParcelaNaoDedutiv
             ))}
           </tbody>
         </table>
-      </div>
+      </TabelaRedimensionavel>
     </div>
   );
 }
@@ -307,7 +308,7 @@ export default function RelatorioPage({ onImportar } = {}) {
                   <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
                     {bl.titulo}
                   </div>
-                  <table style={{ width: '100%', fontSize: '13px' }}>
+                  <TabelaRedimensionavel><table style={{ width: '100%', fontSize: '13px' }}>
                     <tbody>
                       {bl.linhas.map((l, i) => (
                         <tr key={i}>
@@ -326,7 +327,7 @@ export default function RelatorioPage({ onImportar } = {}) {
                         </tr>
                       )}
                     </tbody>
-                  </table>
+                  </table></TabelaRedimensionavel>
                 </div>
               ))}
             </div>
@@ -344,7 +345,7 @@ export default function RelatorioPage({ onImportar } = {}) {
               bem é o mesmo impresso na declaração original. Confira a identificação completa na
               ficha de Bens e Direitos dela, o arquivo importado não traz um vínculo direto.
             </p>
-            <div className="table-container">
+            <TabelaRedimensionavel>
               <table>
                 <thead>
                   <tr>
@@ -389,7 +390,7 @@ export default function RelatorioPage({ onImportar } = {}) {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           </div>
         )}
 
@@ -449,7 +450,7 @@ export default function RelatorioPage({ onImportar } = {}) {
                 <h3 className="card-title">{grupo ? `${grupo.codigo} - ${grupo.nome}` : `Grupo ${g}`}</h3>
                 <span className="badge badge-blue">{data.items.length} {data.items.length === 1 ? 'item' : 'itens'}</span>
               </div>
-              <div className="table-container">
+              <TabelaRedimensionavel>
                 <table>
                   <thead><tr><th>Cód.</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>31/12/{anoCalendario - 1}</th><th style={{ textAlign: 'right' }}>31/12/{anoCalendario}</th><th>Movimentações no ano</th></tr></thead>
                   <tbody>
@@ -471,7 +472,7 @@ export default function RelatorioPage({ onImportar } = {}) {
                     })}
                   </tbody>
                 </table>
-              </div>
+              </TabelaRedimensionavel>
             </div>
           );
         })}

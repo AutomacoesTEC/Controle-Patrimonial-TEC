@@ -70,7 +70,7 @@ function DetalheOperacaoGc({ op }) {
             <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
               {bl.titulo}
             </div>
-            <table style={{ width: '100%', fontSize: '13px' }}>
+            <TabelaRedimensionavel><table style={{ width: '100%', fontSize: '13px' }}>
               <tbody>
                 {bl.linhas.map((l, i) => (
                   <tr key={i}>
@@ -84,7 +84,7 @@ function DetalheOperacaoGc({ op }) {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></TabelaRedimensionavel>
           </div>
         ))}
       </div>
@@ -96,7 +96,7 @@ function DetalheOperacaoGc({ op }) {
       )}
 
       {(op.custosAquisicao || []).length > 0 && (
-        <div className="table-container" style={{ marginTop: '16px' }}>
+        <TabelaRedimensionavel style={{ marginTop: '16px' }}>
           <table>
             <thead><tr><th>Espécie</th><th style={{ textAlign: 'right' }}>Quantidade</th><th style={{ textAlign: 'right' }}>Custo médio</th><th style={{ textAlign: 'right' }}>Custo total</th></tr></thead>
             <tbody>
@@ -110,11 +110,11 @@ function DetalheOperacaoGc({ op }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </TabelaRedimensionavel>
       )}
 
       {parcelas.length > 0 && (
-        <div className="table-container" style={{ marginTop: '16px' }}>
+        <TabelaRedimensionavel style={{ marginTop: '16px' }}>
           {/* No parcelado o imposto é devido conforme o recebimento, e não de
               uma vez na data da alienação. */}
           <table>
@@ -140,11 +140,11 @@ function DetalheOperacaoGc({ op }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </TabelaRedimensionavel>
       )}
 
       {faixas.length > 0 && (
-        <div className="table-container" style={{ marginTop: '16px' }}>
+        <TabelaRedimensionavel style={{ marginTop: '16px' }}>
           <table>
             <thead>
               <tr>
@@ -166,7 +166,7 @@ function DetalheOperacaoGc({ op }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </TabelaRedimensionavel>
       )}
     </>
   );
@@ -557,7 +557,7 @@ export default function GanhosCapitalPage() {
               esse limite, por isso ela aparece aqui do lado do ganho do mês.
             </p>
             {moedaMensalComMovimento.length > 0 && (
-              <div className="table-container">
+              <TabelaRedimensionavel>
                 <table>
                   <thead>
                     <tr>
@@ -586,10 +586,10 @@ export default function GanhosCapitalPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </TabelaRedimensionavel>
             )}
             {moedaEspecie.operacoes.length > 0 && (
-              <div className="table-container" style={{ marginTop: '12px' }}>
+              <TabelaRedimensionavel style={{ marginTop: '12px' }}>
                 <table>
                   <thead><tr><th>Data</th><th>Moeda</th><th>Operação</th><th style={{ textAlign: 'right' }}>Quantidade</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>Custo total</th><th style={{ textAlign: 'right' }}>Ganho</th><th>Adquirente</th></tr></thead>
                   <tbody>
@@ -607,7 +607,7 @@ export default function GanhosCapitalPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </TabelaRedimensionavel>
             )}
           </div>
         )}
@@ -672,7 +672,7 @@ export default function GanhosCapitalPage() {
         </div>
         <BemModal open={bemModalOpen} bem={bemEmEdicao} onSave={handleSaveBem} onClose={fecharBemModal} />
 
-        <div className="table-container">
+        <TabelaRedimensionavel>
           <table>
             <thead><tr><th>Bem</th><th>Origem</th><th>Data</th><th>Tipo</th><th style={{ textAlign: 'right' }}>Custo Baixado</th><th style={{ textAlign: 'right' }}>Valor de Venda</th><th style={{ textAlign: 'right' }}>Ganho/Perda</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
             <tbody>
@@ -701,7 +701,7 @@ export default function GanhosCapitalPage() {
               </tfoot>
             )}
           </table>
-        </div>
+        </TabelaRedimensionavel>
       </div>
     </>
   );

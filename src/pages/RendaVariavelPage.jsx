@@ -421,7 +421,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
                         <tr>
                           <td colSpan={LINHAS_APURACAO.length + 5}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
-                              <table style={{ width: '100%' }}>
+                              <TabelaRedimensionavel><table style={{ width: '100%' }}>
                                 <thead><tr><th>Tipo de mercado/ativo</th><th style={{ textAlign: 'right' }}>Operações comuns</th><th style={{ textAlign: 'right' }}>Day-trade</th></tr></thead>
                                 <tbody>
                                   {MERCADOS.map(([rotulo, campo]) => (
@@ -432,14 +432,14 @@ export default function RendaVariavelPage({ onImportar } = {}) {
                                     </tr>
                                   ))}
                                 </tbody>
-                              </table>
+                              </table></TabelaRedimensionavel>
                               {/* CONSOLIDAÇÃO DO MÊS, como a declaração a imprime. É
                                   aqui que se vê POR QUE o imposto a pagar é menor que
                                   o devido: as duas retenções na fonte, a de day-trade
                                   e a da Lei nº 11.033/2004, são abatidas do mês. */}
                               {linhasConsolidacaoMes(linha.consolidacao).length > 0 && (
                                 <div>
-                                  <table style={{ width: '100%' }}>
+                                  <TabelaRedimensionavel><table style={{ width: '100%' }}>
                                     <thead><tr><th colSpan={2}>Consolidação do mês</th></tr></thead>
                                     <tbody>
                                       {linhasConsolidacaoMes(linha.consolidacao).map(l => (
@@ -449,7 +449,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
                                         </tr>
                                       ))}
                                     </tbody>
-                                  </table>
+                                  </table></TabelaRedimensionavel>
                                   {conferenciaConsolidacaoMes(linha.consolidacao) && (
                                     <div style={{ marginTop: '8px' }}>
                                       <Ajuda
@@ -488,7 +488,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
             {ehDerivadoDosMeses(anual) && (
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
             )}
-            <table className="rv-anual">
+            <TabelaRedimensionavel><table className="rv-anual">
               <tbody>
                 {linhasAnualRendaVariavel(anual).map(l => (
                   <tr key={l.rotulo}>
@@ -497,7 +497,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></TabelaRedimensionavel>
           </div>
         )}
         </>)}
@@ -560,7 +560,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
             {ehDerivadoDosMeses(fiiAnual) && (
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 0 }}>{AVISO_DERIVADO}</p>
             )}
-            <table className="rv-anual">
+            <TabelaRedimensionavel><table className="rv-anual">
               <tbody>
                 {linhasAnualFiiFiagro(fiiAnual).map(l => (
                   <tr key={l.rotulo}>
@@ -569,7 +569,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></TabelaRedimensionavel>
           </div>
         )}
         </>)}

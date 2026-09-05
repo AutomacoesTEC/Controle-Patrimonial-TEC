@@ -120,7 +120,7 @@ export default function TitularPage() {
         {contribuinte && (contribuinte.dataNascimento || contribuinte.logradouro || contribuinte.ocupacaoCodigo) && (
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header"><h3 className="card-title">Dados cadastrais importados da declaração</h3></div>
-            <div className="table-container">
+            <TabelaRedimensionavel>
               <table>
                 <tbody>
                   <tr><th>Data de nascimento</th><td>{formatDate(contribuinte.dataNascimento) || '-'}</td><th>Raça/Cor</th><td>{contribuinte.racaCor || contribuinte.racaCorCodigo || '-'}</td></tr>
@@ -146,7 +146,7 @@ export default function TitularPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           </div>
         )}
 

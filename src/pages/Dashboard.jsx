@@ -1,3 +1,4 @@
+import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCPF, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
@@ -605,7 +606,7 @@ export default function Dashboard({ onNavigate } = {}) {
 
         <div className="card" style={{ marginBottom: '16px' }}>
           <div className="card-header"><h3 className="card-title">Variação Patrimonial</h3></div>
-          <table className="demonstrativo-table">
+          <TabelaRedimensionavel><table className="demonstrativo-table">
             <tbody>
               <tr className="demonstrativo-secao">
                 <td colSpan={2}>
@@ -661,12 +662,12 @@ export default function Dashboard({ onNavigate } = {}) {
                   intocado). */}
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Variação Patrimonial Total</td><td className={`currency ${-demo.varPatrimonial.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(-demo.varPatrimonial.total)}</td></tr>
             </tbody>
-          </table>
+          </table></TabelaRedimensionavel>
         </div>
 
         <div className="card" style={{ marginBottom: '16px' }}>
           <div className="card-header"><h3 className="card-title">Rendimentos</h3></div>
-          <table className="demonstrativo-table">
+          <TabelaRedimensionavel><table className="demonstrativo-table">
             <tbody>
               {/* Mesmo desenho da Tributação Exclusiva logo abaixo: bruto,
                   as retenções em linha própria e o líquido, que é o valor que
@@ -782,12 +783,12 @@ export default function Dashboard({ onNavigate } = {}) {
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></TabelaRedimensionavel>
         </div>
 
         <div className="card" style={{ marginBottom: '16px' }}>
           <div className="card-header"><h3 className="card-title">Ganhos e Perdas Apurados</h3></div>
-          <table className="demonstrativo-table">
+          <TabelaRedimensionavel><table className="demonstrativo-table">
             <tbody>
               {demo.ganhos.vendas.map((v, i) => (
                 <tr key={i}><td title={v.bem || ''}>{v.ganhoLiquido >= 0 ? 'GANHO APURADO NA VENDA DE' : 'PERDA APURADA NA VENDA DE'} {nomeCurtoBem(v.bem)}</td><td className={`currency ${v.ganhoLiquido >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganhoLiquido)}</td></tr>
@@ -837,12 +838,12 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa Geral</td><td className={`currency ${demo.saldoDeCaixaGeral >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
             </tbody>
-          </table>
+          </table></TabelaRedimensionavel>
         </div>
 
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Pagamentos</h3></div>
-          <table className="demonstrativo-table">
+          <TabelaRedimensionavel><table className="demonstrativo-table">
             <tbody>
               <tr>
                 <td>
@@ -876,7 +877,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa</td><td className={`currency ${demo.saldoDeCaixa >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixa)}</td></tr>
             </tbody>
-          </table>
+          </table></TabelaRedimensionavel>
           {checklistSaldo.length > 0 && (
             <section className="saldo-checklist" aria-labelledby="saldo-checklist-titulo">
               <div className="saldo-checklist-cabecalho">
@@ -929,7 +930,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <h3 className="card-title">Saldos que atravessam para o próximo exercício</h3>
               <span className="badge badge-blue">Da declaração</span>
             </div>
-            <table className="demonstrativo-table">
+            <TabelaRedimensionavel><table className="demonstrativo-table">
               <tbody>
                 {saldosAtravessam.map(s => (
                   <tr key={s.chave}>
@@ -949,7 +950,7 @@ export default function Dashboard({ onNavigate } = {}) {
                   <td style={{ color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'right' }}>não atravessa</td>
                 </tr>
               </tbody>
-            </table>
+            </table></TabelaRedimensionavel>
           </div>
         )}
 
@@ -983,7 +984,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 texto={`Em ${formatDate(alerta.data)}, foram informados ${formatCurrency(alerta.informado)}. Pela tabela de 2026, usando a maior dedução entre o simplificado e as deduções informadas, a referência é ${formatCurrency(alerta.esperado)}; diferença de ${formatCurrency(alerta.diferenca)}. É somente um alerta: confira a fonte pagadora e não altere o valor sem o comprovante.`}
               />
             ))}
-            <div className="table-container">
+            <TabelaRedimensionavel>
               <table>
                 <thead><tr><th>Fonte</th><th>Beneficiário</th><th>Tipo</th><th>Tratamento</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
                 <tbody>
@@ -1002,7 +1003,7 @@ export default function Dashboard({ onNavigate } = {}) {
                   {painelIrrf.totalResumo != null && <tr><td colSpan={4}>Total oficial do resumo</td><td className="currency" style={{ textAlign: 'right' }}>{formatCurrency(painelIrrf.totalResumo)}</td></tr>}
                 </tfoot>
               </table>
-            </div>
+            </TabelaRedimensionavel>
             <div className="painel-irrf-resumo">
               <span>Imposto devido <strong>{formatCurrency(painelIrrf.impostoDevido)}</strong></span>
               <span>Saldo a pagar <strong>{formatCurrency(painelIrrf.saldoPagar)}</strong></span>
@@ -1176,7 +1177,7 @@ export default function Dashboard({ onNavigate } = {}) {
           {movimentacoesDetalhe.length === 0 ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>Nenhuma movimentação registrada nesse período.</p>
           ) : (
-            <div className="table-container">
+            <TabelaRedimensionavel>
               <table>
                 <thead><tr><th>Data</th><th>Tipo</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Valor</th></tr></thead>
                 <tbody>
@@ -1190,7 +1191,7 @@ export default function Dashboard({ onNavigate } = {}) {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TabelaRedimensionavel>
           )}
         </div>
         <div className="modal-footer">

@@ -112,7 +112,7 @@ export default function DoacoesPage() {
           ))}
         </div>
 
-        <TabelaRedimensionavel persistKey="doacoes">
+        <TabelaRedimensionavel key={subView} persistKey="doacoes">
           <table>
             <thead>
               <tr>
