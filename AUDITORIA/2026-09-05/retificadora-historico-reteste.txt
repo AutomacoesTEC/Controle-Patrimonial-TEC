@@ -1,0 +1,17 @@
+{"funcao": "Retificadora e histórico: conciliar, preservar edição, avançar, carregar, excluir e cancelar", "resultado": "PASSOU", "evidencia": {"retificadora_sem_duplicar": true, "data_local_preservada": true, "avanco_ano": true, "carregar_excluir_historico": true, "cancelamento_sem_mutacao": true}}
+{
+  "resultados": [
+    {
+      "funcao": "Retificadora e histórico: conciliar, preservar edição, avançar, carregar, excluir e cancelar",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "retificadora_sem_duplicar": true,
+        "data_local_preservada": true,
+        "avanco_ano": true,
+        "carregar_excluir_historico": true,
+        "cancelamento_sem_mutacao": true
+      }
+    }
+  ],
+  "artefatos_temporarios_externos": "/tmp/cptec-perfis-auditoria-2u7u6dmh"
+}

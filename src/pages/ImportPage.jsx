@@ -3,6 +3,7 @@ import { useData } from '../store/DataContext';
 import { formatCpfCnpj } from '../utils/formatters';
 import { snapshotYear } from '../store/reducer';
 import { avaliarDestinoImportacao } from '../utils/destinoImportacao';
+import { pendenciasRetificadora } from '../utils/pendenciasRetificadora';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { parseDBK, parsePDF } from './importParsers';
@@ -86,6 +87,9 @@ export default function ImportPage() {
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    // Permite escolher novamente o mesmo arquivo após revisar/cancelar ou
+    // importar, sem exigir sair da ficha para recriar o input.
+    e.target.value = '';
 
     setImporting(true);
     setImportLog([]);
@@ -195,10 +199,9 @@ export default function ImportPage() {
             return;
           }
           await dispatchPersistido({ type: 'IMPORT_DECLARACAO', payload: payloadImportacaoCompleto(result, {
-            // Titular novo: os dependentes do titular anterior não são dele,
-            // não seguem junto (evita misturar as duas famílias no mesmo
-            // ano-calendário).
-            dependentes: [],
+            // O reducer substitui a coleção inteira. Conservar somente os
+            // dependentes da declaração NOVA, nunca os do titular anterior.
+            dependentes: result.dependentes || [],
           }) });
           log('');
           log('Importação concluída e salva localmente (titular trocado).', 'success');
@@ -308,11 +311,15 @@ export default function ImportPage() {
 
   const handleConfirmarReconciliacao = async (payload) => {
     try {
-      await dispatchPersistido({ type: 'RECONCILIAR_IMPORTACAO', payload });
+      const importado = await dispatchPersistido({ type: 'RECONCILIAR_IMPORTACAO', payload });
       setReconciliacao(null);
       log('');
       log('Conciliação da retificadora concluída e salva localmente.', 'success');
       addToast('Retificadora conciliada, importada e salva!', 'success');
+      const pendencias = pendenciasRetificadora(importado);
+      if (pendencias.length) {
+        log(`${pendencias.length} conflito(s) entre edição local e retificadora. Consulte as pendências abaixo; os valores locais foram preservados para conferência.`, 'warning');
+      }
     } catch (err) {
       log(`A retificadora não foi aplicada: ${err.message}`, 'error');
       addToast(err.message, 'error');
@@ -328,6 +335,15 @@ export default function ImportPage() {
         </div>
       </div>
       <div className="page-body animate-in">
+        {pendenciasRetificadora(state).length > 0 && (
+          <section className="card" style={{ marginBottom: 20 }} aria-label="Pendências da retificadora">
+            <h3>Pendências da retificadora: {state.anoCalendario}</h3>
+            <p>O documento novo divergiu de edições locais. Os valores abaixo foram preservados para conferência. Revise o lançamento na ficha indicada; o relatório Excel também contém essas divergências.</p>
+            <ul>{pendenciasRetificadora(state).map((p, i) => (
+              <li key={i}><strong>{p.ficha}: {p.registro}</strong>; campo {p.campo}; edição local: {JSON.stringify(p.valorLocal) ?? 'não informado'}; nova declaração: {JSON.stringify(p.valorDeclarado) ?? 'não informado'}.</li>
+            ))}</ul>
+          </section>
+        )}
         <div
           className="card"
           style={{

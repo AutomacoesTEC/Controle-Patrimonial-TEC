@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { avaliarDestinoImportacao } from './destinoImportacao';
 
 describe('proteção antes de substituir ano de importação', () => {
+  it('perfil inicial somente com nome não é declaração anterior, mesmo com origem legada inferida', () => {
+    expect(avaliarDestinoImportacao({ origemAnoAtual: 'importacao', contribuinte: { nome: 'Sintético' } }).temImportacaoAnterior).toBe(false);
+  });
   for (const campo of ['doacoesEfetuadasOficial', 'pagamentosDiversos', 'rendaVariavelMensalManual', 'fiiFiagroMensalOficial', 'dependentes']) {
     it(`exige confirmação quando só existe ${campo}`, () => {
       expect(avaliarDestinoImportacao({ [campo]: [{ id: 1, valor: 100 }] }).temDadosNoDestino).toBe(true);

@@ -1,0 +1,59 @@
+{"funcao": "Importação PDF AJU completa, fonte e impressão de dois relatórios", "resultado": "FALHOU", "erro": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Imprimir demonstrativo\", exact=True)\n    - locator resolved to <button class=\"btn btn-secondary\">Imprimir demonstrativo</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    27 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"modal-overlay\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n", "trajetoria": "Traceback (most recent call last):\n  File \"/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-importacao-perfis.py\", line 37, in caso\n    detalhe=fn()\n            ^^^^\n  File \"/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-importacao-perfis.py\", line 74, in importacao_aju\n    page.get_by_role('button',name='Imprimir demonstrativo',exact=True).click()\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 17422, in click\n    self._sync(\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 163, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 569, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Imprimir demonstrativo\", exact=True)\n    - locator resolved to <button class=\"btn btn-secondary\">Imprimir demonstrativo</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    27 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"modal-overlay\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"}
+{"funcao": "Importação de outro titular mantém dependentes da nova declaração", "resultado": "PASSOU", "evidencia": {"dependentes_novos": 1}}
+{"funcao": "Importação e consulta de espólio e saída definitiva", "resultado": "PASSOU", "evidencia": [{"modalidade": "Final de Espólio", "ano": 2025, "divisorias": 8}, {"modalidade": "Saída Definitiva", "ano": 2025, "divisorias": 2}]}
+{"funcao": "Perfis: criar, exportar/restaurar, proteger, desbloquear e recarregar", "resultado": "PASSOU", "evidencia": {"backup_lido": true, "restauracao_novo_perfil": true, "criptografia": true, "senha_errada_recusada": true, "recarga_bloqueada": true}}
+{"funcao": "Pendências da retificadora visíveis e limites do novo bem", "resultado": "PASSOU", "evidencia": {"conflito_visivel": true, "abertura_zero": true, "ano_expandido_invalido": true}}
+{
+  "resultados": [
+    {
+      "funcao": "Importação PDF AJU completa, fonte e impressão de dois relatórios",
+      "resultado": "FALHOU",
+      "erro": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Imprimir demonstrativo\", exact=True)\n    - locator resolved to <button class=\"btn btn-secondary\">Imprimir demonstrativo</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    27 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"modal-overlay\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "trajetoria": "Traceback (most recent call last):\n  File \"/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-importacao-perfis.py\", line 37, in caso\n    detalhe=fn()\n            ^^^^\n  File \"/home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte/AUDITORIA/2026-09-05/auditar-importacao-perfis.py\", line 74, in importacao_aju\n    page.get_by_role('button',name='Imprimir demonstrativo',exact=True).click()\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 17422, in click\n    self._sync(\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 163, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 569, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/automacaotec/PROJETOS/TERA-CONSULTORIA/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Imprimir demonstrativo\", exact=True)\n    - locator resolved to <button class=\"btn btn-secondary\">Imprimir demonstrativo</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"modal-overlay\">…</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    27 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"modal-overlay\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "funcao": "Importação de outro titular mantém dependentes da nova declaração",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "dependentes_novos": 1
+      }
+    },
+    {
+      "funcao": "Importação e consulta de espólio e saída definitiva",
+      "resultado": "PASSOU",
+      "evidencia": [
+        {
+          "modalidade": "Final de Espólio",
+          "ano": 2025,
+          "divisorias": 8
+        },
+        {
+          "modalidade": "Saída Definitiva",
+          "ano": 2025,
+          "divisorias": 2
+        }
+      ]
+    },
+    {
+      "funcao": "Perfis: criar, exportar/restaurar, proteger, desbloquear e recarregar",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "backup_lido": true,
+        "restauracao_novo_perfil": true,
+        "criptografia": true,
+        "senha_errada_recusada": true,
+        "recarga_bloqueada": true
+      }
+    },
+    {
+      "funcao": "Pendências da retificadora visíveis e limites do novo bem",
+      "resultado": "PASSOU",
+      "evidencia": {
+        "conflito_visivel": true,
+        "abertura_zero": true,
+        "ano_expandido_invalido": true
+      }
+    }
+  ],
+  "artefatos_temporarios_externos": "/tmp/cptec-perfis-auditoria-mjq2u4s7"
+}
