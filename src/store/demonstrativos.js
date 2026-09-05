@@ -364,6 +364,10 @@ export function totalRendimentos(rendimentos, resultadoAtividadeRural, dataDe, d
     .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
   const isento = somaPorPrefixo('isento');
   const exclusivo = somaPorPrefixo('exclusivo');
+  // O 13º oficial já é líquido. Compatível também com perfis importados
+  // antes desta correção, sem apagar o IRRF fiscal/informativo armazenado.
+  exclusivo.irrf -= doPeriodo.filter(r => /^exclusivo_0*(1|8)$/.test(r.tipo || ''))
+    .reduce((s, r) => s + (parseFloat(r.irrf) || 0), 0);
   const exclusivoLiquido = exclusivo.valor - exclusivo.irrf;
   const demaisTributaveis = resultadoAtividadeRural || 0;
 

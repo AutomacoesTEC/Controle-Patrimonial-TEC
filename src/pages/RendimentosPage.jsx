@@ -289,7 +289,7 @@ export default function RendimentosPage() {
                     <label>Data</label>
                     <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
                   </div>
-                  <div className="form-group"><label>{form.tipo === 'tributavel_rra' ? 'Valor tributável (conforme apuração)' : 'Valor'}</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
+                  <div className="form-group"><label>{form.tipo === 'tributavel_rra' ? 'Valor tributável (conforme apuração)' : /^exclusivo_0*(1|8)$/.test(form.tipo) ? 'Valor líquido do 13º salário' : 'Valor'}</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>{form.tipo === 'tributavel_pf_exterior' ? 'Carnê-leão pago' : 'IRRF'}</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
                 </div>
                 <div className="form-row">

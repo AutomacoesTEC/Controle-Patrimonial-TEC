@@ -723,8 +723,8 @@ export default function Dashboard({ onNavigate } = {}) {
                 </tr>
               )}
               <tr><td>Rendimentos Isentos e Não Tributáveis</td><td className="currency">{formatCurrency(demo.rendimentos.isentoValor)}</td></tr>
-              <tr><td>Tributação Exclusiva, bruto</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoBruto)}</td></tr>
-              <tr><td>Tributação Exclusiva, IRRF retido</td><td className="currency negative">{formatCurrency(-demo.rendimentos.exclusivoIrrf)}</td></tr>
+              <tr><td>Tributação Exclusiva, valores informados (13º já líquido)</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoBruto)}</td></tr>
+              <tr><td>Tributação Exclusiva, IRRF ainda não descontado</td><td className="currency negative">{formatCurrency(-demo.rendimentos.exclusivoIrrf)}</td></tr>
               <tr><td>Tributação Exclusiva, líquido</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoLiquido)}</td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Total Geral dos Rendimentos</td><td className="currency positive">{formatCurrency(demo.rendimentos.totalGeral)}</td></tr>
               {/* Renda Variável vira uma LINHA da tabela, e não um parágrafo,

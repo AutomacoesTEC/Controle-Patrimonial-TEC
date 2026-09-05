@@ -162,12 +162,10 @@ const DETALHE_RENDIMENTO = {
 // exclusivo importado carregava IRRF: o líquido saía igual ao bruto e a linha
 // "Tributação Exclusiva, IRRF retido" mostrava R$ 0,00 em toda declaração.
 //
-// O 13º salário é o caso com conserto. A Ajuda oficial do IRPF 2026 (ficha
-// Rendimentos Sujeitos à Tributação Exclusiva/Definitiva, aba Totais) diz que
-// a linha 01 recebe "o valor do campo 13º salário" da ficha de Rendimentos
-// Tributáveis Recebidos de PJ, isto é, o BRUTO — diferente da linha 07 (RRA),
-// que já vem subtraída do imposto retido. E o IRRF sobre o 13º está em campo
-// próprio da mesma ficha de PJ, que os dois parsers já leem e descartavam.
+// Correção D03: a linha de 13º recebe valor LÍQUIDO, não bruto.
+// O IRRF abaixo é preservado como informação fiscal e NÃO deve ser
+// novamente subtraído pelo Demonstrativo. A interpretação do cálculo
+// também cobre os perfis legados, sem reescrever suas declarações.
 //
 // Códigos internos: 0001 é o 13º do titular, 0008 o dos dependentes.
 const CODIGO_DECIMO_TERCEIRO = { Titular: '0001', Dependente: '0008' };

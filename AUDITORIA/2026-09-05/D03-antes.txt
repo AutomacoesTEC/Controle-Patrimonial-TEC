@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js (16 tests | 1 failed | 15 skipped) 9ms
+     × D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/auditoriaDemonstrativo20260905.test.js > auditoria independente do Demonstrativo — oráculos de caixa > D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil
+AssertionError: expected 7000 to be 8000 // Object.is equality
+
+- Expected
++ Received
+
+- 8000
++ 7000
+
+ ❯ src/store/auditoriaDemonstrativo20260905.test.js:42:48
+     40|       renda('exclusivo_0001', 8000),
+     41|     ]);
+     42|     expect(totalRendimentos(rs, 0).totalGeral).toBe(8000);
+       |                                                ^
+     43|   });
+     44|   it.fails('D04: RV mensal positiva de 10 mil gera recursos sem redigi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  17:26:34
+   Duration  638ms (transform 410ms, setup 0ms, import 471ms, tests 9ms, environment 0ms)
+

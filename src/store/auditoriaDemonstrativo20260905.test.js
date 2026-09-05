@@ -34,7 +34,7 @@ describe('auditoria independente do Demonstrativo — oráculos de caixa', () =>
   it('D02: RRA tributável de 20 mil com IRRF de 3 mil disponibiliza 17 mil', () => {
     expect(totalRendimentos([renda('tributavel_rra', 20000, { irrf: 3000 })], 0).totalGeral).toBe(17000);
   });
-  it.fails('D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil', () => {
+  it('D03: 13º importado já líquido de 8 mil não sofre nova retenção de mil', () => {
     const rs = aplicarIrrfDecimoTerceiro([
       renda('tributavel_pj', 0, { beneficiario: 'Titular', irrfDecimoTerceiro: 1000 }),
       renda('exclusivo_0001', 8000),

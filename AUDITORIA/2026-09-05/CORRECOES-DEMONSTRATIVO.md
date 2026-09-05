@@ -15,3 +15,9 @@ MANTER: o mesmo D01 passou de 10.000 incorretos para 8.000 esperados. Ajuda da t
 Base e355029. Falha: RRA tributável 20.000 com retenção 3.000 soma 20.000. Previsão: 17.000; preservar exclusão `naoSomar` dos registros já transportados para exclusivos. Camada: retenção do rendimento RRA. Fixture D02 normalizada antes da alteração, mesmos valores e comando antes/depois. Fonte: [Receita, rendimentos do trabalho/RRA](https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/preenchimento/manual-mir/rendimentos/rendimentos-do-trabalho). A mudança não transforma base tributável em bruto bancário; parcelas isentas continuam exigindo classificação própria sem duplicação.
 
 MANTER: D02-antes.txt registra 20.000; D02-depois.txt confirma 17.000.
+
+## D03 — 13º líquido descontado duas vezes
+
+Base bc73fc8. Previsão: valor oficial líquido 8.000 permanecerá 8.000 mesmo com IRRF informativo 1.000; códigos 01/08, com dois ou quatro dígitos, mesma regra nos dados legados e novos. Camada: interpretação do valor líquido oficial, sem reescrever arquivos importados. Fonte conferida: [SC 24/2013, p. 6](https://normas.receita.fazenda.gov.br/sijut2consulta/anexoOutros.action?idArquivoBinario=38509), que orienta valor líquido na linha de 13º. Fixture D03, antes/depois sob o mesmo comando. IRRF continua armazenado e exportado, porém não descontado novamente.
+
+MANTER: D03-antes.txt registra 7.000; D03-depois.txt confirma 8.000. Corrigidos comentário do importador e rótulos de cadastro/demonstrativo.
