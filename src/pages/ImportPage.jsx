@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCpfCnpj } from '../utils/formatters';
 import { snapshotYear } from '../store/reducer';
+import { avaliarDestinoImportacao } from '../utils/destinoImportacao';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { parseDBK, parsePDF } from './importParsers';
@@ -164,14 +165,7 @@ export default function ImportPage() {
         // ano — sem isso, importar por engano sobrescreveria em silêncio
         // lançamentos manuais já feitos (compra/venda/baixa do ano).
         const existenteNoDestino = trocaAno ? (state.historico[anoDestino] || {}) : state;
-        const colecoesQueCaracterizamDados = [
-          'bens', 'dividas', 'rendimentos', 'pagamentos',
-          'imoveisRurais', 'bensRurais', 'dividasRurais',
-          'receitasDespesasRuraisOficial', 'participantesRuraisOficial', 'movimentacaoRebanhoOficial',
-        ];
-        const temDadosNoDestino = colecoesQueCaracterizamDados.some(
-          campo => (existenteNoDestino[campo] || []).length > 0,
-        ) || Boolean(existenteNoDestino.apuracaoResultadoRuralOficial);
+        const { temDadosNoDestino, origemConfiavelPorItem, temImportacaoAnterior } = avaliarDestinoImportacao(existenteNoDestino);
 
         // Titular diferente do já cadastrado nesse ano: isso NÃO é um erro
         // (o app não impede), mas merece um aviso específico em vez do
@@ -221,14 +215,6 @@ export default function ImportPage() {
         // de uma versão antes dessa marca existir não permite separar
         // importado de manual com segurança, então cai no fluxo antigo (que
         // pelo menos avisa antes de substituir tudo).
-        const origemConfiavelPorItem = ['bens', 'dividas', 'imoveisRurais', 'bensRurais', 'dividasRurais'].every(campo =>
-          (existenteNoDestino[campo] || []).every(item => ['importacao', 'manual', 'origem_legacy'].includes(item.origem))
-        );
-        const temImportacaoAnterior = ['bens', 'dividas', 'imoveisRurais', 'bensRurais', 'dividasRurais'].some(
-          campo => (existenteNoDestino[campo] || []).some(
-            item => item.origem === 'importacao' || item.origem === 'origem_legacy',
-          ),
-        ) || existenteNoDestino.origemAnoAtual === 'importacao';
         const ehRetificadora = temDadosNoDestino && temImportacaoAnterior && origemConfiavelPorItem &&
           mesmoTitular(result.contribuinte, existenteNoDestino.contribuinte);
 

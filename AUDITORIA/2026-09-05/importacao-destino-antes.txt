@@ -1,0 +1,61 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/utils/destinoImportacao.test.js (8 tests | 6 failed) 45ms
+     × exige confirmação quando só existe doacoesEfetuadasOficial 25ms
+     × exige confirmação quando só existe pagamentosDiversos 5ms
+     × exige confirmação quando só existe rendaVariavelMensalManual 3ms
+     × exige confirmação quando só existe fiiFiagroMensalOficial 2ms
+     × exige confirmação quando só existe dependentes 2ms
+     × reconhece importação anterior no snapshot histórico sem patrimônio 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > exige confirmação quando só existe doacoesEfetuadasOficial
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > exige confirmação quando só existe pagamentosDiversos
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > exige confirmação quando só existe rendaVariavelMensalManual
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > exige confirmação quando só existe fiiFiagroMensalOficial
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > exige confirmação quando só existe dependentes
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/utils/destinoImportacao.test.js:7:96
+      5|   for (const campo of ['doacoesEfetuadasOficial', 'pagamentosDiversos'…
+      6|     it(`exige confirmação quando só existe ${campo}`, () => {
+      7|       expect(avaliarDestinoImportacao({ [campo]: [{ id: 1, valor: 100 …
+       |                                                                                                ^
+      8|     });
+      9|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/utils/destinoImportacao.test.js > proteção antes de substituir ano de importação > reconhece importação anterior no snapshot histórico sem patrimônio
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/utils/destinoImportacao.test.js:11:117
+      9|   }
+     10|   it('reconhece importação anterior no snapshot histórico sem patrimôn…
+     11|     expect(avaliarDestinoImportacao({ origem: 'importacao', rendimento…
+       |                                                                                                                     ^
+     12|   });
+     13|   it('ano vazio não tem dados nem importação anterior', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 2 passed (8)
+   Start at  15:47:50
+   Duration  586ms (transform 85ms, setup 0ms, import 132ms, tests 45ms, environment 1ms)
+
