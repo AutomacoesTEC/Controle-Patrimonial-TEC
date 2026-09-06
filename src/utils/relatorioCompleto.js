@@ -44,10 +44,18 @@ function achatar(valor, caminho = [], saida = {}) {
 }
 
 export function abasRelatorioCompleto(dados = {}) {
-  return FICHAS_RELATORIO.flatMap(([campo, nome]) => {
+  const fiscais = FICHAS_RELATORIO.flatMap(([campo, nome]) => {
     const valor = dados[campo];
     if (valor == null || (Array.isArray(valor) && !valor.length)) return [];
     const linhas = (Array.isArray(valor) ? valor : [valor]).map(item => achatar(item));
     return linhas.some(linha => Object.keys(linha).length) ? [{ nome, linhas }] : [];
   });
+  const a = dados.acompanhamento;
+  if (!a) return fiscais;
+  const monetarios = new Set(['valor', 'saldoInicial', 'principal', 'juros', 'taxas', 'imposto', 'saldo', 'precoContrato', 'custoBaixado', 'despesasVenda']);
+  const financeiros = [['contas', 'Contas globais'], ['operacoes', 'Operações globais'], ['parcelas', 'Parcelas globais'], ['lancamentos', 'Razão financeiro global'], ['extratos', 'Extratos globais'], ['documentos', 'Documentos externos'], ['avaliacoes', 'Mercado não fiscal'], ['fechamentos', 'Fechamentos financeiros'], ['revisoes', 'Pareceres de revisão']].flatMap(([campo, nome]) => {
+    const linhas = (a[campo] || []).map(item => achatar(Object.fromEntries(Object.entries(item).filter(([k]) => k !== 'snapshot').map(([k, v]) => monetarios.has(k) ? [`${k} (R$)`, v == null ? 'Não informado' : v / 100] : [k, v]))));
+    return linhas.length ? [{ nome, linhas }] : [];
+  });
+  return [...fiscais, ...financeiros];
 }

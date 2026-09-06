@@ -1,0 +1,59 @@
+vite v8.2.1 building client environment for production...
+[2Ktransforming...✓ 683 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../../../tmp/cptec-otimizacoes-build-final/index.html                                        1.19 kB │ gzip:   0.51 kB
+../../../../../tmp/cptec-otimizacoes-build-final/desktop.html                                      1.23 kB │ gzip:   0.53 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-400-normal-C38fXH4l.woff2     23.66 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-500-normal-Cerq10X2.woff2     24.27 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-700-normal-Yt3aPRUw.woff2     24.35 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-600-normal-LgqL8muc.woff2     24.45 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-400-normal-CyCys3Eg.woff      30.69 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-600-normal-CiBQ2DWP.woff      31.26 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-500-normal-BL9OpVg8.woff      31.28 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/inter-latin-700-normal-BLAVimhd.woff      31.32 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/pdf.worker.min-CHFwMXne.mjs            1,262.39 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/main-COUcLEfV.css                         48.98 kB │ gzip:   9.56 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/pdf.worker.min-CycdM0Xo.js                 0.09 kB │ gzip:   0.10 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/validacao-BYasjM34.js                      0.34 kB │ gzip:   0.23 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/EstadoVazio-DVxsLUpg.js                    0.56 kB │ gzip:   0.29 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/BadgeOrigem-D7-Hg9-s.js                    0.56 kB │ gzip:   0.34 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/MoneyInput-WnIN-bJ_.js                     1.00 kB │ gzip:   0.56 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/preload-helper-HclGiUj8.js                 1.21 kB │ gzip:   0.67 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/SeletorCodigo-wdj-QOZ-.js                  1.66 kB │ gzip:   0.86 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/Ajuda-DlkzxXZK.js                          1.78 kB │ gzip:   0.83 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/Modal-Dc7dE1Iw.js                          2.31 kB │ gzip:   1.10 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/SeletorTitularidade-BYOLdOV7.js            2.35 kB │ gzip:   0.81 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/modalidadeDeclaracao-AxqK2Fv8.js           2.85 kB │ gzip:   1.29 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/HistoricoPage-l_G7jW59.js                  3.35 kB │ gzip:   1.40 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/react-dom-BAz_SvRl.js                      3.55 kB │ gzip:   1.34 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/DateInput-CcKHQmJ1.js                      3.64 kB │ gzip:   1.68 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/TabelaRedimensionavel-BlXoN2ov.js          3.92 kB │ gzip:   1.63 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/PagamentosDiversosPage-BIRdKBdX.js         5.78 kB │ gzip:   2.12 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/consultaPeriodo-DBx_W2Ph.js                5.87 kB │ gzip:   2.44 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/ModalidadePage-ddRnsSvG.js                 6.02 kB │ gzip:   2.09 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/RevisaoImportacaoModal-Cnzhyg4T.js         8.58 kB │ gzip:   3.08 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/MovimentacaoBemForm-PvTG-NZQ.js            8.75 kB │ gzip:   3.10 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/BensPage-CFGqaonw.js                       8.88 kB │ gzip:   3.03 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/PagamentosPage-7moCgEk-.js                 8.98 kB │ gzip:   2.87 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/DoacoesPage-Dt6OMwgF.js                    9.31 kB │ gzip:   3.13 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/DividasPage-CYsNct07.js                    9.42 kB │ gzip:   2.98 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/TitularPage-DFfRX8Uj.js                    9.94 kB │ gzip:   2.88 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/RevisaoPeriodicaPage-CX7mmTXY.js          11.13 kB │ gzip:   4.00 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/RendimentosPage-qQ-Gjpkl.js               13.14 kB │ gzip:   4.31 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/BemModal-5vD1CloS.js                      13.25 kB │ gzip:   2.49 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/AcompanhamentoPage-DbPVwOAg.js            19.58 kB │ gzip:   6.59 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/ImportPage-CGRGE6LS.js                    22.55 kB │ gzip:   7.57 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/RelatorioPage-C3Pyh7FJ.js                 23.26 kB │ gzip:   6.10 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/GanhosCapitalPage-Bnutgv-g.js             29.97 kB │ gzip:   8.45 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/RendaVariavelPage-CUdjHXv3.js             35.48 kB │ gzip:   8.49 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/AtividadeRuralPage-CK2aGfp1.js            46.15 kB │ gzip:   8.56 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/importParsers-C42YANYa.js                114.03 kB │ gzip:  35.27 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/DataContext-ByERAcgb.js                  133.06 kB │ gzip:  38.76 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/main-CK7D5pJ2.js                         225.85 kB │ gzip:  70.12 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/exportXlsx-CgDNGTvc.js                   339.13 kB │ gzip: 110.68 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/pdf-BL9Pr2D5.js                          427.32 kB │ gzip: 127.41 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/Dashboard-BFBSemvI.js                    442.93 kB │ gzip: 126.29 kB
+../../../../../tmp/cptec-otimizacoes-build-final/assets/leitorRegistrosDbk-B3oKE5ml.js           489.07 kB │ gzip:  63.54 kB
+
+✓ built in 3.11s

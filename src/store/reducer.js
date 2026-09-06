@@ -18,6 +18,9 @@ import { VERSAO_ESQUEMA_ATUAL } from './migracoes';
 import { arredondarCentavos } from '../utils/formatters';
 import { normalizarToleranciaSaldo, TOLERANCIA_SALDO_PADRAO } from './toleranciaSaldo';
 import { anoCadastroValido, anoDaDataCadastro } from '../utils/dataCadastro';
+import { aplicarAcompanhamento, acompanhamentoVazio } from './acompanhamento';
+import { vincularOperacao, desvincularOperacao } from './vinculosOperacoes';
+import { previaDatasLegadas, ESTOQUES } from './revisaoPeriodica';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -168,6 +171,8 @@ export const initialState = {
   // fica separada de propósito.
   pagamentosDiversos: [],
   historico: {},
+  // Global por perfil; datas próprias. Não copiar para snapshotYear/blankYear.
+  acompanhamento: acompanhamentoVazio(),
   // Log de alterações (quem mudou o quê, quando) — global, atravessa anos
   // (não faz parte de snapshotYear/blankYear de propósito, ver
   // reducerComHistorico mais abaixo).
@@ -419,6 +424,25 @@ function atualizarContinuidadeManual(antes, depois) {
 }
 
 export function reducer(state, action) {
+  if (action.type === 'MIGRAR_DATA_LEGADA') {
+    const p = action.payload;
+    if (!p.backupConfirmado || !p.responsavel?.trim()) throw new Error('Exporte o backup e informe o responsável antes da migração.');
+    const plano = previaDatasLegadas(state).find(x => x.origem === p.origem);
+    if (!plano || plano.antes !== p.antes) throw new Error('A prévia mudou. Revise novamente antes de aplicar.');
+    if (plano.impedimento) throw new Error(plano.impedimento);
+    const fonte = plano.anoOrigem === state.anoCalendario ? state : state.historico[plano.anoOrigem];
+    const original = fonte[plano.ref.campo].find(r => r.id === plano.ref.id);
+    const movimento = original?.movimentacoes?.find(m => m.id === plano.ref.movimentacaoId);
+    if (!movimento) throw new Error('Movimento de origem não encontrado.');
+    // Preserva as versões fiscais anteriores envolvidas, não uma cópia
+    // recursiva do perfil (que duplicaria backups/logs a cada migração).
+    const copiaAnterior = { origem: snapshotYear(fonte), destino: snapshotYear(estadoNoAno(state, plano.anoDestino)) };
+    let next = reducer(state, { type: 'ADD_EM_ANO', payload: { ano: plano.anoOrigem, action: { type: `DELETE_MOVIMENTACAO_${ESTOQUES[plano.ref.campo]}`, payload: { bemId: original.id, movId: movimento.id } } } });
+    next = reducer(next, { type: 'ADD_EM_ANO', payload: { ano: plano.anoDestino, action: { type: `REGISTRAR_MOVIMENTACAO_${ESTOQUES[plano.ref.campo]}`, payload: { bemId: plano.alvoId, movimentacao: { ...movimento } } } } });
+    return { ...next, migracoesDados: [...(state.migracoesDados || []), { id: novoId(), criadoEm: new Date().toISOString(), responsavel: p.responsavel.trim(), plano, copiaAnterior }] };
+  }
+  if (['VINCULAR_OPERACAO', 'DESVINCULAR_OPERACAO'].includes(action.type)) return (action.type === 'VINCULAR_OPERACAO' ? vincularOperacao : desvincularOperacao)(state, action.payload, action.meta || { id: String(novoId()), agora: new Date().toISOString() });
+  if (action.type === 'ACOMPANHAMENTO') return aplicarAcompanhamento(state, action.payload, action.meta || { id: String(novoId()), agora: new Date().toISOString() });
   const anoAlvo = ['SWITCH_ANO', 'LOAD_HISTORICO', 'ROLLOVER_ANO', 'DELETE_HISTORICO_ANO'].includes(action.type)
     ? action.payload : action.type === 'ADD_EM_ANO' ? action.payload.ano
       : action.type === 'IMPORT_DECLARACAO' ? (action.payload.anoCalendario ?? undefined)
@@ -1369,6 +1393,12 @@ function aplicarAcao(state, action) {
           : [...state.rendaVariavelMensalManual, linha],
       };
     }
+    case 'REMOVER_RENDA_VARIAVEL_MES_MANUAL':
+    case 'REMOVER_FII_MES_MANUAL': {
+      const campo = action.type === 'REMOVER_FII_MES_MANUAL' ? 'fiiFiagroMensalManual' : 'rendaVariavelMensalManual';
+      const p = action.payload;
+      return { ...state, [campo]: (state[campo] || []).filter(l => !(l.mes === p.mes && !!l.titular === !!p.titular && String(l.cpfDependente || '') === String(p.cpfDependente || ''))) };
+    }
     case 'ADD_FII_MES_MANUAL': {
       const linha = action.payload;
       const mesmaLinha = (l) => l.mes === linha.mes && !!l.titular === !!linha.titular
@@ -1515,6 +1545,10 @@ function limitarECompactarHistorico(alteracoes) {
 // ele já não existe mais).
 function descreverAcao(state, action) {
   const p = action.payload;
+  if (action.type === 'ACOMPANHAMENTO') return `Acompanhamento financeiro: ${p.comando}. Detalhes e versões preservados no registro financeiro.`;
+  if (action.type === 'VINCULAR_OPERACAO') return `Vinculou representação fiscal à operação ${p.operacaoId}`;
+  if (action.type === 'DESVINCULAR_OPERACAO') return `Removeu vínculo da operação ${p.operacaoId}: ${p.motivo}`;
+  if (action.type === 'MIGRAR_DATA_LEGADA') return `Migrou movimento para o ano da data, com backup confirmado por ${p.responsavel}`;
   switch (action.type) {
     case 'ADD_BEM': return `Cadastrou bem: ${itemLabel('bens', p)}`;
     case 'UPDATE_BEM': return `Editou bem: ${itemLabel('bens', p)}`;
@@ -1534,6 +1568,8 @@ function descreverAcao(state, action) {
     case 'ADD_DOACAO_ECA_IDOSO': return `Cadastrou doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', p)}`;
     case 'ADD_RENDA_VARIAVEL_MES_MANUAL': return `Lançou mês ${p.mes} de Renda Variável (operações comuns/day-trade) à mão: ${p.titular ? 'Titular' : `dependente ${p.cpfDependente || ''}`}`;
     case 'ADD_FII_MES_MANUAL': return `Lançou mês ${p.mes} de FII/Fiagro à mão: ${p.titular ? 'Titular' : `dependente ${p.cpfDependente || ''}`}`;
+    case 'REMOVER_RENDA_VARIAVEL_MES_MANUAL': return `Removeu ajuste manual de Renda Variável no mês ${p.mes}; restaurou a precedência do importado`;
+    case 'REMOVER_FII_MES_MANUAL': return `Removeu ajuste manual de FII/Fiagro no mês ${p.mes}; restaurou a precedência do importado`;
     case 'UPDATE_DOACAO_ECA_IDOSO': return `Editou doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', p)}`;
     case 'DELETE_DOACAO_ECA_IDOSO': return `Excluiu doação ECA/Pessoa Idosa: ${itemLabel('doacoesEcaIdosoOficial', buscar(state, 'doacoesEcaIdosoOficial', p))}`;
     case 'ADD_PAGAMENTO': return `Cadastrou pagamento: ${itemLabel('pagamentos', p)}`;

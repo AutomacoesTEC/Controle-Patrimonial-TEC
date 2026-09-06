@@ -33,6 +33,7 @@ import {
 } from './demonstrativos';
 import { snapshotHasData } from './reducer';
 import { linhasFinanceirasDoAno } from './rendaVariavelMensal';
+import { aplicarVinculosNoAno } from './vinculosOperacoes';
 
 const anoDeUmaData = (data) => Number(String(data).slice(0, 4));
 const maxData = (a, b) => (a >= b ? a : b);
@@ -41,8 +42,7 @@ const minData = (a, b) => (a <= b ? a : b);
 // Dados de um ano específico: o estado vivo se for o ano-calendário em
 // edição, senão o snapshot arquivado. null quando não existe dado do ano.
 export function dadosDoAno(state, ano) {
-  if (ano === state.anoCalendario) return state;
-  return state.historico?.[ano] || null;
+  return aplicarVinculosNoAno(ano === state.anoCalendario ? state : state.historico?.[ano] || null, state.acompanhamento, ano);
 }
 
 // Anos que têm dado real: snapshots do histórico com conteúdo (ano vazio

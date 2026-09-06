@@ -20,7 +20,7 @@ const mesmoBeneficiario = (linha, ben) =>
 
 export default function RendaVariavelMesModal({
   open, onClose, ficha, ano, beneficiarios, beneficiarioPadrao,
-  linhasDoAno, linhasAnoAnterior, onSalvar,
+  linhasDoAno, linhasAnoAnterior, onSalvar, onRemover,
 }) {
   const [mes, setMes] = useState(1);
   const [benChave, setBenChave] = useState(beneficiarioPadrao || beneficiarios[0]?.chave);
@@ -304,6 +304,7 @@ export default function RendaVariavelMesModal({
           </div>
         </div>
         <div className="modal-footer">
+          {onRemover && linhasDoAno.some(l => l.origem === 'manual' && l.mes === mes && beneficiarioAtivo && mesmoBeneficiario(l, beneficiarioAtivo)) && <button type="button" className="btn btn-secondary" onClick={() => onRemover({ mes, titular: beneficiarioAtivo.titular, cpfDependente: beneficiarioAtivo.cpfDependente })}>Remover ajuste e restaurar importado</button>}
           <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
           <button type="submit" className="btn btn-primary">Salvar</button>
         </div>

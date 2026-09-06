@@ -25,6 +25,8 @@ const RendaVariavelPage = lazy(() => import('./pages/RendaVariavelPage'));
 const RelatorioPage = lazy(() => import('./pages/RelatorioPage'));
 const HistoricoPage = lazy(() => import('./pages/HistoricoPage'));
 const ModalidadePage = lazy(() => import('./pages/ModalidadePage'));
+const AcompanhamentoPage = lazy(() => import('./pages/AcompanhamentoPage'));
+const RevisaoPeriodicaPage = lazy(() => import('./pages/RevisaoPeriodicaPage'));
 
 const SunIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -124,6 +126,8 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
   const renderPage = () => {
     switch (activeView) {
       case 'dashboard': return <Dashboard onNavigate={navegarDoDashboard} />;
+      case 'acompanhamento': return <AcompanhamentoPage />;
+      case 'revisaoPeriodica': return <RevisaoPeriodicaPage onNavigate={navegarPelaSidebar} />;
       case 'importar': return <ImportPage />;
       case 'titular': return <TitularPage />;
       case 'bens': return <BensPage onVoltar={dashboardRetorno?.view === 'bens' ? voltarAoDashboard : null} />;

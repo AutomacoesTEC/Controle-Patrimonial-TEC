@@ -131,7 +131,7 @@ function ResumoFicha({ itens }) {
 }
 
 export default function RendaVariavelPage({ onImportar } = {}) {
-  const { state, addToast, garantirAnoCadastro, despacharEmAno } = useData();
+  const { state, addToast, garantirAnoCadastro, despacharEmAno, confirmar } = useData();
   // Item E existe justamente para lançar RV do ano SEGUINTE ao ativo antes de
   // ele ter qualquer outro dado (caso do handoff: declaração em N, lançamento
   // já em N+1) — sem isso no seletor, a pessoa nunca consegue escolher um ano
@@ -585,6 +585,11 @@ export default function RendaVariavelPage({ onImportar } = {}) {
         linhasDoAno={modalFicha === 'fii' ? fii : mensal}
         linhasAnoAnterior={modalFicha === 'fii' ? fiiAnoAnterior : mensalAnoAnterior}
         onSalvar={handleSalvarMes}
+        onRemover={async linha => {
+          if (!await confirmar({ titulo: 'Remover ajuste mensal?', texto: 'O ajuste manual deste mês e beneficiário será removido. O valor importado voltará a prevalecer; se não houver importação, o mês ficará sem dados. Revise os prejuízos e créditos informados manualmente nos meses seguintes.', textoConfirmar: 'Remover ajuste', perigo: true })) return;
+          despacharEmAno(anoEscolhido, { type: modalFicha === 'fii' ? 'REMOVER_FII_MES_MANUAL' : 'REMOVER_RENDA_VARIAVEL_MES_MANUAL', payload: linha });
+          setModalFicha(null); addToast('Ajuste removido. Revise os saldos carregados nos meses seguintes.', 'success');
+        }}
       />
     </>
   );

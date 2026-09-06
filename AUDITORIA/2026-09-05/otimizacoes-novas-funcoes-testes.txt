@@ -1,0 +1,26 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/otimizacoesIntegracao.test.js (13 tests | 1 failed) 34ms
+     × ensaio protegido exige senha correta e relê o envelope restaurado 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/otimizacoesIntegracao.test.js > segurança e rotina > ensaio protegido exige senha correta e relê o envelope restaurado
+TypeError: gerarSalt is not a function
+ ❯ src/store/otimizacoesIntegracao.test.js:110:18
+    108|   });
+    109|   it('ensaio protegido exige senha correta e relê o envelope restaurad…
+    110|     const salt = gerarSalt(), chave = await derivarChave('senha-teste'…
+       |                  ^
+    111|     const arquivo = await montarArquivoBackup({ perfil: { nome: 'Sinté…
+    112|     await expect(ensaiarBackup(textoDoArquivoBackup(arquivo), 'errada'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 18 passed (19)
+   Start at  18:43:43
+   Duration  577ms (transform 540ms, setup 0ms, import 655ms, tests 51ms, environment 0ms)
+

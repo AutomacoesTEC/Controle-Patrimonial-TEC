@@ -1,0 +1,35 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ empacotamento.test.js (11 tests | 1 failed) 78ms
+     × nenhum texto de tela usa travessão conector 37ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  empacotamento.test.js > escrita da interface > nenhum texto de tela usa travessão conector
+AssertionError: expected [ 'src/pages/Dashboard.jsx:539' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/pages/Dashboard.jsx:539",
++ ]
+
+ ❯ empacotamento.test.js:153:23
+    151|       });
+    152|     }
+    153|     expect(ofensores).toEqual([]);
+       |                       ^
+    154|   });
+    155| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 15 passed (16)
+   Start at  18:50:13
+   Duration  2.23s (transform 229ms, setup 0ms, import 417ms, tests 1.83s, environment 1ms)
+

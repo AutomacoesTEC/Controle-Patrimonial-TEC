@@ -1,0 +1,110 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+stderr | src/irpf/pdfSinteticoAju01.audit.test.js > prova de cobertura do PDF sintético AJU-01 > fixa a identidade do documento oficial textual auditado
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+ ❯ empacotamento.test.js (11 tests | 2 failed) 164ms
+     × nenhum texto de tela usa "·" como separador decorativo 72ms
+     × nenhum texto de tela usa travessão conector 47ms
+ ❯ src/irpf/pdfSinteticoAju01.audit.test.js (4 tests | 1 failed) 7805ms
+     × fixa a identidade do documento oficial textual auditado 5100ms
+ ❯ src/store/reducer.historicoCobertura.test.js (1 test | 1 failed) 32ms
+     × classifica todo case novo como registrado ou infraestrutura sem histórico 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  empacotamento.test.js > escrita da interface > nenhum texto de tela usa "·" como separador decorativo
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/pages/AcompanhamentoPage.jsx",
++   "src/pages/RevisaoPeriodicaPage.jsx",
++ ]
+
+ ❯ empacotamento.test.js:135:56
+    133|   it('nenhum texto de tela usa "·" como separador decorativo', () => {
+    134|     const comSeparador = arquivosDeTela().filter(f => readFileSync(f, …
+    135|     expect(comSeparador.map(f => f.replace(RAIZ, ''))).toEqual([]);
+       |                                                        ^
+    136|   });
+    137|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  empacotamento.test.js > escrita da interface > nenhum texto de tela usa travessão conector
+AssertionError: expected [ …(11) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/pages/AcompanhamentoPage.jsx:39",
++   "src/pages/AcompanhamentoPage.jsx:57",
++   "src/pages/AcompanhamentoPage.jsx:58",
++   "src/pages/AcompanhamentoPage.jsx:71",
++   "src/pages/AcompanhamentoPage.jsx:82",
++   "src/pages/AcompanhamentoPage.jsx:85",
++   "src/pages/AcompanhamentoPage.jsx:91",
++   "src/pages/AcompanhamentoPage.jsx:111",
++   "src/pages/Dashboard.jsx:539",
++   "src/pages/RevisaoPeriodicaPage.jsx:50",
++   "src/pages/RevisaoPeriodicaPage.jsx:58",
++ ]
+
+ ❯ empacotamento.test.js:153:23
+    151|       });
+    152|     }
+    153|     expect(ofensores).toEqual([]);
+       |                       ^
+    154|   });
+    155| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/irpf/pdfSinteticoAju01.audit.test.js > prova de cobertura do PDF sintético AJU-01 > fixa a identidade do documento oficial textual auditado
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/irpf/pdfSinteticoAju01.audit.test.js:28:3
+     26|
+     27| describe.skipIf(!temPdf)('prova de cobertura do PDF sintético AJU-01',…
+     28|   it('fixa a identidade do documento oficial textual auditado', async …
+       |   ^
+     29|     const { bytes, paginas } = await extrairPaginas();
+     30|     const hash = createHash('sha256').update(bytes).digest('hex');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/store/reducer.historicoCobertura.test.js > cobertura estrutural do histórico de alterações > classifica todo case novo como registrado ou infraestrutura sem histórico
+AssertionError: todo novo mutador deve entrar no histórico ou na exclusão explícita: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "REMOVER_RENDA_VARIAVEL_MES_MANUAL",
++   "REMOVER_FII_MES_MANUAL",
++ ]
+
+ ❯ src/store/reducer.historicoCobertura.test.js:36:101
+     34|     );
+     35|
+     36|     expect(semClassificacao, 'todo novo mutador deve entrar no históri…
+       |                                                                                                     ^
+     37|     expect(exclusoesObsoletas, 'a lista de exclusão não pode esconder …
+     38|     expect(acoesComHistorico.size + infraestruturaSemHistorico.length)…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed | 70 passed (73)
+      Tests  4 failed | 1057 passed (1061)
+   Start at  18:48:19
+   Duration  62.22s (transform 10.87s, setup 0ms, import 20.73s, tests 103.73s, environment 25ms)
+

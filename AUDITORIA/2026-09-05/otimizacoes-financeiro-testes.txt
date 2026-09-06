@@ -1,0 +1,40 @@
+
+ RUN  v4.1.10 /home/automacaotec/PROJETOS/Planilha Eudúcio/controle-patrimonial-fonte
+
+ ❯ src/store/acompanhamento.test.js (6 tests | 1 failed) 24ms
+     × contrato/projeção não são recebimento; transferência própria não é renda nem despesa 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/store/acompanhamento.test.js > razão financeiro independente da foto fiscal > contrato/projeção não são recebimento; transferência própria não é renda nem despesa
+AssertionError: expected { contas: 2, inicial: +0, …(8) } to match object { final: 11000000, entradas: +0, …(3) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "entradas": 0,
+    "final": 11000000,
+    "projetado": 101000,
+-   "saidas": 0,
++   "saidas": -0,
+    "transferencias": 0,
+  }
+
+ ❯ src/store/acompanhamento.test.js:19:75
+     17|     let s = fixture();
+     18|     s = executar(s, 't1', 'lancamento', { contaId: 'banco', destinoId:…
+     19|     expect(caixaPeriodo(acompanhamentoDo(s), '2026-01-01', '2026-01-31…
+       |                                                                           ^
+     20|     expect(caixaPeriodo(acompanhamentoDo(s), '2026-01-01', '2026-01-31…
+     21|     expect(s.anoCalendario).toBe(2025);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  18:26:26
+   Duration  846ms (transform 391ms, setup 0ms, import 461ms, tests 24ms, environment 0ms)
+

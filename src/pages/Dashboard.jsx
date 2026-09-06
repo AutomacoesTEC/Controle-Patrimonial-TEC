@@ -3,6 +3,7 @@ import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCPF, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
+import { acompanhamentoDo, caixaPeriodo } from '../store/acompanhamento';
 import { version as VERSAO_APP } from '../../package.json';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
@@ -548,6 +549,12 @@ export default function Dashboard({ onNavigate } = {}) {
             </div>
           </section>
         )}
+
+        {(() => {
+          if (!de || !ate || de > ate) return null;
+          const caixa = caixaPeriodo(acompanhamentoDo(estadoCompleto), de, ate, pessoaSelecionada);
+          return <section className="card acomp-card"><h3>Visão financeira separada</h3><p>Disponibilidade registrada nas contas: <strong>{caixa.contas ? formatCurrency(caixa.final / 100) : 'Não informada: cadastre contas'}</strong>. Fluxo previsto sem baixa: {formatCurrency(caixa.projetado / 100)}.</p><p>Não é a diferença fiscal acima. A comprovação depende de extratos conciliados; avaliações de mercado permanecem em visão própria, sem mudar o custo fiscal.</p>{onNavigate && <button className="btn btn-secondary" onClick={() => onNavigate('acompanhamento')}>Abrir contas, extratos e visão econômica</button>}</section>;
+        })()}
 
         {continuidade.disponivel && (
           <div className="card continuidade-card">

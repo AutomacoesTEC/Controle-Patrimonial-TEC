@@ -58,3 +58,6 @@ output/pdf/*.microsoft-print-image-only-*.pdf
 # esperados pelos testes). Mora fora do repositório; a regra existe para o caso
 # de alguém copiá-lo para dentro por engano.
 *.local.json
+
+# Cache do Python do backend desktop
+__pycache__/

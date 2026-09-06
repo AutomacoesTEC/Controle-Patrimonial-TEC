@@ -168,6 +168,7 @@ export async function montarArquivoBackup({
       cpfFinal: protegido ? (perfil.cpfFinal || '') : '',
     },
     protegido: !!protegido,
+    documentos: { incluiArquivosExternos: false, incluiReferenciasLocais: true, orientacao: 'Copie separadamente os documentos apontados pelas referências e os extratos. O backup contém dados e referências, não os arquivos externos.' },
     salt: protegido ? (salt || null) : null,
     conteudo,
   };

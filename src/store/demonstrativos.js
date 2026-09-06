@@ -13,6 +13,7 @@
 import { linhasFinanceirasDoAno } from './rendaVariavelMensal';
 import { pessoaDoRegistro } from './titularidade';
 import { arredondarCentavos } from '../utils/formatters';
+import { aplicarVinculosNoAno } from './vinculosOperacoes';
 
 const emDataOuAntes = (data, corte) => !!data && (!corte || data <= corte);
 
@@ -538,7 +539,8 @@ const ultimoDiaDoMes = (ano, mes) => {
 //
 // Achado na auditoria de 21/08/2026, confirmado na fonte oficial antes de
 // mexer, e decidido junto com o chefe da usuária.
-export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos = [] }, dataDe, dataAte) {
+export function ganhosApuradosPeriodo(dados, dataDe, dataAte) {
+  const { bens, apuracaoGanhoCapital, rendimentos = [] } = aplicarVinculosNoAno(dados, dados.acompanhamento, dados.anoCalendario);
   const vendas = [];
   for (const b of (bens || [])) {
     for (const m of (b.movimentacoes || [])) {
@@ -609,7 +611,7 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos 
     }
     const ganhoBruto = (g.valorAlienacao || 0) - (g.custoAquisicao || 0);
     vendas.push({
-      pessoa: pessoaFinanceira(g), bem: g.bem, data: g.dataAlienacao, ganhoBruto, irrf: 0, valorVenda: g.valorAlienacao || 0,
+      pessoa: pessoaFinanceira(g), operacaoId: g.operacaoId, bem: g.bem, data: g.dataAlienacao, ganhoBruto, irrf: 0, valorVenda: g.valorAlienacao || 0,
       ganhoLiquido: ganhoBruto, semIrrf: ganhoBruto > 0, daDeclaracao: true,
     });
   }
@@ -632,9 +634,16 @@ export function ganhosApuradosPeriodo({ bens, apuracaoGanhoCapital, rendimentos 
 
   const totalOperacoes = vendas.reduce((s, v) => s + v.ganhoLiquido, 0);
   let jaNosRendimentos = 0;
+  // Vínculos explícitos têm prioridade e só abatem o resumo da MESMA operação.
+  // O fallback legado continua restrito aos registros ainda não vinculados.
+  for (const id of new Set(vendas.map(v => v.operacaoId).filter(Boolean))) {
+    const positivos = vendas.filter(v => v.operacaoId === id).reduce((s, v) => s + Math.max(v.ganhoLiquido, 0), 0);
+    const resumo = rendimentos.filter(r => r.operacaoId === id && !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && noPeriodo(r.data, dataDe, dataAte)).reduce((s, r) => s + (Number(r.valor) || 0) - (Number(r.irrf) || 0), 0);
+    jaNosRendimentos += Math.min(positivos, Math.max(resumo, 0));
+  }
   for (const pessoa of new Set(vendas.map(v => v.pessoa))) {
-    const positivos = vendas.filter(v => v.pessoa === pessoa).reduce((s,v) => s + Math.max(v.ganhoLiquido, 0), 0);
-    const resumoFiscal = rendimentos.filter(r => !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && pessoaFinanceira(r) === pessoa && noPeriodo(r.data, dataDe, dataAte))
+    const positivos = vendas.filter(v => !v.operacaoId && v.pessoa === pessoa).reduce((s,v) => s + Math.max(v.ganhoLiquido, 0), 0);
+    const resumoFiscal = rendimentos.filter(r => !r.operacaoId && !r.naoSomar && /^exclusivo_0*2$/.test(r.tipo || '') && pessoaFinanceira(r) === pessoa && noPeriodo(r.data, dataDe, dataAte))
       .reduce((s, r) => s + (parseFloat(r.valor) || 0) - (parseFloat(r.irrf) || 0), 0);
     jaNosRendimentos += Math.min(positivos, Math.max(resumoFiscal, 0));
   }
