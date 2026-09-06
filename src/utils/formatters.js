@@ -185,6 +185,19 @@ export function formatDate(dateStr) {
   return d.toLocaleDateString('pt-BR');
 }
 
+// Carimbo de auditoria (criadoEm/registradoEm): o valor gravado é ISO em UTC.
+// Na tela ele vira data brasileira mais a hora de quem lê. Data pura, sem
+// hora, continua indo por formatDate, que não passa por Date e não erra o dia.
+export function formatDateTime(valor) {
+  if (!valor) return '';
+  // Sem instante no valor não há hora para mostrar, e passar "YYYY-MM-DD" por
+  // Date devolveria o dia anterior num fuso negativo. Ver formatDate acima.
+  if (!/\d[T ]\d/.test(String(valor))) return formatDate(valor);
+  const d = new Date(valor);
+  if (isNaN(d.getTime())) return formatDate(valor);
+  return `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
 // Rótulos oficiais para os tipos de rendimento que o import por .DBK gera
 // (registros 21/23/24), conferidos em 17/08/2026 contra o manual de ajuda
 // do programa IRPF2026 (exercício 2026, ano-calendário 2025), arquivo

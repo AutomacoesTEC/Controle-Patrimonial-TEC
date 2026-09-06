@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, mascaraCpf, mascaraCnpj, mascaraCpfCnpj, formatDate, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento, nomeCurtoBem, CODIGOS_DIVIDA, describeDividaCodigo, CODIGOS_DEPENDENCIA, normalizarBusca, opcoesSeletorBem, filtrarOpcoesBem, decidirReaberturaAposNovoBem } from './formatters';
+import { formatCurrency, resumirMeses, formatCPF, formatCNPJ, formatCpfCnpj, mascaraCpf, mascaraCnpj, mascaraCpfCnpj, formatDate, formatDateTime, describeRendimentoTipo, categoriaRendimento, describePagamentoCodigo, descreverTitularidade, marcadoresDoBem, bemNoExterior, describeRelacaoDependencia, textoOficialRelacaoDependencia, descreverOrigemDocumento, descreverDocumentoParticipante, codigosDoRendimento, nomeCurtoBem, CODIGOS_DIVIDA, describeDividaCodigo, CODIGOS_DEPENDENCIA, normalizarBusca, opcoesSeletorBem, filtrarOpcoesBem, decidirReaberturaAposNovoBem } from './formatters';
 
 describe('formatCpfCnpj', () => {
   it('formata 11 dígitos como CPF', () => {
@@ -482,5 +482,24 @@ describe('nomeCurtoBem', () => {
     expect(nomeCurtoBem('').length).toBe(0);
     expect(nomeCurtoBem(null)).toBe('');
     expect(nomeCurtoBem('X'.repeat(200)).length).toBeLessThanOrEqual(51);
+  });
+});
+
+// Regressão de 06/09/2026: as tabelas do acompanhamento mostravam o carimbo
+// ISO cru ("2026-09-06T14:29:26.130Z") na coluna de data.
+describe('formatDateTime', () => {
+  it('mostra data brasileira com hora e nunca devolve o ISO cru', () => {
+    const saida = formatDateTime('2026-09-06T14:29:26.130Z');
+    expect(saida).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
+    expect(saida).not.toContain('T');
+    expect(saida.slice(0, 10)).toBe(new Date('2026-09-06T14:29:26.130Z').toLocaleDateString('pt-BR'));
+  });
+  it('data sem hora não anda um dia para trás', () => {
+    expect(formatDateTime('2026-03-15')).toBe('15/03/2026');
+  });
+  it('vazio e texto inválido não viram Invalid Date', () => {
+    expect(formatDateTime('')).toBe('');
+    expect(formatDateTime(null)).toBe('');
+    expect(formatDateTime('sem data')).toBe('sem data');
   });
 });

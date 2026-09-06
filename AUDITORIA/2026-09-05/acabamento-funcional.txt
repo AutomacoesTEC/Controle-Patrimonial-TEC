@@ -1,0 +1,12 @@
+{"funcao": "Contas datadas em 2026 com ano ativo 2025; titular/dependente e edição", "resultado": "PASSOU"}
+{"funcao": "Operação, cronograma separado de caixa e referência documental externa", "resultado": "PASSOU"}
+{"funcao": "Vínculo venda/GCAP/rendimento sem duplicação e sem alterar documento fiscal", "resultado": "PASSOU"}
+{"funcao": "Transferência pareada: caixa consolidado inalterado e filtro de dependente", "resultado": "PASSOU"}
+{"funcao": "Baixa na data de recebimento, consultas mensais e exportação Excel", "resultado": "PASSOU"}
+{"funcao": "Extratos, fechamento com checklist, trava retroativa e reabertura versionada", "resultado": "PASSOU"}
+{"funcao": "Mercado e resultado econômico separados do custo fiscal e caixa", "resultado": "PASSOU"}
+{"funcao": "Pendência acionável, parecer, backup restaurado em memória e exportação da revisão", "resultado": "PASSOU"}
+{"funcao": "Teclado no modal, largura reduzida, dimensionamento e impressão sem corte lateral", "resultado": "PASSOU"}
+{"funcao": "Remover RV manual restaura importado sem apagar mês oficial", "resultado": "PASSOU"}
+{"funcao": "Persistência após recarregar e demonstrativo com visão financeira separada", "resultado": "PASSOU"}
+{"total": 11, "aprovados": 11, "erros_js": []}

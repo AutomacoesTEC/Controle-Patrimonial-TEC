@@ -48,3 +48,13 @@ O comportamento de "Nova baixa financeira" com entrada ou saída não muda: a op
 ## Limites que continuam valendo
 
 O caixa registrado depende dos extratos informados: ele não prova saldo bancário nem substitui a diferença de conciliação fiscal. Contratos e parcelas não são recebimentos. O ensaio de backup confirma integridade, senha e releitura, não o estado físico da mídia. A migração de data legada é individual e nunca automática. Nada foi executado sobre a base real do usuário, e o executável Windows empacotado não foi exercitado nesta rodada.
+
+## Acabamento visto na tela, 06/09/2026
+
+Os testes de estado e o funcional passavam, mas três defeitos só apareciam nas telas renderizadas. Capturas em Chromium descartável, perfil sintético.
+
+1. **Carimbo de auditoria em ISO cru.** As colunas de data das tabelas de operações, documentos, fechamentos e pareceres mostravam `2026-09-06T14:29:26.130Z`. Passaram a usar `formatDateTime()`, novo em `src/utils/formatters.js`. Datas puras continuam por `formatDate`, porque `new Date('2026-03-15')` é meia-noite UTC e devolveria o dia anterior em fuso negativo — o teste de regressão cobre exatamente esse caso.
+2. **Indicador do menu tapando um item.** `.sidebar-more` era uma pílula flutuante sobre a área rolável; o `padding-bottom` do `.sidebar-nav` só reserva espaço depois do último item, então "Renda Variável" ficava por baixo dela depois que as duas entradas novas alongaram a lista. Virou faixa de rodapé com desvanecimento.
+3. **Rótulo colado no campo.** Em Revisão e pendências, "Mês de revisão" e "Responsável pela revisão" ficavam grudados no controle, porque a regra de `.form-group` só valia dentro do modal. Estendida para os formulários da própria página.
+
+Verificação: suíte com 73 arquivos e 1.067 testes aprovados (`acabamento-suite.txt`), funcional com 11 de 11 e nenhum erro de JavaScript (`acabamento-funcional.txt`), build de produção limpo em diretório temporário (`acabamento-build.txt`).
