@@ -49,6 +49,26 @@ describe('identidade explícita e representações preservadas', () => {
     expect(resolverReferencia(s, null)).toBeNull();
     expect(referenciasFiscais(s).length).toBe(3);
   });
+  it('P08: a ficha mensal do titular não pode ser vinculada à operação de um dependente', () => {
+    const s = base(); // operação "venda", pessoa: titular
+    s.rendaVariavelMensalManual = [
+      { mes: 3, titular: true, comuns: { prejuizoCompensar: 100 } },
+      { mes: 4, titular: false, cpfDependente: '33344455508', comuns: { prejuizoCompensar: 50 } },
+    ];
+    s.acompanhamento = { ...s.acompanhamento, operacoes: [
+      ...s.acompanhamento.operacoes,
+      { id: 'venda-dep', descricao: 'Venda do dependente', pessoa: '33344455508', tipo: 'venda', anoFiscal: 2026, vinculos: [], criadoEm: '2026-01-01T00:00:00.000Z' },
+    ] };
+    const vinc = (operacaoId, chaveMensal) => vincularOperacao(
+      s, { operacaoId, ref: { ano: 2026, campo: 'rendaVariavelMensalManual', chaveMensal } }, meta(`m-${operacaoId}-${chaveMensal}`),
+    );
+    // Ficha do titular x operação de dependente: recusa.
+    expect(() => vinc('venda-dep', '3|t|')).toThrow('titularidades');
+    // Ficha do dependente x operação do titular: recusa.
+    expect(() => vinc('venda', '4|d|33344455508')).toThrow('titularidades');
+    // Ficha do titular x operação do titular: aceita.
+    expect(vinc('venda', '3|t|').acompanhamento.operacoes.find(o => o.id === 'venda').vinculos).toHaveLength(1);
+  });
   it('chave de importação exata sobrevive à troca de id e desaparecimento vira pendência', () => {
     let s = base(); s.rendimentos = [{ id: 4, chaveImportacao: 'r:4', beneficiario: 'Titular', data, valor: 150, tipo: 'exclusivo_02' }];
     s = vincular(s, 'rendimentos', 4, { chaveImportacao: 'r:4' });

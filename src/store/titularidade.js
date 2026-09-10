@@ -4,6 +4,14 @@ const nomeNormalizado = v => String(v || '').trim().toLocaleLowerCase('pt-BR');
 export function pessoaDoRegistro(item = {}, dependentes = []) {
   const tipo = nomeNormalizado(item.titularidade || item.beneficiario);
   const cpf = digitos(item.cpf_titularidade || item.cpf_beneficiario || item.cpf_dependente || item.cpfDependente);
+  // Ficha mensal de renda variável / FII: a identidade vem do booleano
+  // `titular` e de `cpfDependente` (mesma convenção de `identidadeMensal` em
+  // vinculosOperacoes.js e do filtro por pessoa abaixo), nunca de um rótulo de
+  // texto. Sem isto, a ficha do titular resolvia para 'nao-informada' e
+  // `vincularOperacao` aceitava associá-la à operação de qualquer pessoa
+  // (item P08 da auditoria funcional 2026-09-09).
+  if (item.titular === true) return 'titular';
+  if (item.titular === false && cpf) return cpf;
   if (tipo === 'titular' || tipo === 't') return 'titular';
   if (tipo === 'alimentando') return 'alimentando';
   if (cpf) return cpf;
