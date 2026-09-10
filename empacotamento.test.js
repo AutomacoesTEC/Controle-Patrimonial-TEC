@@ -127,7 +127,10 @@ describe('empacotamento Windows: os contratos entre os arquivos', () => {
 describe('escrita da interface', () => {
   const arquivosDeTela = () => {
     const { globSync } = require('node:fs');
-    return [...globSync(`${RAIZ}src/pages/*.jsx`), ...globSync(`${RAIZ}src/components/*.jsx`)];
+    return [...globSync(`${RAIZ}src/pages/*.jsx`), ...globSync(`${RAIZ}src/components/*.jsx`)]
+      // Arquivos de teste não são interface: o título de um `it(...)` pode usar
+      // travessão livremente.
+      .filter(f => !/\.test\.jsx?$/.test(f));
   };
 
   it('nenhum texto de tela usa "·" como separador decorativo', () => {
