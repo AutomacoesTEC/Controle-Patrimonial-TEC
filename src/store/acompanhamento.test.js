@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { aplicarAcompanhamento, acompanhamentoDo, caixaPeriodo, conciliarConta, fechamentoAtual, centavos, formularioInicial, ajusteDoTipoDeBaixa } from './acompanhamento';
 import { reducer, initialState, snapshotYear } from './reducer';
 
@@ -93,5 +94,32 @@ describe('formulário do acompanhamento', () => {
   it('preserva o recorte de pessoa e o mês da consulta', () => {
     expect(formularioInicial('conta', {}, { pessoa: '33344455508', mes: '2026-03' })).toMatchObject({ pessoa: '33344455508', mes: '2026-03', disponivel: true, saldoInicial: '0' });
     expect(formularioInicial('conta', {}, { pessoa: 'todos', mes: '2026-03' }).pessoa).toBe('titular');
+  });
+
+  it('P02: "Classificar depois" — baixa salva sem categoria e classificação posterior não muda os totais', () => {
+    let s = fixture();
+    // Baixa válida com "Classificar depois" (categoriaFluxo vazio).
+    s = executar(s, 'b1', 'lancamento', {
+      contaId: 'banco', tipo: 'entrada', data: '2026-01-10', valor: 5000,
+      descricao: 'Recebimento', contraparte: 'Cliente', categoriaFluxo: '',
+    });
+    const l = acompanhamentoDo(s).lancamentos.find(x => x.id === 'b1');
+    expect(l).toBeTruthy();
+    expect(l.categoriaFluxo).toBe('');
+    const totais = c => (({ inicial, aberturas, entradas, saidas, transferencias, final }) =>
+      ({ inicial, aberturas, entradas, saidas, transferencias, final }))(c);
+    const antes = totais(caixaPeriodo(acompanhamentoDo(s), '2026-01-01', '2026-01-31'));
+    // Classificação posterior da mesma baixa.
+    s = executar(s, 'c1', 'classificarLancamento', { id: 'b1', categoriaFluxo: 'renda' });
+    expect(acompanhamentoDo(s).lancamentos.find(x => x.id === 'b1').categoriaFluxo).toBe('renda');
+    const depois = totais(caixaPeriodo(acompanhamentoDo(s), '2026-01-01', '2026-01-31'));
+    expect(depois).toEqual(antes);
+  });
+
+  it('P02: o select de classificação de fontes/aplicações não é required no formulário', () => {
+    // Guarda de UI (o domínio já aceita vazio; o bug era o `required` do <select>).
+    const fonte = readFileSync(new URL('../pages/AcompanhamentoPage.jsx', import.meta.url), 'utf8');
+    expect(fonte).toMatch(/campo\('categoriaFluxo'[^\n]*\], undefined, true\)/);
+    expect(fonte).toMatch(/required=\{!opcional\}/);
   });
 });
