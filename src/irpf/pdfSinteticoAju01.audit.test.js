@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { abrirPdfDeTeste } from './pdfDeTeste';
 
 const PDF_AJU_01 = process.env.IRPF_AJU01_PDF
   || fileURLToPath(new URL('../../output/pdf/AJU-01-DECLARACAO-COMPLETA-IRPF-2026.pdf', import.meta.url));
@@ -11,8 +12,7 @@ const temPdf = existsSync(PDF_AJU_01);
 
 async function extrairPaginas() {
   const bytes = await readFile(PDF_AJU_01);
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(bytes) }).promise;
+  const pdf = await abrirPdfDeTeste(new Uint8Array(bytes));
   const paginas = [];
 
   for (let numero = 1; numero <= pdf.numPages; numero += 1) {

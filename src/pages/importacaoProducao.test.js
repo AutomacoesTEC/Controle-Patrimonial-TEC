@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { parsePDF } from './importParsers';
+import { abrirPdfDeTeste } from '../irpf/pdfDeTeste';
 
 describe('PDF sintético com a validação usada na importação real', () => {
   for (const nome of ['AJU-01-DECLARACAO-COMPLETA', 'ESP-01-DECLARACAO-FINAL-ESPOLIO', 'SAI-01-DECLARACAO-SAIDA-DEFINITIVA']) {
     it(nome, async () => {
-      const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
       const data = new Uint8Array(await readFile(new URL(`../../output/pdf/${nome}-IRPF-2026.pdf`, import.meta.url)));
-      const pdf = await pdfjs.getDocument({ data }).promise;
+      const pdf = await abrirPdfDeTeste(data);
       try {
         const result = await parsePDF(pdf);
         expect(result.anoCalendario).toBe(2025);
