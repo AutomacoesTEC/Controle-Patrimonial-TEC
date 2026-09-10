@@ -10,7 +10,7 @@
 // perfil com histórico de dois anos, que é onde a migração de arquivo antigo
 // realmente importa (ver migracoes.js).
 //
-// perfil-aju01-atual.json  estado no formato de hoje (versaoEsquema 2).
+// perfil-aju01-atual.json  estado no formato de hoje (versaoEsquema 3).
 // perfil-aju01-v1.json     o MESMO estado como uma versão antiga do app o
 //                          teria gravado: sem marca de versão e sem as
 //                          chaves cujo valor é o vazio do formato — que é
@@ -45,7 +45,7 @@ registerHooks({
 });
 
 const { initialState, reducer } = await import('../reducer.js');
-const { CAMPOS_DO_SNAPSHOT_V2 } = await import('../migracoes.js');
+const { CAMPOS_DO_SNAPSHOT_V3 } = await import('../migracoes.js');
 const { payloadImportacaoCompleto } = await import('../../utils/importacaoDeclaracao.js');
 
 const aqui = (rel) => fileURLToPath(new URL(rel, import.meta.url));
@@ -66,8 +66,10 @@ estado = reducer(estado, { type: 'LOAD_HISTORICO', payload: anoDeclarado });
 
 const { toasts: _toasts, ...atual } = estado;
 
-// Um valor "vazio" é o que a versão 2 usaria como padrão daquele campo.
+// Um valor "vazio" é o que o formato de hoje usaria como padrão daquele campo:
+// null, lista/objeto vazio, 0 ou (desde a versão 3) o booleano false.
 const ehVazio = (valor) => valor === null
+  || valor === false
   || (Array.isArray(valor) && valor.length === 0)
   || (valor !== null && typeof valor === 'object' && Object.keys(valor).length === 0)
   || valor === 0;
@@ -75,7 +77,7 @@ const ehVazio = (valor) => valor === null
 function comoVersao1(objeto) {
   const { versaoEsquema: _v, ...resto } = objeto;
   const removidos = [];
-  for (const campo of CAMPOS_DO_SNAPSHOT_V2) {
+  for (const campo of CAMPOS_DO_SNAPSHOT_V3) {
     if (campo in resto && ehVazio(resto[campo])) {
       delete resto[campo];
       removidos.push(campo);

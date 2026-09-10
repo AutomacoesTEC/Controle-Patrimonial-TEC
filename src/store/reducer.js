@@ -121,6 +121,13 @@ export const initialState = {
   dividasRurais: [],
   lancamentosRurais: [],
   prejuizoRuralAcompensar: 0,
+  // `true` só depois de AJUSTAR_PREJUIZO_RURAL: a usuária sobrepôs à mão o saldo
+  // de prejuízo rural a compensar, e a partir daí `saldoRuralInformado` passa a
+  // usar `prejuizoRuralAcompensar` em vez do saldo oficial da declaração. É por
+  // ANO (entra em blankYear/snapshotYear e na versão 3 do esquema — ver
+  // migracoes.js): sem estar aqui e no snapshot, um ano antigo herdava a flag
+  // do ano da tela pelo spread de LOAD_HISTORICO (item P01 da auditoria).
+  prejuizoRuralAjustadoManualmente: false,
   // Receitas e Despesas mensais (registro 51) e Apuração do Resultado
   // (registro 52) OFICIAIS, lidas da própria declaração importada —
   // puramente informativas, mesmo padrão de impostoDevido/

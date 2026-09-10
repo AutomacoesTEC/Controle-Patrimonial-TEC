@@ -23,7 +23,7 @@
 //
 // COMO ACRESCENTAR UMA VERSÃO:
 //   1. suba VERSAO_ESQUEMA_ATUAL;
-//   2. escreva `migrar2para3` e registre em MIGRACOES;
+//   2. escreva `migrarNparaN+1` e registre em MIGRACOES;
 //   3. congele a lista de campos do ano dessa versão em
 //      CAMPOS_DO_ANO_POR_VERSAO (nunca edite a lista de uma versão já
 //      publicada: ela é o retrato daquele formato);
@@ -33,7 +33,15 @@
 // Versão 2: primeira versão marcada; formato do HEAD de 03/09/2026, já com
 //           rendaVariavelMensalManual e fiiFiagroMensalManual (item E do
 //           HANDOFF-2026-09-03.md).
-export const VERSAO_ESQUEMA_ATUAL = 2;
+// Versão 3: acrescenta `prejuizoRuralAjustadoManualmente` (flag por ano — item
+//           P01 da auditoria funcional de 09/09/2026). O campo tinha entrado em
+//           blankYear/snapshotYear sem subir a versão: um snapshot v1/v2 sem a
+//           chave deixava o valor `true` do ano anterior VAZAR pelo
+//           `{...state, ...snapshot}` de SWITCH_ANO/LOAD_HISTORICO/ROLLOVER_ANO,
+//           e `saldoRuralInformado` passava a ignorar o saldo oficial de
+//           prejuízo rural de um ano antigo. A migração completa a chave com
+//           `false` na raiz e em cada snapshot.
+export const VERSAO_ESQUEMA_ATUAL = 3;
 
 // --- Retrato do formato da versão 2 -----------------------------------------
 // Os quatro grupos abaixo são só a forma de escrever o valor vazio de cada
@@ -80,9 +88,23 @@ export const CAMPOS_DO_SNAPSHOT_V2 = Object.freeze(
   [...CAMPOS_DO_ANO_V2, ...CAMPOS_QUE_ATRAVESSAM_ANOS_V2].sort()
 );
 
+// --- Retrato do formato da versão 3 -----------------------------------------
+// Só um campo novo em relação à versão 2: a flag booleana de ajuste manual do
+// prejuízo rural. Default `false`. A lista da versão 2 continua congelada.
+const BOOLEANOS_FALSE_DO_ANO_V3 = ['prejuizoRuralAjustadoManualmente'];
+
+export const CAMPOS_DO_ANO_V3 = Object.freeze(
+  [...CAMPOS_DO_ANO_V2, ...BOOLEANOS_FALSE_DO_ANO_V3].sort()
+);
+
+export const CAMPOS_DO_SNAPSHOT_V3 = Object.freeze(
+  [...CAMPOS_DO_ANO_V3, ...CAMPOS_QUE_ATRAVESSAM_ANOS_V2].sort()
+);
+
 // Retrato por versão, para o teste de contrato conferir contra `blankYear`.
 export const CAMPOS_DO_ANO_POR_VERSAO = Object.freeze({
   2: CAMPOS_DO_ANO_V2,
+  3: CAMPOS_DO_ANO_V3,
 });
 
 // Fábricas, não valores: dois anos do histórico nunca podem compartilhar o
@@ -141,9 +163,37 @@ export function migrar1para2(estado) {
   return { ...raiz, ...(historico === undefined ? {} : { historico }), versaoEsquema: 2 };
 }
 
+// Salto 2 para 3: completa `prejuizoRuralAjustadoManualmente` (default `false`)
+// na RAIZ e em cada snapshot do histórico que não tenha a chave, e recarimba a
+// marca de versão nos dois níveis. Valor já gravado é preservado — inclusive um
+// `true` legítimo de um ano em que a usuária ajustou o prejuízo rural à mão
+// (AJUSTAR_PREJUIZO_RURAL); só a ausência (`undefined`) recebe `false`. É o que
+// impede a flag de um ano de vazar para outro pelo spread de LOAD_HISTORICO.
+export function migrar2para3(estado) {
+  if (!ehObjeto(estado)) return estado;
+  const completar = (alvo) => (
+    ehObjeto(alvo) && alvo.prejuizoRuralAjustadoManualmente === undefined
+      ? { ...alvo, prejuizoRuralAjustadoManualmente: false }
+      : alvo
+  );
+  const raiz = completar(estado);
+  let historico = raiz.historico;
+  if (ehObjeto(historico)) {
+    const migrado = {};
+    for (const [ano, snapshot] of Object.entries(historico)) {
+      migrado[ano] = ehObjeto(snapshot)
+        ? { ...completar(snapshot), versaoEsquema: 3 }
+        : snapshot;
+    }
+    historico = migrado;
+  }
+  return { ...raiz, ...(historico === undefined ? {} : { historico }), versaoEsquema: 3 };
+}
+
 // Uma função por salto de versão. A chave é a versão de ORIGEM.
 export const MIGRACOES = Object.freeze({
   1: migrar1para2,
+  2: migrar2para3,
 });
 
 // Ponto de entrada da carga do perfil (DataContext.jsx). Aplica os saltos em

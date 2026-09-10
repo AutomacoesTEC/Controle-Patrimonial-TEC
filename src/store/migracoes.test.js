@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import {
   CAMPOS_DO_ANO_POR_VERSAO,
   CAMPOS_DO_SNAPSHOT_V2,
+  CAMPOS_DO_SNAPSHOT_V3,
   MIGRACOES,
   VERSAO_ESQUEMA_ATUAL,
   migrarEstadoPersistido,
@@ -11,6 +12,7 @@ import {
 import { blankYear, initialState, reducer, snapshotYear } from './reducer';
 import { carregarEstadoDoPerfil } from './DataContext';
 import { demonstrativoConciliacao } from './demonstrativos';
+import { saldoRuralInformado } from './saldoRural';
 
 const lerFixture = (nome) => JSON.parse(
   readFileSync(new URL(`./__fixtures__/${nome}`, import.meta.url), 'utf8')
@@ -111,7 +113,7 @@ describe('cadeia de migração sobre o perfil real do AJU-01', () => {
 
   test('todo campo do formato fica DEFINIDO na raiz e em cada ano do histórico', () => {
     const carregado = carregarEstadoDoPerfil(PERFIL_V1);
-    for (const campo of CAMPOS_DO_SNAPSHOT_V2) {
+    for (const campo of CAMPOS_DO_SNAPSHOT_V3) {
       expect(carregado[campo], `campo indefinido na raiz: ${campo}`).toBeDefined();
       for (const ano of Object.keys(carregado.historico)) {
         expect(carregado.historico[ano][campo], `campo indefinido em historico[${ano}]: ${campo}`).toBeDefined();
@@ -194,6 +196,47 @@ describe('o que a migração protege de verdade: o interior do histórico', () =
     expect(de2025.fiiFiagroMensalManual).toHaveLength(1);
   });
 
+  // P01 (auditoria funcional 09/09/2026). A flag de ajuste manual do prejuízo
+  // rural é POR ANO. Um snapshot gravado antes da versão 3 não tem a chave;
+  // sem a migração, o `{...state, ...snapshot}` de LOAD_HISTORICO deixava o
+  // `true` do ano da tela vazar para o ano antigo, e `saldoRuralInformado`
+  // passava a ignorar o saldo oficial de prejuízo rural daquele ano.
+  test('carregar um ano antigo não herda a flag de ajuste manual do prejuízo rural', () => {
+    const perfil = {
+      anoCalendario: 2025,
+      origemAnoAtual: 'manual',
+      contribuinte: { nome: 'FULANO', cpf: '11144477735' },
+      bens: [], dividas: [], rendimentos: [], pagamentos: [], dependentes: [],
+      // No ano de hoje a usuária sobrepôs o prejuízo rural à mão.
+      prejuizoRuralAjustadoManualmente: true,
+      prejuizoRuralAcompensar: -2000,
+      historico: {
+        2024: {
+          // Snapshot de uma versão anterior à 3: SEM a chave, e com a apuração
+          // oficial informando -10.000 de prejuízo a transportar.
+          bens: [], dividas: [], rendimentos: [], pagamentos: [],
+          contribuinte: { nome: 'FULANO', cpf: '11144477735' },
+          apuracaoResultadoRuralOficial: { saldoPrejuizoExercicioSeguinte: -10000 },
+          prejuizoRuralAcompensar: 0,
+          origem: 'importacao',
+          savedAt: '2026-09-01T10:00:00.000Z',
+        },
+      },
+    };
+    const carregado = carregarEstadoDoPerfil(perfil);
+    const em2024 = reducer(carregado, { type: 'LOAD_HISTORICO', payload: 2024 });
+    expect(em2024.anoCalendario).toBe(2024);
+    // A flag do ano antigo é dele — false —, não a herdada de 2025.
+    expect(em2024.prejuizoRuralAjustadoManualmente).toBe(false);
+    // Logo o saldo rural informado de 2024 é o oficial (-10.000), não o
+    // `prejuizoRuralAcompensar` de 0 que o caminho manual devolveria.
+    expect(saldoRuralInformado(em2024)).toBe(-10000);
+    // E 2025 continua com o ajuste manual que era dele.
+    const de2025 = reducer(em2024, { type: 'LOAD_HISTORICO', payload: 2025 });
+    expect(de2025.prejuizoRuralAjustadoManualmente).toBe(true);
+    expect(saldoRuralInformado(de2025)).toBe(-2000);
+  });
+
   test('gravar num ano antigo do histórico não estoura por coleção ausente', () => {
     const carregado = carregarEstadoDoPerfil(perfilAntigoComDoisAnos());
     const gravado = reducer(carregado, {
@@ -239,7 +282,7 @@ describe('bordas da cadeia', () => {
   it('estado vazio vira um esqueleto completo da versão atual', () => {
     const migrado = migrarEstadoPersistido({});
     expect(migrado.versaoEsquema).toBe(VERSAO_ESQUEMA_ATUAL);
-    for (const campo of CAMPOS_DO_SNAPSHOT_V2) {
+    for (const campo of CAMPOS_DO_SNAPSHOT_V3) {
       expect(migrado[campo], `campo ausente: ${campo}`).toBeDefined();
     }
     expect(migrado.historico).toBeUndefined();

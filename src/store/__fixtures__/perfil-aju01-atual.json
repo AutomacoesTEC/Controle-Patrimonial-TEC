@@ -1,5 +1,5 @@
 {
-  "versaoEsquema": 2,
+  "versaoEsquema": 3,
   "anoCalendario": 2025,
   "origemAnoAtual": "importacao",
   "contribuinte": {
@@ -7121,7 +7121,8 @@
       "pagamentosDiversos": [],
       "origem": "importacao",
       "savedAt": "2026-09-04T01:17:33.714Z",
-      "versaoEsquema": 2
+      "versaoEsquema": 3,
+      "prejuizoRuralAjustadoManualmente": false
     },
     "2026": {
       "importFormato": null,
@@ -7447,7 +7448,8 @@
       "pagamentosDiversos": [],
       "origem": "manual",
       "savedAt": "2026-09-04T01:17:33.715Z",
-      "versaoEsquema": 2
+      "versaoEsquema": 3,
+      "prejuizoRuralAjustadoManualmente": false
     }
   },
   "importFormato": "pdf",
@@ -8413,5 +8415,6 @@
     "DÍVIDAS VINCULADAS À ATIVIDADE RURAL - EXTERIOR"
   ],
   "origem": "importacao",
-  "savedAt": "2026-09-04T01:17:33.714Z"
+  "savedAt": "2026-09-04T01:17:33.714Z",
+  "prejuizoRuralAjustadoManualmente": false
 }
