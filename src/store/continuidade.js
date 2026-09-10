@@ -1,4 +1,5 @@
 import { arredondarCentavos } from '../utils/formatters';
+import { pessoaDoRegistro } from './titularidade';
 
 const CONFIGURACOES = [
   { campo: 'bens', categoria: 'Bem', codigos: ['grupo', 'codigo_bem'] },
@@ -14,8 +15,26 @@ const tokens = (valor) => new Set(normalizar(valor).split(' ').filter(Boolean));
 const codigo = (item, campos) => campos.map(c => normalizar(item[c])).join('|');
 const identificadores = (item) => new Set(CAMPOS_IDENTIFICADORES.map(c => normalizar(item[c])).filter(Boolean));
 
-function similaridade(a, b, camposCodigo) {
+// Identidade estável do item entre anos: a chave que o rollover carimba
+// (chaveContinuidade) ou a que veio da importação. É o pareamento sem
+// ambiguidade — texto e valor não entram.
+const identidadeEstavel = (item) => item.chaveContinuidade || item.chaveImportacao || item.controle || null;
+
+// P05: pessoa definida e diferente nas duas pontas ⇒ não é o mesmo registro.
+// 'nao-informada' e 'dependente-sem-identificacao' ficam ambíguos e não
+// bloqueiam (mantém o comportamento de quem não declara titularidade no item).
+const pessoaDefinida = (p) => p !== 'nao-informada' && p !== 'dependente-sem-identificacao';
+function pessoasConflitantes(a, b, dependentes) {
+  const pa = pessoaDoRegistro(a, dependentes);
+  const pb = pessoaDoRegistro(b, dependentes);
+  return pessoaDefinida(pa) && pessoaDefinida(pb) && pa !== pb;
+}
+
+function similaridade(a, b, camposCodigo, dependentes = []) {
   if (codigo(a, camposCodigo) !== codigo(b, camposCodigo)) return 0;
+  // P05: não parear o registro de uma pessoa com o de outra, por mais
+  // parecido que o texto seja.
+  if (pessoasConflitantes(a, b, dependentes)) return 0;
   const textoA = normalizar(a.discriminacao || a.descricao || a.nome);
   const textoB = normalizar(b.discriminacao || b.descricao || b.nome);
   if (!textoA || !textoB) return 0;
@@ -30,16 +49,46 @@ function similaridade(a, b, camposCodigo) {
   return uniao ? intersecao / uniao : 0;
 }
 
-function casar(anteriores, seguintes, camposCodigo) {
-  const candidatos = [];
-  anteriores.forEach((a, ia) => seguintes.forEach((b, ib) => {
-    const nota = similaridade(a, b, camposCodigo);
-    if (nota >= 0.65) candidatos.push({ ia, ib, nota });
-  }));
-  candidatos.sort((a, b) => b.nota - a.nota || a.ia - b.ia || a.ib - b.ib);
+function casar(anteriores, seguintes, camposCodigo, dependentes = []) {
   const usadosA = new Set(), usadosB = new Set(), pares = [];
+
+  // Passo 1: identidade estável exata, 1-para-1. Se a mesma chave aparece
+  // mais de uma vez de um lado, é ambígua — não pareia por aqui.
+  const seguintesPorChave = new Map();
+  seguintes.forEach((b, ib) => {
+    const k = identidadeEstavel(b);
+    if (k == null) return;
+    if (!seguintesPorChave.has(k)) seguintesPorChave.set(k, []);
+    seguintesPorChave.get(k).push(ib);
+  });
+  anteriores.forEach((a, ia) => {
+    const k = identidadeEstavel(a);
+    if (k == null) return;
+    const livres = (seguintesPorChave.get(k) || []).filter(ib => !usadosB.has(ib));
+    if (livres.length === 1 && (seguintesPorChave.get(k) || []).length === 1) {
+      usadosA.add(ia); usadosB.add(livres[0]); pares.push([ia, livres[0]]);
+    }
+  });
+
+  // Passo 2: pontuação por texto/documento, só entre o que sobrou.
+  const candidatos = [];
+  anteriores.forEach((a, ia) => {
+    if (usadosA.has(ia)) return;
+    seguintes.forEach((b, ib) => {
+      if (usadosB.has(ib)) return;
+      const nota = similaridade(a, b, camposCodigo, dependentes);
+      if (nota >= 0.65) candidatos.push({ ia, ib, nota });
+    });
+  });
+  candidatos.sort((a, b) => b.nota - a.nota || a.ia - b.ia || a.ib - b.ib);
   for (const candidato of candidatos) {
     if (usadosA.has(candidato.ia) || usadosB.has(candidato.ib)) continue;
+    // Empate real: mais de um par livre com a MESMA nota disputando este
+    // item dos dois lados ⇒ ambiguidade, não pareia por índice (P05).
+    const empatados = candidatos.filter(x => x.nota === candidato.nota
+      && !usadosA.has(x.ia) && !usadosB.has(x.ib)
+      && (x.ia === candidato.ia || x.ib === candidato.ib));
+    if (empatados.length > 1) continue;
     usadosA.add(candidato.ia);
     usadosB.add(candidato.ib);
     pares.push([candidato.ia, candidato.ib]);
@@ -60,10 +109,11 @@ export function conferirContinuidade(state, anoAnterior) {
     return { disponivel: false, anoAnterior: Number(anoAnterior), anoSeguinte, divergencias: [] };
   }
 
+  const dependentes = [...(anterior.dependentes || []), ...(seguinte.dependentes || [])];
   const divergencias = [];
   for (const cfg of CONFIGURACOES) {
     const listaA = anterior[cfg.campo] || [], listaB = seguinte[cfg.campo] || [];
-    const { pares, usadosA, usadosB } = casar(listaA, listaB, cfg.codigos);
+    const { pares, usadosA, usadosB } = casar(listaA, listaB, cfg.codigos, dependentes);
     for (const [ia, ib] of pares) {
       const fechamento = dinheiro(listaA[ia].situacao_atual);
       const abertura = dinheiro(listaB[ib].situacao_anterior);

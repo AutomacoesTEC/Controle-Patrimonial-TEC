@@ -56,4 +56,35 @@ describe('conferirContinuidade', () => {
     ), 2025);
     expect(r.divergencias).toEqual([]);
   });
+
+  test('P05: descrição/código/CNPJ iguais mas titular e dependente — inverter a ordem não cria divergência', () => {
+    const mesmo = { cnpj: '11.222.333/0001-44' };
+    const doTitular = (ant, atu) => bem('Aplicação renda fixa', ant, atu, { ...mesmo, beneficiario: 'Titular' });
+    const doDep = (ant, atu) => bem('Aplicação renda fixa', ant, atu, { ...mesmo, beneficiario: 'Dependente', cpf_beneficiario: '33344455508' });
+    // Mesma ordem: coerente.
+    expect(conferirContinuidade(estado(
+      { bens: [doTitular(0, 100), doDep(0, 200)], dividas: [] },
+      { bens: [doTitular(100, 100), doDep(200, 200)], dividas: [] },
+    ), 2025).divergencias).toEqual([]);
+    // Ordem invertida no ano seguinte: cada pessoa comparada com a própria
+    // posição — não deve haver divergência inventada de +100 / -100.
+    expect(conferirContinuidade(estado(
+      { bens: [doTitular(0, 100), doDep(0, 200)], dividas: [] },
+      { bens: [doDep(200, 200), doTitular(100, 100)], dividas: [] },
+    ), 2025).divergencias).toEqual([]);
+  });
+
+  test('P05: chaveContinuidade casa os itens mesmo com descrição alterada e ordem trocada', () => {
+    const r = conferirContinuidade(estado(
+      { bens: [
+        bem('Casa antiga', 0, 100, { chaveContinuidade: 'k1' }),
+        bem('Sítio', 0, 200, { chaveContinuidade: 'k2' }),
+      ], dividas: [] },
+      { bens: [
+        bem('Sítio corrigido', 200, 200, { chaveContinuidade: 'k2' }),
+        bem('Casa antiga - matrícula 55', 100, 100, { chaveContinuidade: 'k1' }),
+      ], dividas: [] },
+    ), 2025);
+    expect(r.divergencias).toEqual([]);
+  });
 });
