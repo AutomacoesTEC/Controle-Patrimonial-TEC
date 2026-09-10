@@ -23,6 +23,7 @@ import { anoCadastroValido, anoDaDataCadastro } from '../utils/dataCadastro';
 import { aplicarAcompanhamento, acompanhamentoVazio } from './acompanhamento';
 import { vincularOperacao, desvincularOperacao } from './vinculosOperacoes';
 import { previaDatasLegadas, ESTOQUES } from './revisaoPeriodica';
+import { pessoasDefinidasEConflitantes } from '../utils/reconciliacaoRetificadora';
 
 // Identificador de item novo. Era `Date.now()` puro, e dois cadastros no mesmo
 // milissegundo recebiam o MESMO id — a partir daí, editar um editava os dois,
@@ -867,6 +868,15 @@ function aplicarAcao(state, action) {
           .map(item => {
             const dados = vinculoPorId.get(item.id);
             if (!dados || item.origem === 'manual') return item;
+            // P06: nem a tela (sugestão automática) nem um payload forjado
+            // podem transferir as movimentações de uma pessoa para o registro
+            // de outra. Se o vínculo cruza pessoas definidas, a conciliação
+            // para e a usuária revê aquele item.
+            if (pessoasDefinidasEConflitantes(item, dados)) {
+              throw new Error(
+                `A conciliação da retificadora vincula "${item.discriminacao || item.descricao || item.codigo_bem || item.codigo || 'item'}" a um registro de outra pessoa. Revise esse vínculo antes de confirmar.`,
+              );
+            }
             const movimentacoes = item.movimentacoes || [];
             const saldoDeclarado = dados.situacao_atual ?? dados.situacao_anterior ?? 0;
             return {

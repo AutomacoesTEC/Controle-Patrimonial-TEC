@@ -1007,6 +1007,42 @@ describe('origem por item (manual x importacao) e RECONCILIAR_IMPORTACAO (retifi
     expect(state.bens[0].movimentacoes).toHaveLength(1);
   });
 
+  it('P06: recusa a conciliação que vincula o registro de uma pessoa ao de outra', () => {
+    // Bem do TITULAR, com uma movimentação lançada nele. A retificadora
+    // (sugestão ou payload forjado) tenta vinculá-lo a um item da mesma
+    // descrição/código que na verdade é do DEPENDENTE.
+    const bemDoTitular = {
+      id: 7, codigo_bem: '02', discriminacao: 'Aplicação renda fixa', beneficiario: 'Titular',
+      situacao_anterior: 5000, situacao_atual: 5000, origem: 'importacao',
+      movimentacoes: [{ id: 1, tipo: 'compra', valor: 1000 }],
+    };
+    const state = { ...initialState, anoCalendario: 2025, bens: [bemDoTitular], dividas: [] };
+    expect(() => reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: { vinculados: [{ idAntigo: 7, dados: { codigo_bem: '02', discriminacao: 'Aplicação renda fixa', beneficiario: 'Dependente', cpf_beneficiario: '22233344455', situacao_anterior: 5000, situacao_atual: 5000 } }], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }})).toThrow(/outra pessoa/);
+  });
+
+  it('P06: mesmo beneficiário nas duas pontas concilia normalmente', () => {
+    const bemDoTitular = {
+      id: 8, codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Titular',
+      situacao_anterior: 5000, situacao_atual: 5000, origem: 'importacao', movimentacoes: [],
+    };
+    let state = { ...initialState, anoCalendario: 2025, bens: [bemDoTitular], dividas: [] };
+    state = reducer(state, { type: 'RECONCILIAR_IMPORTACAO', payload: {
+      anoCalendario: 2025,
+      contribuinte: { cpf: '11111111111', nome: 'Fulano' },
+      bens: { vinculados: [{ idAntigo: 8, dados: { codigo_bem: '02', discriminacao: 'Aplicação (corrigida)', beneficiario: 'Titular', situacao_anterior: 6000, situacao_atual: 6000 } }], novos: [], removerAntigos: [] },
+      dividas: { vinculados: [], novos: [], removerAntigos: [] },
+      rendimentos: [], pagamentos: [],
+    }});
+    expect(state.bens[0].id).toBe(8);
+    expect(state.bens[0].discriminacao).toBe('Aplicação (corrigida)');
+  });
+
   it('item novo da retificadora entra como importação; item antigo em removerAntigos some; item manual não mencionado fica intocado', () => {
     const bemManual = { id: 1, codigo_bem: '99', discriminacao: 'Terreno cadastrado à mão', situacao_atual: 5000, origem: 'manual' };
     const bemOrfao = { id: 2, codigo_bem: '21', discriminacao: 'Item que saiu da retificadora', situacao_atual: 1000, origem: 'importacao', movimentacoes: [] };

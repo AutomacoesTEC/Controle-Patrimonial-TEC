@@ -130,6 +130,15 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
     [antigos, novos, campoCodigo, campoDescricao],
   );
   const descricao = item => item?.[campoDescricao] || '';
+  // P06: a titularidade tem que aparecer na lista de vínculo — código e
+  // descrição iguais não bastam para saber se é a mesma pessoa.
+  const rotuloPessoa = (item) => {
+    const tipo = (item?.titularidade || item?.beneficiario || '').toString().trim();
+    const cpf = (item?.cpf_titularidade || item?.cpf_beneficiario || item?.cpf_dependente || item?.cpfDependente || '')
+      .toString().replace(/\D/g, '');
+    if (!tipo && !cpf) return '';
+    return cpf ? `${tipo || 'Dependente'}, CPF ${cpf}` : tipo;
+  };
 
   // vinculoPorNovo: índice do item novo -> id do antigo vinculado (ou null =
   // "é item novo mesmo"). Inicializa com a sugestão automática.
@@ -198,6 +207,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                   <tr key={i}>
                     <td title={descricao(novo)}>
                       <span className="badge badge-blue">{novo[campoCodigo]}</span> {truncarComReticencias(descricao(novo), 80)}
+                      {rotuloPessoa(novo) && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{rotuloPessoa(novo)}</div>}
                     </td>
                     <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(novo.situacao_anterior)}</td>
                     <td>
@@ -212,7 +222,7 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                         <option value="">Item novo (sem vínculo)</option>
                         {opcoesDisponiveis.map(a => (
                           <option key={a.id} value={a.id}>
-                            {a[campoCodigo]} - {descricao(a).substring(0, 60)}
+                            {a[campoCodigo]}{rotuloPessoa(a) ? ` (${rotuloPessoa(a)})` : ''} - {descricao(a).substring(0, 60)}
                           </option>
                         ))}
                       </select>
@@ -246,7 +256,10 @@ function SecaoConciliacao({ titulo, campoCodigo, campoDescricao = 'discriminacao
                   const temMovimentacao = (a.movimentacoes || []).length > 0;
                   return (
                     <tr key={a.id}>
-                      <td title={descricao(a)}><span className="badge badge-blue">{a[campoCodigo]}</span> {truncarComReticencias(descricao(a), 80)}</td>
+                      <td title={descricao(a)}>
+                        <span className="badge badge-blue">{a[campoCodigo]}</span> {truncarComReticencias(descricao(a), 80)}
+                        {rotuloPessoa(a) && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{rotuloPessoa(a)}</div>}
+                      </td>
                       <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(a.situacao_atual)}</td>
                       <td>
                         {temMovimentacao

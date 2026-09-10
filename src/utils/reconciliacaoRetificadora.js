@@ -33,6 +33,32 @@ export function similaridade(a, b) {
 
 const LIMIAR_SUGESTAO = 0.35;
 
+// Chave de pessoa de um bem/dívida para efeito de conciliação (item P06 da
+// auditoria funcional 2026-09-09). Código + descrição iguais NÃO bastam para
+// vincular quando as duas pontas apontam para pessoas DEFINIDAS e diferentes:
+// seria transferir o histórico de movimentações de uma pessoa para o registro
+// de outra. Aqui "definida" é titular, um CPF, um dependente identificado, ou
+// o próprio rótulo "Dependente"/"Alimentando" — só a ausência total de
+// identificação (`''`) fica ambígua e não bloqueia nada.
+export function chavePessoaRegistro(item = {}) {
+  const cpf = String(
+    item.cpf_titularidade || item.cpf_beneficiario || item.cpf_dependente || item.cpfDependente || '',
+  ).replace(/\D/g, '');
+  if (cpf) return `cpf:${cpf}`;
+  if (item.dependenteId != null) return `dep:${item.dependenteId}`;
+  const tipo = normalizar(item.titularidade || item.beneficiario);
+  if (tipo === 'TITULAR' || tipo === 'T') return 'titular';
+  if (tipo === 'DEPENDENTE' || tipo === 'D' || tipo === 'ALIMENTANDO') return 'dependente';
+  return '';
+}
+
+// true quando os dois registros têm pessoa definida e ela é diferente.
+export function pessoasDefinidasEConflitantes(a, b) {
+  const ka = chavePessoaRegistro(a);
+  const kb = chavePessoaRegistro(b);
+  return ka !== '' && kb !== '' && ka !== kb;
+}
+
 // Casa cada item novo (da retificadora) com o melhor candidato entre os
 // antigos (já importados antes), exigindo código igual e pontuando por
 // similaridade da discriminação. Não usa o id (o parser gera ids novos a
@@ -47,6 +73,10 @@ export function sugerirVinculos(antigos, novos, campoCodigo = 'codigo', campoDes
   for (const novo of novos || []) {
     for (const antigo of antigos || []) {
       if (normalizar(antigo[campoCodigo]) !== normalizar(novo[campoCodigo])) continue;
+      // P06: não sugerir vínculo entre pessoas definidas e diferentes. Se for
+      // mesmo o mesmo item, a usuária vincula à mão — agora vendo a
+      // titularidade na lista do modal.
+      if (pessoasDefinidasEConflitantes(antigo, novo)) continue;
       const score = similaridade(antigo[campoDescricao], novo[campoDescricao]);
       if (score >= LIMIAR_SUGESTAO) candidatos.push({ novo, antigo, score });
     }
