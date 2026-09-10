@@ -60,6 +60,11 @@ class DesktopApiTest(unittest.TestCase):
             usuario = os.path.join(pasta, 'usuario')
             downloads = os.path.join(usuario, 'Downloads')
             os.makedirs(downloads)
+            # DesktopApi normaliza `user_path` com os.path.realpath (segurança do
+            # confinamento). Em máquina Windows cujo %TEMP% carrega o nome curto
+            # 8.3 do usuário (ex.: TECTR_~1), realpath expande para o nome longo,
+            # então a expectativa tem que passar pela mesma normalização.
+            downloads = os.path.realpath(downloads)
             caminho = os.path.join(downloads, 'perfil.cptec.json')
             with open(caminho, 'w', encoding='utf-8') as arquivo:
                 arquivo.write('{"formato":"cptec-backup"}')
