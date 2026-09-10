@@ -740,7 +740,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 {saldosAtravessam.map(s => (
                   <tr key={s.chave}>
                     <td>
-                      {s.rotulo}{s.requerRevisao && <small> · Saldo oficial; conferir lançamentos manuais posteriores</small>}
+                      {s.rotulo}{s.requerRevisao && <small> (saldo oficial; conferir lançamentos manuais posteriores)</small>}
                       <Ajuda texto={s.base} />
                     </td>
                     <td className="currency">{formatCurrency(s.valor)}</td>
@@ -933,7 +933,7 @@ export default function Dashboard({ onNavigate } = {}) {
         </div>
         <div className="modal-body">
           <p>Posições e variação por registro. Diferenças sem movimentos datados permanecem identificadas; não são recebimentos presumidos.</p>
-          {ponte.length === 0 ? <p>Nenhuma diferença de posição ou movimentação neste recorte.</p> : <div className="table-wrapper demo-ponte"><table><thead><tr><th>Registro / origem</th><th>Inicial</th><th>Final</th><th>Variação</th><th>Movimentos / evidência</th></tr></thead><tbody>{ponte.map((r,i) => <tr key={i}><td><details><summary>{r.ano} · {truncarComReticencias(r.descricao, 120)}</summary><p>{r.descricao}</p></details><br/><small>{r.origem}{r.origemDocumento && ' · PDF página ' + r.origemDocumento.pagina + ', linha ' + r.origemDocumento.linha}</small></td><td className="currency">{formatCurrency(r.inicial)}</td><td className="currency">{formatCurrency(r.final)}</td><td className="currency">{formatCurrency(r.variacao)}</td><td>{r.movimentos.length ? r.movimentos.map((m,j) => <div key={j}>{formatDate(m.data)} · {m.tipo} · {formatCurrency(m.valor)}</div>) : 'Posição registrada; completar movimentos e datas'}</td></tr>)}</tbody></table></div>}
+          {ponte.length === 0 ? <p>Nenhuma diferença de posição ou movimentação neste recorte.</p> : <div className="table-wrapper demo-ponte"><table><thead><tr><th>Registro / origem</th><th>Inicial</th><th>Final</th><th>Variação</th><th>Movimentos / evidência</th></tr></thead><tbody>{ponte.map((r,i) => <tr key={i}><td><details><summary>{r.ano} - {truncarComReticencias(r.descricao, 120)}</summary><p>{r.descricao}</p></details><br/><small>{r.origem}{r.origemDocumento && ' (PDF página ' + r.origemDocumento.pagina + ', linha ' + r.origemDocumento.linha + ')'}</small></td><td className="currency">{formatCurrency(r.inicial)}</td><td className="currency">{formatCurrency(r.final)}</td><td className="currency">{formatCurrency(r.variacao)}</td><td>{r.movimentos.length ? r.movimentos.map((m,j) => <div key={j}>{formatDate(m.data)}, {m.tipo}, {formatCurrency(m.valor)}</div>) : 'Posição registrada; completar movimentos e datas'}</td></tr>)}</tbody></table></div>}
 
         </div>
         <div className="modal-footer">

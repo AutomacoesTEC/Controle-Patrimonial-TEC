@@ -19,13 +19,13 @@ export default function ConferenciaAplicacoes({ state, mes }) {
       {itens.map(item => {
         const bem = (dados.bens || []).find(b => b.id === item.id);
         return <details className="import-review-details" key={item.id}>
-          <summary>{item.discriminacao || 'Aplicação sem descrição'} · redução de saldo: {formatCurrency(item.valorResgatado)}</summary>
-          <p><strong>{rotuloTitularidade(bem, dados.dependentes)}</strong> · CNPJ da instituição: {formatCpfCnpj(item.cnpj)} · Grupo {bem?.grupo}, código {bem?.codigo_bem}</p>
+          <summary>{item.discriminacao || 'Aplicação sem descrição'} (redução de saldo: {formatCurrency(item.valorResgatado)})</summary>
+          <p><strong>{rotuloTitularidade(bem, dados.dependentes)}</strong>. CNPJ da instituição: {formatCpfCnpj(item.cnpj)}. Grupo {bem?.grupo}, código {bem?.codigo_bem}.</p>
           <p>{descreverOrigemDocumento(bem) || 'Referência de origem não disponível.'}</p>
           <p>Saldo no início: {formatCurrency(situacaoBemAteData(bem, de, 'de'))}. Saldo no fim do período: {formatCurrency(situacaoBemAteData(bem, ate, 'ate'))}.</p>
           <p>Motivo da comparação: não foi localizado rendimento da mesma instituição na categoria esperada pela regra do aplicativo: {item.onde}.</p>
           <p>Rendimentos encontrados para a instituição, sem atribuição automática a esta aplicação:</p>
-          {item.outrosDaMesmaFonte.length ? <ul>{item.outrosDaMesmaFonte.map((r, i) => <li key={i}>{r.nome || 'Fonte sem nome'} · {describeRendimentoTipo(r.tipo)} · {formatCurrency(r.valor)}</li>)}</ul> : <p>Nenhum rendimento da mesma instituição encontrado no período.</p>}
+          {item.outrosDaMesmaFonte.length ? <ul>{item.outrosDaMesmaFonte.map((r, i) => <li key={i}>{r.nome || 'Fonte sem nome'}: {describeRendimentoTipo(r.tipo)}, {formatCurrency(r.valor)}</li>)}</ul> : <p>Nenhum rendimento da mesma instituição encontrado no período.</p>}
           <p>Confira o informe da instituição e a movimentação desta aplicação. Só cadastre ou corrija um rendimento se o documento confirmar a necessidade. Esta consulta não altera os valores da conciliação.</p>
         </details>;
       })}

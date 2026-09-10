@@ -14,10 +14,19 @@ describe('Imagens da revisão: contratos de apresentação', () => {
     expect(fonte).toContain('{!isEditing && camposIdentificacao}');
     expect(fonte).toContain('{camposIdentificacao}');
   });
-  it('imagem 3: residual identificado sem tolerância configurável', () => {
+  it('imagem 3: resultado da conciliação apresentado sem tolerância configurável (P03)', () => {
+    // O bloco "hero" com título e tolerância foi removido por decisão da
+    // usuária (auditoria funcional 2026-09-09, P03). O contrato agora protege
+    // a APRESENTAÇÃO ATUAL do resultado, não o bloco antigo:
     const fonte = ler('./Dashboard.jsx');
-    expect(fonte).toContain('id="saldo-hero-titulo">Diferença de conciliação');
-    expect(fonte).not.toContain('Tolerância para “fecha”');
-    expect(fonte).toContain('Não representa saldo bancário disponível.');
+    // O resultado da conciliação continua rotulado e em destaque.
+    expect(fonte).toContain('Resultado da conciliação patrimonial');
+    expect(fonte).toContain('demonstrativo-destaque demonstrativo-final');
+    // Sem tolerância configurável para "fechar" a diferença.
+    expect(fonte).not.toMatch(/Toler[âa]ncia para/);
+    // A ressalva de que o número não prova saldo bancário permanece.
+    expect(fonte).toContain('não comprova saldo bancário disponível');
+    // E o bloco hero antigo não voltou só para deixar o teste verde.
+    expect(fonte).not.toContain('saldo-hero-titulo');
   });
 });
