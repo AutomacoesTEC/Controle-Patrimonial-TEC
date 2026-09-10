@@ -59,6 +59,13 @@ export function pessoasDefinidasEConflitantes(a, b) {
   return ka !== '' && kb !== '' && ka !== kb;
 }
 
+// O rótulo "Dependente" sem CPF nem id não distingue QUAL dependente. Um par
+// assim só é seguro de sugerir automaticamente quando não há outro candidato
+// disputando o mesmo lado — senão a sugestão escolheria um dependente por
+// acaso (P06, subcaso de dois dependentes sem CPF com mesmo código/descrição).
+const DEPENDENTE_GENERICO = 'dependente';
+const ehDependenteGenerico = (item) => chavePessoaRegistro(item) === DEPENDENTE_GENERICO;
+
 // Casa cada item novo (da retificadora) com o melhor candidato entre os
 // antigos (já importados antes), exigindo código igual e pontuando por
 // similaridade da discriminação. Não usa o id (o parser gera ids novos a
@@ -88,6 +95,16 @@ export function sugerirVinculos(antigos, novos, campoCodigo = 'codigo', campoDes
   for (const c of candidatos) {
     if (novosVinculados.has(c.novo)) continue;
     if (!antigosDisponiveis.has(c.antigo.id)) continue;
+    // P06 (subcaso): par "Dependente" sem CPF dos dois lados só é sugerido se
+    // não houver outro candidato livre disputando o mesmo novo ou o mesmo
+    // antigo — caso contrário fica ambíguo e vira órfão para escolha manual.
+    if (ehDependenteGenerico(c.antigo) && ehDependenteGenerico(c.novo)) {
+      const disputa = candidatos.some(o => o !== c
+        && !novosVinculados.has(o.novo) && antigosDisponiveis.has(o.antigo.id)
+        && (o.novo === c.novo || o.antigo.id === c.antigo.id)
+        && ehDependenteGenerico(o.antigo) && ehDependenteGenerico(o.novo));
+      if (disputa) continue;
+    }
     vinculos.push({ novo: c.novo, antigo: c.antigo, similaridade: c.score });
     novosVinculados.add(c.novo);
     antigosDisponiveis.delete(c.antigo.id);

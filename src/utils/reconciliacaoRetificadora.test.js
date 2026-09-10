@@ -72,6 +72,28 @@ describe('sugerirVinculos (conciliação de retificadora)', () => {
     expect(r.vinculos).toHaveLength(0);
   });
 
+  it('P06 subcaso: dois "Dependente" sem CPF, mesmo código e descrição, não são sugeridos (ambíguo)', () => {
+    const antigos = [
+      { id: 1, codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Dependente' },
+      { id: 2, codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Dependente' },
+    ];
+    const novos = [
+      { codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Dependente' },
+      { codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Dependente' },
+    ];
+    const r = sugerirVinculos(antigos, novos, 'codigo_bem');
+    expect(r.vinculos).toHaveLength(0);
+    expect(r.novosOrfaos).toHaveLength(2);
+    expect(r.antigosOrfaos).toHaveLength(2);
+  });
+
+  it('P06 subcaso: um único "Dependente" sem CPF de cada lado ainda é sugerido (não-ambíguo)', () => {
+    const antigos = [{ id: 1, codigo_bem: '02', discriminacao: 'Aplicação', beneficiario: 'Dependente' }];
+    const novos = [{ codigo_bem: '02', discriminacao: 'Aplicação renda fixa', beneficiario: 'Dependente' }];
+    const r = sugerirVinculos(antigos, novos, 'codigo_bem');
+    expect(r.vinculos).toHaveLength(1);
+  });
+
   it('chavePessoaRegistro / pessoasDefinidasEConflitantes', () => {
     expect(chavePessoaRegistro({ beneficiario: 'Titular' })).toBe('titular');
     expect(chavePessoaRegistro({ beneficiario: 'Dependente' })).toBe('dependente');

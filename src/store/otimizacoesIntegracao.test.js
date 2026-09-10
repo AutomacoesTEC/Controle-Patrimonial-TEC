@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { initialState, reducer, snapshotYear } from './reducer';
 import { acompanhamentoDo, aplicarAcompanhamento, caixaPeriodo, resultadoEconomicoOperacoes } from './acompanhamento';
 import { vincularOperacao, desvincularOperacao, aplicarVinculosNoAno, referenciasFiscais, resolverReferencia } from './vinculosOperacoes';
-import { ganhosApuradosPeriodo } from './demonstrativos';
+import { ganhosApuradosPeriodo, demonstrativoConciliacao } from './demonstrativos';
 import { previaDatasLegadas, pendenciasPeriodicas } from './revisaoPeriodica';
 import { montarArquivoBackup, textoDoArquivoBackup } from './backupPerfil';
 import { ensaiarBackup } from './ensaioBackup';
@@ -68,6 +68,28 @@ describe('identidade explícita e representações preservadas', () => {
     expect(() => vinc('venda', '4|d|33344455508')).toThrow('titularidades');
     // Ficha do titular x operação do titular: aceita.
     expect(vinc('venda', '3|t|').acompanhamento.operacoes.find(o => o.id === 'venda').vinculos).toHaveLength(1);
+  });
+  it('P08: vincular ficha mensal de RV não move nenhuma figura do Demonstrativo (efeito é só rastreabilidade)', () => {
+    // Prova de que o `operacaoId` que `aplicarVinculosNoAno` carimba numa ficha
+    // mensal de RV é dado inerte para o cálculo: nenhuma função de
+    // demonstrativos/consultaPeriodo lê esse campo (só bens/GCAP/rendimentos).
+    // Logo P08 é rastreabilidade por beneficiário, não efeito monetário → MÉDIO.
+    let s = base();
+    s.rendaVariavelMensalOficial = [{
+      mes: 6, titular: true,
+      comuns: { resultadoLiquidoMes: -1000, prejuizoCompensar: 1000 },
+      consolidacao: {},
+    }];
+    const antes = demonstrativoConciliacao(s, '2026-01-01', '2026-12-31');
+    s = vincularOperacao(
+      s, { operacaoId: 'venda', ref: { ano: 2026, campo: 'rendaVariavelMensalOficial', chaveMensal: '6|t|' } },
+      meta('m-rv'),
+    );
+    const depois = demonstrativoConciliacao(s, '2026-01-01', '2026-12-31');
+    expect(depois.saldoDeCaixaGeral).toBe(antes.saldoDeCaixaGeral);
+    expect(depois.saldoDeCaixa).toBe(antes.saldoDeCaixa);
+    expect(depois.rendaVariavelPerda).toBe(antes.rendaVariavelPerda);
+    expect(depois.ganhos).toEqual(antes.ganhos);
   });
   it('P07: referência de movimento ambígua não é aplicada na projeção anual', () => {
     // Estado deliberadamente inconsistente: pai único, dois movimentos com o
