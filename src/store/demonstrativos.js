@@ -815,7 +815,12 @@ function bensSaidosSemPrecoConhecido({ bens, apuracaoGanhoCapital }, dataDe, dat
 // demonstrativo. Data fora do período consultado é descartada aqui.
 export function vendasDaDiscriminacaoPeriodo(dados, dataDe, dataAte) {
   const lidas = [];
-  for (const c of bensSaidosSemPrecoConhecido(dados, dataDe, dataAte)) {
+  // Selecionar pelo ano da posição; o evento datado pertence ao seu mês,
+  // mesmo quando o saldo intermediário ainda é uma projeção incompleta.
+  const ano = String(dataAte || dataDe || dados.anoCalendario || "").slice(0, 4);
+  const inicio = ano ? `${ano}-01-01` : dataDe;
+  const fim = ano ? `${ano}-12-31` : dataAte;
+  for (const c of bensSaidosSemPrecoConhecido(dados, inicio, fim)) {
     const venda = vendaLidaDaDiscriminacao(c.bem.discriminacao, c.de);
     if (!venda) continue;
     if (!noPeriodo(venda.data, dataDe, dataAte)) continue;

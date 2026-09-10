@@ -20,3 +20,13 @@ describe('reclassificação de rendimento importado', () => {
     expect(prepararRendimentoParaSalvar({ tipo: 'tributavel_pj', valor: '1000', contribuicaoPrevidenciaria: '100' })).toMatchObject({ valor: 1000, contribuicaoPrevidenciaria: 100, irrf: 0 });
   });
 });
+
+describe('edição de rendimento com IRRF não informado', () => {
+  it('editar a descrição não converte ausência importada em zero', () => {
+    const original = {tipo: 'exclusivo_0006', valor: 100, irrf: null};
+    const salvo = prepararRendimentoParaSalvar({...original, nome_fonte: 'Fonte sintética', irrf: ''}, original);
+    expect(salvo.irrf).toBeNull();
+    expect(prepararRendimentoParaSalvar({...original, irrf: 0}, original).irrf).toBe(0);
+    expect(prepararRendimentoParaSalvar({...original, irrf: 12.5}, original).irrf).toBe(12.5);
+  });
+});

@@ -1,0 +1,21 @@
+{
+  "dados": "Exclusivamente sintéticos no navegador isolado",
+  "testes": 279,
+  "arquivosTeste": 9,
+  "build": "aprovado, 686 módulos",
+  "interface": {
+    "aberturaAutomatica": true,
+    "dependenteVinculado": true,
+    "cnpjDoBemPreservado": true,
+    "ausenciaIrrfPreservada": true,
+    "semCodigoExplicito": true,
+    "pularEReabrir": true,
+    "recargaPreservaClassificacao": true,
+    "falhaArmazenamentoNaoConfirmaEdicao": true,
+    "blocoApenasNaImportacao": true,
+    "telaEstreitaSemOverflowHorizontal": true,
+    "temaClaroEEscuro": true
+  },
+  "limitacao": "Classificação de campos de cadastro; não promove cobertura técnica nem altera o PDF original.",
+  "observacaoTestes": "278 na rodada de nove arquivos; após um teste adicional, 32 testes dos três arquivos afetados foram repetidos e aprovados."
+}

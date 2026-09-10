@@ -1,3 +1,4 @@
+import { CATEGORIAS_FLUXO } from './classificacoesFinanceiras';
 // Razão financeiro GLOBAL do perfil. Não é foto fiscal anual nem inferência
 // de caixa a partir de patrimônio. Valores são inteiros em centavos aqui.
 import { anoDaDataCadastro } from '../utils/dataCadastro';
@@ -148,7 +149,15 @@ export function aplicarAcompanhamento(state, p, { id, agora }) {
         op = buscar(a.operacoes, parcela.operacaoId, 'Operação');
       }
       if (op) exigir(conta.pessoa === op.pessoa, 'Titularidade da conta difere da operação. Registre a transferência entre pessoas separadamente.');
-      guardar('lancamentos', { id, contaId: conta.id, destinoId: p.tipo === 'transferencia' ? p.destinoId : null, tipo: p.tipo, valor, data: p.data, descricao: texto(p.descricao, 'descrição do lançamento'), contraparte: texto(p.contraparte || (p.tipo === 'transferencia' ? a.contas.find(c => c.id === p.destinoId).pessoa : ''), 'contraparte'), operacaoId: op?.id || null, parcelaId: p.parcelaId || null, criadoEm: agora }); break;
+      exigir(!p.categoriaFluxo || p.tipo === 'transferencia' || CATEGORIAS_FLUXO.some(([c, , sentido]) => c === p.categoriaFluxo && sentido === p.tipo), 'Classificação incompatível com o sentido da baixa.');
+      guardar('lancamentos', { categoriaFluxo: p.tipo === 'transferencia' ? '' : (p.categoriaFluxo || ''), id, contaId: conta.id, destinoId: p.tipo === 'transferencia' ? p.destinoId : null, tipo: p.tipo, valor, data: p.data, descricao: texto(p.descricao, 'descrição do lançamento'), contraparte: texto(p.contraparte || (p.tipo === 'transferencia' ? a.contas.find(c => c.id === p.destinoId).pessoa : ''), 'contraparte'), operacaoId: op?.id || null, parcelaId: p.parcelaId || null, criadoEm: agora }); break;
+    }
+    case 'classificarLancamento': {
+      const registro = buscar(a.lancamentos, p.id, 'Lançamento');
+      exigir(!registro.canceladoEm && registro.tipo !== 'transferencia', 'Selecione uma entrada ou saída ativa.');
+      aberto(a, registro.data);
+      exigir(!p.categoriaFluxo || CATEGORIAS_FLUXO.some(([c, , sentido]) => c === p.categoriaFluxo && sentido === registro.tipo), 'Classificação incompatível com o sentido da baixa.');
+      next = { ...a, lancamentos: a.lancamentos.map(l => l.id === registro.id ? { ...l, categoriaFluxo: p.categoriaFluxo || '', atualizadoEm: agora } : l) }; break;
     }
     case 'cancelarLancamento':
     case 'cancelarParcela': {

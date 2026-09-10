@@ -101,18 +101,18 @@ export default function TitularPage() {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div className="card-header"><h3 className="card-title">Titular</h3></div>
           <form onSubmit={handleSalvarTitular}>
-            <div className="form-group"><label>Data do cadastro</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!contribuinte} value={formTitular.data || ''} onChange={e => setFormTitular(p => ({ ...p, data: e.target.value }))} /></div>
-            <div className="form-row" style={{ padding: '0 16px' }}>
-              <div className="form-group">
-                <label>Nome Completo</label>
-                <input className="form-control" value={formTitular.nome} onChange={e => setFormTitular(p => ({ ...p, nome: e.target.value }))} placeholder="Nome do titular" />
+            <div className="titular-form-grid">
+              <div className="form-group titular-form-nome">
+                <label htmlFor="titular-nome">Nome Completo</label>
+                <input id="titular-nome" className="form-control" value={formTitular.nome} onChange={e => setFormTitular(p => ({ ...p, nome: e.target.value }))} placeholder="Nome do titular" />
               </div>
               <div className="form-group">
-                <label>CPF</label>
-                <input className="form-control" inputMode="numeric" value={mascaraCpf(formTitular.cpf)} onChange={e => setFormTitular(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="000.000.000-00" />
+                <label htmlFor="titular-cpf">CPF</label>
+                <input id="titular-cpf" className="form-control" inputMode="numeric" value={mascaraCpf(formTitular.cpf)} onChange={e => setFormTitular(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="000.000.000-00" />
               </div>
+              <div className="form-group"><label htmlFor="titular-data">Data do cadastro</label><input id="titular-data" className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!contribuinte} value={formTitular.data || ''} onChange={e => setFormTitular(p => ({ ...p, data: e.target.value }))} /></div>
             </div>
-            <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="titular-form-actions">
               <button type="submit" className="btn btn-primary">Salvar Titular</button>
             </div>
           </form>
@@ -121,33 +121,30 @@ export default function TitularPage() {
         {contribuinte && (contribuinte.dataNascimento || contribuinte.logradouro || contribuinte.ocupacaoCodigo) && (
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header"><h3 className="card-title">Dados cadastrais importados da declaração</h3></div>
-            <TabelaRedimensionavel>
-              <table>
-                <tbody>
-                  <tr><th>Data de nascimento</th><td>{formatDate(contribuinte.dataNascimento) || '-'}</td><th>Raça/Cor</th><td>{contribuinte.racaCor || contribuinte.racaCorCodigo || '-'}</td></tr>
-                  <tr><th>Possui cônjuge</th><td>{simNao(contribuinte.possuiConjuge)}</td><th>CPF do cônjuge</th><td>{formatCpfCnpj(contribuinte.cpfConjuge) || '-'}</td></tr>
-                  <tr><th>Endereço</th><td colSpan={3}>{enderecoCompleto || '-'}</td></tr>
-                  <tr><th>E-mail</th><td>{contribuinte.email || '-'}</td><th>Telefone/Celular</th><td>{[contribuinte.telefone, contribuinte.celular].filter(Boolean).join(' / ') || '-'}</td></tr>
-                  <tr><th>Natureza da ocupação</th><td colSpan={3}>{[contribuinte.naturezaOcupacaoCodigo, contribuinte.naturezaOcupacaoDescricao].filter(Boolean).join(' - ') || '-'}</td></tr>
-                  <tr><th>Ocupação principal</th><td colSpan={3}>{[contribuinte.ocupacaoCodigo, contribuinte.ocupacaoDescricao].filter(Boolean).join(' - ') || '-'}</td></tr>
-                  <tr><th>Tipo de declaração</th><td>{contribuinte.tipoDeclaracao || contribuinte.tipoDeclaracaoCodigo || '-'}</td><th>Retificadora</th><td>{simNao(contribuinte.retificadora)}</td></tr>
-                  <tr><th>Recibo anterior</th><td>{contribuinte.reciboUltimaDeclaracao || '-'}</td><th>Doença grave/deficiência</th><td>{simNao(contribuinte.doencaDeficiencia)}</td></tr>
-                  {/* Duas perguntas que a identificação imprime e que ficavam
-                      só no estado. A primeira NÃO é cadastral: quem era
-                      residente no exterior e passou a ser residente no Brasil
-                      no ano tem a tributação partida em duas condições
-                      diferentes dentro do mesmo ano-calendário, e essa é a
-                      única linha da tela que diz isso. Rótulos conferidos no
-                      AJU-01 p1 r9 e no parser (importParsers.js). */}
-                  <tr>
-                    <th title="Passou a ser residente no Brasil durante o ano-calendário, vindo do exterior. Muda a condição de residência dentro do próprio ano.">Era residente no exterior e passou a ser residente no Brasil</th>
-                    <td>{simNao(contribuinte.retornoPais)}</td>
-                    <th>Houve alteração de dados cadastrais</th>
-                    <td>{simNao(contribuinte.alteracaoDadosCadastrais)}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </TabelaRedimensionavel>
+            <dl className="titular-dados-grid">
+              {[
+                ['Data de nascimento', formatDate(contribuinte.dataNascimento)],
+                ['Raça/Cor', contribuinte.racaCor || contribuinte.racaCorCodigo],
+                ['Possui cônjuge', simNao(contribuinte.possuiConjuge)],
+                ['CPF do cônjuge', formatCpfCnpj(contribuinte.cpfConjuge)],
+                ['Endereço', enderecoCompleto, true],
+                ['E-mail', contribuinte.email],
+                ['Telefone/Celular', [contribuinte.telefone, contribuinte.celular].filter(Boolean).join(' / ')],
+                ['Natureza da ocupação', [contribuinte.naturezaOcupacaoCodigo, contribuinte.naturezaOcupacaoDescricao].filter(Boolean).join(' - '), true],
+                ['Ocupação principal', [contribuinte.ocupacaoCodigo, contribuinte.ocupacaoDescricao].filter(Boolean).join(' - '), true],
+                ['Tipo de declaração', contribuinte.tipoDeclaracao || contribuinte.tipoDeclaracaoCodigo],
+                ['Retificadora', simNao(contribuinte.retificadora)],
+                ['Recibo anterior', contribuinte.reciboUltimaDeclaracao],
+                ['Doença grave/deficiência', simNao(contribuinte.doencaDeficiencia)],
+                ['Era residente no exterior e passou a ser residente no Brasil', simNao(contribuinte.retornoPais)],
+                ['Houve alteração de dados cadastrais', simNao(contribuinte.alteracaoDadosCadastrais)],
+              ].map(([rotulo, valor, linhaInteira]) => (
+                <div key={rotulo} className={linhaInteira ? 'titular-dado-amplo' : undefined}>
+                  <dt>{rotulo}</dt>
+                  <dd>{valor || '-'}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         )}
 

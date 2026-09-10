@@ -143,6 +143,9 @@ class DesktopApi:
 
     def salvar_backup_automatico(self, nome, conteudo):
         self._validar_conteudo(conteudo)
+        # Use o mesmo limite em bytes do seletor, antes de escrever ou reter cópias.
+        if len(conteudo.encode('utf-8')) > self.MAX_BACKUP_BYTES:
+            raise ValueError('O conteúdo é grande demais para ser um backup do CP-TEC.')
         os.makedirs(self.backup_path, exist_ok=True)
         destino = os.path.join(self.backup_path, self._nome_seguro(nome))
         temporario = None

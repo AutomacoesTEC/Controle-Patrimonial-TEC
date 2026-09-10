@@ -1,0 +1,143 @@
+{
+  "fixture": {
+    "anoCalendario": 2025,
+    "contribuinte": {
+      "nome": "Titular de teste visual",
+      "cpf": "00000000000",
+      "dataNascimento": "1980-01-01",
+      "logradouro": "Rua de teste",
+      "numero": "123",
+      "municipio": "Município de teste",
+      "uf": "MG",
+      "email": "endereco.muito.longo.para.conferir.quebra.de.linha@example.invalid",
+      "telefone": "(00) 0000-0000",
+      "ocupacaoCodigo": "120",
+      "ocupacaoDescricao": "DESCRIÇÃO LONGA DA OCUPAÇÃO PARA CONFERIR A LEITURA EM TELAS MENORES",
+      "naturezaOcupacaoCodigo": "12",
+      "naturezaOcupacaoDescricao": "DESCRIÇÃO LONGA DA NATUREZA DA OCUPAÇÃO",
+      "possuiConjuge": true,
+      "retificadora": false,
+      "retornoPais": false,
+      "alteracaoDadosCadastrais": true
+    },
+    "dependentes": [
+      {
+        "id": "d1",
+        "nome": "Dependente de teste",
+        "cpf": "00000000000"
+      }
+    ],
+    "bens": [
+      {
+        "id": "b1",
+        "grupo": "03",
+        "codigo_bem": "02",
+        "discriminacao": "Participação de teste — descrição original preservada",
+        "beneficiario": "dependente",
+        "cpf_beneficiario": "00000000000",
+        "situacao_anterior": 100,
+        "situacao_atual": 120,
+        "origem": "pdf"
+      },
+      {
+        "id": "b2",
+        "grupo": "04",
+        "codigo_bem": "01",
+        "discriminacao": "Aplicação de teste no exterior",
+        "beneficiario": "dependente",
+        "cpf_beneficiario": "00000000000",
+        "pais": "249",
+        "paisNome": "Estados Unidos",
+        "situacao_anterior": 100,
+        "situacao_atual": 150,
+        "origem": "pdf"
+      },
+      {
+        "id": "b3",
+        "grupo": "04",
+        "codigo_bem": "01",
+        "discriminacao": "Aplicação do titular",
+        "beneficiario": "titular",
+        "situacao_anterior": 100,
+        "situacao_atual": 90,
+        "origem": "manual"
+      }
+    ],
+    "rendimentos": [
+      {
+        "id": "r1",
+        "tipo": "tributavel_pj",
+        "nome_fonte": "Fonte de teste titular",
+        "beneficiario": "Titular",
+        "valor": 1000,
+        "irrf": 10,
+        "data": "2025-12-31"
+      },
+      {
+        "id": "r2",
+        "tipo": "tributavel_pj",
+        "nome_fonte": "Fonte de teste dependente",
+        "beneficiario": "Dependente",
+        "cpf_dependente": "00000000000",
+        "valor": 2000,
+        "irrf": 20,
+        "data": "2025-12-31"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "theme": "light",
+      "width": 1513,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "light",
+      "width": 1100,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "light",
+      "width": 900,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "light",
+      "width": 700,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "dark",
+      "width": 1513,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "dark",
+      "width": 1100,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "dark",
+      "width": 900,
+      "fields": 15,
+      "overflow": []
+    },
+    {
+      "theme": "dark",
+      "width": 700,
+      "fields": 15,
+      "overflow": []
+    }
+  ],
+  "titularidade": [
+    "Titular",
+    "Dependente: Dependente de teste"
+  ],
+  "keyboard": "Nome → CPF → Data"
+}

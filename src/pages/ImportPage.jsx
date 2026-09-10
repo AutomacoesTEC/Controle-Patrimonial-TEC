@@ -1,3 +1,4 @@
+import PontosAtencaoImportacao from '../components/PontosAtencaoImportacao';
 import { useState, useRef } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCpfCnpj } from '../utils/formatters';
@@ -335,6 +336,7 @@ export default function ImportPage() {
         </div>
       </div>
       <div className="page-body animate-in">
+        <PontosAtencaoImportacao />
         {pendenciasRetificadora(state).length > 0 && (
           <section className="card" style={{ marginBottom: 20 }} aria-label="Pendências da retificadora">
             <h3>Pendências da retificadora: {state.anoCalendario}</h3>

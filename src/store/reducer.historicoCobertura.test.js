@@ -21,6 +21,7 @@ describe('cobertura estrutural do histórico de alterações', () => {
     const acoesComHistorico = new Set(nomesDosCases(blocoDescricoes));
     const infraestruturaSemHistorico = [
       'SUBSTITUIR_ESTADO_PERSISTIDO',
+      'ABRIR_CLASSIFICACAO_IMPORTACAO',
       'ADD_TOAST',
       'CLOSE_TOAST',
       'REMOVE_TOAST',

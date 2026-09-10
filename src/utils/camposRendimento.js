@@ -16,7 +16,9 @@ export function rendimentoSemFonteObrigatoria(tipo) {
   return /^isento_0[5-8]$/.test(tipo || '');
 }
 export function prepararRendimentoParaSalvar(form, original) {
-  return { ...form, valor: parseFloat(form.valor) || 0, irrf: parseFloat(form.irrf) || 0,
+  // Editar outro campo não pode transformar IRRF ausente no PDF em zero.
+  const irrfAusente = form.irrf === null || (original?.irrf === null && form.irrf === '');
+  return { ...form, valor: parseFloat(form.valor) || 0, irrf: irrfAusente ? null : (parseFloat(form.irrf) || 0),
     ...Object.fromEntries(camposRendimento(form.tipo).map(([campo]) => [campo, parseFloat(form[campo]) || 0])),
     // A marca veio da conciliação do tipo importado (RRA transportado para
     // exclusivos). Outra classificação não pode herdar essa exclusão.

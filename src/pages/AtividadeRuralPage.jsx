@@ -1,3 +1,4 @@
+import { saldoRuralInformado } from '../store/saldoRural';
 import { anoDaDataCadastro } from '../utils/dataCadastro';
 import SeletorTitularidade from '../components/SeletorTitularidade';
 import { dependentesDoFormulario, rotuloTitularidade } from '../store/titularidade';
@@ -94,7 +95,7 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
         {subView === 'resultado' && (
           <ResultadoSection
             receitaTotal={receitaTotal} despesaTotal={despesaTotal} resultadoDoAno={resultadoDoAno}
-            prejuizoRuralAcompensar={prejuizoRuralAcompensar} dispatch={dispatch} addToast={addToast}
+            prejuizoRuralAcompensar={saldoRuralInformado(state)} dispatch={dispatch} addToast={addToast}
             apuracaoResultadoRuralOficial={apuracaoResultadoRuralOficial}
           />
         )}

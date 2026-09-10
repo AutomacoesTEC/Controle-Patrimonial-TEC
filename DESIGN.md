@@ -229,9 +229,10 @@ Nenhum elemento usa `border-radius` fora dessa escala.
 - **dashboard-graficos**: agrupador nativo recolhido por padrão. Gráficos são
   leitura de apoio e só ocupam a página depois que a pessoa abre `Gráficos de
   apoio`; títulos e visualizações permanecem integrais no estado aberto.
-- **dashboard-avisos**: bloco compacto no topo que reúne todas as ressalvas
-  persistentes do período, importação e cobertura. A janela inicial exige
-  ciência; este bloco único permite consultar os mesmos limites depois.
+- **pontos de atenção da importação**: observações do arquivo, cobertura técnica e
+  retomada da classificação ficam em Importar declaração. A janela de classificação
+  abre após importar e permite salvar campo a campo ou pular para retomar depois.
+  Escolhas manuais preservam a origem e não promovem cobertura técnica.
 - **painel de IRRF**: tabela anual por fonte, beneficiário e tipo. Distingue
   visualmente o crédito que compõe o ajuste da retenção apenas informativa e
   confronta o primeiro com o total oficial do resumo, sem afetar o caixa.
@@ -261,3 +262,9 @@ Nenhum elemento usa `border-radius` fora dessa escala.
   convenção padrão de UI) e as setas "→"/"«"/"»" já em uso.
 - **Don't** introduzir uma quarta família tipográfica ou uma cor de
   acento fora das três cores de marca sem atualizar este arquivo.
+
+## Tipografia das fichas — revisão de 09/09/2026
+
+A base de leitura usa Inter 14 px, títulos de página 20 px e títulos de seção 16 px. Textos de apoio e detalhes usam 13 px; rótulos e cabeçalhos de tabela, 12 px. Valores de resumo usam 15–16 px com algarismos tabulares. Indicadores principais do demonstrativo mantêm seu destaque próprio.
+
+Filtros e formulários de Acompanhamento financeiro usam `form-control`, com altura mínima de 40 px e fonte de 14 px. Os saldos são apresentados em pares de rótulo e valor, com uma linha separada para o saldo final. Os estilos compartilhados também atendem Demonstrativo, cadastros e Importar declaração.

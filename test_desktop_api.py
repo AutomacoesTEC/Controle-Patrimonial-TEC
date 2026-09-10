@@ -6,6 +6,46 @@ from desktop_api import DesktopApi
 
 
 class DesktopApiTest(unittest.TestCase):
+    def test_backup_no_limite_utf8_pode_ser_reaberto(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            api = DesktopApi(pasta)
+            api.MAX_BACKUP_BYTES = 32
+            conteudo = '"' + 'á' * 15 + '"'
+            self.assertEqual(32, len(conteudo.encode('utf-8')))
+            resultado = api.salvar_backup_automatico('limite', conteudo)
+            caminho = os.path.join(api.backup_path, resultado['nome'])
+
+            class JanelaFalsa:
+                def create_file_dialog(self, *args, **kwargs):
+                    return (caminho,)
+
+            api.vincular_janela(JanelaFalsa())
+            self.assertEqual(conteudo, api.selecionar_backup()['conteudo'])
+
+    def test_backup_excedente_preserva_copias_e_retencao(self):
+        for conteudo in ('"' + 'a' * 31 + '"', '"' + 'á' * 15 + 'a"'):
+            for nome in ('existente', 'novo'):
+                with self.subTest(conteudo=conteudo, nome=nome):
+                    with tempfile.TemporaryDirectory() as pasta:
+                        api = DesktopApi(pasta, max_backups=1)
+                        api.MAX_BACKUP_BYTES = 32
+                        self.assertEqual(33, len(conteudo.encode('utf-8')))
+                        api.salvar_backup_automatico('existente', '{"valor":1}')
+                        with self.assertRaisesRegex(ValueError, 'grande demais'):
+                            api.salvar_backup_automatico(nome, conteudo)
+                        self.assertEqual(['existente.cptec.json'], os.listdir(api.backup_path))
+                        with open(os.path.join(api.backup_path, 'existente.cptec.json'),
+                                  encoding='utf-8') as arquivo:
+                            self.assertEqual('{"valor":1}', arquivo.read())
+
+    def test_backup_excedente_nao_cria_diretorio(self):
+        with tempfile.TemporaryDirectory() as pasta:
+            api = DesktopApi(pasta)
+            api.MAX_BACKUP_BYTES = 32
+            with self.assertRaisesRegex(ValueError, 'grande demais'):
+                api.salvar_backup_automatico('novo', 'a' * 33)
+            self.assertFalse(os.path.exists(api.backup_path))
+
     def test_seletor_backup_abre_em_downloads_do_usuario(self):
         class JanelaFalsa:
             def __init__(self, retorno):

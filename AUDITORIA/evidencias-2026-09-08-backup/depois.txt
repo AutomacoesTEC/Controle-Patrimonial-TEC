@@ -1,0 +1,11 @@
+test_backup_excedente_nao_cria_diretorio (test_desktop_api.DesktopApiTest.test_backup_excedente_nao_cria_diretorio) ... ok
+test_backup_excedente_preserva_copias_e_retencao (test_desktop_api.DesktopApiTest.test_backup_excedente_preserva_copias_e_retencao) ... ok
+test_backup_no_limite_utf8_pode_ser_reaberto (test_desktop_api.DesktopApiTest.test_backup_no_limite_utf8_pode_ser_reaberto) ... ok
+test_confina_escrita_atomica_e_limita_retencao (test_desktop_api.DesktopApiTest.test_confina_escrita_atomica_e_limita_retencao) ... ok
+test_persiste_carrega_e_exclui_perfis_com_confinamento (test_desktop_api.DesktopApiTest.test_persiste_carrega_e_exclui_perfis_com_confinamento) ... ok
+test_seletor_backup_abre_em_downloads_do_usuario (test_desktop_api.DesktopApiTest.test_seletor_backup_abre_em_downloads_do_usuario) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.671s
+
+OK

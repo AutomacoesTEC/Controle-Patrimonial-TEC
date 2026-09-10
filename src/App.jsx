@@ -1,3 +1,4 @@
+import ClassificacaoImportacaoModal from './components/ClassificacaoImportacaoModal';
 import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { DataProvider, useData } from './store/DataContext';
 import Sidebar from './components/Sidebar';
@@ -126,7 +127,7 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
   const renderPage = () => {
     switch (activeView) {
       case 'dashboard': return <Dashboard onNavigate={navegarDoDashboard} />;
-      case 'acompanhamento': return <AcompanhamentoPage />;
+      case 'acompanhamento': return <AcompanhamentoPage contextoInicial={dashboardRetorno?.view === 'acompanhamento' ? dashboardRetorno.aba : null} onVoltar={dashboardRetorno?.view === 'acompanhamento' ? voltarAoDashboard : null} />;
       case 'revisaoPeriodica': return <RevisaoPeriodicaPage onNavigate={navegarPelaSidebar} />;
       case 'importar': return <ImportPage />;
       case 'titular': return <TitularPage />;
@@ -166,6 +167,7 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
           {renderPage()}
         </Suspense>
       </main>
+      <ClassificacaoImportacaoModal />
       {/* Toasts */}
       {state.toasts.length > 0 && (
         <div className="toast-container">

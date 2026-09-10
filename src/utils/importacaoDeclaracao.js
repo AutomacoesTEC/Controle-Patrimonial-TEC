@@ -55,6 +55,7 @@ export async function identificarArquivoFonte(resultado, arquivo, arrayBuffer) {
       ultimaModificacao: Number.isFinite(arquivo?.lastModified) ? arquivo.lastModified : null,
       sha256ArquivoOriginal,
       arquivoOriginalPersistido: false,
+      revisaoManualAberta: true,
     },
   };
 }

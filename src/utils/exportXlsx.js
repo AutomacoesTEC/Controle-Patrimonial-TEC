@@ -62,7 +62,7 @@ export function exportToXlsx(data, fileName = 'variacao_patrimonial') {
       'Nome Fonte': r.nome_fonte || '',
       'Beneficiário': r.beneficiario || 'Titular',
       'Valor': r.valor || 0,
-      'IRRF': r.irrf || 0,
+      'IRRF': r.irrf ?? '',
     }));
     const ws3 = XLSX.utils.json_to_sheet(rendData);
     XLSX.utils.book_append_sheet(wb, ws3, 'Rendimentos');

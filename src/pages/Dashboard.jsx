@@ -1,9 +1,12 @@
+import VendasAnterioresAviso from '../components/VendasAnterioresAviso';
+import ResumoDemonstrativo from '../components/ResumoDemonstrativo';
+import { painelFinanceiro, posicoesFinanceiras, coberturaTemporal, pontePatrimonial, parcelasDeclaradas } from '../store/auditoriaDemonstrativo';
+import { exportDemonstrativoToXlsx } from '../utils/exportDemonstrativo';
 import { filtrarPorPessoa } from '../store/titularidade';
 import TabelaRedimensionavel from '../components/TabelaRedimensionavel';
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../store/DataContext';
 import { formatCurrency, formatDate, formatCPF, resumirMeses, GRUPOS_BENS, MOVIMENTACAO_TIPOS, MOVIMENTACAO_DIVIDA_TIPOS, truncarComReticencias, nomeCurtoBem } from '../utils/formatters';
-import { acompanhamentoDo, caixaPeriodo } from '../store/acompanhamento';
 import { version as VERSAO_APP } from '../../package.json';
 import { exportToXlsx } from '../utils/exportXlsx';
 import { situacaoBemAteData, diaAnterior } from '../store/demonstrativos';
@@ -11,7 +14,6 @@ import { demonstrativoPeriodo, serieEvolucao, totaisNaData, dadosDoAno, anosComD
 import { saldosQueAtravessam, disponibilidadesEmData } from '../store/saldosCompensaveis';
 import { conferirContinuidade } from '../store/continuidade';
 import { classificarPendenciasSaldo } from '../store/classificacaoSaldo';
-import { avaliarSaldoComTolerancia } from '../store/toleranciaSaldo';
 import { montarPainelIrrf } from '../store/painelIrrf';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList } from 'recharts';
 import DateInput from '../components/DateInput';
@@ -198,30 +200,16 @@ export default function Dashboard({ onNavigate } = {}) {
     [state, de, ate]
   );
   const checklistSaldo = useMemo(
-    () => classificarPendenciasSaldo(state, demo, de, ate),
+    () => classificarPendenciasSaldo(state, demo, de, ate).filter(item => item.tipo !== 'aplicacao_sem_rendimento'),
     [state, demo, de, ate]
   );
-  const saldoHero = demo?.saldoDeCaixa || 0;
-  const avaliacaoSaldo = avaliarSaldoComTolerancia(saldoHero, { tipo: 'fixa', valor: 0 }, 0);
-  const leituraSaldoHero = avaliacaoSaldo.fecha
-    ? {
-        classe: 'fecha',
-        estado: 'Conciliação fecha',
-        explicacao: avaliacaoSaldo.limite > 0
-          ? `Diferença dentro da tolerância de ${formatCurrency(avaliacaoSaldo.limite)}.`
-          : 'Entradas e saídas registradas se conciliam no período.',
-      }
-    : saldoHero > 0
-      ? {
-          classe: 'sobra',
-          estado: 'Sobra a explicar',
-          explicacao: 'As entradas registradas superam as saídas e o aumento patrimonial no período.',
-        }
-      : {
-          classe: 'falta',
-          estado: 'Falta a explicar',
-          explicacao: 'As saídas e o aumento patrimonial superam as entradas registradas no período.',
-        };
+  useEffect(() => {
+    let fechados = [];
+    const preparar = () => { fechados = [...document.querySelectorAll('.page-body details:not([open])')]; fechados.forEach(d => { d.open = true; }); };
+    const restaurar = () => { fechados.forEach(d => { d.open = false; }); fechados = []; };
+    window.addEventListener('beforeprint', preparar); window.addEventListener('afterprint', restaurar);
+    return () => { window.removeEventListener('beforeprint', preparar); window.removeEventListener('afterprint', restaurar); };
+  }, []);
   const geradoEm = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
@@ -247,100 +235,10 @@ export default function Dashboard({ onNavigate } = {}) {
     [dadosFimPeriodo]
   );
 
-  // Anos do período consultado cuja declaração veio do PDF. O caminho PDF só
-  // lê 4 fichas (Bens e Direitos, Dívidas e Ônus Reais, Pagamentos Efetuados
-  // e Doações); Rendimentos, Atividade Rural, Ganho de Capital, Imposto
-  // Devido e Dependentes ficam de fora. Sem este aviso, o Demonstrativo
-  // fechava com "Total Geral dos Rendimentos R$ 0,00" e um Saldo de Caixa
-  // muito negativo, que é exatamente o desenho de acréscimo patrimonial a
-  // descoberto — alarme falso, achado na auditoria de 21/08/2026.
-  const anosImportadosPorPdf = useMemo(() => {
-    if (!demo) return [];
-    return demo.anosCobertos.filter(ano => dadosDoAno(state, ano)?.importFormato === 'pdf');
-  }, [state, demo]);
-
-  // Mesmo aviso, para o ano que foi importado mas é ANTERIOR ao campo
-  // `importFormato` existir: não dá pra saber de qual arquivo ele veio, mas dá
-  // pra ver o sintoma, que é o que importa aqui — declaração importada, com
-  // bens, e nenhum rendimento lançado. Sem esta segunda checagem a correção
-  // do aviso não valeria para nenhum perfil já existente, que é justamente
-  // onde o alarme falso aparece hoje. Um .DBK de alguém que realmente não
-  // teve renda nenhuma cai aqui também, e o texto cobre os dois casos sem
-  // afirmar de qual arquivo veio.
-  // Fichas que a declaração importada tem PREENCHIDAS e que o app não lê.
-  // Agrupadas por ano do período consultado, sem repetir a mesma ficha duas
-  // vezes. Ver FICHAS_NAO_LIDAS em importParsers.js.
-  const fichasNaoLidas = useMemo(() => {
-    if (!demo) return [];
-    const acc = [];
-    for (const ano of demo.anosCobertos) {
-      const dados = dadosDoAno(state, ano);
-      for (const ficha of (dados?.fichasNaoLidasComConteudo || [])) {
-        if (!acc.includes(ficha)) acc.push(ficha);
-      }
-    }
-    return acc;
-  }, [demo, state]);
-
-  const coberturaFichas = useMemo(() => {
-    if (!demo) return null;
-    const entradas = demo.anosCobertos.flatMap(ano =>
-      Object.values(dadosDoAno(state, ano)?.estadoFichas || {})
-    ).filter(ficha => ficha?.presenca === 'preenchida' || ficha?.estado === 'erro');
-    if (entradas.length === 0) return null;
-    return {
-      parciais: entradas.filter(ficha => ficha.estado === 'parcial').length,
-      naoSuportadas: entradas.filter(ficha => ficha.estado === 'nao_suportada').length,
-      erros: entradas.filter(ficha => ficha.estado === 'erro').length,
-      derivadas: entradas.filter(ficha => ficha.derivado === true).length,
-      completas: entradas.filter(ficha =>
-        ficha.estado === 'completa' && ficha.completudeAuditada === true
-      ).length,
-    };
-  }, [demo, state]);
-
-  const anosImportadosSemRendimento = useMemo(() => {
-    if (!demo) return [];
-    return demo.anosCobertos.filter(ano => {
-      const dados = dadosDoAno(state, ano);
-      if (!dados || dados.importFormato) return false;
-      const origem = ano === state.anoCalendario ? state.origemAnoAtual : dados.origem;
-      return origem === 'importacao'
-        && (dados.bens || []).length > 0
-        && (dados.rendimentos || []).length === 0;
-    });
-  }, [state, demo]);
-
-  // Avisos ESTRUTURAIS: os que dizem que o número desta tela pode estar errado
-  // ou incompleto (parte da declaração não lida; ano importado sem rendimento).
-  // Não são ressalva de conferência (essas viraram o "?" discreto): aqui a
-  // pessoa PRECISA ficar ciente antes de confiar no demonstrativo, então
-  // aparecem numa janela própria ao abrir o Dashboard, que ela fecha no OK ou
-  // Esc. Depois de fechada, ficam acessíveis pelo "?" ao lado do título.
+  // Alertas de importação e cobertura ficam na ficha Importar declaração.
+  // O demonstrativo mantém somente os avisos do período consultado.
   const avisosEstruturais = useMemo(() => {
     const lista = [];
-    if (anosImportadosPorPdf.length === 0 && anosImportadosSemRendimento.length > 0) {
-      lista.push({
-        chave: 'semRendimento',
-        titulo: 'Sem rendimentos lançados',
-        texto: (anosImportadosSemRendimento.length === 1
-          ? `O ano-calendário ${anosImportadosSemRendimento[0]} veio de uma declaração importada, tem bens cadastrados e nenhum rendimento.`
-          : `Os anos-calendário ${anosImportadosSemRendimento.join(', ')} vieram de declarações importadas, têm bens cadastrados e nenhum rendimento.`)
-          + ' O demonstrativo confronta a variação do patrimônio com os rendimentos do período, então sem eles o Saldo de Caixa fica muito negativo mesmo que a declaração tenha renda. Reimporte o arquivo .DBK da mesma declaração em Importar Declaração, ou cadastre os rendimentos à mão.',
-      });
-    }
-    if (fichasNaoLidas.length > 0) {
-      const temDecOnly = fichasNaoLidas.some(f => /ACUMULADAMENTE|PESSOA FÍSICA E DO EXTERIOR/.test(f));
-      lista.push({
-        chave: 'naoImportada',
-        titulo: 'Parte da declaração não foi importada',
-        grave: true,
-        texto: 'A declaração importada tem informação nestas fichas, que o app ainda não lê:\n\n'
-          + fichasNaoLidas.map(f => `• ${f}`).join('\n')
-          + '\n\nOs valores dessas fichas não entram em nenhum número desta tela. Confira-os na declaração original, ou cadastre-os à mão, antes de usar o demonstrativo.'
-          + (temDecOnly ? '\n\nEstas fichas o arquivo .DEC/.DBK importa: se você tiver o arquivo eletrônico desta mesma declaração, importe por ele em Importar Declaração e os valores entram sozinhos.' : ''),
-      });
-    }
     // Período: resposta ao filtro de datas. Marca discreta fica no próprio
     // card de período (onde as datas são editadas), e o texto também entra na
     // janela de abertura.
@@ -350,19 +248,7 @@ export default function Dashboard({ onNavigate } = {}) {
       lista.push({ chave: 'anosSemDado', local: 'periodo', titulo: `Sem dados de ${demo.anosSemDado.join(', ')}`, texto: 'Esses anos ficam de fora das contas e dos gráficos.' });
     }
     return lista;
-  }, [demo, anosImportadosPorPdf, anosImportadosSemRendimento, fichasNaoLidas]);
-  const avisoCobertura = coberturaFichas
-    && (coberturaFichas.parciais > 0 || coberturaFichas.naoSuportadas > 0 || coberturaFichas.erros > 0)
-    ? {
-        chave: 'coberturaFichas',
-        titulo: 'Cobertura das fichas ainda em auditoria',
-        texto: `Dados encontrados não significam ficha integralmente conferida. No período há ${coberturaFichas.parciais} ficha(s) com suporte parcial, ${coberturaFichas.naoSuportadas} não suportada(s) e ${coberturaFichas.erros} com erro de extração.${coberturaFichas.derivadas > 0 ? ` ${coberturaFichas.derivadas} consolidação(ões) foi(ram) calculada(s) a partir dos meses e não representa(m) importação integral da ficha anual.` : ''}`,
-      }
-    : null;
-  const avisosPersistentes = avisoCobertura
-    ? [...avisosEstruturais, avisoCobertura]
-    : avisosEstruturais;
-
+  }, [demo]);
   const assinaturaAviso = avisosEstruturais.map(a => a.chave).join('|');
   const [avisoVisto, setAvisoVisto] = useState(true);
   useEffect(() => {
@@ -430,20 +316,12 @@ export default function Dashboard({ onNavigate } = {}) {
       .sort((a, b) => b.value - a.value);
   }, [state, ate]);
 
-  const handleExport = () => {
-    const dadosFim = ate ? dadosDoAno(state, Number(ate.slice(0, 4))) : null;
-    exportToXlsx({
-      bens: dadosFim?.bens || [],
-      dividas: dadosFim?.dividas || [],
-      rendimentos: dadosFim?.rendimentos || [],
-      pagamentos: dadosFim?.pagamentos || [],
-      totalBensAnterior: totIni?.totalBens || 0,
-      totalBensAtual: totFim?.totalBens || 0,
-      totalDividasAnterior: totIni?.totalDividas || 0,
-      totalDividasAtual: totFim?.totalDividas || 0,
-      anoCalendario: ate ? Number(ate.slice(0, 4)) : 'periodo',
-    }, 'variacao_patrimonial');
-  };
+  const cobertura = useMemo(() => coberturaTemporal(state, de, ate), [state, de, ate]);
+  const financeiro = useMemo(() => painelFinanceiro(estadoCompleto, de, ate, pessoaSelecionada), [estadoCompleto, de, ate, pessoaSelecionada]);
+  const posicoes = useMemo(() => posicoesFinanceiras(dadosFimPeriodo, ate), [dadosFimPeriodo, ate]);
+  const parcelas = useMemo(() => parcelasDeclaradas(state, de, ate), [state, de, ate]);
+  const ponte = useMemo(() => detalheCategoria ? pontePatrimonial(state, CATEGORIA_VARIACAO[detalheCategoria].colecao, de, ate) : [], [state, detalheCategoria, de, ate]);
+  const handleExport = () => exportDemonstrativoToXlsx({state, de, ate, pessoa: nomeRecorte, demo, financeiro, cobertura, painelIrrf, saldos: saldosAtravessam});
 
   if (!temDado) {
     return (
@@ -521,40 +399,8 @@ export default function Dashboard({ onNavigate } = {}) {
           </div>
         </div>
 
-        {avisosPersistentes.length > 0 && (
-          <section className="dashboard-avisos" aria-labelledby="dashboard-avisos-titulo">
-            <div className="dashboard-avisos-cabecalho">
-              <h3 id="dashboard-avisos-titulo">Pontos de atenção</h3>
-              <span>{avisosPersistentes.length}</span>
-            </div>
-            <div className="dashboard-avisos-itens">
-              {avisosPersistentes.map(a => (
-                <Ajuda key={a.chave} tom="ressalva" rotulo={a.titulo} titulo={a.titulo} texto={a.texto} />
-              ))}
-            </div>
-          </section>
-        )}
 
-        {demo && (
-          <section className={`saldo-hero saldo-hero-${leituraSaldoHero.classe}`} aria-labelledby="saldo-hero-titulo">
-            <div className="saldo-hero-contexto">
-              <span className="saldo-hero-rotulo" id="saldo-hero-titulo">Diferença de conciliação</span>
-              <p>{leituraSaldoHero.explicacao}</p>
-              <small>Não representa saldo bancário disponível. Compara os recursos registrados com as saídas e a variação patrimonial fiscal.</small>
-              <small style={{ display: 'block' }}>Saldos anuais sem movimentos datados não comprovam a posição mensal. Entre janeiro e novembro, a projeção utiliza somente a abertura e os eventos datados; a diferença anual aparece no fechamento de 31/12, sem presumir que ocorreu em dezembro.</small>
-            </div>
-            <div className="saldo-hero-leitura">
-              <span className="saldo-hero-estado">{leituraSaldoHero.estado}</span>
-              <strong className="saldo-hero-valor">{formatCurrency(saldoHero)}</strong>
-            </div>
-          </section>
-        )}
 
-        {(() => {
-          if (!de || !ate || de > ate) return null;
-          const caixa = caixaPeriodo(acompanhamentoDo(estadoCompleto), de, ate, pessoaSelecionada);
-          return <section className="card acomp-card"><h3>Visão financeira separada</h3><p>Disponibilidade registrada nas contas: <strong>{caixa.contas ? formatCurrency(caixa.final / 100) : 'Não informada: cadastre contas'}</strong>. Fluxo previsto sem baixa: {formatCurrency(caixa.projetado / 100)}.</p><p>Não é a diferença fiscal acima. A comprovação depende de extratos conciliados; avaliações de mercado permanecem em visão própria, sem mudar o custo fiscal.</p>{onNavigate && <button className="btn btn-secondary" onClick={() => onNavigate('acompanhamento')}>Abrir contas, extratos e visão econômica</button>}</section>;
-        })()}
 
         {continuidade.disponivel && (
           <div className="card continuidade-card">
@@ -589,79 +435,7 @@ export default function Dashboard({ onNavigate } = {}) {
 
         {demo && (
         <>
-        <div className="dashboard-demonstrativo-cabecalho">
-          <h3>Demonstrativo de Conciliação Patrimonial</h3>
-        </div>
-        {/* Virou 4 cards separados (Variação Patrimonial / Rendimentos /
-            Ganhos Apurados / Pagamentos), em vez de uma tabela só gigante —
-            pedido real da usuária, "está tudo muito junto, separe por
-            sessões diferentes pra melhor visualizar". Cada card fecha no seu
-            próprio subtotal de destaque (Variação Patrimonial Total / Total
-            Geral dos Rendimentos / Saldo de Caixa Geral / Saldo de Caixa),
-            então a fronteira visual do card já bate com a fronteira lógica
-            do cálculo. */}
-
-        <div className="card" style={{ marginBottom: '16px' }}>
-          <div className="card-header"><h3 className="card-title">Variação Patrimonial</h3></div>
-          <TabelaRedimensionavel><table className="demonstrativo-table">
-            <tbody>
-              <tr className="demonstrativo-secao">
-                <td colSpan={2}>
-                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('bens')}>
-                    Bens e Direitos
-                  </button>
-                </td>
-              </tr>
-              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
-              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('bens')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('bens'))} title="Ver as movimentações que compõem esse saldo">
-                <td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td>
-              </tr>
-
-              <tr className="demonstrativo-secao">
-                <td colSpan={2}>
-                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('dividas')}>
-                    Dívidas e Ônus Reais
-                  </button>
-                </td>
-              </tr>
-              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumDe)}</td></tr>
-              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaComum')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaComum'))} title="Ver as movimentações que compõem esse saldo">
-                <td>Variação das Dívidas e Ônus Reais</td><td className={`currency ${demo.varPatrimonial.deltaDividaComum >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaComum)}</td>
-              </tr>
-
-              <tr className="demonstrativo-secao">
-                <td colSpan={2}>
-                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('atividadeRural', 'dividas')}>
-                    Dívida Rural
-                  </button>
-                </td>
-              </tr>
-              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralDe)}</td></tr>
-              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralAte)}</td></tr>
-              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaRural')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaRural'))} title="Ver as movimentações que compõem esse saldo">
-                <td>Variação da Dívida Rural</td><td className={`currency ${demo.varPatrimonial.deltaDividaRural >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaRural)}</td>
-              </tr>
-
-              <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
-              {/* demo.varPatrimonial.total (o valor calculado, usado sem mudar em
-                  Saldo de Caixa Geral logo abaixo) é "impacto no caixa": negativo
-                  quando o patrimônio líquido CRESCEU (dinheiro saiu do caixa pra
-                  virar bem ou pagar dívida) — mesma convenção da planilha
-                  original (lá aparece como "PERDAS APURADAS" quando negativo).
-                  Pedido real da usuária: essa tela é "Demonstrativo de
-                  Conciliação PATRIMONIAL", não de caixa — só NESTA linha exibida
-                  na tela, o sinal mostrado é invertido pra bater com a leitura
-                  intuitiva (patrimônio cresceu = positivo/verde), sem alterar o
-                  valor usado no resto do cálculo (Saldo de Caixa Geral etc.
-                  continuam somando demo.varPatrimonial.total como está,
-                  intocado). */}
-              <tr className="demonstrativo-destaque demonstrativo-final"><td>Variação Patrimonial Total</td><td className={`currency ${-demo.varPatrimonial.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(-demo.varPatrimonial.total)}</td></tr>
-            </tbody>
-          </table></TabelaRedimensionavel>
-        </div>
-
+        <ResumoDemonstrativo inicial={totIni?.liquido || 0} final={totFim?.liquido || 0} variacao={variacaoPeriodo} financeiro={financeiro} posicoes={posicoes} cobertura={cobertura} parcelas={parcelas} state={estadoCompleto} pessoa={pessoaSelecionada} ate={ate} onNavigate={onNavigate} onDetalhar={() => setDetalheCategoria('bens')} conciliacaoCards={<>
         <div className="card" style={{ marginBottom: '16px' }}>
           <div className="card-header"><h3 className="card-title">Rendimentos</h3></div>
           <TabelaRedimensionavel><table className="demonstrativo-table">
@@ -676,7 +450,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 <tr>
                   <td>
                     PJ, contribuição previdenciária oficial
-                    <Ajuda texto="INSS descontado na folha pela fonte pagadora. Sai daqui porque este demonstrativo mede caixa, e esse valor nunca chegou à conta de quem declara." />
+                    <Ajuda texto="INSS descontado na folha pela fonte pagadora. Sai daqui porque esta linha apresenta o líquido após as retenções informadas, e esse valor nunca chegou à conta de quem declara." />
                   </td>
                   <td className="currency negative">{formatCurrency(-demo.rendimentos.tributavelPjPrevidencia)}</td>
                 </tr>
@@ -793,7 +567,7 @@ export default function Dashboard({ onNavigate } = {}) {
               {demo.ganhos.jaNosRendimentos > 0 && <tr><td>Menos: ganho já incluído nos rendimentos exclusivos (conferir resumo agregado)</td><td className="currency negative">{formatCurrency(-demo.ganhos.jaNosRendimentos)}</td></tr>}
               <tr>
                 <td>
-                  Ganho/perda líquido de IRRF nas vendas do período ({demo.ganhos.vendas.length} venda(s))
+                  Ganho/perda após tributos informados nas vendas do período ({demo.ganhos.vendas.length} venda(s))
                   {demo.ganhos.daDeclaracao && (
                     <Ajuda texto="Valores vindos da Apuração do Ganho de Capital da declaração importada: valor de alienação menos custo de aquisição, por operação. A declaração informa ganho 0,00 quando a operação deu prejuízo, porque prejuízo não gera imposto, mas aqui a perda entra negativa, que é o efeito real no caixa. Assim que houver venda lançada como movimentação no bem, passa a valer a movimentação." />
                   )}
@@ -810,7 +584,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 <tr>
                   <td>
                     Ajuste do resultado de Renda Variável no período
-                    <Ajuda texto="Soma dos meses que fecharam negativos nas fichas de Renda Variável. Entra no caixa porque é dinheiro que saiu; o ganho dos meses positivos não entra aqui, já vem pela ficha de tributação exclusiva." />
+                    <Ajuda texto="Resultado das fichas mensais após tributos informados e ajustes para evitar repetir ganhos já incluídos nos rendimentos. Não corresponde ao total de vendas ou resgates." />
                   </td>
                   <td className={`currency ${demo.rendaVariavelPerda < 0 ? 'negative' : 'positive'}`}>{formatCurrency(demo.rendaVariavelPerda)}</td>
                 </tr>
@@ -818,23 +592,9 @@ export default function Dashboard({ onNavigate } = {}) {
               {/* Venda financiada de ano anterior é uma distorção temporal,
                   não uma ausência de preço. Continua junto do ganho que afeta,
                   separada do checklist final desta rodada. */}
-              {(() => {
-                const anteriores = (demo.pendenciasAlienacao || []).filter(p => p.vendaForaDoPeriodo);
-                if (anteriores.length === 0) return null;
-                const item = p => `${truncarComReticencias(p.discriminacao || 'Bem sem descrição', 70)}: baixou ${formatCurrency(p.reducao)}, venda em ${formatDate(p.vendaForaDoPeriodo)}${p.valorVendaForaDoPeriodo != null ? ` por ${formatCurrency(p.valorVendaForaDoPeriodo)}` : ''}`;
-                return (
-                  <tr className="demonstrativo-nota"><td colSpan={2} style={{ padding: '8px 0 0' }}>
-                    <Ajuda
-                      tom="ressalva"
-                      rotulo={`${anteriores.length} venda(s) de ano anterior ainda no patrimônio inflam este Saldo`}
-                      titulo="Venda de ano anterior zerando o bem só agora"
-                      texto={`Este(s) bem(ns) foi(ram) vendido(s) em ano anterior, mas continuava(m) declarado(s) pelo custo. O Saldo soma o custo inteiro como se tivesse virado dinheiro agora. No ano da venda, confira a baixa do bem e o crédito a receber pelas parcelas.\n\n${anteriores.slice(0, 6).map(item).join('\n')}${anteriores.length > 6 ? `\ne mais ${anteriores.length - 6}.` : ''}`}
-                    />
-                  </td></tr>
-                );
-              })()}
+              {(demo.pendenciasAlienacao || []).some(p => p.vendaForaDoPeriodo) && <tr className="demonstrativo-nota"><td colSpan={2}><VendasAnterioresAviso pendencias={demo.pendenciasAlienacao} state={estadoCompleto} ate={ate} pessoa={pessoaSelecionada} onNavigate={onNavigate} /></td></tr>}
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
-              <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa Geral</td><td className={`currency ${demo.saldoDeCaixaGeral >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
+              <tr className="demonstrativo-destaque demonstrativo-final"><td>Resultado antes dos pagamentos</td><td className="currency">{formatCurrency(demo.saldoDeCaixaGeral)}</td></tr>
             </tbody>
           </table></TabelaRedimensionavel>
         </div>
@@ -845,7 +605,7 @@ export default function Dashboard({ onNavigate } = {}) {
             <tbody>
               <tr>
                 <td>
-                  Pagamentos Efetuados (ficha dedutível)
+                  Pagamentos efetuados (valores declarados)
                   <Ajuda texto="Soma o VALOR PAGO de cada item da ficha, como a declaração informa. A parcela não dedutível não é descontada aqui: ela diz que aquela parte não pode ser abatida do imposto, e não que o dinheiro voltou. Se num caso concreto ela for reembolso, o valor devolvido deve ser lançado em Rendimentos, que é onde ele entra no caixa de volta." />
                 </td>
                 <td className="currency negative">{formatCurrency(-demo.pagamentosEfetuados)}</td>
@@ -873,13 +633,14 @@ export default function Dashboard({ onNavigate } = {}) {
                 </>
               )}
               <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
-              <tr className="demonstrativo-destaque demonstrativo-final"><td>Saldo de Caixa</td><td className={`currency ${demo.saldoDeCaixa >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.saldoDeCaixa)}</td></tr>
+              <tr className="demonstrativo-destaque demonstrativo-final"><td>Resultado da conciliação patrimonial</td><td className="currency">{formatCurrency(demo.saldoDeCaixa)}</td></tr>
+              <tr className="demonstrativo-nota"><td colSpan={2}><p>Diferença entre os recursos registrados, os pagamentos e a variação do patrimônio líquido. Um valor positivo indica recursos acima das aplicações registradas; um valor negativo indica o contrário. O resultado orienta a conferência, mas não comprova saldo bancário disponível nem, sozinho, um erro na declaração.</p><p>Saldos anuais sem movimentos datados não comprovam a posição mensal. A diferença anual aparece no fechamento de 31/12, sem presumir que ocorreu em dezembro.</p></td></tr>
             </tbody>
           </table></TabelaRedimensionavel>
           {checklistSaldo.length > 0 && (
             <section className="saldo-checklist" aria-labelledby="saldo-checklist-titulo">
               <div className="saldo-checklist-cabecalho">
-                <h4 id="saldo-checklist-titulo">Pontos para conferir no Saldo de Caixa</h4>
+                <h4 id="saldo-checklist-titulo">Pontos para conferir na conciliação patrimonial</h4>
                 <span>{checklistSaldo.length}</span>
               </div>
               <ul>
@@ -897,26 +658,72 @@ export default function Dashboard({ onNavigate } = {}) {
               </ul>
             </section>
           )}
-          {/* Leitura de compatibilidade das seções 11-12 do estudo: o Saldo de
-              Caixa que fecha a conciliação precisa ser plausível diante do que
-              a pessoa efetivamente tem em forma de dinheiro no fim do período.
-              Não altera o cálculo acima — é referência ao lado. */}
-          {disponibilidades.total > 0 && (
-            <div className="rv-total-imposto" style={{ marginTop: '16px', marginBottom: 0, flexWrap: 'wrap' }}>
-              <span>
-                Disponibilidades em 31/12
-                <Ajuda texto="Soma do que a declaração já traz em forma de dinheiro no fim do período: aplicações e investimentos, créditos, depósitos à vista e numerário, e fundos (grupos 04, 05, 06 e 07 da ficha Bens e Direitos). Serve como referência: o Saldo de Caixa que fecha a conciliação deve ser compatível com o dinheiro efetivamente disponível. Não entra em nenhum cálculo do demonstrativo." />
-                <span style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 18px', fontSize: '11px', textTransform: 'none', letterSpacing: 0, marginTop: '4px', color: 'var(--text-muted)' }}>
-                  {disponibilidades.porGrupo.map(g => (
-                    <span key={g.grupo}>{g.nome}: {formatCurrency(g.valor)}</span>
-                  ))}
-                </span>
-              </span>
-              <strong className="currency">{formatCurrency(disponibilidades.total)}</strong>
-            </div>
-          )}
+
         </div>
 
+
+</>} variacaoCard={<div className="card" style={{ marginBottom: '16px' }}>
+          <div className="card-header"><h3 className="card-title">Variação Patrimonial</h3></div>
+          <TabelaRedimensionavel><table className="demonstrativo-table">
+            <tbody>
+              <tr className="demonstrativo-secao">
+                <td colSpan={2}>
+                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('bens')}>
+                    Bens e Direitos
+                  </button>
+                </td>
+              </tr>
+              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensDe)}</td></tr>
+              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.bensAte)}</td></tr>
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('bens')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('bens'))} title="Ver as movimentações que compõem esse saldo">
+                <td>Variação dos Bens</td><td className={`currency ${demo.varPatrimonial.deltaBens >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaBens)}</td>
+              </tr>
+
+              <tr className="demonstrativo-secao">
+                <td colSpan={2}>
+                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('dividas')}>
+                    Dívidas e Ônus Reais
+                  </button>
+                </td>
+              </tr>
+              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumDe)}</td></tr>
+              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaComumAte)}</td></tr>
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaComum')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaComum'))} title="Ver as movimentações que compõem esse saldo">
+                <td>Variação das Dívidas e Ônus Reais</td><td className={`currency ${demo.varPatrimonial.deltaDividaComum >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaComum)}</td>
+              </tr>
+
+              <tr className="demonstrativo-secao">
+                <td colSpan={2}>
+                  <button type="button" className="demonstrativo-secao-link" onClick={() => onNavigate && onNavigate('atividadeRural', 'dividas')}>
+                    Dívida Rural
+                  </button>
+                </td>
+              </tr>
+              <tr><td>Situação em {formatDate(dataSaldoAnterior)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralDe)}</td></tr>
+              <tr><td>Situação em {formatDate(ate)}</td><td className="currency">{formatCurrency(demo.varPatrimonial.dividaRuralAte)}</td></tr>
+              <tr className="demonstrativo-total demonstrativo-total-clicavel" role="button" tabIndex={0} onClick={() => setDetalheCategoria('dividaRural')} onKeyDown={evento => acionarPorTeclado(evento, () => setDetalheCategoria('dividaRural'))} title="Ver as movimentações que compõem esse saldo">
+                <td>Variação da Dívida Rural</td><td className={`currency ${demo.varPatrimonial.deltaDividaRural >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(demo.varPatrimonial.deltaDividaRural)}</td>
+              </tr>
+
+              <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
+              {/* demo.varPatrimonial.total (o valor calculado, usado sem mudar em
+                  Saldo de Caixa Geral logo abaixo) é "impacto no caixa": negativo
+                  quando o patrimônio líquido CRESCEU (dinheiro saiu do caixa pra
+                  virar bem ou pagar dívida) — mesma convenção da planilha
+                  original (lá aparece como "PERDAS APURADAS" quando negativo).
+                  Pedido real da usuária: essa tela é "Demonstrativo de
+                  Conciliação PATRIMONIAL", não de caixa — só NESTA linha exibida
+                  na tela, o sinal mostrado é invertido pra bater com a leitura
+                  intuitiva (patrimônio cresceu = positivo/verde), sem alterar o
+                  valor usado no resto do cálculo (Saldo de Caixa Geral etc.
+                  continuam somando demo.varPatrimonial.total como está,
+                  intocado). */}
+              <tr className="demonstrativo-destaque demonstrativo-final"><td>Variação Patrimonial Total</td><td className={`currency ${-demo.varPatrimonial.total >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(-demo.varPatrimonial.total)}</td></tr>
+            </tbody>
+          </table></TabelaRedimensionavel>
+        </div>} />
+
+        <details className="demo-detalhes-fiscais"><summary>Conferências fiscais anuais de {ate.slice(0, 4)}: IRRF e saldos transportáveis</summary><p>Dados anuais da declaração e do controle manual. Não são limitados ao mês selecionado.</p>
         {/* SALDOS QUE ATRAVESSAM O EXERCÍCIO (parte 2 do estudo de variação
             patrimonial). O que a lei deixa transportar de um ano para o outro
             são os PREJUÍZOS compensáveis — nunca o IRRF, que se resolve no
@@ -926,27 +733,19 @@ export default function Dashboard({ onNavigate } = {}) {
           <div className="card" style={{ marginBottom: '20px' }}>
             <div className="card-header">
               <h3 className="card-title">Saldos que atravessam para o próximo exercício</h3>
-              <span className="badge badge-blue">Da declaração</span>
+              <span className="badge badge-blue">Declaração e controle manual</span>
             </div>
             <TabelaRedimensionavel><table className="demonstrativo-table">
               <tbody>
                 {saldosAtravessam.map(s => (
                   <tr key={s.chave}>
                     <td>
-                      {s.rotulo}
+                      {s.rotulo}{s.requerRevisao && <small> · Saldo oficial; conferir lançamentos manuais posteriores</small>}
                       <Ajuda texto={s.base} />
                     </td>
                     <td className="currency">{formatCurrency(s.valor)}</td>
                   </tr>
                 ))}
-                <tr className="demonstrativo-espacador"><td colSpan={2}></td></tr>
-                <tr>
-                  <td style={{ color: 'var(--text-muted)' }}>
-                    IRRF do ano
-                    <Ajuda texto="O IRRF (retido na fonte, carnê-leão, imposto complementar) NÃO atravessa o exercício: é antecipação que se acerta no ajuste anual daquele ano-calendário; se sobrar, vira imposto a restituir, não saldo transportável. Só os prejuízos compensáveis acima seguem para o ano seguinte. Base: Lei nº 7.713/1988 e IN RFB nº 1.585/2015." />
-                  </td>
-                  <td style={{ color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'right' }}>não atravessa</td>
-                </tr>
               </tbody>
             </table></TabelaRedimensionavel>
           </div>
@@ -957,7 +756,7 @@ export default function Dashboard({ onNavigate } = {}) {
             <div className="card-header">
               <div>
                 <h3 className="card-title">IRRF do ano</h3>
-                <p>Por fonte, beneficiário e tipo; conferência separada do Saldo de Caixa.</p>
+                <p>Por fonte, beneficiário e tipo; conferência separada da conciliação patrimonial.</p>
               </div>
               {painelIrrf.confere != null && (
                 <span className={`badge ${painelIrrf.confere ? 'badge-green' : 'badge-orange'}`}>
@@ -1003,12 +802,13 @@ export default function Dashboard({ onNavigate } = {}) {
               </table>
             </TabelaRedimensionavel>
             <div className="painel-irrf-resumo">
-              <span>Imposto devido <strong>{formatCurrency(painelIrrf.impostoDevido)}</strong></span>
-              <span>Saldo a pagar <strong>{formatCurrency(painelIrrf.saldoPagar)}</strong></span>
-              <span>Restituição <strong>{formatCurrency(painelIrrf.impostoRestituir)}</strong></span>
+              <span>Imposto devido <strong>{painelIrrf.impostoDevido == null ? 'Não individualizado / não informado' : formatCurrency(painelIrrf.impostoDevido)}</strong></span>
+              <span>Saldo a pagar <strong>{painelIrrf.saldoPagar == null ? 'Não individualizado / não informado' : formatCurrency(painelIrrf.saldoPagar)}</strong></span>
+              <span>Restituição <strong>{painelIrrf.impostoRestituir == null ? 'Não individualizado / não informado' : formatCurrency(painelIrrf.impostoRestituir)}</strong></span>
             </div>
           </div>
         )}
+        </details>
         </>
         )}
 
@@ -1019,53 +819,13 @@ export default function Dashboard({ onNavigate } = {}) {
             Ícone em cada card (classe `.stat-icon` já existia no CSS, nunca
             tinha sido usada em lugar nenhum do app) pra parar de ficar
             "vago" — só número e texto pequeno, sem nenhuma âncora visual. */}
-        <div className="stats-grid">
-          <div className="stat-card blue">
-            <div className="stat-icon blue"><IconCarteira /></div>
-            <div className="stat-info">
-              <h3>{formatCurrency(totFim?.totalBens || 0)}</h3>
-              <p>Bens e Direitos em {formatDate(ate)}</p>
-              <span className="stat-change positive">{totFim?.qtdBens || 0} itens</span>
-            </div>
-          </div>
-          <div className="stat-card danger">
-            <div className="stat-icon orange"><IconQuedaVermelha /></div>
-            <div className="stat-info">
-              <h3>{formatCurrency(totFim?.totalDividas || 0)}</h3>
-              {/* O rótulo diz que a Dívida Rural está somada aqui. Antes o
-                  card dizia só "Dívidas", com R$ 2.652.738,92 e 7 itens,
-                  enquanto a página Dívidas e Ônus Reais mostrava R$ 36.000,00
-                  e 1 item — os mesmos dados, dois nomes iguais e R$ 2,6
-                  milhões de diferença. Achado 15. */}
-              <p>{(totFim?.qtdDividasRurais || 0) > 0 ? 'Dívidas e Ônus + Dívida Rural' : 'Dívidas e Ônus Reais'} em {formatDate(ate)}</p>
-              <span className="stat-change negative">
-                {(totFim?.qtdDividasRurais || 0) > 0
-                  ? `${totFim.qtdDividasComuns} + ${totFim.qtdDividasRurais} rurais`
-                  : `${totFim?.qtdDividas || 0} itens`}
-              </span>
-            </div>
-          </div>
-          <div className="stat-card green">
-            <div className="stat-icon green"><IconBalanca /></div>
-            <div className="stat-info">
-              <h3>{formatCurrency(totFim?.liquido || 0)}</h3>
-              <p>Patrimônio Líquido em {formatDate(ate)}</p>
-              <div className="stat-comparativo">
-                <span className="stat-comparativo-label">Em {formatDate(dataSaldoAnterior)}</span>
-                <span className="stat-comparativo-valor">{formatCurrency(totIni?.liquido || 0)}</span>
-              </div>
-              <span className={`stat-change ${variacaoPeriodo >= 0 ? 'positive' : 'negative'}`}>
-                {variacaoPeriodo >= 0 ? '▲' : '▼'} {formatCurrency(Math.abs(variacaoPeriodo))} ({varPctPeriodo == null ? 'sem base percentual' : `${varPctPeriodo.toFixed(1)}% sobre o módulo da base inicial`})
-              </span>
-            </div>
-          </div>
-        </div>
         <details className="dashboard-graficos">
           <summary>
             <span>Gráficos de apoio</span>
             <small>Distribuição e evolução patrimonial</small>
           </summary>
           <div className="dashboard-graficos-conteudo">
+            {!cobertura.completa && <p>Há posições anuais sem movimentos completos. A linha mostra apenas as pontas registradas; não representa crescimento mensal comprovado.</p>}
         <div className="card">
           <div className="card-header">
             <h3 className="card-title">Distribuição de Bens e Direitos por Categoria, situação em {formatDate(ate)}</h3>
@@ -1113,7 +873,7 @@ export default function Dashboard({ onNavigate } = {}) {
             // pontos (um por mês dentro do mesmo ano), barras lado a lado
             // ficavam finas demais e o eixo pulava mês de forma desigual.
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={evolucaoData} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
+              <LineChart data={cobertura.completa ? evolucaoData : [evolucaoData[0], evolucaoData.at(-1)].filter(Boolean)} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
                 <CartesianGrid stroke={cromo.grid} vertical={false} />
                 <XAxis
                   dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
@@ -1126,8 +886,8 @@ export default function Dashboard({ onNavigate } = {}) {
                   labelStyle={{ color: cromo.tooltipText }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Line type="monotone" dataKey="bens" name="Bens" stroke={cores[0]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="dividas" name="Dívidas" stroke={cores[7]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="stepAfter" dataKey="bens" name="Bens" stroke={cores[0]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="stepAfter" dataKey="dividas" name="Dívidas" stroke={cores[7]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -1141,7 +901,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <h3 className="card-title">Evolução do Patrimônio Líquido, {formatDate(de)} a {formatDate(ate)}</h3>
             </div>
             <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={evolucaoData} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
+              <LineChart data={cobertura.completa ? evolucaoData : [evolucaoData[0], evolucaoData.at(-1)].filter(Boolean)} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
                 <CartesianGrid stroke={cromo.grid} vertical={false} />
                 <XAxis
                   dataKey="data" tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={d => formatDate(d)}
@@ -1153,7 +913,7 @@ export default function Dashboard({ onNavigate } = {}) {
                   contentStyle={{ background: cromo.tooltipBg, border: `1px solid ${cromo.tooltipBorder}`, borderRadius: '8px' }}
                   labelStyle={{ color: cromo.tooltipText }}
                 />
-                <Line type="monotone" dataKey="liquido" name="Patrimônio Líquido" stroke={cores[2]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="stepAfter" dataKey="liquido" name="Patrimônio Líquido" stroke={cores[2]} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -1166,42 +926,22 @@ export default function Dashboard({ onNavigate } = {}) {
         </footer>
       </div>
 
-      <Modal open={!!detalheCategoria} onClose={() => setDetalheCategoria(null)}>
+      <Modal open={!!detalheCategoria} onClose={() => setDetalheCategoria(null)} style={{ maxWidth: '1200px' }}>
         <div className="modal-header">
-          <h3>{CATEGORIA_VARIACAO[detalheCategoria || 'bens'].titulo}, movimentações de {formatDate(de)} a {formatDate(ate)}</h3>
+          <h3>{CATEGORIA_VARIACAO[detalheCategoria || 'bens'].titulo}, composição de {formatDate(de)} a {formatDate(ate)}</h3>
           <button className="modal-close" onClick={() => setDetalheCategoria(null)}>✕</button>
         </div>
         <div className="modal-body">
-          {movimentacoesDetalhe.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>Nenhuma movimentação registrada nesse período.</p>
-          ) : (
-            <TabelaRedimensionavel>
-              <table>
-                <thead><tr><th>Data</th><th>Tipo</th><th>Discriminação</th><th style={{ textAlign: 'right' }}>Valor</th></tr></thead>
-                <tbody>
-                  {movimentacoesDetalhe.map((m, i) => (
-                    <tr key={i}>
-                      <td>{formatDate(m.data)}</td>
-                      <td>{CATEGORIA_VARIACAO[detalheCategoria || 'bens'].tipos[m.tipo]?.label || m.tipo}</td>
-                      <td style={{ maxWidth: '320px' }} title={m.discriminacao || ''}>{truncarComReticencias(m.discriminacao, 100)}</td>
-                      <td className="currency">{formatCurrency(m.valor)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </TabelaRedimensionavel>
-          )}
+          <p>Posições e variação por registro. Diferenças sem movimentos datados permanecem identificadas; não são recebimentos presumidos.</p>
+          {ponte.length === 0 ? <p>Nenhuma diferença de posição ou movimentação neste recorte.</p> : <div className="table-wrapper demo-ponte"><table><thead><tr><th>Registro / origem</th><th>Inicial</th><th>Final</th><th>Variação</th><th>Movimentos / evidência</th></tr></thead><tbody>{ponte.map((r,i) => <tr key={i}><td><details><summary>{r.ano} · {truncarComReticencias(r.descricao, 120)}</summary><p>{r.descricao}</p></details><br/><small>{r.origem}{r.origemDocumento && ' · PDF página ' + r.origemDocumento.pagina + ', linha ' + r.origemDocumento.linha}</small></td><td className="currency">{formatCurrency(r.inicial)}</td><td className="currency">{formatCurrency(r.final)}</td><td className="currency">{formatCurrency(r.variacao)}</td><td>{r.movimentos.length ? r.movimentos.map((m,j) => <div key={j}>{formatDate(m.data)} · {m.tipo} · {formatCurrency(m.valor)}</div>) : 'Posição registrada; completar movimentos e datas'}</td></tr>)}</tbody></table></div>}
+
         </div>
         <div className="modal-footer">
           <button type="button" className="btn btn-secondary" onClick={() => setDetalheCategoria(null)}>Fechar</button>
         </div>
       </Modal>
 
-      {/* Janela dos avisos estruturais: aparece ao abrir o Dashboard quando o
-          número pode estar errado/incompleto, para a pessoa ficar ciente antes
-          de usar os valores. Fecha no OK, no Esc ou no clique fora (o Modal já
-          trata Esc e clique fora). Uma vez fechada, não repete na sessão; a
-          informação continua no "?" ao lado dos avisos acima. */}
+      {/* Avisos relativos ao período consultado. */}
       <Modal open={avisosEstruturais.length > 0 && !avisoVisto} onClose={fecharAviso} style={{ maxWidth: '520px' }}>
         <div className="modal-header">
           <h3>Antes de usar estes números</h3>

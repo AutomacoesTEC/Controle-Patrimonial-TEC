@@ -178,7 +178,7 @@ export function demonstrativoPeriodo(state, dataDe, dataAte) {
     possiveisDuplicidades.push(...(g.possiveisDuplicidades || []));
     // Bens que encolheram no período sem preço de venda conhecido (achado 04):
     // a lista atravessa os anos junto com o resto do fluxo.
-    pendenciasAlienacao.push(...bensAlienadosSemValorDeVenda(dados, trechoDe, trechoAte));
+    pendenciasAlienacao.push(...bensAlienadosSemValorDeVenda(dados, trechoDe, trechoAte).map(p => ({ ...p, ano: Number(trechoAte.slice(0, 4)) })));
     aplicacoesSemRendimento.push(...aplicacoesResgatadasSemRendimento(dados, trechoDe, trechoAte));
 
     pagamentosEfetuados += totalPagamentos(dados.pagamentos, trechoDe, trechoAte);

@@ -39,10 +39,14 @@ export function saldosQueAtravessam(dadosFim) {
   if (!dadosFim) return [];
   const rows = [];
 
-  const rural = Math.abs(Math.min(0, parseFloat(dadosFim.prejuizoRuralAcompensar) || 0));
+  const oficialRural = dadosFim.apuracaoResultadoRuralOficial?.saldoPrejuizoExercicioSeguinte;
+  const usaOficial = oficialRural != null && !dadosFim.prejuizoRuralAjustadoManualmente;
+  const rural = usaOficial ? Math.abs(Number(oficialRural) || 0) : Math.abs(Math.min(0, Number(dadosFim.prejuizoRuralAcompensar) || 0));
   if (rural > 0) {
     rows.push({
       chave: 'rural',
+      origem: usaOficial ? 'Declaração' : 'Controle manual',
+      requerRevisao: usaOficial && (dadosFim.lancamentosRurais || []).length > 0,
       rotulo: 'Prejuízo da atividade rural',
       valor: rural,
       base: 'Regime próprio da atividade rural; compensa resultado rural de anos seguintes.',

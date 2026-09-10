@@ -1,3 +1,5 @@
+import { saldoRuralInformado } from './saldoRural';
+import { aplicarClassificacao } from '../utils/classificacaoImportacao';
 // Lógica pura do estado do app: nenhuma dependência de React aqui de
 // propósito, para poder testar sem montar componente nenhum (ver
 // reducer.test.js). O DataContext.jsx só faz a fiação com useReducer.
@@ -227,6 +229,7 @@ export const snapshotYear = (state) => ({
   dividasRurais: state.dividasRurais,
   lancamentosRurais: state.lancamentosRurais,
   prejuizoRuralAcompensar: state.prejuizoRuralAcompensar,
+  prejuizoRuralAjustadoManualmente: state.prejuizoRuralAjustadoManualmente || false,
   receitasDespesasRuraisOficial: state.receitasDespesasRuraisOficial,
   apuracaoResultadoRuralOficial: state.apuracaoResultadoRuralOficial,
   movimentacaoRebanhoOficial: state.movimentacaoRebanhoOficial,
@@ -304,6 +307,7 @@ export const blankYear = {
   // da tela de importar. Ver FICHAS_NAO_LIDAS em importParsers.js.
   fichasNaoLidasComConteudo: [],
   doacoesEfetuadasOficial: [], doacoesPartidosOficial: [], doacoesEcaIdosoOficial: [],
+  prejuizoRuralAjustadoManualmente: false,
   // imoveisRurais e prejuizoRuralAcompensar NÃO entram aqui de propósito:
   // imóveis explorados normalmente continuam os mesmos de um ano pro
   // outro (ver ROLLOVER_ANO) e o prejuízo é um saldo que atravessa anos,
@@ -468,6 +472,10 @@ function aplicarAcao(state, action) {
       // Editar nome/CPF na tela não pode apagar endereço, ocupação e demais
       // dados cadastrais que vieram da declaração.
       return { ...state, contribuinte: { ...(state.contribuinte || {}), ...action.payload } };
+    case 'CLASSIFICAR_CAMPO_IMPORTADO':
+      return aplicarClassificacao(state, action.payload);
+    case 'ABRIR_CLASSIFICACAO_IMPORTACAO':
+      return { ...state, documentoFonte: { ...state.documentoFonte, revisaoManualAberta: !!action.payload } };
     case 'SET_TOLERANCIA_SALDO':
       return { ...state, toleranciaSaldo: normalizarToleranciaSaldo(action.payload) };
     case 'ADD_DEPENDENTE':
@@ -601,7 +609,9 @@ function aplicarAcao(state, action) {
         : (state.receitasDespesasRuraisOficial || []).reduce(
             (s, m) => s + (m.receitaBruta || 0) - (m.despesaCusteioInvestimento || 0), 0
           );
-      const prejuizoRuralAcompensar = state.prejuizoRuralAcompensar + Math.min(0, resultadoRuralDoAno);
+      const prejuizoRuralAcompensar = state.apuracaoResultadoRuralOficial?.saldoPrejuizoExercicioSeguinte != null
+        ? saldoRuralInformado(state)
+        : state.prejuizoRuralAcompensar + Math.min(0, resultadoRuralDoAno);
       return {
         ...state,
         historico,
@@ -671,6 +681,7 @@ function aplicarAcao(state, action) {
         lancamentosRurais: [],
         pagamentosDiversos: [],
         prejuizoRuralAcompensar,
+        prejuizoRuralAjustadoManualmente: false,
       };
     }
     // Import atômico de uma declaração já parseada (.DBK/.DEC ou PDF). Se o
@@ -1131,6 +1142,7 @@ function aplicarAcao(state, action) {
         imoveisRurais: imoveisRuraisReconciliados,
         lancamentosRurais: base.lancamentosRurais,
         prejuizoRuralAcompensar: base.prejuizoRuralAcompensar,
+        prejuizoRuralAjustadoManualmente: base.prejuizoRuralAjustadoManualmente || false,
         pagamentosDiversos: base.pagamentosDiversos,
         rendaVariavelMensalManual: base.rendaVariavelMensalManual,
         fiiFiagroMensalManual: base.fiiFiagroMensalManual,
@@ -1338,7 +1350,7 @@ function aplicarAcao(state, action) {
     // automática — não temos confirmação da regra atual de limite de
     // compensação para aplicar isso sozinho.
     case 'AJUSTAR_PREJUIZO_RURAL':
-      return { ...state, prejuizoRuralAcompensar: state.prejuizoRuralAcompensar + action.payload };
+      return { ...state, prejuizoRuralAjustadoManualmente: true, prejuizoRuralAcompensar: Math.min(0, saldoRuralInformado(state) + action.payload) };
 
     case 'ADD_PAGAMENTO_DIVERSO':
       return { ...state, pagamentosDiversos: [...state.pagamentosDiversos, { ...action.payload, id: novoId() }] };
@@ -1496,7 +1508,7 @@ const COLECAO_POR_EDICAO = {
   UPDATE_DOACAO_EFETUADA: 'doacoesEfetuadasOficial', UPDATE_DOACAO_PARTIDO: 'doacoesPartidosOficial', UPDATE_DOACAO_ECA_IDOSO: 'doacoesEcaIdosoOficial',
 };
 
-const CAMPOS_TECNICOS_HISTORICO = new Set(['id', 'origem', 'origemDocumento', 'valorDeclarado', 'movimentacoes']);
+const CAMPOS_TECNICOS_HISTORICO = new Set(['id', 'origem', 'origemDocumento', 'valorDeclarado', 'movimentacoes', 'classificacaoManual']);
 const LIMITE_HISTORICO = 300;
 
 function mudancasDaAcao(stateAntes, stateDepois, action) {
@@ -1506,7 +1518,7 @@ function mudancasDaAcao(stateAntes, stateDepois, action) {
       ? stateAntes : estadoNoAno(stateAntes, ano);
     return mudancasDaAcao(anterior, estadoNoAno(stateDepois, ano), interna);
   }
-  const colecao = COLECAO_POR_EDICAO[action.type];
+  const colecao = action.type === 'CLASSIFICAR_CAMPO_IMPORTADO' ? action.payload.colecao : COLECAO_POR_EDICAO[action.type];
   if (!colecao) return [];
   const antes = buscar(stateAntes, colecao, action.payload?.id);
   const depois = buscar(stateDepois, colecao, action.payload?.id);
@@ -1617,6 +1629,7 @@ function descreverAcao(state, action) {
       const descricaoInterna = descreverAcao(baseParaDescricao, interna);
       return descricaoInterna ? `${descricaoInterna}, no ano-calendário ${ano}` : null;
     }
+    case 'CLASSIFICAR_CAMPO_IMPORTADO': return `Classificou manualmente o campo ${p.campo}: ${p.estado === 'nao_informado' ? 'Não informado' : p.estado === 'sem_codigo' ? 'Sem código' : 'Informado'}`;
     case 'IMPORT_DECLARACAO': return `Importou declaração${p.anoCalendario ? ` do ano-calendário ${p.anoCalendario}` : ''}`;
     case 'RECONCILIAR_IMPORTACAO': return `Reimportou declaração retificadora do ano-calendário ${p.anoCalendario}, com conciliação item a item`;
     case 'ROLLOVER_ANO': return `Avançou o ano-calendário para ${p}`;

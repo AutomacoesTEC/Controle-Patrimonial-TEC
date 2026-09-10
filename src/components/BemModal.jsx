@@ -1,3 +1,4 @@
+import { CLASSES_FINANCEIRAS } from '../store/classificacoesFinanceiras';
 import { anoDaDataCadastro } from '../utils/dataCadastro';
 import { prepararBemParaSalvar } from '../utils/cadastroBem';
 import SeletorTitularidade from './SeletorTitularidade';
@@ -99,6 +100,7 @@ export default function BemModal({ open, bem, onSave, onClose }) {
   const codigosDoGrupo = CODIGOS_POR_GRUPO[form.grupo] || [];
 
   const camposIdentificacao = <>
+    <div className="form-group"><label>Classe financeira (independente do grupo fiscal)</label><select value={form.classeFinanceira || ''} onChange={e => upd('classeFinanceira', e.target.value)}>{CLASSES_FINANCEIRAS.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}</select><small>Classifica a posição no Demonstrativo; não altera o custo nem comprova saldo em conta.</small></div>
     <SeletorTitularidade registro={form} onChange={setForm} dependentes={dependentesDoFormulario(state, form.data_aquisicao)} />
     <div className="form-group"><label>Data de aquisição</label><input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!isEditing} value={form.data_aquisicao || ''} onChange={e => upd('data_aquisicao', e.target.value)} /></div>
   </>;

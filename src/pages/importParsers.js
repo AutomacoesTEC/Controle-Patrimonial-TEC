@@ -4023,7 +4023,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
       // acha a linha na declaração em papel.
       codigo_impresso: String(g.codigo).padStart(2, '0'),
       descricao_ficha: g.descricao,
-      irrf: 0,
+      // Esta ficha não imprime IRRF por rendimento. Ausência não é zero;
+      // o IRRF do 13º, quando disponível nas fontes PJ, é associado ao final.
+      irrf: null,
       data: anoCalendario ? `${anoCalendario}-12-31` : '',
     };
     if (g.detalhes.length > 0) {
@@ -4284,9 +4286,13 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
       }
       if (rowHasCell(row, 'DADOS E IDENTIFICAÇÃO DO IMÓVEL EXPLORADO - BRASIL')) {
         flushAllCurrent();
+        // O cabeçalho se repete nas páginas de continuação. O participante
+        // pode vir na página seguinte ao imóvel e precisa manter o vínculo.
+        if (section !== 'imoveisRurais') {
+          ultimoImovelRural = null;
+          emParticipantes = false;
+        }
         section = 'imoveisRurais';
-        ultimoImovelRural = null;
-        emParticipantes = false;
         continue;
       }
       // "- BRASIL" é exigido: existe uma ficha irmã "MOVIMENTAÇÃO DO REBANHO
@@ -4994,7 +5000,9 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         const contRow = rows[ri + 1];
         if (contRow) {
           const contTextos = contRow.cells.map(c => c.text.trim()).filter(Boolean);
-          if (contTextos.length > 0 && !contTextos.some(t => RV_VALOR.test(t)) && !AR_ESPECIES.some(([re]) => re.test(contTextos[0]))) {
+          // A espécie é uma opção fixa do formulário. Texto arbitrário na próxima
+          // linha pode ser um rodapé ou o título da ficha seguinte.
+          if (especie[1] === '04' && /^Asininos,\s*equinos$/.test(especieNome) && normSpace(contTextos.join(' ')) === 'e muares') {
             especieNome = normSpace(`${especieNome} ${contTextos.join(' ')}`);
           }
         }
@@ -5022,6 +5030,7 @@ export async function parsePDF(pdf, log = noop, onProgress = noop, options = {})
         // segunda com "Despesa de custeio e investimento total".
         receitasDespesasRuraisOficial.push({
           mes: mes + 1,
+          origemDocumento: origemPdf(pageNum, ri + 1),
           receitaBruta: parseMoneyBR(valores[0]),
           despesaCusteioInvestimento: parseMoneyBR(valores[1]),
         });

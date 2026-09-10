@@ -1,0 +1,69 @@
+{
+  "fixture": {
+    "anoCalendario": 2025,
+    "contribuinte": {
+      "nome": "Perfil de teste visual"
+    },
+    "dependentes": [
+      {
+        "id": "d1",
+        "nome": "Dependente de teste",
+        "cpf": "00000000000"
+      }
+    ],
+    "bens": [
+      {
+        "id": "b1",
+        "grupo": "03",
+        "codigo_bem": "02",
+        "discriminacao": "Participação de teste — descrição original preservada",
+        "beneficiario": "dependente",
+        "cpf_beneficiario": "00000000000",
+        "situacao_anterior": 100,
+        "situacao_atual": 120,
+        "origem": "pdf"
+      },
+      {
+        "id": "b2",
+        "grupo": "04",
+        "codigo_bem": "01",
+        "discriminacao": "Aplicação de teste no exterior",
+        "beneficiario": "dependente",
+        "cpf_beneficiario": "00000000000",
+        "pais": "249",
+        "paisNome": "Estados Unidos",
+        "situacao_anterior": 100,
+        "situacao_atual": 150,
+        "origem": "pdf"
+      },
+      {
+        "id": "b3",
+        "grupo": "04",
+        "codigo_bem": "01",
+        "discriminacao": "Aplicação do titular",
+        "beneficiario": "titular",
+        "situacao_anterior": 100,
+        "situacao_atual": 90,
+        "origem": "manual"
+      }
+    ]
+  },
+  "antes": [
+    "Dependente: Dependente de teste0302Participação de teste — descrição original preservadaDeclaraçãoDependente: 000.000.000-00R$ 100,00R$ 120,00R$ 20,00EditarExcluir",
+    "Dependente: Dependente de teste0401Aplicação de teste no exteriorDeclaraçãoDependente: 000.000.000-00Exterior: Estados UnidosR$ 100,00R$ 150,00R$ 50,00EditarExcluir",
+    "Titular0401Aplicação do titularManualR$ 100,00R$ 90,00-R$ 10,00EditarExcluir"
+  ],
+  "depois": [
+    "Dependente: Dependente de teste0302Participação de teste — descrição original preservadaDeclaraçãoR$ 100,00R$ 120,00R$ 20,00EditarExcluir",
+    "Dependente: Dependente de teste0401Aplicação de teste no exteriorDeclaraçãoExterior: Estados UnidosR$ 100,00R$ 150,00R$ 50,00EditarExcluir",
+    "Titular0401Aplicação do titularManualR$ 100,00R$ 90,00-R$ 10,00EditarExcluir"
+  ],
+  "checks": {
+    "titularidadeUnica": true,
+    "exteriorPreservado": true,
+    "descricaoPreservada": true,
+    "filtroDependente": true,
+    "filtroTitular": true
+  },
+  "ambiente": "Chromium headless Windows; context isolado; 1513x912 claro, 1280x800 escuro"
+}

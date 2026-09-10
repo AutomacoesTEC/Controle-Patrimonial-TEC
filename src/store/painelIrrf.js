@@ -1,5 +1,6 @@
 import { linhasComunsDoAno, linhasFiiDoAno } from './rendaVariavelMensal';
 
+const moedaOpcional = valor => valor == null || valor === '' || !Number.isFinite(Number(valor)) ? null : moeda(valor);
 const moeda = valor => Math.round((Number(valor) || 0) * 100) / 100;
 
 // Parâmetros oficiais a partir de janeiro de 2026:
@@ -152,7 +153,7 @@ export function montarPainelIrrf(dados = {}) {
 
   const consolidadas = consolidar(linhas);
   const totalPainel = moeda(consolidadas.filter(linha => linha.compoeAjuste).reduce((soma, linha) => soma + linha.valor, 0));
-  const totalResumo = Number.isFinite(Number(imposto.impostoPagoTotal)) ? moeda(imposto.impostoPagoTotal) : null;
+  const totalResumo = moedaOpcional(imposto.impostoPagoTotal);
   const diferenca = totalResumo == null ? null : moeda(totalPainel - totalResumo);
   return {
     linhas: consolidadas,
@@ -160,9 +161,9 @@ export function montarPainelIrrf(dados = {}) {
     totalResumo,
     diferenca,
     confere: diferenca == null ? null : Math.abs(diferenca) <= 0.01,
-    impostoDevido: moeda(imposto.impostoDevidoTotal),
-    saldoPagar: moeda(imposto.saldoPagar),
-    impostoRestituir: moeda(imposto.impostoRestituir),
+    impostoDevido: moedaOpcional(imposto.impostoDevidoTotal),
+    saldoPagar: moedaOpcional(imposto.saldoPagar),
+    impostoRestituir: moedaOpcional(imposto.impostoRestituir),
     alertasRetencao: alertasRetencaoMensal(dados.rendimentos),
   };
 }

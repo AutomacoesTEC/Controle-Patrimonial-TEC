@@ -187,13 +187,11 @@ export default function BensPage({ onVoltar } = {}) {
                       <BadgeOrigem item={bem} />
                       {bem.cnpj && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>CNPJ: {formatCpfCnpj(bem.cnpj)}</div>}
                       {bem.renavam && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RENAVAM: {bem.renavam}</div>}
-                      {/* De quem o bem é e onde ele está: bem do dependente não é
-                          patrimônio do titular, e bem no exterior tem regra
-                          própria. Ver marcadoresDoBem. */}
                       {descreverOrigemDocumento(bem) && (
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(bem)}</div>
                       )}
-                      {marcadoresDoBem(bem).map(marca => (
+                      {/* A titularidade já aparece na coluna própria. */}
+                      {marcadoresDoBem(bem).filter(marca => marca.tipo !== 'dependente').map(marca => (
                         <span
                           key={marca.tipo}
                           className={`badge ${marca.tipo === 'exterior' ? 'badge-orange' : 'badge-blue'}`}

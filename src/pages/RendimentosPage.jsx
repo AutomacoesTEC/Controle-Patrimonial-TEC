@@ -50,7 +50,7 @@ export default function RendimentosPage() {
   };
   const abrirEdicao = (r) => {
     setEditingId(r.id);
-    setForm({ ...r, tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf || '', data: r.data || '' });
+    setForm({ ...r, tipo: r.tipo, cnpj_fonte: r.cnpj_fonte || '', nome_fonte: r.nome_fonte || '', beneficiario: r.beneficiario || 'Titular', valor: r.valor, irrf: r.irrf ?? '', data: r.data || '' });
     setModalOpen(true);
   };
 
@@ -105,7 +105,7 @@ export default function RendimentosPage() {
       ['Beneficiário', r => r.beneficiario || 'Titular'],
       ['CPF do dependente', r => formatCpfCnpj(r.cpf_dependente) || ''],
       ['Valor', r => r.valor || 0],
-      ['IRRF', r => r.irrf || 0],
+      ['IRRF', r => r.irrf ?? ''],
       // As três colunas restantes da ficha de pessoa jurídica. Só ela as tem,
       // então ficam zeradas nas demais linhas — mas sem elas a planilha
       // exportada esconderia o 13º salário e a previdência oficial que a tela
@@ -149,7 +149,7 @@ export default function RendimentosPage() {
                 );
               })}
               <div style={{ padding: '16px', background: 'rgba(239,68,68,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--accent-danger)', textTransform: 'uppercase', fontWeight: 600 }}>IRRF retido no total</div>
+                <div style={{ fontSize: '11px', color: 'var(--accent-danger)', textTransform: 'uppercase', fontWeight: 600 }}>IRRF informado</div>
                 <div style={{ fontSize: '18px', fontWeight: 700 }}>{formatCurrency(totalIRRF)}</div>
               </div>
               </div>
@@ -172,14 +172,15 @@ export default function RendimentosPage() {
                 <h3 className="card-title">{categoriaFilter === 'all' ? 'Todos os Rendimentos' : CATEGORIAS_RENDIMENTO[categoriaFilter].label}</h3>
                 <span className={`badge badge-${categoriaFilter === 'all' ? 'blue' : CATEGORIAS_RENDIMENTO[categoriaFilter].cor}`}>{formatCurrency(totalPorCategoria(filtrados))}</span>
               </div>
-              <TabelaRedimensionavel persistKey="rendimentos" stickyRightColumns={3}>
+              <TabelaRedimensionavel persistKey="rendimentos-titularidade" stickyRightColumns={1} initialColumnWidths={{ 0: 180 }}>
                 <table className="tabela-acoes-fixas">
-                  <thead><tr><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th>Beneficiário</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
+                  <thead><tr><th>Titularidade</th><th>Tipo</th><th>Data</th><th>CNPJ Fonte</th><th>Nome Fonte Pagadora</th><th style={{ textAlign: 'right' }}>Valor</th><th style={{ textAlign: 'right' }}>IRRF</th><th>Ações</th></tr></thead>
                   <tbody>
                     {filtrados.length === 0 ? (
                       <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum rendimento nesta categoria.</td></tr>
                     ) : filtrados.map(r => (
                       <tr key={r.id}>
+                        <td>{rotuloTitularidade(r, state.dependentes)}</td>
                         <td>
                           {describeRendimentoTipo(r.tipo)}
                           {/* O número que a pessoa procura na ficha em PAPEL. Ele
@@ -215,19 +216,6 @@ export default function RendimentosPage() {
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{descreverOrigemDocumento(r)}</div>
                           )}
                         </td>
-                        <td>
-                          {(() => {
-                            const b = descreverBeneficiarioRendimento(r, state.dependentes);
-                            return (
-                              <>
-                                {b.rotulo}
-                                {b.detalhe && (
-                                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{b.detalhe}</div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </td>
                         <td style={{ textAlign: 'right' }} className="currency">
                           {formatCurrency(r.valor)}
                           {/* As outras colunas da ficha de pessoa jurídica.
@@ -243,7 +231,7 @@ export default function RendimentosPage() {
                             </div>
                           ))}
                         </td>
-                        <td style={{ textAlign: 'right' }} className="currency">{formatCurrency(r.irrf)}</td>
+                        <td style={{ textAlign: 'right' }} className="currency">{r.irrf == null ? 'Não informado' : formatCurrency(r.irrf)}</td>
                         <td>
                           <div style={{ display: 'flex', gap: '4px' }}>
                             <button className="btn btn-sm btn-secondary" onClick={() => abrirEdicao(r)}>Editar</button>
@@ -288,6 +276,7 @@ export default function RendimentosPage() {
                   <div className="form-group">
                     <label>Data</label>
                     <input className="form-control" type="date" min="0001-01-01" max="9999-12-31" required={!editingId || !!form.data} value={form.data} onChange={e => upd('data', e.target.value)} />
+                    {form.origemDocumento && <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}><input type="checkbox" checked={!!form.dataEfetivaConfirmada} onChange={e => upd('dataEfetivaConfirmada', e.target.checked)} /> Esta é a data efetiva deste valor, confirmada por mim</label>}
                   </div>
                   <div className="form-group"><label>{form.tipo === 'tributavel_rra' ? 'Valor tributável (conforme apuração)' : /^exclusivo_0*(1|8)$/.test(form.tipo) ? 'Valor líquido do 13º salário' : 'Valor'}</label><MoneyInput value={form.valor} onChange={v => upd('valor', v)} /></div>
                   <div className="form-group"><label>{form.tipo === 'tributavel_pf_exterior' ? 'Carnê-leão pago' : 'IRRF'}</label><MoneyInput value={form.irrf} onChange={v => upd('irrf', v)} /></div>
