@@ -53,6 +53,14 @@ export function aplicarVinculosNoAno(dados, acompanhamento, ano) {
     if (Number(v.ref.ano) !== Number(ano)) continue;
     const lista = next[v.ref.campo] || [];
     if (lista.filter(r => mesmoItem(r, v.ref)).length !== 1) continue;
+    // P07: mesmo critério de unicidade de `resolverReferencia` também na
+    // projeção. Se o movimento filho referenciado não for único no pai (estado
+    // legado ou corrompido com ids repetidos), o vínculo não é aplicado — em
+    // vez de carimbar `operacaoId` nos dois movimentos.
+    if (v.ref.movimentacaoId != null) {
+      const pai = lista.find(r => mesmoItem(r, v.ref));
+      if ((pai.movimentacoes || []).filter(m => m.id === v.ref.movimentacaoId).length !== 1) continue;
+    }
     next = { ...next, [v.ref.campo]: lista.map(r => !mesmoItem(r, v.ref) ? r : v.ref.movimentacaoId != null
       ? { ...r, movimentacoes: (r.movimentacoes || []).map(m => m.id === v.ref.movimentacaoId ? { ...m, operacaoId: o.id } : m) }
       : { ...r, operacaoId: o.id }) };

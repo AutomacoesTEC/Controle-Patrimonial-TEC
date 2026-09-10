@@ -69,6 +69,27 @@ describe('identidade explícita e representações preservadas', () => {
     // Ficha do titular x operação do titular: aceita.
     expect(vinc('venda', '3|t|').acompanhamento.operacoes.find(o => o.id === 'venda').vinculos).toHaveLength(1);
   });
+  it('P07: referência de movimento ambígua não é aplicada na projeção anual', () => {
+    // Estado deliberadamente inconsistente: pai único, dois movimentos com o
+    // mesmo id, e um vínculo já gravado para esse id.
+    const dados = {
+      bens: [{
+        id: 1, discriminacao: 'Carro', chaveContinuidade: 'carro',
+        movimentacoes: [
+          { id: 2, tipo: 'venda_total', data: '2026-04-01', valorVenda: 100, valor: 90 },
+          { id: 2, tipo: 'benfeitoria', data: '2026-06-01', valor: 10 },
+        ],
+      }],
+    };
+    const acompanhamento = { operacoes: [
+      { id: 'op-x', vinculos: [{ id: 'v1', ref: { ano: 2026, campo: 'bens', id: 1, movimentacaoId: 2 } }] },
+    ] };
+    // resolverReferencia já recusa (movimento não é único).
+    expect(resolverReferencia({ anoCalendario: 2026, ...dados }, { ano: 2026, campo: 'bens', id: 1, movimentacaoId: 2 })).toBeNull();
+    // E a projeção não carimba operacaoId em movimento nenhum.
+    const projetado = aplicarVinculosNoAno(dados, acompanhamento, 2026);
+    expect(projetado.bens[0].movimentacoes.every(m => m.operacaoId === undefined)).toBe(true);
+  });
   it('chave de importação exata sobrevive à troca de id e desaparecimento vira pendência', () => {
     let s = base(); s.rendimentos = [{ id: 4, chaveImportacao: 'r:4', beneficiario: 'Titular', data, valor: 150, tipo: 'exclusivo_02' }];
     s = vincular(s, 'rendimentos', 4, { chaveImportacao: 'r:4' });
