@@ -42,6 +42,20 @@ trilha de evidência e decisões explícitas.
   a tela não cria overflow horizontal quando a janela é estreitada.
 - Tabelas do Demonstrativo se recompõem quando o contêiner muda de largura;
   em telas estreitas os valores continuam acessíveis no mesmo quadro.
+- Seções expansíveis ganham uma regra lateral navy, cabeçalho separado por
+  linha e fechamento próprio; a expansão não introduz uma segunda rolagem
+  vertical dentro da peça.
+- A faixa de posições e os indicadores do caixa usam linhas contínuas, sem
+  caixas individuais: seis colunas no desktop e recomposição em três, duas ou
+  uma coluna nas janelas estreitas.
+- Rendimentos termina no Total Geral dos Rendimentos. Renda Variável aparece
+  em um bloco complementar próprio, explicitamente fora desse total, para
+  evitar que o fechamento e o ajuste sejam lidos como a mesma grandeza.
+- O símbolo CP-TEC novo é a marca da navegação e do favicon web; o arquivo
+  `.ico` público acompanha o mesmo ativo usado no empacotamento desktop. O
+  mapa de navegação deve manter um ícone específico por destino.
+- Gráficos mantêm a escala monocromática e refluem o eixo de categorias em
+  janelas estreitas, sem cortar barras nem criar overflow da página.
 - Foco visível, rótulos explícitos para datas, cabeçalhos/captions semânticos
   e suporte a teclado fazem parte do acabamento, não são camada posterior.
 

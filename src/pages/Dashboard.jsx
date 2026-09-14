@@ -66,6 +66,20 @@ function useTemaAtual() {
   return tema;
 }
 
+// O gráfico de distribuição precisa reservar menos espaço para o eixo de
+// categorias em uma janela estreita. A leitura completa continua disponível
+// no tooltip; aqui só evitamos que o eixo consuma toda a área das barras.
+function useLarguraViewport() {
+  const [largura, setLargura] = useState(() => typeof window === 'undefined' ? 1280 : window.innerWidth);
+  useEffect(() => {
+    const atualizar = () => setLargura(window.innerWidth);
+    atualizar();
+    window.addEventListener('resize', atualizar);
+    return () => window.removeEventListener('resize', atualizar);
+  }, []);
+  return largura;
+}
+
 // Período padrão: o ano-calendário selecionado na sidebar, INTEIRO, de 01/01
 // a 31/12 — o Dashboard já abre mostrando o ano que a usuária está
 // trabalhando, sem precisar digitar nada. Continua independente dele: é só o
@@ -115,6 +129,13 @@ export default function Dashboard({ onNavigate } = {}) {
   const tema = useTemaAtual();
   const cores = CATEGORICAS[tema];
   const cromo = CROMO_GRAFICO[tema];
+  const larguraViewport = useLarguraViewport();
+  const graficoCompacto = larguraViewport <= 560;
+  const larguraEixoCategorias = graficoCompacto ? 132 : 210;
+  const margemDireitaCategorias = graficoCompacto ? 70 : 110;
+  const formatarCategoriaGrafico = graficoCompacto
+    ? nome => nome.length > 19 ? `${nome.slice(0, 18)}…` : nome
+    : undefined;
 
   const padrao = useMemo(() => periodoAnoSelecionado(state), [state]);
   const todoHistorico = useMemo(() => periodoTodoHistorico(state), [state]);
@@ -480,21 +501,37 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr><td>Tributação Exclusiva, IRRF ainda não descontado</td><td className="currency negative">{formatCurrency(-demo.rendimentos.exclusivoIrrf)}</td></tr>
               <tr><td>Tributação Exclusiva, líquido</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoLiquido)}</td></tr>
               <tr className="demonstrativo-destaque demonstrativo-final"><td>Total Geral dos Rendimentos</td><td className="currency">{formatCurrency(demo.rendimentos.totalGeral)}</td></tr>
-              {/* Renda Variável vira uma LINHA da tabela, e não um parágrafo,
-                  para que a coluna de valores possa dizer o que se sabe sobre
-                  ela. O detalhe fica no "?" (ver Ajuda). */}
-              {/* Desde 24/08/2026 os DOIS caminhos de importação trazem o valor
-                  de cada mês: o .DBK pelo registro 40 (a ficha mensal de
-                  operações comuns/day-trade) e o PDF pela página "GANHOS
-                  LÍQUIDOS OU PERDAS". A leitura sem valor continua possível em
-                  declaração importada por uma versão anterior do app, e é o
-                  que o ramo "ficha registrada em" atende — mostrar zero ali
-                  seria mentira. Em nenhum dos casos o ganho entra em total
-                  desta tela: ganho líquido em renda variável é tributação
-                  exclusiva, apurada e recolhida mês a mês fora do ajuste
-                  anual. A ficha de FII/Fiagro é exibida na tela Renda
-                  Variável e, por ora, não entra neste demonstrativo. */}
-              {demo.rendaVariavelMeses.length > 0 && (
+            </tbody>
+          </table></TabelaRedimensionavel>
+        </div>
+
+        {/* Renda Variável é uma apuração complementar: seus valores não
+            compõem o Total Geral dos Rendimentos. Mantemos o conteúdo e os
+            detalhes existentes, mas damos a ele um bloco próprio para o
+            total encerrar a tabela de rendimentos sem uma continuação ambígua. */}
+        {demo.rendaVariavelMeses.length > 0 && (
+          <div className="card demonstrativo-bloco demonstrativo-renda-variavel">
+            <div className="card-header demonstrativo-complemento-cabecalho">
+              <div>
+                <h3 className="card-title">Renda Variável</h3>
+                <p>Informação complementar. Não compõe o Total Geral dos Rendimentos.</p>
+              </div>
+            </div>
+            {/* Desde 24/08/2026 os DOIS caminhos de importação trazem o valor
+                de cada mês: o .DBK pelo registro 40 (a ficha mensal de
+                operações comuns/day-trade) e o PDF pela página "GANHOS
+                LÍQUIDOS OU PERDAS". A leitura sem valor continua possível em
+                declaração importada por uma versão anterior do app, e é o
+                que o ramo "ficha registrada em" atende — mostrar zero ali
+                seria mentira. Em nenhum dos casos o ganho entra no total
+                desta tela: ganho líquido em renda variável é tributação
+                exclusiva, apurada e recolhida mês a mês fora do ajuste
+                anual. A ficha de FII/Fiagro é exibida na tela Renda
+                Variável e, por ora, não entra neste demonstrativo. */}
+            <TabelaRedimensionavel responsive><table className="demonstrativo-table">
+              <caption className="sr-only">Informações complementares de Renda Variável</caption>
+              <thead className="demonstrativo-cabecalho"><tr><th scope="col">Descrição</th><th scope="col">Valor</th></tr></thead>
+              <tbody>
                 <tr>
                   <td>
                     {demo.rendaVariavelComValor
@@ -514,19 +551,19 @@ export default function Dashboard({ onNavigate } = {}) {
                     <td className="currency" style={{ color: 'var(--text-muted)' }}>valor não lido</td>
                   )}
                 </tr>
-              )}
-              {demo.rendaVariavelComValor && demo.rendaVariavelImposto > 0 && (
-                <tr>
-                  <td>
-                    Renda Variável, imposto devido no período
-                    <Ajuda texto="Soma do imposto devido apurado nas fichas mensais de Renda Variável do período. É imposto de tributação exclusiva, recolhido por DARF até o último dia útil do mês seguinte ao da apuração, e por isso não se confunde com o imposto do ajuste anual." />
-                  </td>
-                  <td className="currency">{formatCurrency(demo.rendaVariavelImposto)}</td>
-                </tr>
-              )}
-            </tbody>
-          </table></TabelaRedimensionavel>
-        </div>
+                {demo.rendaVariavelComValor && demo.rendaVariavelImposto > 0 && (
+                  <tr>
+                    <td>
+                      Renda Variável, imposto devido no período
+                      <Ajuda texto="Soma do imposto devido apurado nas fichas mensais de Renda Variável do período. É imposto de tributação exclusiva, recolhido por DARF até o último dia útil do mês seguinte ao da apuração, e por isso não se confunde com o imposto do ajuste anual." />
+                    </td>
+                    <td className="currency">{formatCurrency(demo.rendaVariavelImposto)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table></TabelaRedimensionavel>
+          </div>
+        )}
 
         <div className="card demonstrativo-bloco">
           <div className="card-header"><h3 className="card-title">Ganhos e Perdas Apurados</h3></div>
@@ -809,7 +846,7 @@ export default function Dashboard({ onNavigate } = {}) {
             // amontoa — o rótulo do eixo Y já identifica a categoria, então
             // nem precisa de legenda à parte.
             <ResponsiveContainer width="100%" height={Math.max(220, pieData.length * 42 + 20)}>
-              <BarChart data={pieData} layout="vertical" margin={{ top: 4, right: 110, bottom: 4, left: 4 }}>
+              <BarChart data={pieData} layout="vertical" margin={{ top: 4, right: margemDireitaCategorias, bottom: 4, left: 4 }}>
                 <CartesianGrid horizontal={false} stroke={cromo.grid} />
                 <XAxis
                   type="number" domain={[0, dataMax => dataMax * 1.2]} tick={{ fill: cromo.tick, fontSize: 11 }}
@@ -817,8 +854,8 @@ export default function Dashboard({ onNavigate } = {}) {
                   axisLine={{ stroke: cromo.axis }} tickLine={false}
                 />
                 <YAxis
-                  type="category" dataKey="name" width={210}
-                  tick={{ fill: cromo.tick, fontSize: 11 }} axisLine={{ stroke: cromo.axis }} tickLine={false}
+                  type="category" dataKey="name" width={larguraEixoCategorias}
+                  tick={{ fill: cromo.tick, fontSize: 11 }} tickFormatter={formatarCategoriaGrafico} axisLine={{ stroke: cromo.axis }} tickLine={false}
                 />
                 <Tooltip
                   formatter={v => formatCurrency(v)}

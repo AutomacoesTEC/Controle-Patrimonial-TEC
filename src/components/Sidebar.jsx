@@ -93,7 +93,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
       </button>
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <div className="logo-icon">CP</div>
+          <img className="logo-icon" src="./cp-tec.png" alt="" width="40" height="40" />
           {!collapsed && (
             <div className="logo-text">
               <h1>CP-TEC</h1>

@@ -11,6 +11,14 @@
 
 ## O que mudou
 
+- A marca CP-TEC nova passou a ser usada na navegação e o favicon web passou a
+  usar `public/cp-tec.ico`, mantendo o mesmo ativo do empacotamento desktop.
+- Seções abertas agora têm regra lateral navy, cabeçalho separado e fechamento
+  visual próprio. A faixa de posições e o detalhe de caixa usam linhas contínuas
+  e colunas que se recompõem em 6, 3, 2 ou 1 item conforme a largura.
+- Rendimentos termina no Total Geral dos Rendimentos; Renda Variável ficou em
+  bloco complementar separado, com indicação explícita de que não compõe o
+  total.
 - O Demonstrativo agora abre com um ledger de fechamento patrimonial: patrimônio
   inicial, final, variação e resultado da conciliação aparecem antes dos filtros.
 - A antiga fileira de indicadores iguais foi substituída por uma âncora única,
@@ -29,6 +37,12 @@
 
 ## Estado da verificação
 
+- Na rodada de correção foram verificados 1513, 1000, 900, 600 e 390px: não
+  houve rolagem vertical interna nas tabelas, overflow horizontal da página ou
+  desalinhamento na faixa de caixa; o gráfico móvel manteve as cinco barras
+  visíveis com eixo de categorias refluído.
+- O favicon respondeu `200` como `image/x-icon`; os 16 destinos da navegação
+  renderizaram SVG específico, sem ícone circular de fallback.
 - Visual QA com Playwright no app renderizado, usando o perfil de teste local do
   PDF AJU-01 autorizado no handoff anterior.
 - Verificados temas claro e escuro, abertura e fechamento da composição,
@@ -43,6 +57,8 @@
 
 ## O que ficou pendente
 
+- O evento de download do botão `Exportar .xlsx` não foi automatizado nesta
+  rodada; a ação permanece com texto, comportamento e lógica existentes.
 - Próxima tela da fila: **Importar declaração**, somente após aprovação da
   usuária. Os comentários sobre retirar o rodapé de armazenamento local e
   explorar uma faixa vertical animada/3D ficam para essa rodada posterior.

@@ -26,6 +26,14 @@ const NAV_ICONS = {
   dashboard: (
     <svg {...base}><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>
   ),
+  // Acompanhamento financeiro — movimento entre abertura e fechamento
+  acompanhamento: (
+    <svg {...base}><path d="M4 18V6" /><path d="M4 18h16" /><path d="m7 14 3-3 3 2 5-6" /><circle cx="7" cy="14" r=".8" fill="currentColor" stroke="none" /><circle cx="13" cy="13" r=".8" fill="currentColor" stroke="none" /><circle cx="18" cy="7" r=".8" fill="currentColor" stroke="none" /></svg>
+  ),
+  // Revisão e pendências — lista de conferência com marcação
+  revisaoPeriodica: (
+    <svg {...base}><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h1M12 8h4M8 12h1M12 12h4M8 16h1M12 16h4" /><path d="m8 8 .6.6L10 7.2M8 12l.6.6 1.4-1.4" /></svg>
+  ),
   // Modalidade — ramificação (o ano tem regra própria)
   modalidade: (
     <svg {...base}><line x1="6" y1="3" x2="6" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" /></svg>

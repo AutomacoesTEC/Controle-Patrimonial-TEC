@@ -99,7 +99,7 @@ body{font-family:var(--font-family);font-size:14px;line-height:1.5;background:va
 .sidebar-toggle:hover{color:var(--accent-primary);border-color:var(--accent-primary)}
 .sidebar-header{padding:20px;border-bottom:1px solid var(--border-color);overflow:hidden}
 .sidebar-logo{display:flex;align-items:center;gap:12px}
-.sidebar-logo .logo-icon{width:40px;height:40px;background:var(--gradient-primary);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;box-shadow:var(--shadow-glow);flex-shrink:0}
+.sidebar-logo .logo-icon{width:40px;height:40px;display:block;border-radius:var(--radius-md);object-fit:contain;flex-shrink:0}
 /* min-width:0 no flex item: sem isso, o texto nunca encolhe abaixo da
    própria largura de conteúdo dentro do .sidebar-logo (display:flex), e o
    overflow:hidden do pai só cortava o nome sem nenhum "..." indicando que
@@ -807,7 +807,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 /* Demonstrativo: peça de conferência, não grade de cartões. O resumo é a
    âncora da tela; as tabelas abaixo repetem a mesma lógica em linhas para
    manter a leitura próxima do papel e deixar a cor reservada ao significado. */
-.demonstrativo-screen{min-width:0}
+.demonstrativo-screen{min-width:0;overflow-x:hidden}
 .demonstrativo-screen .card{background:transparent;border-color:transparent;border-radius:0;padding:0;box-shadow:none}
 .demonstrativo-screen .card:hover{border-color:transparent;box-shadow:none;transform:none}
 .demonstrativo-screen .demonstrativo-bloco,
@@ -833,9 +833,9 @@ textarea.form-control{resize:vertical;min-height:80px}
 .demo-ledger-resultado>strong{font-size:22px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 .demo-cobertura{font-size:12px;line-height:1.6;color:var(--text-secondary)}
-.demo-posicoes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:18px 0 20px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color)}
-.demo-posicoes>div{display:flex;min-width:0;flex-direction:column;gap:7px;padding:13px 18px 12px;border-left:1px solid var(--border-color)}
-.demo-posicoes>div:first-child{padding-left:0;border-left:0}
+.demo-posicoes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:24px;row-gap:0;margin:18px 0 20px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color)}
+.demo-posicoes>div{display:flex;min-width:0;flex-direction:column;gap:7px;padding:13px 0 12px}
+.demo-posicoes>div:first-child{padding-left:0}
 .demo-posicoes span{color:var(--text-secondary);font-size:12px;line-height:1.4}
 .demo-posicoes strong{color:var(--text-primary);font-size:15px;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap}
 .demonstrativo-screen .demo-visao>h3{margin:0 0 4px;font-size:15px;line-height:1.4;font-weight:650}
@@ -846,6 +846,27 @@ textarea.form-control{resize:vertical;min-height:80px}
 .demonstrativo-screen .demo-detalhes-fiscais>summary:hover{color:var(--accent-primary)}
 .demonstrativo-screen .demo-detalhes-fiscais{margin:0 0 28px;padding:0 0 28px;border-bottom:1px solid var(--border-color)}
 .demonstrativo-screen .demo-detalhes-fiscais>summary{border-bottom:1px solid var(--border-color);margin-bottom:20px;padding:0 0 14px}
+
+/* Uma expansão é uma seção de trabalho, não um cartão solto. O filete
+   lateral marca o perímetro do conteúdo aberto; a régua no summary separa o
+   título do corpo e a borda inferior do bloco encerra a leitura. */
+.demonstrativo-screen details.demo-visao[open],
+.demonstrativo-screen .demo-detalhes-fiscais[open]{border-top:1px solid var(--border-color);border-left:2px solid color-mix(in srgb,var(--accent-primary) 58%,var(--border-color));padding-left:16px;overflow-x:hidden}
+.demonstrativo-screen details.demo-visao[open]>summary,
+.demonstrativo-screen .demo-detalhes-fiscais[open]>summary{margin-bottom:18px;padding:13px 0 12px;border-bottom:1px solid var(--border-color)}
+.demonstrativo-screen .demo-visao>details[open]{margin-top:18px;padding:0 0 14px 14px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color);border-left:2px solid color-mix(in srgb,var(--accent-primary) 42%,var(--border-color))}
+.demonstrativo-screen .demo-visao>details[open]>summary{margin-bottom:14px;padding:12px 0;border-bottom:1px solid var(--border-color)}
+.demonstrativo-screen details>summary::marker{color:var(--accent-primary)}
+.demonstrativo-screen .dashboard-graficos{margin:0 0 28px;border:0;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color);border-radius:0;background:transparent;min-width:0;max-width:100%;overflow:hidden;flex:0 0 auto}
+.demonstrativo-screen .dashboard-graficos>summary{padding:13px 0}
+.demonstrativo-screen .dashboard-graficos[open]>summary{margin-bottom:18px;border-bottom:1px solid var(--border-color)}
+.demonstrativo-screen .dashboard-graficos-conteudo{padding:0 0 28px;min-width:0;max-width:100%;overflow:hidden}
+.demonstrativo-screen .dashboard-graficos-conteudo>.card{min-width:0;max-width:100%;overflow:hidden}
+
+/* O caixa possui seis pontos de leitura, enquanto as posições patrimoniais
+   possuem cinco. Ambos continuam sendo uma faixa sem cartões individuais,
+   mas o caixa não deve empurrar o sexto valor para uma linha órfã. */
+.demonstrativo-screen .demo-caixa-detalhes .demo-posicoes{grid-template-columns:repeat(6,minmax(0,1fr));column-gap:20px}
 
 /* O filtro é ferramenta de leitura: segue a resposta principal e mantém uma
    única linha de controles quando a largura permite. */
@@ -862,8 +883,10 @@ textarea.form-control{resize:vertical;min-height:80px}
 
 /* Tabelas sem a caixa dentro da caixa: o contêiner conserva somente a
    rolagem horizontal necessária em janelas estreitas. */
-.demonstrativo-screen .table-container{max-width:100%;min-width:0;border:0;border-top:1px solid var(--border-color);border-radius:0;overflow-x:auto}
-.demonstrativo-screen .table-wrapper{max-width:100%;overflow-x:auto}
+.demonstrativo-screen .table-container{max-width:100%;min-width:0;height:auto;flex:0 0 auto;border:0;border-top:1px solid var(--border-color);border-radius:0;overflow-x:auto;overflow-y:hidden;max-height:none}
+.demonstrativo-screen .table-wrapper{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.demonstrativo-screen .demonstrativo-complemento-cabecalho{align-items:flex-start;margin-bottom:12px}
+.demonstrativo-screen .demonstrativo-complemento-cabecalho p{margin-top:3px;color:var(--text-muted);font-size:11px;line-height:1.5}
 .demonstrativo-screen tbody tr,
 .demonstrativo-screen tbody tr:nth-child(even){background:transparent}
 .demonstrativo-screen tbody tr:hover{background:rgba(var(--accent-primary-rgb),.05)}
@@ -884,8 +907,9 @@ textarea.form-control{resize:vertical;min-height:80px}
   .demonstrativo-screen .dashboard-periodo-controles>.form-group,
   .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-column:1}
   .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .demo-posicoes{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .demo-posicoes>div:nth-child(odd){padding-left:0;border-left:0}
+  .demo-posicoes{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+  .demonstrativo-screen .demo-caixa-detalhes .demo-posicoes{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+  .demo-posicoes>div:nth-child(odd){padding-left:0}
   .demo-posicoes>div:nth-child(n+3){border-top:1px solid var(--border-color)}
 }
 @media(max-width:560px){
@@ -896,9 +920,13 @@ textarea.form-control{resize:vertical;min-height:80px}
   .demo-ledger-resultado{align-items:flex-start;flex-direction:column;gap:8px}
   .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-template-columns:1fr}
   .demonstrativo-screen .dashboard-periodo-controles>.form-row>.form-group:last-child{grid-column:auto}
-  .demo-posicoes{grid-template-columns:1fr}
-  .demo-posicoes>div,.demo-posicoes>div:nth-child(n+3){padding-left:0;border-left:0;border-top:1px solid var(--border-color)}
+  .demo-posicoes{grid-template-columns:1fr;column-gap:0}
+  .demonstrativo-screen .demo-caixa-detalhes .demo-posicoes{grid-template-columns:1fr;column-gap:0}
+  .demo-posicoes>div,.demo-posicoes>div:nth-child(n+3){padding-left:0;border-top:1px solid var(--border-color)}
   .demo-posicoes>div:first-child{border-top:0}
+}
+@media(max-width:1100px) and (min-width:901px){
+  .demonstrativo-screen .demo-caixa-detalhes .demo-posicoes{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
 }
 @media(max-width:1000px){
   .page-header.dashboard-screen-header{min-width:0;padding-right:76px;gap:16px}
