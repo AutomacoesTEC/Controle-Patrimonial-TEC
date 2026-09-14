@@ -453,11 +453,12 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       <div className="entrada">
       <main className="entrada-coluna">
       <div className="entrada-conteudo">
+        <div className="entrada-marca">
+          <img src="./cp-tec.png" alt="" width="36" height="36" />
+          <div className="entrada-marca-nome">Controle Patrimonial<span>TEC Tributos</span></div>
+        </div>
+        <div className="entrada-miolo">
         <div className="launcher-shell">
-          <div className="entrada-marca">
-            <img src="./cp-tec.png" alt="" width="34" height="34" />
-            <div className="entrada-marca-nome">Controle Patrimonial<span>TEC Tributos</span></div>
-          </div>
           <div className="launcher-heading">
             <h1 className="entrada-titulo">Selecione um perfil</h1>
             <p className="entrada-subtitulo">Escolha o titular para continuar, ou cadastre um novo.</p>
@@ -713,16 +714,28 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
             </div></div>
           )}
         </div>
+        </div>
+        <p className="entrada-rodape-coluna">
+          <strong>Os dados ficam somente neste computador.</strong> Cada perfil é um titular
+          isolado, com seus dependentes, bens, dívidas e anos-calendário.
+        </p>
       </div>
       </main>
       <aside className="entrada-vitrine">
         <p className="entrada-vitrine-eyebrow">CP-TEC</p>
-        <h2>O patrimônio do seu cliente, ano após ano.</h2>
-        <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
-        <p>
-          Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
-          e feche 31/12 com a posição pronta para a próxima declaração.
-        </p>
+        <div className="entrada-vitrine-miolo">
+          <h2>O patrimônio do seu cliente, ano após ano.</h2>
+          <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+          <p>
+            Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
+            e feche 31/12 com a posição pronta para a próxima declaração.
+          </p>
+        </div>
+        <ol className="entrada-ciclo">
+          <li><span>01</span>Importar a declaração já entregue</li>
+          <li><span>02</span>Registrar compra, venda, baixa e benfeitoria</li>
+          <li><span>03</span>Fechar 31/12 e virar para o ano seguinte</li>
+        </ol>
       </aside>
       </div>
       {previsualizacao && (

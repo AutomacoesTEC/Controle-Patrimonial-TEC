@@ -890,21 +890,26 @@ button,input,select,textarea{font-family:var(--font-family);}
    é o bloco de marca, só tipografia, em navy nos dois temas. Abaixo de 1100px
    o bloco sai de cena e a coluna ocupa a tela inteira.
    ========================================================================== */
-.entrada{display:grid;grid-template-columns:minmax(440px,42%) 1fr;min-height:100vh;width:100%;}
-.entrada-coluna{display:flex;flex-direction:column;justify-content:center;padding:48px 56px;overflow-y:auto;background:var(--bg-primary);}
-.entrada-conteudo{width:100%;max-width:480px;margin:0 auto;}
-.entrada-marca{display:flex;align-items:center;gap:12px;margin-bottom:36px;}
-.entrada-marca img{width:34px;height:34px;flex-shrink:0;display:block;}
+.entrada{display:grid;grid-template-columns:minmax(420px,38%) 1fr;min-height:100vh;height:100vh;width:100%;}
+/* Três faixas em cada coluna: topo, miolo e rodapé. Sem isso o conteúdo vira
+   uma ilha no meio da tela e sobra vazio em cima e embaixo. */
+.entrada-coluna{display:flex;flex-direction:column;padding:40px 48px;overflow-y:auto;background:var(--bg-primary);}
+.entrada-conteudo{width:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;flex:1;min-height:0;}
+.entrada-miolo{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:32px 0;}
+.entrada-rodape-coluna{font-size:11px;line-height:1.6;color:var(--text-muted);border-top:1px solid var(--border-color);padding-top:16px;}
+.entrada-rodape-coluna strong{font-weight:600;color:var(--text-secondary);}
+.entrada-marca{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.entrada-marca img{width:36px;height:36px;flex-shrink:0;display:block;}
 .entrada-marca-nome{font-size:14px;font-weight:700;line-height:1.2;}
 .entrada-marca-nome span{display:block;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-muted);margin-top:2px;}
 
 /* Perfis como lista, não como cartões: um filete separa cada titular, o nome
    é o botão de entrar e o resto fica em texto miúdo, sem competir. */
-.entrada-perfis{margin:0 0 20px;border-top:1px solid var(--border-color);}
-.entrada-perfil{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--border-color);}
-.entrada-perfil .perfil-avatar{width:38px;height:38px;font-size:13px;flex-shrink:0;box-shadow:none;}
+.entrada-perfis{margin:0 0 24px;border-top:1px solid var(--border-color);}
+.entrada-perfil{display:flex;align-items:flex-start;gap:16px;padding:22px 0;border-bottom:1px solid var(--border-color);}
+.entrada-perfil .perfil-avatar{width:44px;height:44px;font-size:14px;flex-shrink:0;box-shadow:none;}
 .entrada-perfil-corpo{flex:1;min-width:0;}
-.entrada-perfil-nome{display:inline-flex;align-items:center;gap:8px;padding:0;border:none;background:none;color:var(--text-primary);font-family:var(--font-family);font-size:15px;font-weight:700;line-height:1.3;text-align:left;cursor:pointer;transition:color var(--transition-fast);}
+.entrada-perfil-nome{display:inline-flex;align-items:center;gap:8px;padding:0;border:none;background:none;color:var(--text-primary);font-family:var(--font-family);font-size:16px;font-weight:700;line-height:1.3;text-align:left;cursor:pointer;transition:color var(--transition-fast);}
 .entrada-perfil-nome:hover{color:var(--accent-primary);}
 .entrada-perfil-doc{font-size:12px;color:var(--text-secondary);margin-top:2px;font-variant-numeric:tabular-nums;}
 .entrada-perfil-acoes{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;}
@@ -915,21 +920,23 @@ button,input,select,textarea{font-family:var(--font-family);}
 .entrada-link{display:inline-flex;align-items:center;gap:7px;padding:0;border:none;background:none;color:var(--text-secondary);font-family:var(--font-family);font-size:12px;font-weight:600;cursor:pointer;transition:color var(--transition-fast);}
 .entrada-link:hover{color:var(--accent-primary);}
 .entrada-link svg{width:14px;height:14px;flex-shrink:0;}
-.entrada-titulo{font-size:22px;font-weight:700;line-height:1.3;margin:0;}
-.entrada-subtitulo{font-size:13px;color:var(--text-secondary);margin:6px 0 24px;}
-.entrada-rodape{margin-top:32px;font-size:11px;color:var(--text-muted);}
+.entrada-titulo{font-size:24px;font-weight:700;line-height:1.25;margin:0;}
+.entrada-subtitulo{font-size:13px;color:var(--text-secondary);margin:8px 0 28px;}
 
 /* Bloco de marca: navy fixo nos dois temas, como um bloco impresso. */
-.entrada-vitrine{display:flex;flex-direction:column;justify-content:center;padding:64px clamp(40px,5vw,80px);background:#283453;color:#fff;}
-.entrada-vitrine-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin:0 0 24px;}
-.entrada-vitrine h2{font-size:clamp(30px,3.2vw,44px);font-weight:700;line-height:1.08;letter-spacing:-0.02em;margin:0;max-width:15ch;color:#fff;text-wrap:balance;}
+.entrada-vitrine{display:flex;flex-direction:column;justify-content:space-between;padding:44px clamp(40px,5vw,80px);background:#283453;color:#fff;overflow-y:auto;}
+.entrada-vitrine-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin:0;flex-shrink:0;}
+.entrada-vitrine-miolo{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;min-height:0;}
+/* O ciclo do produto ancora o pé do bloco: três passos, nada de ilustração. */
+.entrada-ciclo{list-style:none;margin:0;padding:0;flex-shrink:0;}
+.entrada-ciclo li{display:flex;align-items:baseline;gap:14px;padding:13px 0;border-top:1px solid rgba(255,255,255,0.16);font-size:13px;line-height:1.4;color:rgba(255,255,255,0.78);}
+.entrada-ciclo li span{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.45);font-variant-numeric:tabular-nums;}
+.entrada-vitrine h2{font-size:clamp(34px,3.8vw,54px);font-weight:700;line-height:1.06;letter-spacing:-0.02em;margin:0;max-width:15ch;color:#fff;text-wrap:balance;}
 /* Dupla linha de fechamento, o mesmo gesto do ícone. */
 .entrada-vitrine-regua{margin:28px 0;}
 .entrada-vitrine-regua span{display:block;height:4px;border-radius:2px;background:#fff;width:96px;}
 .entrada-vitrine-regua span + span{margin-top:5px;height:2px;width:56px;background:rgba(255,255,255,0.5);}
-.entrada-vitrine p{font-size:15px;line-height:1.65;color:rgba(255,255,255,0.74);margin:0;max-width:46ch;}
-/* Precisa de dois níveis para vencer o "margin:0" de .entrada-vitrine p. */
-.entrada-vitrine .entrada-vitrine-rodape{margin-top:44px;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:rgba(255,255,255,0.45);}
+.entrada-vitrine p{font-size:16px;line-height:1.65;color:rgba(255,255,255,0.74);margin:0;max-width:44ch;}
 /* O botão de tema cai sobre o bloco navy: vira contorno claro, não um disco. */
 .app-layout-entrada .theme-toggle-fixed{background:transparent;border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.75);box-shadow:none;}
 .app-layout-entrada .theme-toggle-fixed:hover{border-color:rgba(255,255,255,0.6);color:#fff;background:rgba(255,255,255,0.08);}

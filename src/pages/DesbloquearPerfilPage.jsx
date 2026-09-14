@@ -57,9 +57,10 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
         <main className="entrada-coluna">
           <div className="entrada-conteudo">
             <div className="entrada-marca">
-              <div className="entrada-marca-simbolo">CP</div>
-              <div className="entrada-marca-nome">CP-TEC<span>Controle Patrimonial</span></div>
+              <img src="./cp-tec.png" alt="" width="36" height="36" />
+              <div className="entrada-marca-nome">Controle Patrimonial<span>TEC Tributos</span></div>
             </div>
+            <div className="entrada-miolo">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
               <div className="perfil-avatar">{iniciaisNome(perfil.nome)}</div>
               <h1 className="entrada-titulo">{perfil.apelido || perfil.nome}</h1>
@@ -85,17 +86,28 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
                 <button type="button" className="btn btn-secondary" onClick={onVoltar}>Voltar</button>
               </div>
             </form>
-            <p className="entrada-rodape">O conteúdo deste perfil só é decifrado depois da senha correta.</p>
+            </div>
+            <p className="entrada-rodape-coluna">
+              <strong>O conteúdo deste perfil só é decifrado depois da senha correta.</strong> Sem
+              ela, nem o app nem quem tiver o arquivo consegue ler o que está guardado.
+            </p>
           </div>
         </main>
         <aside className="entrada-vitrine">
           <p className="entrada-vitrine-eyebrow">CP-TEC</p>
-          <h2>O patrimônio do seu cliente, ano após ano.</h2>
-          <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
-          <p>
-            Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
-            e feche 31/12 com a posição pronta para a próxima declaração.
-          </p>
+          <div className="entrada-vitrine-miolo">
+            <h2>O patrimônio do seu cliente, ano após ano.</h2>
+            <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+            <p>
+              Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
+              e feche 31/12 com a posição pronta para a próxima declaração.
+            </p>
+          </div>
+          <ol className="entrada-ciclo">
+            <li><span>01</span>Importar a declaração já entregue</li>
+            <li><span>02</span>Registrar compra, venda, baixa e benfeitoria</li>
+            <li><span>03</span>Fechar 31/12 e virar para o ano seguinte</li>
+          </ol>
         </aside>
       </div>
     </div>
