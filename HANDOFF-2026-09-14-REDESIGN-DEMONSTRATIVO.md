@@ -65,8 +65,8 @@
 - O evento de download do botão `Exportar .xlsx` não foi automatizado nesta
   rodada; a ação permanece com texto, comportamento e lógica existentes.
 - Próxima tela da fila: **Importar declaração**, somente após aprovação da
-  usuária. Os comentários sobre retirar o rodapé de armazenamento local e
-  explorar uma faixa vertical animada/3D ficam para essa rodada posterior.
+  usuária. A tela de entrada recebeu um ajuste complementar posterior,
+  registrado em `HANDOFF-2026-09-14-REDESIGN-ENTRADA.md`.
 - A prévia gráfica de impressão e a recompilação do executável PyInstaller não
   foram executadas nesta rodada; o CSS de impressão foi revisado e mantido
   alinhado à peça de tela.

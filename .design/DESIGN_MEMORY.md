@@ -63,6 +63,23 @@ trilha de evidência e decisões explícitas.
 - Foco visível, rótulos explícitos para datas, cabeçalhos/captions semânticos
   e suporte a teclado fazem parte do acabamento, não são camada posterior.
 
+## Tela de entrada — aplicação complementar
+
+- A seleção de perfil é a primeira ação da entrada; o rodapé sobre armazenamento
+  local foi retirado para não competir com esse trabalho nem repetir uma
+  explicação fora de contexto. A persistência e o isolamento entre perfis não
+  foram alterados.
+- A vitrine mantém o ciclo real do CP-TEC em três etapas: importar a declaração,
+  registrar os movimentos do ano e fechar 31/12. A lista permanece completa e
+  legível, com um trilho vertical que desloca um único marcador entre as linhas.
+- O movimento é uma assinatura de produto, não uma decoração 3D: ele traduz a
+  conferência linha a linha e não cria perspectiva, brilho ou dependência de
+  biblioteca. A linha ativa ganha contraste, o trilho pausa ao ser apontado e a
+  preferência de redução de movimento deixa a sequência estática.
+- A animação usa somente transform e cor, sem alterar dimensões ou fluxo do
+  layout. As três etapas seguem no DOM e na ordem semântica para teclado e
+  leitor de tela.
+
 ## Evitar
 
 - Grade de três cartões de KPI sem conteúdo proporcional.
@@ -76,6 +93,6 @@ trilha de evidência e decisões explícitas.
 ## Próxima aplicação
 
 Aplicar este norte uma tela por vez, mantendo as funções e os textos
-contratados. A próxima tela da fila é **Importar declaração**; os comentários
-sobre retirar a informação de armazenamento local e explorar uma faixa
-vertical animada/3D ficam deliberadamente para essa rodada posterior.
+contratados. A próxima tela da fila é **Importar declaração**. A entrada já
+recebeu o tratamento complementar desta rodada; a animação do ciclo não deve
+ser replicada como padrão automático nas demais telas.

@@ -715,10 +715,6 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           )}
         </div>
         </div>
-        <p className="entrada-rodape-coluna">
-          <strong>Os dados ficam somente neste computador.</strong> Cada perfil é um titular
-          isolado, com seus dependentes, bens, dívidas e anos-calendário.
-        </p>
       </div>
       </main>
       <aside className="entrada-vitrine">
@@ -731,7 +727,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
             e feche 31/12 com a posição pronta para a próxima declaração.
           </p>
         </div>
-        <ol className="entrada-ciclo">
+        <ol className="entrada-ciclo" aria-label="Ciclo de trabalho do CP-TEC">
           <li><span>01</span>Importar a declaração já entregue</li>
           <li><span>02</span>Registrar compra, venda, baixa e benfeitoria</li>
           <li><span>03</span>Fechar 31/12 e virar para o ano seguinte</li>
