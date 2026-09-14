@@ -97,7 +97,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
           {!collapsed && (
             <div className="logo-text">
               <h1>CP-TEC</h1>
-              <span title={state.contribuinte?.nome || undefined}>{state.contribuinte?.nome || 'Variação Patrimonial IRPF'}</span>
+              <span>Controle Patrimonial</span>
             </div>
           )}
         </div>

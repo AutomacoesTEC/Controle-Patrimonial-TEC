@@ -893,6 +893,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 .demonstrativo-screen .demonstrativo-table td{padding:10px 12px}
 .demonstrativo-screen .demonstrativo-table thead th,
 .demonstrativo-screen thead th{background:transparent;text-transform:none;letter-spacing:0;font-size:11px}
+.demonstrativo-screen .demonstrativo-table thead th:last-child{text-align:right}
 .demonstrativo-screen .demonstrativo-secao td{padding-top:18px;padding-bottom:8px;font-size:12px;font-weight:650;text-transform:none;letter-spacing:0;color:var(--text-primary);border-bottom:1px solid var(--border-color)}
 .demonstrativo-screen .demonstrativo-secao-link{font-size:12px;font-weight:650;text-transform:none;letter-spacing:0;color:var(--accent-primary)}
 .demonstrativo-screen .demonstrativo-total td{background:transparent;font-weight:650}

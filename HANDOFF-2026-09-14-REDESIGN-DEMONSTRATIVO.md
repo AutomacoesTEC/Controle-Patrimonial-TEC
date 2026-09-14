@@ -6,8 +6,8 @@
 - **Branch:** `AutomacoesTEC/redesign-visual-a2c763fd`
 - **Escopo desta rodada:** tela de Demonstrativo; as telas seguintes da fila
   não foram alteradas.
-- **Commit:** `Redesenha o Demonstrativo como peça de conferência` (hash no
-  `git log -1` desta branch).
+- **Commits:** `Redesenha o Demonstrativo como peça de conferência` e `Corrige
+  marca e alinhamento do Demonstrativo` (hashes no `git log` desta branch).
 
 ## O que mudou
 
@@ -19,6 +19,9 @@
 - Rendimentos termina no Total Geral dos Rendimentos; Renda Variável ficou em
   bloco complementar separado, com indicação explícita de que não compõe o
   total.
+- A assinatura exibida no menu foi fixada como “Controle Patrimonial” e os
+  cabeçalhos “Valor” das tabelas do Demonstrativo foram alinhados à direita,
+  diretamente sobre a coluna numérica.
 - O Demonstrativo agora abre com um ledger de fechamento patrimonial: patrimônio
   inicial, final, variação e resultado da conciliação aparecem antes dos filtros.
 - A antiga fileira de indicadores iguais foi substituída por uma âncora única,
@@ -43,6 +46,8 @@
   visíveis com eixo de categorias refluído.
 - O favicon respondeu `200` como `image/x-icon`; os 16 destinos da navegação
   renderizaram SVG específico, sem ícone circular de fallback.
+- A inspeção visual confirmou o cabeçalho “Valor” alinhado com os números nas
+  tabelas de Rendimentos, Ganhos e Perdas e Pagamentos.
 - Visual QA com Playwright no app renderizado, usando o perfil de teste local do
   PDF AJU-01 autorizado no handoff anterior.
 - Verificados temas claro e escuro, abertura e fechamento da composição,

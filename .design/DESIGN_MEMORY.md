@@ -42,6 +42,10 @@ trilha de evidência e decisões explícitas.
   a tela não cria overflow horizontal quando a janela é estreitada.
 - Tabelas do Demonstrativo se recompõem quando o contêiner muda de largura;
   em telas estreitas os valores continuam acessíveis no mesmo quadro.
+- A assinatura da marca no menu é fixa como “Controle Patrimonial”; o nome do
+  perfil continua sendo dado do cadastro e não deve ocupar o lugar da marca.
+- Cabeçalhos de valor ficam alinhados à direita com a coluna numérica abaixo,
+  preservando a leitura vertical de cada demonstrativo.
 - Seções expansíveis ganham uma regra lateral navy, cabeçalho separado por
   linha e fechamento próprio; a expansão não introduz uma segunda rolagem
   vertical dentro da peça.
