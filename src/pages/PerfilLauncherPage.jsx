@@ -439,8 +439,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   };
 
   return (
-    <div className="app-layout">
-      <div className="launcher-ambient" />
+    <div className="app-layout app-layout-entrada">
       <button
         className="theme-toggle-fixed"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
@@ -448,14 +447,20 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       >
         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
       </button>
-      <main className="main-content" style={{ alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', position: 'relative' }}>
+      {/* Duas colunas: à esquerda o trabalho, à direita o bloco de marca. Os
+          três wrappers ficam no mesmo nível de indentação de propósito, para
+          não reindentar as 200 linhas de conteúdo que já existiam. */}
+      <div className="entrada">
+      <main className="entrada-coluna">
+      <div className="entrada-conteudo">
         <div className="launcher-shell">
+          <div className="entrada-marca">
+            <div className="entrada-marca-simbolo">CP</div>
+            <div className="entrada-marca-nome">CP-TEC<span>Controle Patrimonial</span></div>
+          </div>
           <div className="launcher-heading">
-            <div className="launcher-logo">CP</div>
-            <h1 style={{ fontSize: '26px', fontWeight: 700, margin: '20px 0 0', letterSpacing: '-0.02em' }}>
-              Controle Patrimonial <span className="perfil-apelido-badge" style={{ fontSize: '13px', padding: '3px 10px', verticalAlign: 'middle' }}>TEC</span>
-            </h1>
-            <p style={{ color: 'var(--text-secondary)', margin: '6px 0 0', fontSize: '14px' }}>Selecione um perfil para continuar, ou cadastre um novo titular</p>
+            <h1 className="entrada-titulo">Selecione um perfil</h1>
+            <p className="entrada-subtitulo">Escolha o titular para continuar, ou cadastre um novo.</p>
           </div>
 
           {perfis.length > 0 && (
@@ -513,7 +518,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                       </div>
                     )}
                   </div>
-                  <button className="btn btn-sm btn-danger" onClick={e => handleExcluirPerfil(e, p)}>Excluir</button>
+                  <button className="perfil-link-btn perfil-link-btn-perigo" onClick={e => handleExcluirPerfil(e, p)}>Excluir</button>
                 </div>
               ))}
               {!formOpen && (
@@ -707,7 +712,19 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
             </div></div>
           )}
         </div>
+      </div>
       </main>
+      <aside className="entrada-vitrine">
+        <p className="entrada-vitrine-eyebrow">TEC Tributos</p>
+        <h2>O patrimônio do seu cliente, ano após ano.</h2>
+        <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+        <p>
+          Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
+          e feche 31/12 com a posição pronta para a próxima declaração.
+        </p>
+        <p className="entrada-vitrine-rodape">Uso interno da consultoria</p>
+      </aside>
+      </div>
       {previsualizacao && (
         <RevisaoImportacaoModal
           open

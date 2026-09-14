@@ -43,8 +43,7 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
   };
 
   return (
-    <div className="app-layout">
-      <div className="launcher-ambient" />
+    <div className="app-layout app-layout-entrada">
       <button
         className="theme-toggle-fixed"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
@@ -52,35 +51,54 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
       >
         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
       </button>
-      <main className="main-content" style={{ alignItems: 'center', justifyContent: 'center', overflowY: 'auto', position: 'relative' }}>
-        <div style={{ width: '100%', maxWidth: '380px', padding: '40px 20px', textAlign: 'center' }}>
-          <div className="perfil-avatar" style={{ width: '64px', height: '64px', fontSize: '22px', margin: '0 auto 16px' }}>
-            {iniciaisNome(perfil.nome)}
-          </div>
-          <h1 style={{ fontSize: '19px', fontWeight: 700, margin: 0 }}>{perfil.apelido || perfil.nome}</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 28px', fontSize: '13px' }}>Este perfil é protegido por senha</p>
+      {/* Mesma estrutura de duas colunas da seleção de perfil, para que entrar
+          no app seja sempre a mesma tela. */}
+      <div className="entrada">
+        <main className="entrada-coluna">
+          <div className="entrada-conteudo">
+            <div className="entrada-marca">
+              <div className="entrada-marca-simbolo">CP</div>
+              <div className="entrada-marca-nome">CP-TEC<span>Controle Patrimonial</span></div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+              <div className="perfil-avatar">{iniciaisNome(perfil.nome)}</div>
+              <h1 className="entrada-titulo">{perfil.apelido || perfil.nome}</h1>
+            </div>
+            <p className="entrada-subtitulo">Este perfil é protegido por senha.</p>
 
-          <form onSubmit={handleSubmit} className="card" style={{ textAlign: 'left' }}>
-            <div className="form-group" style={{ marginBottom: erro ? '8px' : '20px' }}>
-              <label>Senha</label>
-              <input
-                type="password"
-                className={`form-control${erro ? ' form-control-invalid' : ''}`}
-                value={senha}
-                onChange={e => setSenha(e.target.value)}
-                autoFocus
-              />
-            </div>
-            {erro && <p style={{ color: 'var(--accent-danger)', fontSize: '12px', marginBottom: '20px' }}>{erro}</p>}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button type="button" className="btn btn-secondary" onClick={onVoltar}>Voltar</button>
-              <button type="submit" className="btn btn-primary" disabled={!senha || carregando}>
-                {carregando ? 'Entrando...' : 'Entrar'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </main>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group" style={{ marginBottom: erro ? '8px' : '20px' }}>
+                <label>Senha</label>
+                <input
+                  type="password"
+                  className={`form-control${erro ? ' form-control-invalid' : ''}`}
+                  value={senha}
+                  onChange={e => setSenha(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              {erro && <p style={{ color: 'var(--accent-danger)', fontSize: '12px', marginBottom: '20px' }}>{erro}</p>}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={!senha || carregando}>
+                  {carregando ? 'Entrando...' : 'Entrar'}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={onVoltar}>Voltar</button>
+              </div>
+            </form>
+            <p className="entrada-rodape">O conteúdo deste perfil só é decifrado depois da senha correta.</p>
+          </div>
+        </main>
+        <aside className="entrada-vitrine">
+          <p className="entrada-vitrine-eyebrow">TEC Tributos</p>
+          <h2>O patrimônio do seu cliente, ano após ano.</h2>
+          <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+          <p>
+            Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
+            e feche 31/12 com a posição pronta para a próxima declaração.
+          </p>
+          <p className="entrada-vitrine-rodape">Uso interno da consultoria</p>
+        </aside>
+      </div>
     </div>
   );
 }
