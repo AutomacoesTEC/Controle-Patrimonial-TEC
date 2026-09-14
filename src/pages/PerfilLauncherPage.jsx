@@ -150,6 +150,10 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
     e.target.value = ''; // permite escolher o mesmo arquivo de novo depois de um erro
     if (!file) return;
 
+    // O atalho de importação também existe fora do cartão de cadastro. Só
+    // abre o cartão depois que a pessoa realmente escolheu um arquivo; cancelar
+    // o seletor não altera a tela de perfis.
+    setFormOpen(true);
     setImportando(true);
     setErroImportacao('');
     try {
@@ -213,6 +217,13 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
   const limparDeclaracaoImportada = () => {
     setDeclaracaoImportada(null);
     setErroImportacao('');
+  };
+
+  const handleAbrirImportacao = () => {
+    setAvisoBackup(null);
+    setForm(FORM_VAZIO);
+    limparDeclaracaoImportada();
+    fileRef.current?.click();
   };
 
   const confirmarPrevisualizacao = () => {
@@ -538,6 +549,13 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
             style={{ display: 'none' }}
             onChange={handleEscolherBackup}
           />
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.dbk,.dec,.f2b"
+            style={{ display: 'none' }}
+            onChange={handleImportarDeclaracao}
+          />
           {avisoBackup && (
             <p style={{
               fontSize: '12px',
@@ -547,14 +565,21 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
               {avisoBackup.texto}
             </p>
           )}
-          {/* Uma ação de peso (cadastrar) e uma de texto (restaurar), lado a
-              lado. Antes eram dois blocos do tamanho da lista de perfis. */}
+          {/* Importar é a ação principal de quem já tem a declaração. Cadastrar
+              continua explícito para quem ainda vai preencher manualmente;
+              restaurar fica como ação de manutenção. */}
           {!restauracao && (
             <div className="entrada-acoes">
               {!formOpen && (
-                <button type="button" className="btn btn-secondary" onClick={() => { setForm(FORM_VAZIO); limparDeclaracaoImportada(); setFormOpen(true); }}>
-                  Cadastrar novo titular
-                </button>
+                <>
+                  <button type="button" className="btn btn-primary entrada-importar-btn" onClick={handleAbrirImportacao} disabled={importando}>
+                    <ImportFileIcon />
+                    {importando ? 'Lendo arquivo...' : 'Importar declaração'}
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setForm(FORM_VAZIO); limparDeclaracaoImportada(); setFormOpen(true); }}>
+                    Cadastrar novo titular
+                  </button>
+                </>
               )}
               <button className="entrada-link" type="button" onClick={handleAbrirSeletorBackup}>
                 <RestoreIcon />
@@ -633,7 +658,6 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
               </div>
               <form onSubmit={handleCriarPerfil}>
                 <div className="launcher-create-body">
-                  <input ref={fileRef} type="file" accept=".pdf,.dbk,.dec,.f2b" style={{ display: 'none' }} onChange={handleImportarDeclaracao} />
                   {declaracaoImportada ? (
                     <div className="form-group" style={{ padding: '10px 12px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

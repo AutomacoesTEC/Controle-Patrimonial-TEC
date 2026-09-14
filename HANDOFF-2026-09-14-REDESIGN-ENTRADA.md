@@ -17,6 +17,10 @@
 - A lista estática de funcionalidades da vitrine virou uma sequência horizontal
   de mensagens: cada etapa entra pela esquerda, permanece 3,5 segundos e sai
   antes da próxima etapa chegar.
+- A tela de perfis agora oferece "Importar declaração" como ação principal de
+  primeiro nível, sem exigir o clique em "Cadastrar novo titular". O seletor
+  reutiliza o mesmo parser e a mesma revisão já existentes; o cartão de criação
+  só abre depois que um arquivo foi escolhido.
 - As três etapas continuam visíveis no DOM e na ordem semântica. O movimento
   usa somente CSS, pausa ao apontar a vitrine e é desativado para
   `prefers-reduced-motion`. Não foi introduzido efeito 3D ou dependência nova.
@@ -25,6 +29,9 @@
 
 - Visual QA no app renderizado com Playwright/CUA em **1513x912**, tema claro e
   escuro: rodapé ausente, ciclo completo visível e mensagem alinhada na faixa.
+- A ação "Importar declaração" ficou visível na tela com perfil existente, com
+  ícone de arquivo e hierarquia de botão principal; "Cadastrar novo titular" e
+  "Restaurar um perfil salvo" continuam disponíveis.
 - A progressão temporal horizontal foi observada em execução; as mensagens 1,
   2 e 3 entraram e saíram na ordem, sem barra móvel.
 - Em **1000x800** e **390x844**, a vitrine recolheu conforme o breakpoint já
