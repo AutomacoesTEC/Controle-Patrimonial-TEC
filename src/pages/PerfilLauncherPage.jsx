@@ -469,14 +469,18 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           <div className="entrada-marca-nome">Controle Patrimonial<span>TEC Tributos</span></div>
         </div>
         <div className="entrada-miolo">
-        <div className="launcher-shell">
+          <div className="launcher-shell">
           <div className="launcher-heading">
-            <h1 className="entrada-titulo">Selecione um perfil</h1>
-            <p className="entrada-subtitulo">Escolha o titular para continuar, ou cadastre um novo.</p>
+            <h1 className="entrada-titulo">{formOpen ? 'Novo titular' : 'Selecione um perfil'}</h1>
+            <p className="entrada-subtitulo">
+              {formOpen
+                ? 'Importe a declaração ou informe os dados do titular.'
+                : 'Escolha o titular para continuar, ou cadastre um novo.'}
+            </p>
           </div>
 
-          {perfis.length > 0 && (
-            <div className="entrada-perfis" style={{ marginBottom: formOpen ? '24px' : '20px' }}>
+          {perfis.length > 0 && !formOpen && (
+            <div className="entrada-perfis">
               {perfis.map(p => (
                 <div key={p.id} className="entrada-perfil">
                   <div className="perfil-avatar">{iniciaisNome(p.nome)}</div>
@@ -568,7 +572,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           {/* Importar é a ação principal de quem já tem a declaração. Cadastrar
               continua explícito para quem ainda vai preencher manualmente;
               restaurar fica como ação de manutenção. */}
-          {!restauracao && (
+          {!restauracao && !formOpen && (
             <div className="entrada-acoes">
               {!formOpen && (
                 <>
@@ -649,13 +653,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           )}
 
           {formOpen && (
-            <div className="card launcher-create-card">
-              <div className="card-header launcher-create-header">
-                <div>
-                  <h3 className="card-title">Criar novo perfil</h3>
-                  <p>Comece importando a declaração ou informe os dados do titular.</p>
-                </div>
-              </div>
+            <div className="launcher-create-card">
               <form onSubmit={handleCriarPerfil}>
                 <div className="launcher-create-body">
                   {declaracaoImportada ? (
@@ -717,13 +715,13 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                   {!declaracaoImportada && (
                     <div className="launcher-choice-divider"><span>Preencher manualmente</span></div>
                   )}
-                  <div className="form-group"><label>Nome do Titular</label><input className="form-control" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} placeholder="Nome completo do titular" autoFocus /></div>
+                  <div className="form-group"><label>Nome do Titular</label><input className="form-control" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} placeholder="Nome completo do titular" /></div>
                   <div className="form-row">
                     <div className="form-group"><label>CPF</label><input className="form-control" inputMode="numeric" value={mascaraCpf(form.cpf)} onChange={e => setForm(p => ({ ...p, cpf: mascaraCpf(e.target.value) }))} placeholder="Opcional, 000.000.000-00" /></div>
                     <div className="form-group"><label>Apelido</label><input className="form-control" value={form.apelido} onChange={e => setForm(p => ({ ...p, apelido: e.target.value }))} placeholder="Ex: Cliente A" /></div>
                   </div>
                 </div>
-                <div style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <div className="launcher-create-footer">
                   {perfis.length > 0 && <button type="button" className="btn btn-secondary" onClick={() => { setFormOpen(false); limparDeclaracaoImportada(); }}>Cancelar</button>}
                   <button type="submit" className="btn btn-primary" disabled={!form.nome.trim()}>Criar e Entrar</button>
                 </div>
