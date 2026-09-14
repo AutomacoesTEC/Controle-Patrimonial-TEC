@@ -752,9 +752,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           </p>
         </div>
         <ol className="entrada-ciclo" aria-label="Ciclo de trabalho do CP-TEC">
-          <li><span>01</span>Importar a declaração já entregue</li>
-          <li><span>02</span>Registrar compra, venda, baixa e benfeitoria</li>
-          <li><span>03</span>Fechar 31/12 e virar para o ano seguinte</li>
+          <li>Importar a declaração já entregue</li>
+          <li>Registrar compra, venda, baixa e benfeitoria</li>
+          <li>Fechar 31/12 e virar para o ano seguinte</li>
         </ol>
       </aside>
       </div>

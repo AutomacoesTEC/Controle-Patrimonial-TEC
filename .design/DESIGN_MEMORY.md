@@ -70,8 +70,9 @@ trilha de evidência e decisões explícitas.
   explicação fora de contexto. A persistência e o isolamento entre perfis não
   foram alterados.
 - A vitrine mantém o ciclo real do CP-TEC em três etapas: importar a declaração,
-  registrar os movimentos do ano e fechar 31/12. Uma mensagem por vez entra pela
-  esquerda, permanece 3,5 segundos e sai antes da próxima etapa chegar.
+  registrar os movimentos do ano e fechar 31/12. Uma frase por vez entra pela
+  esquerda, permanece 3,5 segundos e sai antes da próxima etapa chegar; não há
+  numeração visual competindo com a mensagem.
 - A tela de seleção de perfil expõe "Importar declaração" como ação principal
   ao lado de "Cadastrar novo titular". O mesmo fluxo de leitura e revisão é
   reutilizado; o cartão de cadastro só aparece depois que um arquivo é

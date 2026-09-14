@@ -6,8 +6,8 @@
 - **Branch:** `AutomacoesTEC/redesign-visual-a2c763fd`
 - **Escopo desta aplicação:** tela de seleção de perfil e vitrine inicial;
   nenhuma tela de trabalho, cálculo ou importação foi alterada.
-- **Commit:** `Substitui a barra por mensagens na entrada` nesta branch; o hash
-  final é informado no encerramento da aplicação.
+- **Commit:** `Remove a numeração das mensagens da entrada` nesta branch; o
+  hash final é informado no encerramento da aplicação.
 
 ## O que mudou
 
@@ -15,8 +15,9 @@
   tela de entrada, conforme a revisão visual. A persistência, o isolamento de
   perfis e todas as ações do lançador permanecem iguais.
 - A lista estática de funcionalidades da vitrine virou uma sequência horizontal
-  de mensagens: cada etapa entra pela esquerda, permanece 3,5 segundos e sai
-  antes da próxima etapa chegar.
+  de frases: cada etapa entra pela esquerda, permanece 3,5 segundos e sai antes
+  da próxima etapa chegar. A numeração visual foi retirada para deixar a
+  mensagem ocupar o foco.
 - A tela de perfis agora oferece "Importar declaração" como ação principal de
   primeiro nível, sem exigir o clique em "Cadastrar novo titular". O seletor
   reutiliza o mesmo parser e a mesma revisão já existentes; o cartão de criação
