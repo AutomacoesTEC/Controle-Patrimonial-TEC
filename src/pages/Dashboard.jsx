@@ -39,45 +39,18 @@ function acionarPorTeclado(evento, acao) {
 }
 
 
-// Paleta categórica validada (skill dataviz): 8 tons, ordem fixa, checada por
-// CVD contra as cores reais do app (fundo escuro #161d2e e claro #ffffff) —
-// `node scripts/validate_palette.js` passou nos dois modos. Os gráficos
-// escolhem o par certo sozinhos, acompanhando o botão de tema.
+// Escala monocromática da peça: os gráficos diferenciam categorias por
+// luminosidade do navy, sem criar uma segunda linguagem de cor para a tela.
+// O significado de ganho, perda ou ressalva continua reservado às classes
+// semânticas usadas nas tabelas.
 const CATEGORICAS = {
-  dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
-  light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+  dark: ['#aeb9d1', '#98a6c2', '#8291b1', '#6f7f9f', '#607292', '#526487', '#42557a', '#34486f'],
+  light: ['#283453', '#3b4964', '#4d5c77', '#5f6e89', '#718099', '#8491a8', '#98a3b6', '#acb5c4'],
 };
 const CROMO_GRAFICO = {
   dark: { grid: '#2c2c2a', axis: '#383835', tick: '#94a3b8', tooltipBg: '#1a2332', tooltipBorder: 'rgba(148,163,184,0.15)', tooltipText: '#f1f5f9' },
   light: { grid: '#e1e0d9', axis: '#c3c2b7', tick: '#5c6168', tooltipBg: '#ffffff', tooltipBorder: 'rgba(123,129,138,0.25)', tooltipText: '#1e273e' },
 };
-
-// Ícones dos 3 cards de estatística do topo (mesmo estilo de linha das
-// SunIcon/MoonIcon do App.jsx: viewBox 24, stroke, sem fill) — a classe CSS
-// `.stat-icon` já existia (index.css) mas nunca tinha sido usada em nenhuma
-// tela; sem ícone os cards ficavam só número + texto pequeno, "vagos".
-const IconCarteira = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-  </svg>
-);
-const IconQuedaVermelha = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
-    <polyline points="16 17 22 17 22 11" />
-  </svg>
-);
-const IconBalanca = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3v18" />
-    <path d="M6 8l-4 8a4 4 0 0 0 8 0Z" />
-    <path d="M18 8l-4 8a4 4 0 0 0 8 0Z" />
-    <path d="M4 8h16" />
-    <path d="M9 3h6" />
-  </svg>
-);
 
 // Acompanha o botão de tema (data-theme no <html>, ver App.jsx) — os
 // gráficos são SVG puro do Recharts, não leem as CSS custom properties do
@@ -332,7 +305,7 @@ export default function Dashboard({ onNavigate } = {}) {
             <p>Visão geral do patrimônio</p>
           </div>
         </div>
-        <div className="page-body animate-in">
+        <div className="page-body demonstrativo-screen animate-in">
           <div className="card">
             <div className="empty-state" style={{ padding: '60px 20px' }}>
               <p style={{ fontSize: '16px', fontWeight: 600 }}>Nenhum dado ainda</p>
@@ -355,12 +328,12 @@ export default function Dashboard({ onNavigate } = {}) {
           <button className="btn btn-secondary" onClick={() => window.print()}>
             Imprimir demonstrativo
           </button>
-          <button className="btn btn-success" onClick={handleExport}>
+          <button className="btn btn-secondary" onClick={handleExport}>
             Exportar .xlsx
           </button>
         </div>
       </div>
-      <div className="page-body animate-in">
+      <div className="page-body demonstrativo-screen animate-in">
         <header className="print-header">
           <div>
             <strong>Demonstrativo de Conciliação Patrimonial: {nomeRecorte}</strong>
@@ -373,36 +346,36 @@ export default function Dashboard({ onNavigate } = {}) {
           </dl>
         </header>
 
-        <div className="card dashboard-periodo-controles" style={{ marginBottom: '20px' }}>
-          <div className="card-header"><h3 className="card-title">Período da consulta</h3></div>
-          <div className="form-group"><label>Visão do demonstrativo</label>
-            <select className="form-control" aria-label="Visão do demonstrativo" value={pessoaSelecionada} onChange={e => setPessoaSelecionada(e.target.value)}>
-              <option value="todos">Visão geral</option><option value="titular">Titular</option>
-              {pessoas.map(([id, d]) => <option key={id} value={id}>Dependente: {d.nome}</option>)}
-            </select>
+        {demo && (
+        <>
+        <ResumoDemonstrativo inicial={totIni?.liquido || 0} final={totFim?.liquido || 0} variacao={variacaoPeriodo} conciliacao={demo.saldoDeCaixa} financeiro={financeiro} posicoes={posicoes} cobertura={cobertura} parcelas={parcelas} state={estadoCompleto} pessoa={pessoaSelecionada} ate={ate} onNavigate={onNavigate} onDetalhar={() => setDetalheCategoria('bens')} controles={
+          <div className="card dashboard-periodo-controles">
+            <div className="card-header"><h3 className="card-title">Período da consulta</h3></div>
+            <div className="form-group"><label>Visão do demonstrativo</label>
+              <select className="form-control" aria-label="Visão do demonstrativo" value={pessoaSelecionada} onChange={e => setPessoaSelecionada(e.target.value)}>
+                <option value="todos">Visão geral</option><option value="titular">Titular</option>
+                {pessoas.map(([id, d]) => <option key={id} value={id}>Dependente: {d.nome}</option>)}
+              </select>
+            </div>
+            {pessoaSelecionada !== 'todos' && <p role="status">Recorte de {nomeRecorte}. Dados sem titularidade identificada e totais fiscais agregados permanecem somente na visão geral.</p>}
+            <div className="form-row">
+              <div className="form-group">
+                <label>De</label>
+                <DateInput value={de} onChange={setDataDe} min={dateMinAttr} max={dateMaxAttr} ariaLabel="Data inicial do período" />
+              </div>
+              <div className="form-group">
+                <label>Até</label>
+                <DateInput value={ate} onChange={setDataAte} min={dateMinAttr} max={dateMaxAttr} ariaLabel="Data final do período" />
+              </div>
+              <div className="form-group">
+                <button className="btn btn-secondary" onClick={() => { setDataDe(todoHistorico.de); setDataAte(todoHistorico.ate); }}>
+                  Todo o histórico
+                </button>
+              </div>
+            </div>
           </div>
-          {pessoaSelecionada !== 'todos' && <p role="status">Recorte de {nomeRecorte}. Dados sem titularidade identificada e totais fiscais agregados permanecem somente na visão geral.</p>}
-          <div className="form-row" style={{ alignItems: 'end', marginBottom: 0 }}>
-            <div className="form-group">
-              <label>De</label>
-              <DateInput value={de} onChange={setDataDe} min={dateMinAttr} max={dateMaxAttr} />
-            </div>
-            <div className="form-group">
-              <label>Até</label>
-              <DateInput value={ate} onChange={setDataAte} min={dateMinAttr} max={dateMaxAttr} />
-            </div>
-            <div className="form-group">
-              <button className="btn btn-secondary" onClick={() => { setDataDe(todoHistorico.de); setDataAte(todoHistorico.ate); }}>
-                Todo o histórico
-              </button>
-            </div>
-          </div>
-        </div>
-
-
-
-
-        {continuidade.disponivel && (
+        }
+        contexto={continuidade.disponivel && (
           <div className="card continuidade-card">
             <div className="continuidade-resumo">
               <div>
@@ -431,14 +404,12 @@ export default function Dashboard({ onNavigate } = {}) {
               </details>
             )}
           </div>
-        )}
-
-        {demo && (
-        <>
-        <ResumoDemonstrativo inicial={totIni?.liquido || 0} final={totFim?.liquido || 0} variacao={variacaoPeriodo} financeiro={financeiro} posicoes={posicoes} cobertura={cobertura} parcelas={parcelas} state={estadoCompleto} pessoa={pessoaSelecionada} ate={ate} onNavigate={onNavigate} onDetalhar={() => setDetalheCategoria('bens')} conciliacaoCards={<>
-        <div className="card" style={{ marginBottom: '16px' }}>
+        )} conciliacaoCards={<>
+        <div className="card demonstrativo-bloco">
           <div className="card-header"><h3 className="card-title">Rendimentos</h3></div>
-          <TabelaRedimensionavel><table className="demonstrativo-table">
+          <TabelaRedimensionavel responsive><table className="demonstrativo-table">
+            <caption className="sr-only">Rendimentos do período consultado</caption>
+            <thead className="demonstrativo-cabecalho"><tr><th scope="col">Descrição</th><th scope="col">Valor</th></tr></thead>
             <tbody>
               {/* Mesmo desenho da Tributação Exclusiva logo abaixo: bruto,
                   as retenções em linha própria e o líquido, que é o valor que
@@ -508,7 +479,7 @@ export default function Dashboard({ onNavigate } = {}) {
               <tr><td>Tributação Exclusiva, valores informados (13º já líquido)</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoBruto)}</td></tr>
               <tr><td>Tributação Exclusiva, IRRF ainda não descontado</td><td className="currency negative">{formatCurrency(-demo.rendimentos.exclusivoIrrf)}</td></tr>
               <tr><td>Tributação Exclusiva, líquido</td><td className="currency">{formatCurrency(demo.rendimentos.exclusivoLiquido)}</td></tr>
-              <tr className="demonstrativo-destaque demonstrativo-final"><td>Total Geral dos Rendimentos</td><td className="currency positive">{formatCurrency(demo.rendimentos.totalGeral)}</td></tr>
+              <tr className="demonstrativo-destaque demonstrativo-final"><td>Total Geral dos Rendimentos</td><td className="currency">{formatCurrency(demo.rendimentos.totalGeral)}</td></tr>
               {/* Renda Variável vira uma LINHA da tabela, e não um parágrafo,
                   para que a coluna de valores possa dizer o que se sabe sobre
                   ela. O detalhe fica no "?" (ver Ajuda). */}
@@ -557,9 +528,11 @@ export default function Dashboard({ onNavigate } = {}) {
           </table></TabelaRedimensionavel>
         </div>
 
-        <div className="card" style={{ marginBottom: '16px' }}>
+        <div className="card demonstrativo-bloco">
           <div className="card-header"><h3 className="card-title">Ganhos e Perdas Apurados</h3></div>
-          <TabelaRedimensionavel><table className="demonstrativo-table">
+          <TabelaRedimensionavel responsive><table className="demonstrativo-table">
+            <caption className="sr-only">Ganhos e Perdas Apurados no período consultado</caption>
+            <thead className="demonstrativo-cabecalho"><tr><th scope="col">Descrição</th><th scope="col">Valor</th></tr></thead>
             <tbody>
               {demo.ganhos.vendas.map((v, i) => (
                 <tr key={i}><td title={v.bem || ''}>{v.ganhoLiquido >= 0 ? 'GANHO APURADO NA VENDA DE' : 'PERDA APURADA NA VENDA DE'} {nomeCurtoBem(v.bem)}</td><td className={`currency ${v.ganhoLiquido >= 0 ? 'positive' : 'negative'}`}>{formatCurrency(v.ganhoLiquido)}</td></tr>
@@ -599,9 +572,11 @@ export default function Dashboard({ onNavigate } = {}) {
           </table></TabelaRedimensionavel>
         </div>
 
-        <div className="card" style={{ marginBottom: '20px' }}>
+        <div className="card demonstrativo-bloco">
           <div className="card-header"><h3 className="card-title">Pagamentos</h3></div>
-          <TabelaRedimensionavel><table className="demonstrativo-table">
+          <TabelaRedimensionavel responsive><table className="demonstrativo-table">
+            <caption className="sr-only">Pagamentos do período consultado</caption>
+            <thead className="demonstrativo-cabecalho"><tr><th scope="col">Descrição</th><th scope="col">Valor</th></tr></thead>
             <tbody>
               <tr>
                 <td>
@@ -662,9 +637,11 @@ export default function Dashboard({ onNavigate } = {}) {
         </div>
 
 
-</>} variacaoCard={<div className="card" style={{ marginBottom: '16px' }}>
+</>} variacaoCard={<div className="card demonstrativo-bloco demonstrativo-variacao">
           <div className="card-header"><h3 className="card-title">Variação Patrimonial</h3></div>
-          <TabelaRedimensionavel><table className="demonstrativo-table">
+          <TabelaRedimensionavel responsive><table className="demonstrativo-table">
+            <caption className="sr-only">Variação Patrimonial no período consultado</caption>
+            <thead className="demonstrativo-cabecalho"><tr><th scope="col">Descrição</th><th scope="col">Valor</th></tr></thead>
             <tbody>
               <tr className="demonstrativo-secao">
                 <td colSpan={2}>
@@ -730,12 +707,12 @@ export default function Dashboard({ onNavigate } = {}) {
             próprio ajuste anual. Este card só EXIBE o que já veio na declaração
             (ver saldosCompensaveis.js), não recalcula. */}
         {saldosAtravessam.length > 0 && (
-          <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card demonstrativo-bloco">
             <div className="card-header">
               <h3 className="card-title">Saldos que atravessam para o próximo exercício</h3>
               <span className="badge badge-blue">Declaração e controle manual</span>
             </div>
-            <TabelaRedimensionavel><table className="demonstrativo-table">
+            <TabelaRedimensionavel responsive><table className="demonstrativo-table">
               <tbody>
                 {saldosAtravessam.map(s => (
                   <tr key={s.chave}>
@@ -752,7 +729,7 @@ export default function Dashboard({ onNavigate } = {}) {
         )}
 
         {(painelIrrf.linhas.length > 0 || painelIrrf.totalResumo != null) && (
-          <div className="card painel-irrf" style={{ marginBottom: '20px' }}>
+          <div className="card painel-irrf demonstrativo-bloco">
             <div className="card-header">
               <div>
                 <h3 className="card-title">IRRF do ano</h3>
@@ -781,7 +758,7 @@ export default function Dashboard({ onNavigate } = {}) {
                 texto={`Em ${formatDate(alerta.data)}, foram informados ${formatCurrency(alerta.informado)}. Pela tabela de 2026, usando a maior dedução entre o simplificado e as deduções informadas, a referência é ${formatCurrency(alerta.esperado)}; diferença de ${formatCurrency(alerta.diferenca)}. É somente um alerta: confira a fonte pagadora e não altere o valor sem o comprovante.`}
               />
             ))}
-            <TabelaRedimensionavel>
+            <TabelaRedimensionavel responsive>
               <table>
                 <thead><tr><th>Fonte</th><th>Beneficiário</th><th>Tipo</th><th>Tratamento</th><th style={{ textAlign: 'right' }}>IRRF</th></tr></thead>
                 <tbody>
@@ -812,13 +789,9 @@ export default function Dashboard({ onNavigate } = {}) {
         </>
         )}
 
-        {/* 3 cards em vez de 5: os dois "Patrimônio Líquido" (anterior/
-            atual) e o card solto de "Variação no período" viraram UM só,
-            com a comparação e o delta dentro do mesmo card — pedido real da
-            usuária ("unificaria os saldos de patrimônio líquido em um só").
-            Ícone em cada card (classe `.stat-icon` já existia no CSS, nunca
-            tinha sido usada em lugar nenhum do app) pra parar de ficar
-            "vago" — só número e texto pequeno, sem nenhuma âncora visual. */}
+        {/* Os gráficos ficam fora da peça principal e entram como consulta
+            complementar, fechados na abertura para preservar a leitura do
+            demonstrativo antes da exploração visual. */}
         <details className="dashboard-graficos">
           <summary>
             <span>Gráficos de apoio</span>

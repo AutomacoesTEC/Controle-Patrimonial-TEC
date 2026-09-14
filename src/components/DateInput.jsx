@@ -120,7 +120,7 @@ function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar }) {
 // inválido, volta pro último valor válido em vez de deixar o campo quebrado.
 // O ícone de calendário abre um seletor visual (CalendarioPopup) como
 // segunda forma de preencher, sem tirar a digitação livre.
-export default function DateInput({ value, onChange, min, max }) {
+export default function DateInput({ value, onChange, min, max, ariaLabel }) {
   const [texto, setTexto] = useState(() => isoParaTexto(value));
   const [invalido, setInvalido] = useState(false);
   const [calendarioAberto, setCalendarioAberto] = useState(false);
@@ -156,6 +156,8 @@ export default function DateInput({ value, onChange, min, max }) {
       <input
         type="text"
         inputMode="numeric"
+        aria-label={ariaLabel}
+        aria-invalid={invalido || undefined}
         placeholder="dd/mm/aaaa"
         className={`form-control${invalido ? ' form-control-invalid' : ''}`}
         value={texto}

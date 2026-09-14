@@ -119,6 +119,7 @@ body{font-family:var(--font-family);font-size:14px;line-height:1.5;background:va
 .nav-item.active{background:rgba(var(--accent-primary-rgb),0.12);color:var(--accent-primary)}
 .nav-item.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--accent-primary);border-radius:0 3px 3px 0}
 .nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-item-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* Menu recolhido: só o ícone, centralizado. A sigla de 2 letras foi trocada
    por ícone de traço em 03/09/2026 (ver NavIcons.jsx). */
 .nav-item-icone{justify-content:center;padding:11px 0}
@@ -136,7 +137,7 @@ body{font-family:var(--font-family);font-size:14px;line-height:1.5;background:va
 .year-selector select{flex:1;background:transparent;border:none;color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;outline:none;font-family:var(--font-family)}
 .year-selector select option{background:var(--bg-secondary);color:var(--text-primary)}
 
-.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-primary);transition:background-color var(--transition-normal)}
+.main-content{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-primary);transition:background-color var(--transition-normal)}
 .page-header{padding:20px 76px 16px 28px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;background:var(--bg-secondary);transition:background-color var(--transition-normal),border-color var(--transition-normal)}
 .page-header-left h2{font-size:20px;font-weight:700;color:var(--text-primary)}
 .page-header-left p{font-size:13px;color:var(--text-secondary);margin-top:2px}
@@ -152,7 +153,7 @@ body{font-family:var(--font-family);font-size:14px;line-height:1.5;background:va
    continua como rede de segurança pras páginas sem table-container
    direto (relatório com vários cards, por exemplo) — nessas, ele que
    rola, como sempre rolou. */
-.page-body{flex:1;display:flex;flex-direction:column;padding:24px 28px;overflow-y:auto}
+.page-body{flex:1;min-width:0;display:flex;flex-direction:column;padding:24px 28px;overflow-y:auto}
 @media (min-width:1800px) {
   .page-body{width:100%;max-width:1600px;align-self:center}
 }
@@ -803,26 +804,126 @@ textarea.form-control{resize:vertical;min-height:80px}
 .disponibilidades-nota { margin-top: 16px; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
 @media(max-width: 600px) { .disponibilidades-total { text-align: left; } }
 
-/* Demonstrativo: resumo, três visões e níveis de detalhe. */
-.demo-indicadores { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:12px; }
-.demo-indicadores article { border:1px solid var(--border-color); border-radius:10px; padding:20px; background:var(--bg-card); display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
-.demo-indicadores article>span,.demo-posicoes span { color:var(--text-secondary); font-size:12px; }
-.demo-indicadores strong { font-size:22px; font-variant-numeric:tabular-nums; }
-.demo-cobertura { font-size:12px; line-height:1.6; color:var(--text-secondary); }
-.demo-posicoes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:20px 0; }
-.demo-posicoes>div { display:flex; flex-direction:column; gap:7px; }
-.demo-visao { margin:16px 0; }
-.demo-visao p { line-height:1.6; font-size:13px; }
-.demo-visao summary,.demo-detalhes-fiscais>summary { cursor:pointer; font-weight:600; padding:14px 0; }
-.demo-detalhes-fiscais { margin:20px 0; }
-.demo-detalhes-fiscais>summary { border-bottom:1px solid var(--border-color); margin-bottom:16px; }
-.dashboard-periodo-controles { padding:16px; display:flex; flex-wrap:wrap; align-items:end; gap:16px; }
-.dashboard-periodo-controles>.card-header { display:none; }
-.dashboard-periodo-controles>.form-group { flex:1; min-width:200px; margin:0; }
-.dashboard-periodo-controles>.form-row { flex:2; }
-.resumo-auditado table td { max-width:360px; overflow-wrap:anywhere; }
-@media(max-width:800px) { .demo-indicadores,.demo-posicoes {grid-template-columns:1fr;} .dashboard-periodo-controles {display:block;} }
-@media print { .demo-indicadores {grid-template-columns:repeat(3,1fr);} .demo-detalhes-fiscais>summary {break-after:avoid;} }
+/* Demonstrativo: peça de conferência, não grade de cartões. O resumo é a
+   âncora da tela; as tabelas abaixo repetem a mesma lógica em linhas para
+   manter a leitura próxima do papel e deixar a cor reservada ao significado. */
+.demonstrativo-screen{min-width:0}
+.demonstrativo-screen .card{background:transparent;border-color:transparent;border-radius:0;padding:0;box-shadow:none}
+.demonstrativo-screen .card:hover{border-color:transparent;box-shadow:none;transform:none}
+.demonstrativo-screen .demonstrativo-bloco,
+.demonstrativo-screen .demo-visao{margin:0 0 28px;padding:0 0 28px;border:0;border-bottom:1px solid var(--border-color);border-radius:0;background:transparent}
+.demonstrativo-screen .demonstrativo-bloco>.card-header{margin:0 0 12px;padding:0;align-items:flex-start}
+.demonstrativo-screen .demonstrativo-bloco>.card-header .card-title{font-size:15px;line-height:1.4;font-weight:650}
+
+.demo-ledger{margin:0 0 28px;padding:0 0 18px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color)}
+.demo-ledger-cabecalho{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:17px 0 15px}
+.demo-ledger-kicker{display:block;margin-bottom:4px;color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:.02em}
+.demo-ledger-cabecalho h3{font-size:18px;line-height:1.35;font-weight:650}
+.demo-ledger-valores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+.demo-ledger-valores>div{min-width:0;padding:11px 24px 10px;border-left:1px solid var(--border-color)}
+.demo-ledger-valores>div:first-child{padding-left:0;border-left:0}
+.demo-ledger-valores dt{color:var(--text-secondary);font-size:12px;line-height:1.4}
+.demo-ledger-valores dd{margin-top:7px;color:var(--text-primary);font-size:clamp(18px,2.05vw,28px);font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+.demo-ledger-variacao{border-left:2px solid var(--accent-primary)!important;background:color-mix(in srgb,var(--accent-primary) 7%,transparent)}
+.demo-ledger-variacao dd.positive,.demo-ledger-variacao dd.negative{font-size:clamp(18px,2.05vw,28px)}
+.demo-ledger-resultado{display:flex;align-items:baseline;justify-content:space-between;gap:18px;margin-top:18px;padding:14px 0 0;border-top:1px solid var(--border-color)}
+.demo-ledger-resultado>div{display:flex;min-width:0;flex-direction:column;gap:3px}
+.demo-ledger-resultado>div>strong{font-size:13px;line-height:1.4;font-weight:650;color:var(--text-primary)}
+.demo-ledger-resultado>div>span{font-size:11px;line-height:1.45;color:var(--text-muted)}
+.demo-ledger-resultado>strong{font-size:22px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.demo-cobertura{font-size:12px;line-height:1.6;color:var(--text-secondary)}
+.demo-posicoes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:18px 0 20px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color)}
+.demo-posicoes>div{display:flex;min-width:0;flex-direction:column;gap:7px;padding:13px 18px 12px;border-left:1px solid var(--border-color)}
+.demo-posicoes>div:first-child{padding-left:0;border-left:0}
+.demo-posicoes span{color:var(--text-secondary);font-size:12px;line-height:1.4}
+.demo-posicoes strong{color:var(--text-primary);font-size:15px;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap}
+.demonstrativo-screen .demo-visao>h3{margin:0 0 4px;font-size:15px;line-height:1.4;font-weight:650}
+.demonstrativo-screen .demo-visao>p{margin:0;line-height:1.6;font-size:13px}
+.demonstrativo-screen .demo-visao details>summary,
+.demonstrativo-screen .demo-detalhes-fiscais>summary{cursor:pointer;font-weight:600;padding:13px 0;color:var(--text-primary)}
+.demonstrativo-screen .demo-visao details>summary:hover,
+.demonstrativo-screen .demo-detalhes-fiscais>summary:hover{color:var(--accent-primary)}
+.demonstrativo-screen .demo-detalhes-fiscais{margin:0 0 28px;padding:0 0 28px;border-bottom:1px solid var(--border-color)}
+.demonstrativo-screen .demo-detalhes-fiscais>summary{border-bottom:1px solid var(--border-color);margin-bottom:20px;padding:0 0 14px}
+
+/* O filtro é ferramenta de leitura: segue a resposta principal e mantém uma
+   única linha de controles quando a largura permite. */
+.demonstrativo-screen .dashboard-periodo-controles{display:grid;grid-template-columns:minmax(210px,1fr) minmax(0,2fr);align-items:end;column-gap:20px;row-gap:12px;margin:0 0 28px;padding:0 0 20px;border:0;border-bottom:1px solid var(--border-color);background:transparent}
+.demonstrativo-screen .dashboard-periodo-controles>.card-header{display:block;grid-column:1/-1;margin:0;padding:0}
+.demonstrativo-screen .dashboard-periodo-controles>.card-header .card-title{color:var(--text-muted);font-size:11px;font-weight:650;letter-spacing:.02em}
+.demonstrativo-screen .dashboard-periodo-controles>.form-group{grid-column:1;min-width:0;margin:0}
+.demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-column:2;display:grid;grid-template-columns:minmax(140px,1fr) minmax(140px,1fr) auto;align-items:end;gap:12px;margin:0}
+.demonstrativo-screen .dashboard-periodo-controles .form-group{min-width:0;margin-bottom:0}
+.demonstrativo-screen .dashboard-periodo-controles .form-group label{min-height:0;margin-bottom:6px;text-transform:none;letter-spacing:0}
+.demonstrativo-screen .dashboard-periodo-controles .form-control,
+.demonstrativo-screen .dashboard-periodo-controles .btn{height:40px}
+.demonstrativo-screen .dashboard-periodo-controles>p[role="status"]{grid-column:1/-1;margin:0;color:var(--text-secondary);font-size:12px;line-height:1.5}
+
+/* Tabelas sem a caixa dentro da caixa: o contêiner conserva somente a
+   rolagem horizontal necessária em janelas estreitas. */
+.demonstrativo-screen .table-container{max-width:100%;min-width:0;border:0;border-top:1px solid var(--border-color);border-radius:0;overflow-x:auto}
+.demonstrativo-screen .table-wrapper{max-width:100%;overflow-x:auto}
+.demonstrativo-screen tbody tr,
+.demonstrativo-screen tbody tr:nth-child(even){background:transparent}
+.demonstrativo-screen tbody tr:hover{background:rgba(var(--accent-primary-rgb),.05)}
+.demonstrativo-screen .demonstrativo-table td{padding:10px 12px}
+.demonstrativo-screen .demonstrativo-table thead th,
+.demonstrativo-screen thead th{background:transparent;text-transform:none;letter-spacing:0;font-size:11px}
+.demonstrativo-screen .demonstrativo-secao td{padding-top:18px;padding-bottom:8px;font-size:12px;font-weight:650;text-transform:none;letter-spacing:0;color:var(--text-primary);border-bottom:1px solid var(--border-color)}
+.demonstrativo-screen .demonstrativo-secao-link{font-size:12px;font-weight:650;text-transform:none;letter-spacing:0;color:var(--accent-primary)}
+.demonstrativo-screen .demonstrativo-total td{background:transparent;font-weight:650}
+.demonstrativo-screen .demonstrativo-destaque td{padding:13px 12px;background:transparent;font-size:14px}
+.demonstrativo-screen .demonstrativo-final td{font-size:15px;border-top:2px solid var(--accent-primary)}
+.demonstrativo-screen .ajuda-marca{width:auto;min-width:0;height:auto;margin:0 0 0 3px;padding:0;border:0;border-bottom:1px dotted currentColor;border-radius:0;color:var(--text-muted);font-size:10px;line-height:1;vertical-align:super;opacity:.9}
+.demonstrativo-screen .ajuda-marca:hover,.demonstrativo-screen .ajuda-marca:focus-visible{border-color:var(--accent-primary);color:var(--accent-primary);background:transparent}
+
+@media(max-width:900px){
+  .demo-ledger-valores>div{padding-right:16px;padding-left:16px}
+  .demonstrativo-screen .dashboard-periodo-controles{grid-template-columns:1fr}
+  .demonstrativo-screen .dashboard-periodo-controles>.form-group,
+  .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-column:1}
+  .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .demo-posicoes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .demo-posicoes>div:nth-child(odd){padding-left:0;border-left:0}
+  .demo-posicoes>div:nth-child(n+3){border-top:1px solid var(--border-color)}
+}
+@media(max-width:560px){
+  .demo-ledger-cabecalho{align-items:flex-start;flex-direction:column}
+  .demo-ledger-valores{display:block}
+  .demo-ledger-valores>div,.demo-ledger-valores>div:first-child{padding:11px 0;border:0;border-top:1px solid var(--border-color)}
+  .demo-ledger-valores>div:first-child{border-top:0}
+  .demo-ledger-resultado{align-items:flex-start;flex-direction:column;gap:8px}
+  .demonstrativo-screen .dashboard-periodo-controles>.form-row{grid-template-columns:1fr}
+  .demonstrativo-screen .dashboard-periodo-controles>.form-row>.form-group:last-child{grid-column:auto}
+  .demo-posicoes{grid-template-columns:1fr}
+  .demo-posicoes>div,.demo-posicoes>div:nth-child(n+3){padding-left:0;border-left:0;border-top:1px solid var(--border-color)}
+  .demo-posicoes>div:first-child{border-top:0}
+}
+@media(max-width:1000px){
+  .page-header.dashboard-screen-header{min-width:0;padding-right:76px;gap:16px}
+  .dashboard-screen-header .page-header-left{min-width:0}
+  .dashboard-screen-header .page-header-actions{flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:620px){
+  .page-header.dashboard-screen-header{padding:16px 18px 14px;align-items:flex-start;flex-direction:column}
+  .dashboard-screen-header .page-header-actions{width:100%;justify-content:stretch;gap:8px}
+  .dashboard-screen-header .page-header-actions .btn{min-width:0;flex:1;justify-content:center;padding-right:10px;padding-left:10px}
+  .demonstrativo-screen{padding:20px 18px}
+}
+@media(max-width:420px){
+  .dashboard-screen-header .page-header-actions{align-items:stretch;flex-direction:column}
+  .dashboard-screen-header .page-header-actions .btn{width:100%;flex:none}
+}
+
+@media print{
+  .demonstrativo-screen .table-container{display:block;overflow:visible;max-height:none;height:auto;min-height:0;flex:none}
+  .demonstrativo-screen .table-container>table{width:100%!important;min-width:0;max-width:none;table-layout:auto}
+  .demonstrativo-screen .table-container th,
+  .demonstrativo-screen .table-container td{position:static!important;min-width:0!important;max-width:none!important;overflow-wrap:anywhere}
+  .demonstrativo-screen .table-container th{white-space:normal}
+  .demonstrativo-screen .rdz-camada{display:none!important}
+}
 
 .demo-ponte table{table-layout:fixed;width:100%;min-width:850px;}
 .demo-ponte th:first-child{width:34%;}

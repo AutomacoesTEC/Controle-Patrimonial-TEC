@@ -110,6 +110,16 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem('controle-patrimonial-sidebar') === 'collapsed'; } catch { return false; }
   });
+  const [sidebarCompact, setSidebarCompact] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 1000px)').matches
+  ));
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1000px)');
+    const atualizar = () => setSidebarCompact(media.matches);
+    atualizar();
+    media.addEventListener?.('change', atualizar);
+    return () => media.removeEventListener?.('change', atualizar);
+  }, []);
   const { state } = useData();
 
   const toggleSidebar = () => {
@@ -154,7 +164,7 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
 
   return (
     <div className="app-layout">
-      <Sidebar activeView={activeView} onNavigate={navegarPelaSidebar} collapsed={sidebarCollapsed} onToggleCollapsed={toggleSidebar} onTrocarPerfil={onTrocarPerfil} />
+      <Sidebar activeView={activeView} onNavigate={navegarPelaSidebar} collapsed={sidebarCollapsed || sidebarCompact} onToggleCollapsed={toggleSidebar} onTrocarPerfil={onTrocarPerfil} />
       <button
         className="theme-toggle-fixed"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}

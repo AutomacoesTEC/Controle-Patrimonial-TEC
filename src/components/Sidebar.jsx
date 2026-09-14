@@ -138,7 +138,8 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
                   title={collapsed ? item.label : undefined}
                   aria-label={collapsed ? item.label : undefined}
                 >
-                  {collapsed ? <NavIcon id={item.id} /> : item.label}
+                  <NavIcon id={item.id} />
+                  {!collapsed && <span className="nav-item-label">{item.label}</span>}
                 </button>
               </div>
             );

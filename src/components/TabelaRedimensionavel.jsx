@@ -26,6 +26,7 @@ export default function TabelaRedimensionavel({
   initialColumnWidths = {},
   persistKey,
   constLayoutKey,
+  responsive = false,
 }) {
   const wrapRef = useRef(null);
   const rawId = useId();
@@ -38,6 +39,8 @@ export default function TabelaRedimensionavel({
   const [temAcoes, setTemAcoes] = useState(false);
   const iniciaisRef = useRef(null);
   const dragRef = useRef(null);
+  const larguraObservadaRef = useRef(null);
+  const [revisaoLayout, setRevisaoLayout] = useState(0);
 
   useLayoutEffect(() => () => document.body.classList.remove('rdz-arrastando'), []);
 
@@ -58,6 +61,9 @@ export default function TabelaRedimensionavel({
     if (soma > 0 && soma < disponivel - 1) {
       const fator = disponivel / soma;
       medidas = medidas.map(w => w * fator);
+    } else if (responsive && soma > disponivel && disponivel > 0) {
+      const fator = disponivel / soma;
+      medidas = medidas.map(w => Math.max(MIN_COL, w * fator));
     }
     medidas = medidas.map(w => Math.round(w));
     medidas = medidas.map((w, i) => (
@@ -67,9 +73,38 @@ export default function TabelaRedimensionavel({
     ));
 
     iniciaisRef.current = medidas;
+    larguraObservadaRef.current = Math.round(cont.getBoundingClientRect().width);
     setLarguras(medidas);
     setAlturaCab(Math.round(headRow.getBoundingClientRect().height));
-  }, [persistKey, constLayoutKey]);
+  }, [persistKey, constLayoutKey, revisaoLayout, responsive]);
+
+  useLayoutEffect(() => {
+    if (!responsive) return undefined;
+    const cont = wrapRef.current;
+    if (!cont) return undefined;
+
+    let frame = 0;
+    const solicitarNovaMedicao = () => {
+      if (dragRef.current) return;
+      const largura = Math.round(cont.getBoundingClientRect().width);
+      if (!largura || largura === larguraObservadaRef.current) return;
+      larguraObservadaRef.current = largura;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => setRevisaoLayout(valor => valor + 1));
+    };
+
+    const observer = typeof ResizeObserver === 'function'
+      ? new ResizeObserver(solicitarNovaMedicao)
+      : null;
+    if (observer) observer.observe(cont);
+    window.addEventListener('resize', solicitarNovaMedicao);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener('resize', solicitarNovaMedicao);
+    };
+  }, [responsive]);
 
   const iniciarArraste = (i) => (e) => {
     dragRef.current = { i, x0: e.clientX, w0: larguras[i] };
