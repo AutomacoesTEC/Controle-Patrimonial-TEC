@@ -61,3 +61,18 @@ output/pdf/*.microsoft-print-image-only-*.pdf
 
 # Cache do Python do backend desktop
 __pycache__/
+
+# Estado de execução do modo live da impeccable (diário de sessões, raízes e
+# registro de injeção). A configuração (.impeccable/live/config.json) e o
+# sidecar do sistema visual (.impeccable/design.json) são versionados.
+.impeccable/live/sessions/
+.impeccable/live/roots.json
+.impeccable/live/inject-journal.json
+.impeccable/live/server.json
+
+# Saída do MCP do Playwright (instantâneos e log de console de sessão de teste)
+.playwright-mcp/
+
+# Configuração de desenvolvimento local desta worktree (libera o caminho real do
+# node_modules para o Vite servir a fonte Inter).
+vite.live.config.mjs

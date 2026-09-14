@@ -1,0 +1,651 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-14T03:15:48Z",
+  "title": "Design System: CP-TEC",
+  "extensions": {
+    "colorMeta": {
+      "navy-tec": {
+        "role": "primary",
+        "displayName": "Navy TEC",
+        "canonical": "oklch(33.0% 0.058 267.2)",
+        "tonalRamp": [
+          "#030823",
+          "#172240",
+          "#323f5e",
+          "#4f5d7f",
+          "#6e7da0",
+          "#8e9ec3",
+          "#b7c7ee",
+          "#ddeeff"
+        ],
+        "usage": "Cor de interação do tema claro: botão primário, item ativo, aba ativa e foco."
+      },
+      "navy-bruma": {
+        "role": "primary",
+        "displayName": "Navy Bruma",
+        "canonical": "oklch(65.9% 0.040 271.8)",
+        "tonalRamp": [
+          "#06091c",
+          "#1d2337",
+          "#383f55",
+          "#555d75",
+          "#757c96",
+          "#959eb8",
+          "#bec6e2",
+          "#e5eeff"
+        ],
+        "usage": "Cor de interação do tema escuro e base de toda transparência de acento."
+      },
+      "navy-noite": {
+        "role": "primary",
+        "displayName": "Navy Noite",
+        "canonical": "oklch(27.6% 0.045 267.2)",
+        "tonalRamp": [
+          "#04091e",
+          "#1a233a",
+          "#353f58",
+          "#525d77",
+          "#717d99",
+          "#929ebb",
+          "#bac7e5",
+          "#e1eeff"
+        ],
+        "usage": "Fecho do gradiente da marca e texto forte do tema claro."
+      },
+      "grafite": {
+        "role": "primary",
+        "displayName": "Grafite",
+        "canonical": "oklch(54.9% 0.036 267.7)",
+        "tonalRamp": [
+          "#050a1a",
+          "#1c2336",
+          "#373f53",
+          "#555d73",
+          "#747d93",
+          "#959eb6",
+          "#bdc7e0",
+          "#e4eeff"
+        ],
+        "usage": "Abertura do gradiente da marca no tema escuro."
+      },
+      "ardosia": {
+        "role": "secondary",
+        "displayName": "Ardósia",
+        "canonical": "oklch(60.1% 0.015 258.4)",
+        "tonalRamp": [
+          "#070b12",
+          "#1f242c",
+          "#3b4048",
+          "#585e67",
+          "#787e87",
+          "#999fa8",
+          "#c1c8d2",
+          "#e8eff9"
+        ],
+        "usage": "Cinza da marca, sempre em transparência: bordas de 15% no escuro e 25% no claro."
+      },
+      "fundo-escuro": {
+        "role": "neutral",
+        "displayName": "Fundo Escuro",
+        "canonical": "oklch(16.0% 0.018 268.5)",
+        "tonalRamp": [
+          "#080b13",
+          "#20242d",
+          "#3c4049",
+          "#595d68",
+          "#797d88",
+          "#9a9eaa",
+          "#c2c7d3",
+          "#e9eefb"
+        ],
+        "usage": "Fundo da página no tema escuro."
+      },
+      "painel-escuro": {
+        "role": "neutral",
+        "displayName": "Painel Escuro",
+        "canonical": "oklch(19.7% 0.026 266.7)",
+        "tonalRamp": [
+          "#070b16",
+          "#1e2431",
+          "#3a404e",
+          "#575e6d",
+          "#767d8d",
+          "#979eaf",
+          "#c0c7d9",
+          "#e7efff"
+        ],
+        "usage": "Barra lateral, cabeçalho de página e cabeçalho de tabela no tema escuro."
+      },
+      "cartao-escuro": {
+        "role": "neutral",
+        "displayName": "Cartão Escuro",
+        "canonical": "oklch(23.3% 0.035 266.6)",
+        "tonalRamp": [
+          "#050a1a",
+          "#1c2435",
+          "#373f52",
+          "#555d72",
+          "#747d93",
+          "#959eb5",
+          "#bdc7df",
+          "#e4efff"
+        ],
+        "usage": "Superfície de cartão, modal secundário e botão secundário no tema escuro."
+      },
+      "campo-escuro": {
+        "role": "neutral",
+        "displayName": "Campo Escuro",
+        "canonical": "oklch(15.0% 0.016 265.8)",
+        "tonalRamp": [
+          "#080b12",
+          "#20242c",
+          "#3c4049",
+          "#595e67",
+          "#797d87",
+          "#9a9ea9",
+          "#c2c7d2",
+          "#e9effa"
+        ],
+        "usage": "Interior de campo no tema escuro, mais fundo que o cartão."
+      },
+      "fundo-claro": {
+        "role": "neutral",
+        "displayName": "Fundo Claro",
+        "canonical": "oklch(97.2% 0.001 197.1)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#232424",
+          "#3f4040",
+          "#5d5e5e",
+          "#7c7d7d",
+          "#9e9e9e",
+          "#c6c7c7",
+          "#eeefef"
+        ],
+        "usage": "Fundo da página no tema claro."
+      },
+      "painel-claro": {
+        "role": "neutral",
+        "displayName": "Painel Claro",
+        "canonical": "oklch(95.4% 0.002 145.6)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#232423",
+          "#3f403f",
+          "#5d5e5d",
+          "#7d7d7d",
+          "#9e9f9e",
+          "#c6c7c6",
+          "#eeefee"
+        ],
+        "usage": "Barra lateral, cabeçalho e caixa de modal no tema claro."
+      },
+      "cartao-claro": {
+        "role": "neutral",
+        "displayName": "Cartão Claro",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c7c7c7",
+          "#eeeeee"
+        ],
+        "usage": "Cartão e campo no tema claro: branco puro é o que está na frente."
+      },
+      "texto-escuro-forte": {
+        "role": "neutral",
+        "displayName": "Texto Forte no Escuro",
+        "canonical": "oklch(95.4% 0.003 247.9)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#3e4041",
+          "#5c5e5f",
+          "#7c7d7f",
+          "#9d9fa0",
+          "#c5c7c9",
+          "#edeff1"
+        ],
+        "usage": "Texto principal no tema escuro."
+      },
+      "texto-claro-forte": {
+        "role": "neutral",
+        "displayName": "Texto Forte no Claro",
+        "canonical": "oklch(27.6% 0.045 267.2)",
+        "tonalRamp": [
+          "#04091e",
+          "#1a233a",
+          "#353f58",
+          "#525d77",
+          "#717d99",
+          "#929ebb",
+          "#bac7e5",
+          "#e1eeff"
+        ],
+        "usage": "Texto principal no tema claro."
+      },
+      "sucesso": {
+        "role": "tertiary",
+        "displayName": "Sucesso",
+        "canonical": "oklch(69.6% 0.149 162.5)",
+        "tonalRamp": [
+          "#001800",
+          "#003609",
+          "#005526",
+          "#007643",
+          "#009762",
+          "#14ba82",
+          "#57e5aa",
+          "#84ffd1"
+        ],
+        "usage": "Ganho, resultado positivo e integridade confirmada."
+      },
+      "alerta": {
+        "role": "tertiary",
+        "displayName": "Alerta",
+        "canonical": "oklch(76.9% 0.165 70.1)",
+        "tonalRamp": [
+          "#2e0000",
+          "#500000",
+          "#722300",
+          "#954500",
+          "#b96600",
+          "#de8800",
+          "#ffb234",
+          "#ffd964"
+        ],
+        "usage": "Ressalva, pendência e conferência que falta."
+      },
+      "perigo": {
+        "role": "tertiary",
+        "displayName": "Perigo",
+        "canonical": "oklch(63.7% 0.208 25.3)",
+        "tonalRamp": [
+          "#410000",
+          "#680000",
+          "#8f0000",
+          "#b60010",
+          "#de3136",
+          "#ff5b57",
+          "#ff877f",
+          "#ffb0a5"
+        ],
+        "usage": "Perda e erro. Como fundo de etiqueta, a 15%."
+      },
+      "perigo-acao": {
+        "role": "tertiary",
+        "displayName": "Perigo em Ação",
+        "canonical": "oklch(57.7% 0.215 27.3)",
+        "tonalRamp": [
+          "#420000",
+          "#6a0000",
+          "#910000",
+          "#b90000",
+          "#e12c2a",
+          "#ff584e",
+          "#ff8576",
+          "#ffae9c"
+        ],
+        "usage": "Botão destrutivo, em repouso; o hover fecha para #b91c1c."
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Informação",
+        "canonical": "oklch(62.3% 0.188 259.8)",
+        "tonalRamp": [
+          "#090059",
+          "#00007c",
+          "#0031a0",
+          "#0755c5",
+          "#3177ea",
+          "#539bff",
+          "#7bc5ff",
+          "#a1eeff"
+        ],
+        "usage": "Caixa explicativa e registro de origem importada."
+      },
+      "categoria": {
+        "role": "tertiary",
+        "displayName": "Categoria",
+        "canonical": "oklch(60.6% 0.219 292.7)",
+        "tonalRamp": [
+          "#20005d",
+          "#340081",
+          "#4c00a5",
+          "#6830ca",
+          "#8757f1",
+          "#a77bff",
+          "#cfa6ff",
+          "#f5ceff"
+        ],
+        "usage": "Classificação sem juízo de valor."
+      }
+    },
+    "typographyMeta": {
+      "titulo-pagina": {
+        "displayName": "Título de página",
+        "purpose": "Nome da tela no cabeçalho fixo."
+      },
+      "titulo-modal": {
+        "displayName": "Título de modal",
+        "purpose": "Cabeçalho de qualquer diálogo."
+      },
+      "titulo-card": {
+        "displayName": "Título de card",
+        "purpose": "Título de cartão, h3 de corpo e estado vazio."
+      },
+      "corpo": {
+        "displayName": "Corpo",
+        "purpose": "Base da página e texto de campo."
+      },
+      "corpo-denso": {
+        "displayName": "Corpo denso",
+        "purpose": "Tabela, botão, navegação e aba: o tamanho mais presente."
+      },
+      "valor-destaque": {
+        "displayName": "Valor de destaque",
+        "purpose": "O número que a pessoa veio ver, um por bloco."
+      },
+      "valor-kpi": {
+        "displayName": "Valor de KPI",
+        "purpose": "Indicadores em grade."
+      },
+      "valor-tabela": {
+        "displayName": "Valor de tabela",
+        "purpose": "Célula monetária, à direita e tabular."
+      },
+      "rotulo-tabela": {
+        "displayName": "Rótulo de tabela",
+        "purpose": "Cabeçalho de coluna no corpo da página."
+      },
+      "rotulo-campo": {
+        "displayName": "Rótulo de campo",
+        "purpose": "Rótulo maiúsculo com duas linhas reservadas."
+      },
+      "rotulo-secao": {
+        "displayName": "Rótulo de seção",
+        "purpose": "Divisória da navegação e seção do demonstrativo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "reacao-escuro",
+        "value": "0 0 20px rgba(137,145,171,0.15)",
+        "purpose": "Halo de hover de cartão no tema escuro."
+      },
+      {
+        "name": "reacao-claro",
+        "value": "0 0 20px rgba(40,52,83,0.12)",
+        "purpose": "O mesmo halo no tema claro."
+      },
+      {
+        "name": "apoio-escuro",
+        "value": "0 1px 3px rgba(0,0,0,0.3)",
+        "purpose": "Botão fixo de tema no tema escuro."
+      },
+      {
+        "name": "apoio-claro",
+        "value": "0 1px 3px rgba(40,52,83,0.08)",
+        "purpose": "Botão fixo de tema no tema claro."
+      },
+      {
+        "name": "camada-media-escuro",
+        "value": "0 4px 12px rgba(0,0,0,0.4)",
+        "purpose": "Lista suspensa nascida de um campo."
+      },
+      {
+        "name": "camada-media-claro",
+        "value": "0 4px 12px rgba(40,52,83,0.10)",
+        "purpose": "A mesma lista no tema claro."
+      },
+      {
+        "name": "sobreposicao-escuro",
+        "value": "0 8px 32px rgba(0,0,0,0.5)",
+        "purpose": "Confirmação, calendário, toast e ajuda."
+      },
+      {
+        "name": "sobreposicao-claro",
+        "value": "0 8px 32px rgba(40,52,83,0.14)",
+        "purpose": "O mesmo no tema claro."
+      },
+      {
+        "name": "acao-primaria",
+        "value": "0 2px 8px rgba(var(--accent-primary-rgb),0.3)",
+        "purpose": "Botão primário em repouso; 0 4px 16px a 0.4 no hover."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-snappy",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Curva única do app."
+      },
+      {
+        "name": "transition-fast",
+        "value": "150ms",
+        "purpose": "Resposta de controle: botão, campo, item de navegação, aba."
+      },
+      {
+        "name": "transition-normal",
+        "value": "220ms",
+        "purpose": "Transição de superfície: cartão, barra lateral, troca de tema."
+      },
+      {
+        "name": "transition-slow",
+        "value": "320ms",
+        "purpose": "Entrada de diálogo."
+      },
+      {
+        "name": "hover-lift",
+        "value": "translateY(-1px) em botão e translateY(-2px) em cartão",
+        "purpose": "Resposta ao passar o ponteiro."
+      },
+      {
+        "name": "press",
+        "value": "scale(0.97)",
+        "purpose": "Afundar ao clicar, declarado depois do hover para vencer o levantar."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration: 0.01ms; transition-duration: 0.01ms",
+        "purpose": "Com prefers-reduced-motion nada se move."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compacto",
+        "value": "600px"
+      },
+      {
+        "name": "filtros",
+        "value": "640px"
+      },
+      {
+        "name": "formulario",
+        "value": "700px"
+      },
+      {
+        "name": "demonstrativo",
+        "value": "800px"
+      },
+      {
+        "name": "titular",
+        "value": "1100px"
+      },
+      {
+        "name": "abas",
+        "value": "1600px"
+      },
+      {
+        "name": "leitura-larga",
+        "value": "1800px"
+      },
+      {
+        "name": "container-indicadores",
+        "value": "752px a 1007px (container query)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela. Gradiente da marca, sombra na própria cor, levanta 1px no hover.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Salvar</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border:none;border-radius:var(--radius-sm,6px);font-family:var(--font-family);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition-fast,150ms cubic-bezier(0.16,1,0.3,1))}.ds-btn-primary{background:var(--gradient-primary);color:#fff;box-shadow:0 2px 8px rgba(var(--accent-primary-rgb),0.3)}.ds-btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(var(--accent-primary-rgb),0.4)}.ds-btn-primary:active{transform:scale(0.97)}.ds-btn-primary:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A variante mais usada do app. Superfície de cartão com borda de 1px que acende no acento.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">Exportar .xlsx</button>",
+      "css": ".ds-btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);padding:9px 18px;border-radius:var(--radius-sm,6px);font-family:var(--font-family);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition-fast,150ms cubic-bezier(0.16,1,0.3,1))}.ds-btn-secondary:hover{background:var(--bg-card-hover);border-color:var(--accent-primary)}.ds-btn-secondary:active{transform:scale(0.97)}.ds-btn-secondary:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}"
+    },
+    {
+      "name": "Botão destrutivo",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Excluir e confirmar de diálogo destrutivo. Vermelho fechado igual nos dois temas.",
+      "html": "<button class=\"ds-btn ds-btn-danger\">Excluir</button>",
+      "css": ".ds-btn-danger{background:#dc2626;color:#fff;border:1px solid #dc2626;padding:9px 18px;border-radius:var(--radius-sm,6px);font-family:var(--font-family);font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(239,68,68,0.35);transition:all var(--transition-fast,150ms cubic-bezier(0.16,1,0.3,1))}.ds-btn-danger:hover{background:#b91c1c;border-color:#b91c1c;box-shadow:0 2px 8px rgba(239,68,68,0.5)}.ds-btn-danger:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}"
+    },
+    {
+      "name": "Campo de formulário",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Rótulo maiúsculo com altura reservada para duas linhas, campo com anel de foco de 3px.",
+      "html": "<div class=\"ds-form-group\"><label class=\"ds-label\" for=\"ds-i1\">Discriminação do bem</label><input class=\"ds-input\" id=\"ds-i1\" placeholder=\"Apartamento 101, Rua X\" /></div>",
+      "css": ".ds-form-group{display:block;margin-bottom:16px}.ds-label{display:block;font-family:var(--font-family);font-size:12px;line-height:14px;min-height:28px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}.ds-input{width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm,6px);color:var(--text-primary);font-family:var(--font-family);font-size:14px;outline:none;transition:all var(--transition-fast,150ms cubic-bezier(0.16,1,0.3,1))}.ds-input::placeholder{color:var(--text-muted)}.ds-input:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(var(--accent-primary-rgb),0.1)}"
+    },
+    {
+      "name": "Item de navegação",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Barra de 3px na borda esquerda marca o ativo; fundo do acento a 12%, nunca preenchimento sólido.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item\">Bens e Direitos</button><button class=\"ds-nav-item ds-nav-item-active\">Demonstrativo</button></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;background:var(--bg-secondary);padding:12px 10px;width:260px;box-sizing:border-box}.ds-nav-item{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:2px;border:none;background:transparent;border-radius:var(--radius-sm,6px);color:var(--text-secondary);font-family:var(--font-family);font-size:13px;font-weight:500;text-align:left;cursor:pointer;transition:all var(--transition-fast,150ms cubic-bezier(0.16,1,0.3,1))}.ds-nav-item:hover{background:var(--bg-card);color:var(--text-primary)}.ds-nav-item-active{background:rgba(var(--accent-primary-rgb),0.12);color:var(--accent-primary)}.ds-nav-item-active::before{content:\"\";position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:0 3px 3px 0;background:var(--accent-primary)}.ds-nav-item:focus-visible{outline:2px solid var(--accent-primary);outline-offset:2px}"
+    },
+    {
+      "name": "Cartão",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Superfície de conteúdo: 16px de raio, borda de 1px e halo que acende no hover.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Bens e direitos</h3></div><p class=\"ds-card-body\">Posição em 31/12 pelo custo de aquisição.</p></div>",
+      "css": ".ds-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg,16px);padding:24px;transition:all var(--transition-normal,220ms cubic-bezier(0.16,1,0.3,1))}.ds-card:hover{border-color:rgba(var(--accent-primary-rgb),0.2);box-shadow:var(--shadow-glow)}.ds-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.ds-card-title{margin:0;font-family:var(--font-family);font-size:16px;font-weight:600;line-height:1.4;color:var(--text-primary)}.ds-card-body{margin:0;font-family:var(--font-family);font-size:13px;line-height:1.55;color:var(--text-secondary)}"
+    },
+    {
+      "name": "Etiqueta de origem",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Diz de onde veio o registro: informação para manual, sucesso para importado, alerta para editado.",
+      "html": "<span class=\"ds-badge ds-badge-info\">Manual</span> <span class=\"ds-badge ds-badge-sucesso\">Declaração PDF/DBK</span> <span class=\"ds-badge ds-badge-alerta\">Editado</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-family:var(--font-family);font-size:11px;font-weight:600;line-height:1.5}.ds-badge-info{background:rgba(59,130,246,0.15);color:#60a5fa}.ds-badge-sucesso{background:rgba(16,185,129,0.15);color:#34d399}.ds-badge-alerta{background:rgba(245,158,11,0.15);color:#fbbf24}:root[data-theme=\"light\"] .ds-badge-info{color:#1d4ed8}:root[data-theme=\"light\"] .ds-badge-sucesso{color:#047857}:root[data-theme=\"light\"] .ds-badge-alerta{color:#92400e}"
+    },
+    {
+      "name": "Tabela de valores",
+      "kind": "custom",
+      "refersTo": "table-header",
+      "description": "Cabeçalho preso, zebra a 40% do tom de hover e coluna monetária tabular à direita.",
+      "html": "<div class=\"ds-table-container\"><table class=\"ds-table\"><thead><tr><th>Descrição</th><th class=\"ds-num\">Situação em 31/12</th></tr></thead><tbody><tr><td>Apartamento 101</td><td class=\"ds-num\">R$ 320.000,00</td></tr><tr><td>Veículo Gol 2019</td><td class=\"ds-num\">R$ 41.500,00</td></tr><tr><td>Conta corrente 1234</td><td class=\"ds-num\">R$ 8.230,45</td></tr></tbody></table></div>",
+      "css": ".ds-table-container{border:1px solid var(--border-color);border-radius:var(--radius-md,10px);overflow:auto}.ds-table{width:100%;border-collapse:collapse;font-family:var(--font-family);font-size:13px}.ds-table thead th{position:sticky;top:0;background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;text-align:left;padding:12px 16px;border-bottom:1px solid var(--border-color)}.ds-table tbody td{padding:12px 16px;border-bottom:1px solid var(--border-color);color:var(--text-primary);background:var(--bg-card)}.ds-table tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--bg-card-hover) 40%,var(--bg-card))}.ds-table tbody tr:hover td{background:var(--bg-card-hover)}.ds-table tbody tr:last-child td{border-bottom:none}.ds-table .ds-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-feature-settings:\"tnum\",\"ss01\"}"
+    },
+    {
+      "name": "Estado vazio",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Título factual, uma frase de contexto e no máximo uma ação. Sem ilustração e sem emoji.",
+      "html": "<div class=\"ds-empty\"><h3>Nenhum bem neste recorte</h3><p>Cadastre um bem ou importe a declaração do ano anterior para começar o acompanhamento.</p><button class=\"ds-btn ds-btn-primary\">Cadastrar bem</button></div>",
+      "css": ".ds-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;min-height:180px;padding:32px 20px;color:var(--text-secondary);font-family:var(--font-family)}.ds-empty h3{margin:0;font-size:16px;font-weight:600;line-height:1.4;color:var(--text-primary)}.ds-empty p{margin:0;max-width:520px;font-size:13px;line-height:1.55}.ds-empty .ds-btn{margin-top:8px}"
+    },
+    {
+      "name": "Aviso temporário",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Canto inferior direito, quatro segundos, cor funcional a 90% com texto branco.",
+      "html": "<div class=\"ds-toast ds-toast-sucesso\">Bem cadastrado com sucesso.</div>",
+      "css": ".ds-toast{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:var(--radius-md,10px);font-family:var(--font-family);font-size:13px;font-weight:500;color:#fff;box-shadow:var(--shadow-lg)}.ds-toast-sucesso{background:rgba(16,185,129,0.9)}.ds-toast-erro{background:rgba(239,68,68,0.9)}.ds-toast-info{background:rgba(59,130,246,0.9)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Sala de Conferência",
+    "overview": "O CP-TEC é o lugar onde uma consultora senta com o patrimônio de um cliente e confere, linha a linha, se a conta fecha. A sala é silenciosa de propósito: ninguém disputa atenção com o número. A interface é calma, clara e confiável, três palavras que resolvem qualquer dúvida de decisão futura. A densidade é alta e assumida, e o que organiza essa densidade é tipografia e espaçamento, nunca cor decorativa nem moldura. O app nasce em tema escuro e troca para claro a qualquer momento; os dois temas são o mesmo sistema e nenhum é o principal.",
+    "keyCharacteristics": [
+      "Acento contido: o navy da marca é a única cor de interação, em poucos pontos por tela.",
+      "Número antes de tudo: algarismos tabulares, alinhamento à direita, comparação fácil entre linhas.",
+      "Dois temas no mesmo nível, mais uma terceira leitura para impressão em A4.",
+      "Superfície plana em repouso; sombra só quando o elemento reage ou flutua.",
+      "Sem emoji, sem travessão, sem ornamento: o texto de interface é direto."
+    ],
+    "rules": [
+      {
+        "name": "A Regra do Acento Escasso",
+        "body": "O navy aparece em no máximo três pontos por tela. Se um quarto elemento pede acento, ele não é importante o bastante.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Par",
+        "body": "Todo token de cor existe nos dois temas. Uma cor que só funciona no escuro é um defeito, não um estilo.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Significado",
+        "body": "Cor funcional só entra quando o usuário precisa distinguir ganho, perda, alerta, informação ou categoria.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Algarismo Alinhado",
+        "body": "Todo número comparável usa algarismos tabulares. Uma coluna de valores tem que poder ser lida na vertical.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Maiúscula com Trilho",
+        "body": "Texto em maiúsculas nunca vai sem espaçamento entre letras, e o espaçamento acompanha o papel: 0.4px na tabela, 0.5px no campo, 1.2px na seção.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra dos Quatro Pesos",
+        "body": "Só existem 400, 500, 600 e 700, porque só essas faces são empacotadas.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Passo de Quatro",
+        "body": "Qualquer medida nova nasce múltipla de 4. Meio-passo só dentro de controle, nunca entre blocos.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra da Sombra Reativa",
+        "body": "Superfície parada não tem sombra. Se um elemento ganhou sombra sem ter reagido nem flutuado, a sombra está decorando.",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra dos Quatro Raios",
+        "body": "Um valor de raio novo precisa substituir um dos quatro, não se somar a eles.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do usar o acento em no máximo três pontos por tela e deixar o número ser o mais forte.",
+      "Do declarar toda cor nova nos dois temas, com a variante legível de texto em cada um.",
+      "Do aplicar algarismos tabulares em qualquer valor que entre numa coluna ou numa comparação.",
+      "Do manter maiúsculas sempre com espaçamento entre letras (0.4px, 0.5px ou 1.2px, conforme o papel).",
+      "Do reservar a sombra para o que reage ou flutua, e usar preto no tema escuro e navy no claro.",
+      "Do escrever medidas múltiplas de 4, deixando 6, 10, 14 e 18 só para o interior de controles.",
+      "Do dar a toda ação destrutiva o vermelho fechado #dc2626 e um diálogo de confirmação com foco inicial em Confirmar."
+    ],
+    "donts": [
+      "Don't usar dourado, laranja vibrante ou qualquer acento quente.",
+      "Don't usar emoji decorativo. As exceções que já existem são o fechar e as setas.",
+      "Don't usar travessão em texto de interface, seja rótulo, aviso, log ou confirmação.",
+      "Don't introduzir uma segunda família tipográfica, um quinto raio ou uma cor de marca além do navy e da ardósia.",
+      "Don't pedir peso 800 ou itálico: essas faces não são empacotadas e o navegador improvisa.",
+      "Don't espalhar gradiente: ele pertence ao logo, ao avatar e ao botão primário, e a mais nada.",
+      "Don't escrever cor em hexadecimal solto no componente quando existe token."
+    ]
+  }
+}
