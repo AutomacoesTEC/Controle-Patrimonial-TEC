@@ -14,9 +14,10 @@
 - O rodapé que repetia a informação de armazenamento local foi retirado da
   tela de entrada, conforme a revisão visual. A persistência, o isolamento de
   perfis e todas as ações do lançador permanecem iguais.
-- A lista estática de funcionalidades da vitrine virou uma sequência vertical
-  de conferência: um marcador percorre as três etapas reais do CP-TEC e o
-  texto da etapa correspondente ganha contraste.
+- A lista estática de funcionalidades da vitrine virou uma sequência
+  horizontal de conferência: um marcador percorre da esquerda para a direita
+  as três etapas reais do CP-TEC e o texto da etapa correspondente ganha
+  contraste.
 - As três etapas continuam visíveis no DOM e na ordem semântica. O movimento
   usa somente CSS, pausa ao apontar a vitrine e é desativado para
   `prefers-reduced-motion`. Não foi introduzido efeito 3D ou dependência nova.
@@ -25,8 +26,8 @@
 
 - Visual QA no app renderizado com Playwright/CUA em **1513x912**, tema claro e
   escuro: rodapé ausente, ciclo completo visível, trilho e marcador alinhados.
-- A progressão temporal foi observada em execução; o marcador e o realce
-  tipográfico ficaram sincronizados nas etapas 1, 2 e 3.
+- A progressão temporal horizontal foi observada em execução; o marcador e o
+  realce tipográfico ficaram sincronizados nas etapas 1, 2 e 3.
 - Em **1000x800** e **390x844**, a vitrine recolheu conforme o breakpoint já
   existente, a coluna ocupou a janela e `documentElement.scrollWidth` ficou
   igual à largura do viewport.

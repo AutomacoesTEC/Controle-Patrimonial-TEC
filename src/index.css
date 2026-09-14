@@ -1054,13 +1054,15 @@ button,input,select,textarea{font-family:var(--font-family);}
 .entrada-vitrine{display:flex;flex-direction:column;justify-content:space-between;padding:44px clamp(40px,5vw,80px);background:#283453;color:#fff;overflow-y:auto;}
 .entrada-vitrine-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin:0;flex-shrink:0;}
 .entrada-vitrine-miolo{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;min-height:0;}
-/* O ciclo é a única peça em movimento da entrada: o marcador percorre um
-   trilho vertical como uma conferência que avança linha a linha. As três
-   etapas ficam sempre no DOM e na leitura; a animação só organiza o foco. */
-.entrada-ciclo{--entrada-ciclo-passo:46px;position:relative;list-style:none;margin:0;padding:0 0 0 30px;flex-shrink:0;}
-.entrada-ciclo::before{content:"";position:absolute;top:14px;bottom:14px;left:4px;width:1px;background:rgba(255,255,255,0.22);}
-.entrada-ciclo::after{content:"";position:absolute;top:8px;left:0;width:9px;height:30px;border-radius:var(--radius-sm);background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,0.1);transform:translate3d(0,0,0);animation:entrada-ciclo-indicador 12s linear infinite;}
-.entrada-ciclo li{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:baseline;min-height:var(--entrada-ciclo-passo);padding:13px 0;border-top:1px solid rgba(255,255,255,0.16);font-size:13px;line-height:1.4;color:rgba(255,255,255,0.68);animation:entrada-ciclo-foco 12s var(--ease-snappy) infinite;}
+/* O ciclo é a única peça em movimento da entrada: o marcador percorre uma
+   faixa horizontal, como uma conferência que avança da origem ao fechamento.
+   As três etapas ficam lado a lado, sempre no DOM e na leitura; a animação
+   só organiza o foco. */
+.entrada-ciclo{--entrada-ciclo-passo:calc(100% / 3);position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 20px;list-style:none;margin:0;padding:32px 0 0;flex-shrink:0;}
+.entrada-ciclo::before{content:"";position:absolute;top:8px;left:0;right:0;width:auto;height:1px;background:rgba(255,255,255,0.22);}
+.entrada-ciclo::after{content:"";position:absolute;top:4px;left:0;width:var(--entrada-ciclo-passo);height:9px;border-radius:var(--radius-sm);background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,0.1);transform:translate3d(0,0,0);animation:entrada-ciclo-indicador 12s linear infinite;}
+.entrada-ciclo li{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:72px;padding:0;font-size:13px;line-height:1.4;color:rgba(255,255,255,0.68);animation:entrada-ciclo-foco 12s var(--ease-snappy) infinite;}
+.entrada-ciclo li + li{border-left:1px solid rgba(255,255,255,0.16);padding-left:20px;}
 .entrada-ciclo li:nth-child(2){animation-delay:-8s;}
 .entrada-ciclo li:nth-child(3){animation-delay:-4s;}
 .entrada-ciclo li span{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.45);font-variant-numeric:tabular-nums;}
@@ -1071,7 +1073,7 @@ button,input,select,textarea{font-family:var(--font-family);}
 .entrada-vitrine-regua span + span{margin-top:5px;height:2px;width:56px;background:rgba(255,255,255,0.5);}
 .entrada-vitrine p{font-size:16px;line-height:1.65;color:rgba(255,255,255,0.74);margin:0;max-width:44ch;}
 @keyframes entrada-ciclo-foco{0%,20%{color:rgba(255,255,255,0.98)}27%,100%{color:rgba(255,255,255,0.68)}}
-@keyframes entrada-ciclo-indicador{0%,26%{transform:translate3d(0,0,0)}33%,59%{transform:translate3d(0,var(--entrada-ciclo-passo),0)}66%,92%{transform:translate3d(0,calc(var(--entrada-ciclo-passo) * 2),0)}99%,100%{transform:translate3d(0,0,0)}}
+@keyframes entrada-ciclo-indicador{0%,26%{transform:translate3d(0,0,0)}33%,59%{transform:translate3d(100%,0,0)}66%,92%{transform:translate3d(200%,0,0)}99%,100%{transform:translate3d(0,0,0)}}
 .entrada-ciclo:hover::after,.entrada-ciclo:hover li,.entrada-ciclo:focus-within::after,.entrada-ciclo:focus-within li{animation-play-state:paused;}
 @media (prefers-reduced-motion:reduce){
   .entrada-ciclo::after{animation:none;transform:translate3d(0,0,0);}

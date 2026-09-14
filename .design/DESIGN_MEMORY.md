@@ -71,14 +71,14 @@ trilha de evidência e decisões explícitas.
   foram alterados.
 - A vitrine mantém o ciclo real do CP-TEC em três etapas: importar a declaração,
   registrar os movimentos do ano e fechar 31/12. A lista permanece completa e
-  legível, com um trilho vertical que desloca um único marcador entre as linhas.
+  legível, com uma faixa horizontal que desloca um único marcador entre as etapas.
 - O movimento é uma assinatura de produto, não uma decoração 3D: ele traduz a
   conferência linha a linha e não cria perspectiva, brilho ou dependência de
   biblioteca. A linha ativa ganha contraste, o trilho pausa ao ser apontado e a
   preferência de redução de movimento deixa a sequência estática.
 - A animação usa somente transform e cor, sem alterar dimensões ou fluxo do
-  layout. As três etapas seguem no DOM e na ordem semântica para teclado e
-  leitor de tela.
+  layout. As três etapas seguem lado a lado no DOM e na ordem semântica para
+  teclado e leitor de tela.
 
 ## Evitar
 
