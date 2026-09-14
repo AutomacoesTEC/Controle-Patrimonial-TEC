@@ -455,8 +455,8 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       <div className="entrada-conteudo">
         <div className="launcher-shell">
           <div className="entrada-marca">
-            <div className="entrada-marca-simbolo">CP</div>
-            <div className="entrada-marca-nome">CP-TEC<span>Controle Patrimonial</span></div>
+            <img src="./cp-tec.png" alt="" width="34" height="34" />
+            <div className="entrada-marca-nome">Controle Patrimonial<span>TEC Tributos</span></div>
           </div>
           <div className="launcher-heading">
             <h1 className="entrada-titulo">Selecione um perfil</h1>
@@ -464,21 +464,24 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
           </div>
 
           {perfis.length > 0 && (
-            <div style={{ display: 'grid', gap: '12px', marginBottom: formOpen ? '24px' : '0' }}>
+            <div className="entrada-perfis" style={{ marginBottom: formOpen ? '24px' : '20px' }}>
               {perfis.map(p => (
-                <div key={p.id} className="perfil-card" onClick={() => onSelecionarPerfil(p)}>
+                <div key={p.id} className="entrada-perfil">
                   <div className="perfil-avatar">{iniciaisNome(p.nome)}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '15px', fontWeight: 700 }}>{p.nome || 'Sem nome'}</span>
+                  <div className="entrada-perfil-corpo">
+                    {/* O nome é o botão de entrar. A linha inteira não é mais
+                        clicável: dentro dela existem outros botões, e um bloco
+                        clicável com botões dentro confunde teclado e leitor. */}
+                    <button type="button" className="entrada-perfil-nome" onClick={() => onSelecionarPerfil(p)}>
+                      <span>{p.nome || 'Sem nome'}</span>
                       {p.apelido && <span className="perfil-apelido-badge">{p.apelido}</span>}
                       {p.protegido && <span title="Protegido por senha" style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><LockIcon /></span>}
-                    </div>
+                    </button>
                     {/* Perfil protegido não guarda o CPF completo fora do
                         envelope cifrado (ver protegerPerfil em perfis.js,
                         achado 21): o card mostra só os três últimos dígitos,
                         que bastam para desempatar homônimos. */}
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                    <div className="entrada-perfil-doc">
                       {p.cpf
                         ? formatCpfCnpj(p.cpf)
                         : p.cpfFinal
@@ -500,9 +503,9 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                         {senhaErro && <p style={{ color: 'var(--accent-danger)', fontSize: '11px', marginTop: '4px' }}>{senhaErro}</p>}
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap' }}>
+                      <div className="entrada-perfil-acoes">
                         <button className="perfil-link-btn" onClick={e => iniciarEdicaoApelido(e, p)}>
-                          {p.apelido ? 'Editar apelido' : '+ Apelido'}
+                          {p.apelido ? 'Editar apelido' : 'Apelido'}
                         </button>
                         {!p.protegido && (
                           <button className="perfil-link-btn" onClick={e => iniciarProtecao(e, p)}>Proteger com senha</button>
@@ -515,17 +518,12 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                         >
                           {exportandoId === p.id ? 'Gerando backup...' : 'Exportar backup'}
                         </button>
+                        <button className="perfil-link-btn perfil-link-btn-perigo" onClick={e => handleExcluirPerfil(e, p)}>Excluir</button>
                       </div>
                     )}
                   </div>
-                  <button className="perfil-link-btn perfil-link-btn-perigo" onClick={e => handleExcluirPerfil(e, p)}>Excluir</button>
                 </div>
               ))}
-              {!formOpen && (
-                <button className="perfil-add-card" onClick={() => { setForm(FORM_VAZIO); limparDeclaracaoImportada(); setFormOpen(true); }}>
-                  ＋ Novo Perfil
-                </button>
-              )}
             </div>
           )}
 
@@ -548,15 +546,18 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
               {avisoBackup.texto}
             </p>
           )}
+          {/* Uma ação de peso (cadastrar) e uma de texto (restaurar), lado a
+              lado. Antes eram dois blocos do tamanho da lista de perfis. */}
           {!restauracao && (
-            <div className="launcher-restore-wrap">
-              <button className="launcher-restore-action" type="button" onClick={handleAbrirSeletorBackup}>
-                <span className="launcher-action-icon"><RestoreIcon /></span>
-                <span className="launcher-action-copy">
-                  <strong>Já usou o CP-TEC?</strong>
-                  <small>Restaure aqui um perfil salvo anteriormente</small>
-                </span>
-                <span className="launcher-action-arrow" aria-hidden="true">›</span>
+            <div className="entrada-acoes">
+              {!formOpen && (
+                <button type="button" className="btn btn-secondary" onClick={() => { setForm(FORM_VAZIO); limparDeclaracaoImportada(); setFormOpen(true); }}>
+                  Cadastrar novo titular
+                </button>
+              )}
+              <button className="entrada-link" type="button" onClick={handleAbrirSeletorBackup}>
+                <RestoreIcon />
+                Restaurar um perfil salvo
               </button>
             </div>
           )}
@@ -715,14 +716,13 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
       </div>
       </main>
       <aside className="entrada-vitrine">
-        <p className="entrada-vitrine-eyebrow">TEC Tributos</p>
+        <p className="entrada-vitrine-eyebrow">CP-TEC</p>
         <h2>O patrimônio do seu cliente, ano após ano.</h2>
         <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
         <p>
           Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
           e feche 31/12 com a posição pronta para a próxima declaração.
         </p>
-        <p className="entrada-vitrine-rodape">Uso interno da consultoria</p>
       </aside>
       </div>
       {previsualizacao && (

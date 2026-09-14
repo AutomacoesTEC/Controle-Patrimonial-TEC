@@ -89,14 +89,13 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
           </div>
         </main>
         <aside className="entrada-vitrine">
-          <p className="entrada-vitrine-eyebrow">TEC Tributos</p>
+          <p className="entrada-vitrine-eyebrow">CP-TEC</p>
           <h2>O patrimônio do seu cliente, ano após ano.</h2>
           <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
           <p>
             Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
             e feche 31/12 com a posição pronta para a próxima declaração.
           </p>
-          <p className="entrada-vitrine-rodape">Uso interno da consultoria</p>
         </aside>
       </div>
     </div>
