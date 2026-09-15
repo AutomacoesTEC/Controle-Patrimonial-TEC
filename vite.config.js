@@ -25,6 +25,7 @@ export default defineConfig({
       ...configDefaults.exclude,
       'src/irpf/dumpParsePdf.audit.test.js',
       'src/irpf/dumpRowsPdfjs.audit.test.js',
+      'e2e/**', // suíte do Playwright, roda via "npm run test:e2e", não vitest
     ],
   },
 })
