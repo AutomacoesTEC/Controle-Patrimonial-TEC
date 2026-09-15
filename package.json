@@ -15,6 +15,7 @@
     "lint:fix": "biome check --write .",
     "lint:changed": "biome check --changed --no-errors-on-unmatched .",
     "lint:staged": "biome check --staged --no-errors-on-unmatched .",
+    "deadcode": "knip",
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "cross-env": "^10.1.0",
     "dependency-cruiser": "^18.3.1",
     "jsdom": "^25.0.1",
+    "knip": "^6.35.1",
     "simple-git-hooks": "^2.14.0",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
@@ -41,6 +43,6 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npm run lint:staged",
-    "commit-msg": "npx --no-install commitlint --edit $1"
+    "commit-msg": "npx --no-install commitlint --edit \"$1\""
   }
 }

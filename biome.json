@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "defaultBranch": "main" },
   "files": {
-    "includes": ["src/**", "*.json", "!src/pages/__fixtures__/**", "!src/store/__fixtures__/**"]
+    "includes": ["src/**", "*.json", "!src/pages/__fixtures__", "!src/store/__fixtures__"]
   },
   "formatter": {
     "enabled": true,
@@ -21,7 +21,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "off",
         "noArrayIndexKey": "off"
@@ -30,7 +30,7 @@
         "useExhaustiveDependencies": "warn"
       },
       "a11y": {
-        "recommended": true
+        "preset": "recommended"
       },
       "style": {
         "useImportType": "off",
