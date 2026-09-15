@@ -754,7 +754,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         <ol className="entrada-ciclo" aria-label="Ciclo de trabalho do CP-TEC">
           <li>Sua declaração como ponto de partida</li>
           <li>Controle simples e intuitivo</li>
-          <li>Feche o ano com tudo pronto. Sem sustos.</li>
+          <li>Feche o ano com tudo pronto, sem sustos.</li>
         </ol>
       </aside>
       </div>

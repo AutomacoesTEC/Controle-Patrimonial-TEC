@@ -105,10 +105,10 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
               para declarar.
             </p>
           </div>
-          <ol className="entrada-ciclo">
-            <li><span>01</span>Sua declaração como ponto de partida</li>
-            <li><span>02</span>Controle simples e intuitivo</li>
-            <li><span>03</span>Feche o ano com tudo pronto. Sem sustos.</li>
+          <ol className="entrada-ciclo" aria-label="Ciclo de trabalho do CP-TEC">
+            <li>Sua declaração como ponto de partida</li>
+            <li>Controle simples e intuitivo</li>
+            <li>Feche o ano com tudo pronto, sem sustos.</li>
           </ol>
         </aside>
       </div>

@@ -88,3 +88,7 @@ reports/mutation/
 # Configuração de desenvolvimento local desta worktree (libera o caminho real do
 # node_modules para o Vite servir a fonte Inter).
 vite.live.config.mjs
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+# Playwright CLI: escolha de navegador local, não é config do projeto
+.playwright/
