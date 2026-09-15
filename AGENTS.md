@@ -56,6 +56,16 @@ Para mudanças no código, execute os comandos pertinentes na raiz deste reposit
 
 Use o ambiente compatível existente. Se Windows/WSL ou dependências impedirem a execução, diagnostique e use uma cópia temporária isolada quando apropriado, preservando o checkout e configurando explicitamente os caminhos das fixtures. Não reinstale dependências nem altere dados apenas para mascarar um erro de ambiente.
 
+## Ferramentas de qualidade
+
+- `npm run arch:check` — dependency-cruiser, contrato de arquitetura (`.dependency-cruiser.cjs`): `store`/`irpf` sem React fora de `DataContext.jsx`, páginas não se importam entre si, `components` não sobe para `pages`, sem dependência circular. Zero violações é o estado esperado; uma nova sempre indica desenho errado, não regra a ajustar.
+- `npm run lint` — Biome (`biome.json`), linter + formatter. Tem débito pré-existente conhecido (a11y principalmente: label sem `for`/`htmlFor`, botão sem `type`, svg sem título — rode `npm run lint` para o relatório completo). O pre-commit hook roda só nos arquivos staged (`lint:staged`); o CI roda só no diff do PR (`lint:changed`) — nenhum dos dois trava por causa do débito antigo, só por regressão nova. Não rode `lint:fix` no repositório inteiro sem decisão explícita: reformataria ~180 arquivos de uma vez.
+- `npm run deadcode` — Knip, arquivo/export/dependência sem uso (`knip.json` já filtra os falso-positivos conhecidos: `@fontsource/inter` via `@import` CSS, `dot` como binário de sistema).
+- `npm run test:e2e` — Playwright (`playwright.config.js`, testes em `e2e/`), roda contra `npm run preview` (interface web pura; `DataContext.jsx` cai para `localStorage` sozinho sem `window.pywebview`).
+- `npm run test:coverage` — cobertura via `@vitest/coverage-v8`, gera `coverage/lcov.info` (sobe pro Codecov no CI quando `CODECOV_TOKEN` existir).
+- `npm run test:mutation` — Stryker (`stryker.config.mjs`), escopado em `store`/`irpf`/`utils` (lógica pura, não JSX de página). Rotina periódica de custo real, não gate de commit nem de PR — não rode sem avisar que vai demorar.
+- Commits passam por `commitlint` (`commitlint.config.cjs`) via hook `commit-msg` (`simple-git-hooks`): mensagem com pelo menos 10 caracteres, sem ponto final, corpo com linha em branco antes do texto. Não segue Conventional Commits em inglês — o parser trata a linha inteira como `subject`, para bater com o estilo descritivo em português já usado neste histórico.
+
 ## Conclusão e limites
 
 Para tarefas de implementação, prossiga pela implementação, validação pertinente e correção das falhas introduzidas pela alteração. Os checks locais descritos aqui não exigem confirmação a cada etapa. Encerre quando o comportamento solicitado funcionar e os checks relevantes passarem, ou quando houver um bloqueio que exija decisão do usuário; não faça ciclos adicionais sem motivo novo.
