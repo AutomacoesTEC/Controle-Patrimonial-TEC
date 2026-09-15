@@ -744,15 +744,17 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
         <div className="entrada-vitrine-miolo">
           <h2>O patrimônio do seu cliente, ano após ano.</h2>
           <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+          <p>Patrimônio atualizado o ano inteiro. Sem surpresas na hora de declarar.</p>
           <p>
-            Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
-            e feche 31/12 com a posição pronta para a próxima declaração.
+            Mantenha sua posição patrimonial atualizada ao longo do ano, registre compras,
+            vendas e baixas e chegue a 31/12 com tudo consolidado, sem surpresas e pronto
+            para declarar.
           </p>
         </div>
         <ol className="entrada-ciclo" aria-label="Ciclo de trabalho do CP-TEC">
-          <li>Importar a declaração já entregue</li>
-          <li>Registrar compra, venda, baixa e benfeitoria</li>
-          <li>Fechar 31/12 e virar para o ano seguinte</li>
+          <li>Sua declaração como ponto de partida</li>
+          <li>Controle simples e intuitivo</li>
+          <li>Feche o ano com tudo pronto. Sem sustos.</li>
         </ol>
       </aside>
       </div>

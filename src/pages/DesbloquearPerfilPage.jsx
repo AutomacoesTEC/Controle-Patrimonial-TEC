@@ -98,15 +98,17 @@ export default function DesbloquearPerfilPage({ perfil, theme, onToggleTheme, on
           <div className="entrada-vitrine-miolo">
             <h2>O patrimônio do seu cliente, ano após ano.</h2>
             <div className="entrada-vitrine-regua" aria-hidden="true"><span /><span /></div>
+            <p>Patrimônio atualizado o ano inteiro. Sem surpresas na hora de declarar.</p>
             <p>
-              Importe a declaração entregue, registre compra, venda e baixa ao longo do ano
-              e feche 31/12 com a posição pronta para a próxima declaração.
+              Mantenha sua posição patrimonial atualizada ao longo do ano, registre compras,
+              vendas e baixas e chegue a 31/12 com tudo consolidado, sem surpresas e pronto
+              para declarar.
             </p>
           </div>
           <ol className="entrada-ciclo">
-            <li><span>01</span>Importar a declaração já entregue</li>
-            <li><span>02</span>Registrar compra, venda, baixa e benfeitoria</li>
-            <li><span>03</span>Fechar 31/12 e virar para o ano seguinte</li>
+            <li><span>01</span>Sua declaração como ponto de partida</li>
+            <li><span>02</span>Controle simples e intuitivo</li>
+            <li><span>03</span>Feche o ano com tudo pronto. Sem sustos.</li>
           </ol>
         </aside>
       </div>
