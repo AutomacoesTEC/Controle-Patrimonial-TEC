@@ -51,7 +51,6 @@ jobs:
       - run: npm ci
       - run: npm run test:coverage
       - name: Cobertura (Codecov)
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
