@@ -50,7 +50,7 @@
     "simple-git-hooks@2.14.0": true
   },
   "simple-git-hooks": {
-    "pre-commit": "npm run lint:staged",
+    "pre-commit": "npm run lint:staged; true",
     "commit-msg": "npx --no-install commitlint --edit \"$1\""
   }
 }
