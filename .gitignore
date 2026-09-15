@@ -69,6 +69,7 @@ __pycache__/
 .impeccable/live/roots.json
 .impeccable/live/inject-journal.json
 .impeccable/live/server.json
+.impeccable/hook.cache.json
 
 # Saída do MCP do Playwright (instantâneos e log de console de sessão de teste)
 .playwright-mcp/
