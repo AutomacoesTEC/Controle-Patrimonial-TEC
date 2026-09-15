@@ -59,6 +59,13 @@ output/pdf/*.microsoft-print-image-only-*.pdf
 # de alguém copiá-lo para dentro por engano.
 *.local.json
 
+# Variáveis de ambiente locais (ex.: VITE_SENTRY_DSN para o build desktop no
+# Windows, que não passa pelo GitHub Actions). Nunca existiu regra pra isso -
+# um "git add -A" descuidado commitaria segredo real. .env.example fica.
+.env
+.env.*
+!.env.example
+
 # Cache do Python do backend desktop
 __pycache__/
 
