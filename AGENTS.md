@@ -13,6 +13,30 @@ Preserve alterações preexistentes e arquivos não versionados. Em operações 
 
 Instruções em `node_modules` pertencem às bibliotecas. Não promova suas habilidades a regras gerais do aplicativo nem edite dependências instaladas para ajustar o comportamento dos agentes. Uma atualização de dependência deve ser explícita, reproduzível e validada pelo fluxo do projeto.
 
+## Fluxo de trabalho: Issues e Pull Requests
+
+Repositório: `github.com/AutomacoesTEC/Controle-Patrimonial-TEC` (privado). Esta
+convenção vale para qualquer agente, de qualquer modelo, que trabalhe neste
+repositório — não é específica de uma ferramenta.
+
+Toda tarefa de correção, melhoria ou nova função tem uma Issue no GitHub antes
+do código, com o tipo no título (`bug:`, `melhoria:` ou `feat:`) e contexto
+suficiente para alguém sem acesso à conversa original entender o que motivou o
+pedido e como confirmar que foi resolvido. Uma tarefa descoberta no meio de
+outro trabalho (ex.: um bug achado ao implementar uma feature) também abre sua
+própria Issue — não vira item oculto dentro de um PR alheio.
+
+O código segue em branch e Pull Request; nada é commitado direto em `main`. A
+descrição do PR sempre referencia a Issue correspondente — `Closes #N` quando o
+merge resolve a Issue, `Refs #N` quando é trabalho parcial ou relacionado sem
+fechá-la. Um PR sem Issue associada só se justifica para mudança mecânica
+trivial (typo, formatação) que não caberia como tarefa rastreável por si só.
+
+PRs são o mecanismo de deploy: a integração em `main` é o que efetivamente
+libera a mudança. Cada PR descreve o que muda, como foi testado e o resultado
+mensurável esperado, na mesma linha do que a auto-avaliação de conclusão já
+pede em "Conclusão e limites".
+
 ## Dados e critérios de evidência
 
 Ao lidar com dados do usuário, preserve entradas PDF/DBK/TXT, lançamentos manuais, histórico e arquivos de trabalho. Não regrave declarações originais nem transmita dados para serviços externos por iniciativa própria. Use dados sintéticos quando cobrirem o caso; se um teste precisar ler dados reais, verifique antes que o conjunto de amostras está autorizado.
