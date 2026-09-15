@@ -117,7 +117,7 @@ export default function DoacoesPage() {
         {aba.comCategoria && <p className="card">Esta ficha é a destinação diretamente na declaração, não uma doação comum durante o ano. O ano-base fiscal do documento é preservado; o Demonstrativo usa a data do pagamento. Para novo cadastro, a data determina o ano-base anterior. Confira o documento em caso de declaração antiga ou em atraso.</p>}
         <div className="tabs" style={{ marginBottom: '20px' }}>
           {Object.entries(ABAS).map(([key, meta]) => (
-            <button key={key} className={`tab ${subView === key ? 'active' : ''}`} onClick={() => setSubView(key)}>{meta.titulo}</button>
+            <button type="button" key={key} className={`tab ${subView === key ? 'active' : ''}`} aria-pressed={subView === key} onClick={() => setSubView(key)}>{meta.titulo}</button>
           ))}
         </div>
 

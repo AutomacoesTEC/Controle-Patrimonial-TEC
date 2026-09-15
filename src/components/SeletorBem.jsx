@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useEffect, useState, useId } from 'react';
 import { filtrarOpcoesBem } from '../utils/formatters';
 
 // Combobox de escolha de bem já cadastrado, para a aba Ganhos de Capital
@@ -23,6 +23,13 @@ export default function SeletorBem({ opcoes = [], value, onChange, placeholder =
   const filtradas = busca == null ? opcoes : filtrarOpcoesBem(opcoes, busca);
   const selecionada = opcoes.find(o => String(o.id) === String(value ?? ''));
   const textoCampo = busca != null ? busca : (selecionada ? selecionada.rotulo : '');
+  const opcaoMarcada = filtradas[marcado];
+  const opcaoMarcadaId = opcaoMarcada ? `${listId}-opcao-${marcado}` : undefined;
+
+  useEffect(() => {
+    if (!aberto || !opcaoMarcadaId) return;
+    document.getElementById(opcaoMarcadaId)?.scrollIntoView({ block: 'nearest' });
+  }, [aberto, opcaoMarcadaId, opcaoMarcada?.id]);
 
   const escolher = (bemId) => {
     onChange(bemId);
@@ -31,12 +38,12 @@ export default function SeletorBem({ opcoes = [], value, onChange, placeholder =
   };
 
   const onKeyDown = (e) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setAberto(true); setMarcado(m => Math.min(m + 1, filtradas.length - 1)); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setAberto(true); setMarcado(m => Math.min(m + 1, Math.max(0, filtradas.length - 1))); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setMarcado(m => Math.max(m - 1, 0)); }
     else if (e.key === 'Enter') {
       e.preventDefault();
       if (aberto && filtradas[marcado]) escolher(filtradas[marcado].id);
-    } else if (e.key === 'Escape') { setAberto(false); setBusca(null); }
+    } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setAberto(false); setBusca(null); }
   };
 
   return (
@@ -46,6 +53,8 @@ export default function SeletorBem({ opcoes = [], value, onChange, placeholder =
         role="combobox"
         aria-expanded={aberto}
         aria-controls={listId}
+        aria-autocomplete="list"
+        aria-activedescendant={aberto ? opcaoMarcadaId : undefined}
         autoComplete="off"
         placeholder={placeholder}
         value={textoCampo}
@@ -62,6 +71,7 @@ export default function SeletorBem({ opcoes = [], value, onChange, placeholder =
           {filtradas.map((o, i) => (
             <li
               key={o.id}
+              id={`${listId}-opcao-${i}`}
               role="option"
               aria-selected={String(o.id) === String(value ?? '')}
               className={`${i === marcado ? 'marcado' : ''} ${String(o.id) === String(value ?? '') ? 'atual' : ''}`}

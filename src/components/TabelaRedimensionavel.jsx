@@ -124,6 +124,18 @@ export default function TabelaRedimensionavel({
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* já solto */ }
     document.body.classList.remove('rdz-arrastando');
   };
+  const ajustarColunaTeclado = (i) => (e) => {
+    if (e.key === 'Home') {
+      e.preventDefault();
+      setLarguras(prev => { const n = prev.slice(); n[i] = iniciaisRef.current[i]; return n; });
+      return;
+    }
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const passo = e.shiftKey ? 50 : 10;
+    const delta = e.key === 'ArrowRight' ? passo : -passo;
+    setLarguras(prev => { const n = prev.slice(); n[i] = Math.max(MIN_COL, n[i] + delta); return n; });
+  };
   const restaurarColuna = (i) => (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -187,34 +199,50 @@ export default function TabelaRedimensionavel({
       {css && <style media="screen">{css}</style>}
       {larguras && alturaCab > 0 && (
         <>
-          <div className="rdz-camada" aria-hidden="true" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
+          <div className="rdz-camada" style={{ height: 0, width: `${larguras.reduce((a, b) => a + b, 0)}px` }}>
             {divisorias.map(({ i, left }) => (
               <div
                 key={i}
                 className="rdz-puxador"
                 style={{ left: `${left}px`, height: `${alturaCab}px` }}
                 title="Arraste para ajustar a largura. Duplo clique volta ao padrão."
+                role="separator"
+                tabIndex={0}
+                aria-orientation="vertical"
+                aria-valuemin={MIN_COL}
+                aria-valuemax={1200}
+                aria-valuenow={larguras[i]}
+                aria-label={`Ajustar largura da coluna ${i + 1}`}
                 onPointerDown={iniciarArraste(i)}
                 onPointerMove={moverArraste}
                 onPointerUp={soltarArraste}
                 onPointerCancel={soltarArraste}
                 onDoubleClick={restaurarColuna(i)}
+                onKeyDown={ajustarColunaTeclado(i)}
               />
             ))}
           </div>
           {divisoriasFixas.length > 0 && (
-            <div className="rdz-camada rdz-camada-fixa" aria-hidden="true" style={{ height: 0 }}>
+            <div className="rdz-camada rdz-camada-fixa" style={{ height: 0 }}>
               {divisoriasFixas.map(({ i, right }) => (
                 <div
                   key={i}
                   className="rdz-puxador rdz-puxador-fixo"
                   style={{ right: `${right}px`, height: `${alturaCab}px` }}
                   title="Arraste para ajustar a largura. Duplo clique volta ao padrão."
+                  role="separator"
+                  tabIndex={0}
+                  aria-orientation="vertical"
+                  aria-valuemin={MIN_COL}
+                  aria-valuemax={1200}
+                  aria-valuenow={larguras[i]}
+                  aria-label={`Ajustar largura da coluna ${i + 1}`}
                   onPointerDown={iniciarArraste(i)}
                   onPointerMove={moverArraste}
                   onPointerUp={soltarArraste}
                   onPointerCancel={soltarArraste}
                   onDoubleClick={restaurarColuna(i)}
+                  onKeyDown={ajustarColunaTeclado(i)}
                 />
               ))}
             </div>

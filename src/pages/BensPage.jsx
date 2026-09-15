@@ -34,6 +34,8 @@ export default function BensPage({ onVoltar } = {}) {
     if (sortField === field) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
     else { setSortField(field); setSortDir('asc'); }
   };
+  const sortAria = field => sortField === field ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
+  const sortMarker = field => sortField === field ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '';
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBem, setEditingBem] = useState(null);
 
@@ -130,9 +132,9 @@ export default function BensPage({ onVoltar } = {}) {
       <div className="page-body animate-in">
         <div className="toolbar">
           <div className="tabs tabs-bens" style={{ marginBottom: 0 }}>
-            <button className={`tab ${grupoFilter === 'all' ? 'active' : ''}`} onClick={() => setGrupoFilter('all')}>Todos</button>
+            <button type="button" className={`tab ${grupoFilter === 'all' ? 'active' : ''}`} aria-pressed={grupoFilter === 'all'} onClick={() => setGrupoFilter('all')}>Todos</button>
             {GRUPOS_BENS.map(g => (
-              <button key={g.codigo} className={`tab ${grupoFilter === g.codigo ? 'active' : ''}`} onClick={() => setGrupoFilter(g.codigo)}>
+              <button type="button" key={g.codigo} className={`tab ${grupoFilter === g.codigo ? 'active' : ''}`} aria-pressed={grupoFilter === g.codigo} onClick={() => setGrupoFilter(g.codigo)}>
                 {g.nome}
               </button>
             ))}
@@ -161,12 +163,12 @@ export default function BensPage({ onVoltar } = {}) {
             <thead>
               <tr>
                 <th>Titularidade</th>
-                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('grupo')}>Grupo{sortField === 'grupo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
-                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('codigo')}>Cód.{sortField === 'codigo' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
-                <th style={{ minWidth: '300px', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('discriminacao')}>Discriminação{sortField === 'discriminacao' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
-                <th style={{ textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('anterior')}>{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Situação anterior'}{sortField === 'anterior' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
-                <th style={{ textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('atual')}>{anoCalendario != null ? `31/12/${anoCalendario}` : 'Situação atual'}{sortField === 'atual' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
-                <th style={{ textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('variacao')}>Variação{sortField === 'variacao' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
+                <th aria-sort={sortAria('grupo')}><button type="button" className="table-sort-button" onClick={() => toggleSort('grupo')} aria-label="Ordenar por grupo">Grupo<span aria-hidden="true">{sortMarker('grupo')}</span></button></th>
+                <th aria-sort={sortAria('codigo')}><button type="button" className="table-sort-button" onClick={() => toggleSort('codigo')} aria-label="Ordenar por código">Cód.<span aria-hidden="true">{sortMarker('codigo')}</span></button></th>
+                <th style={{ minWidth: '300px' }} aria-sort={sortAria('discriminacao')}><button type="button" className="table-sort-button" onClick={() => toggleSort('discriminacao')} aria-label="Ordenar por discriminação">Discriminação<span aria-hidden="true">{sortMarker('discriminacao')}</span></button></th>
+                <th style={{ textAlign: 'right' }} aria-sort={sortAria('anterior')}><button type="button" className="table-sort-button" onClick={() => toggleSort('anterior')} aria-label="Ordenar por situação anterior">{anoCalendario != null ? `31/12/${anoCalendario - 1}` : 'Situação anterior'}<span aria-hidden="true">{sortMarker('anterior')}</span></button></th>
+                <th style={{ textAlign: 'right' }} aria-sort={sortAria('atual')}><button type="button" className="table-sort-button" onClick={() => toggleSort('atual')} aria-label="Ordenar por situação atual">{anoCalendario != null ? `31/12/${anoCalendario}` : 'Situação atual'}<span aria-hidden="true">{sortMarker('atual')}</span></button></th>
+                <th style={{ textAlign: 'right' }} aria-sort={sortAria('variacao')}><button type="button" className="table-sort-button" onClick={() => toggleSort('variacao')} aria-label="Ordenar por variação">Variação<span aria-hidden="true">{sortMarker('variacao')}</span></button></th>
                 <th>Ações</th>
               </tr>
             </thead>

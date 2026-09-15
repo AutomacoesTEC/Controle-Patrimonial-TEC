@@ -62,16 +62,16 @@ export default function AtividadeRuralPage({ abaInicial, onVoltar } = {}) {
       </div>
       <div className="page-body animate-in altura-tabelas-adaptativa">
         <div className="tabs" style={{ marginBottom: '20px' }}>
-          <button className={`tab ${subView === 'imoveis' ? 'active' : ''}`} onClick={() => setSubView('imoveis')}>Imóveis Explorados</button>
-          <button className={`tab ${subView === 'bens' ? 'active' : ''}`} onClick={() => setSubView('bens')}>Bens da Atividade Rural</button>
-          <button className={`tab ${subView === 'dividas' ? 'active' : ''}`} onClick={() => setSubView('dividas')}>Dívidas Vinculadas</button>
-          <button className={`tab ${subView === 'lancamentos' ? 'active' : ''}`} onClick={() => setSubView('lancamentos')}>Receitas e Despesas</button>
-          <button className={`tab ${subView === 'resultado' ? 'active' : ''}`} onClick={() => setSubView('resultado')}>Resultado</button>
+          <button type="button" className={`tab ${subView === 'imoveis' ? 'active' : ''}`} aria-pressed={subView === 'imoveis'} onClick={() => setSubView('imoveis')}>Imóveis Explorados</button>
+          <button type="button" className={`tab ${subView === 'bens' ? 'active' : ''}`} aria-pressed={subView === 'bens'} onClick={() => setSubView('bens')}>Bens da Atividade Rural</button>
+          <button type="button" className={`tab ${subView === 'dividas' ? 'active' : ''}`} aria-pressed={subView === 'dividas'} onClick={() => setSubView('dividas')}>Dívidas Vinculadas</button>
+          <button type="button" className={`tab ${subView === 'lancamentos' ? 'active' : ''}`} aria-pressed={subView === 'lancamentos'} onClick={() => setSubView('lancamentos')}>Receitas e Despesas</button>
+          <button type="button" className={`tab ${subView === 'resultado' ? 'active' : ''}`} aria-pressed={subView === 'resultado'} onClick={() => setSubView('resultado')}>Resultado</button>
           {movimentacaoRebanhoOficial.length > 0 && (
-            <button className={`tab ${subView === 'rebanho' ? 'active' : ''}`} onClick={() => setSubView('rebanho')}>Movimentação do Rebanho</button>
+            <button type="button" className={`tab ${subView === 'rebanho' ? 'active' : ''}`} aria-pressed={subView === 'rebanho'} onClick={() => setSubView('rebanho')}>Movimentação do Rebanho</button>
           )}
           {participantesRuraisOficial.length > 0 && (
-            <button className={`tab ${subView === 'participantes' ? 'active' : ''}`} onClick={() => setSubView('participantes')}>Participantes</button>
+            <button type="button" className={`tab ${subView === 'participantes' ? 'active' : ''}`} aria-pressed={subView === 'participantes'} onClick={() => setSubView('participantes')}>Participantes</button>
           )}
         </div>
 

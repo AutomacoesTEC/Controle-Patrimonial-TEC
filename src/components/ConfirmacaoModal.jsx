@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 // Modal de confirmação próprio, no lugar do confirm() nativo (que aparece como
 // "localhost:4173 diz" e não estiliza). Pedido da usuária em 03/09/2026:
@@ -62,13 +62,19 @@ export default function ConfirmacaoModal({
   textoCancelar = 'Cancelar', perigo = false, onConfirmar, onCancelar,
 }) {
   const confirmarRef = useRef(null);
+  const cancelarRef = useRef(null);
   const caixaRef = useRef(null);
   const focoAnteriorRef = useRef(null);
+  const tituloId = `confirmacao-titulo-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const textoId = `${tituloId}-texto`;
 
   useEffect(() => {
     if (!open) return undefined;
     focoAnteriorRef.current = document.activeElement;
-    confirmarRef.current?.focus();
+    // Em uma ação destrutiva, o foco começa em cancelar: a confirmação
+    // precisa ser uma decisão deliberada, inclusive para quem navega por
+    // teclado. Ações informativas continuam levando ao botão principal.
+    (perigo ? cancelarRef.current : confirmarRef.current)?.focus();
     // Listener em CAPTURA no document: pega a tecla antes do <Modal> de trás.
     const onKey = (e) => tratarTeclaConfirmacao(e, {
       caixa: caixaRef.current,
@@ -88,7 +94,7 @@ export default function ConfirmacaoModal({
         });
       }
     };
-  }, [open, onCancelar, onConfirmar]);
+  }, [open, perigo, onCancelar, onConfirmar]);
 
   if (!open) return null;
 
@@ -99,14 +105,15 @@ export default function ConfirmacaoModal({
         className="confirmacao-caixa"
         role="alertdialog"
         aria-modal="true"
-        aria-label={titulo}
+        aria-labelledby={tituloId}
+        aria-describedby={texto ? textoId : undefined}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
       >
-        <h3 className="confirmacao-titulo">{titulo}</h3>
-        <p className="confirmacao-texto">{texto}</p>
+        <h3 id={tituloId} className="confirmacao-titulo">{titulo}</h3>
+        <p id={textoId} className="confirmacao-texto">{texto}</p>
         <div className="confirmacao-acoes">
-          <button type="button" className="btn btn-secondary" onClick={onCancelar}>{textoCancelar}</button>
+          <button type="button" ref={cancelarRef} className="btn btn-secondary" onClick={onCancelar}>{textoCancelar}</button>
           <button
             type="button"
             ref={confirmarRef}

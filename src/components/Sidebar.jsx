@@ -83,10 +83,13 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
   ])].sort((a, b) => a - b);
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} aria-label="Navegação principal">
       <button
+        type="button"
         className="sidebar-toggle"
         title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+        aria-label={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+        aria-expanded={!collapsed}
         onClick={onToggleCollapsed}
       >
         {collapsed ? '»' : '«'}
@@ -102,18 +105,18 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
           )}
         </div>
         {!collapsed && (
-          <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+          <div className="sidebar-header-actions">
             <button
+              type="button"
               className="btn btn-sm btn-secondary"
-              style={{ flex: 1 }}
               onClick={onTrocarPerfil}
               title="Voltar para a tela de seleção de perfil"
             >
               Trocar Perfil
             </button>
             <button
+              type="button"
               className="btn btn-sm btn-secondary"
-              style={{ flex: 1 }}
               onClick={exportarBackup}
               disabled={exportando}
               title="Salva um arquivo .cptec.json com tudo o que está neste perfil, para guardar como backup ou levar para outro computador"
@@ -133,10 +136,12 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
               <div key={item.id}>
                 {showSection && <div className="nav-section-label">{item.section}</div>}
                 <button
+                  type="button"
                   className={`nav-item ${collapsed ? 'nav-item-icone' : ''} ${activeView === item.id ? 'active' : ''}`}
                   onClick={() => onNavigate(item.id)}
                   title={collapsed ? item.label : undefined}
-                  aria-label={collapsed ? item.label : undefined}
+                  aria-label={item.label}
+                  aria-current={activeView === item.id ? 'page' : undefined}
                 >
                   <NavIcon id={item.id} />
                   {!collapsed && <span className="nav-item-label">{item.label}</span>}
@@ -150,7 +155,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
             type="button"
             className="sidebar-more"
             aria-label="Ver itens abaixo"
-            onClick={() => navRef.current?.scrollTo({ top: navRef.current.scrollHeight, behavior: 'smooth' })}
+            onClick={() => navRef.current?.scrollTo({ top: navRef.current.scrollHeight, behavior: 'auto' })}
           >
             <span className="sidebar-more-label">Ver itens abaixo</span><span aria-hidden="true">↓</span>
           </button>
@@ -161,6 +166,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggleCol
         {!collapsed && (
           <div className="year-selector">
             <select
+              aria-label="Ano-calendário ativo"
               value={state.anoCalendario ?? ''}
               onChange={e => {
                 const valor = e.target.value;

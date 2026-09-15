@@ -156,11 +156,11 @@ export default function RendimentosPage() {
             </div>
 
             <div className="tabs" style={{ marginBottom: '20px' }}>
-              <button className={`tab ${categoriaFilter === 'all' ? 'active' : ''}`} onClick={() => setCategoriaFilter('all')}>Todos</button>
+              <button type="button" className={`tab ${categoriaFilter === 'all' ? 'active' : ''}`} aria-pressed={categoriaFilter === 'all'} onClick={() => setCategoriaFilter('all')}>Todos</button>
               {Object.entries(CATEGORIAS_RENDIMENTO).map(([key, meta]) => {
                 if (porCategoria[key].length === 0) return null;
                 return (
-                  <button key={key} className={`tab ${categoriaFilter === key ? 'active' : ''}`} onClick={() => setCategoriaFilter(key)}>
+                  <button type="button" key={key} className={`tab ${categoriaFilter === key ? 'active' : ''}`} aria-pressed={categoriaFilter === key} onClick={() => setCategoriaFilter(key)}>
                     {meta.label} ({porCategoria[key].length})
                   </button>
                 );

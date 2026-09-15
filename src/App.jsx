@@ -166,8 +166,10 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
     <div className="app-layout">
       <Sidebar activeView={activeView} onNavigate={navegarPelaSidebar} collapsed={sidebarCollapsed || sidebarCompact} onToggleCollapsed={toggleSidebar} onTrocarPerfil={onTrocarPerfil} />
       <button
+        type="button"
         className="theme-toggle-fixed"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+        aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
         onClick={onToggleTheme}
       >
         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
@@ -180,9 +182,14 @@ function AppContent({ theme, onToggleTheme, onTrocarPerfil }) {
       <ClassificacaoImportacaoModal />
       {/* Toasts */}
       {state.toasts.length > 0 && (
-        <div className="toast-container">
+        <div className="toast-container" role="region" aria-label="Avisos do sistema" aria-live="polite">
           {state.toasts.map(t => (
-            <div key={t.id} className={`toast toast-${t.type}${t.closing ? ' closing' : ''}`}>
+            <div
+              key={t.id}
+              className={`toast toast-${t.type}${t.closing ? ' closing' : ''}`}
+              role={t.type === 'error' ? 'alert' : 'status'}
+              aria-live={t.type === 'error' ? 'assertive' : 'polite'}
+            >
               {t.message}
             </div>
           ))}

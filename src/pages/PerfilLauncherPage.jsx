@@ -491,7 +491,7 @@ export default function PerfilLauncherPage({ theme, onToggleTheme, onSelecionarP
                     <button type="button" className="entrada-perfil-nome" onClick={() => onSelecionarPerfil(p)}>
                       <span>{p.nome || 'Sem nome'}</span>
                       {p.apelido && <span className="perfil-apelido-badge">{p.apelido}</span>}
-                      {p.protegido && <span title="Protegido por senha" style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><LockIcon /></span>}
+                      {p.protegido && <span title="Protegido por senha" aria-label="Protegido por senha" style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><LockIcon /></span>}
                     </button>
                     {/* Perfil protegido não guarda o CPF completo fora do
                         envelope cifrado (ver protegerPerfil em perfis.js,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useMarcarModalSujo } from './Modal';
 
 function isoParaTexto(iso) {
@@ -51,7 +51,7 @@ function gradeDoMes(ano, mes) {
 // clique num ponto errado sobrescrevia o valor sem aviso). Continua com a
 // digitação livre dd/mm/aaaa de sempre; o calendário é só um jeito a mais
 // de escolher a data, não substitui o texto.
-function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar }) {
+function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar, id }) {
   const base = valorIso ? new Date(`${valorIso}T00:00:00`) : new Date();
   const [anoView, setAnoView] = useState(base.getFullYear());
   const [mesView, setMesView] = useState(base.getMonth() + 1); // 1-12
@@ -80,14 +80,14 @@ function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar }) {
   const hoje = isoDeYMD(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
 
   return (
-    <div ref={ref} className="date-picker-popup" onClick={e => e.stopPropagation()}>
+    <div ref={ref} id={id} className="date-picker-popup" role="dialog" aria-label="Escolher data" onClick={e => e.stopPropagation()}>
       <div className="date-picker-header">
-        <button type="button" className="date-picker-nav" onClick={() => mudarMes(-1)} title="Mês anterior">‹</button>
+        <button type="button" className="date-picker-nav" onClick={() => mudarMes(-1)} title="Mês anterior" aria-label="Mês anterior">‹</button>
         <span>{MESES[mesView - 1]} {anoView}</span>
-        <button type="button" className="date-picker-nav" onClick={() => mudarMes(1)} title="Próximo mês">›</button>
+        <button type="button" className="date-picker-nav" onClick={() => mudarMes(1)} title="Próximo mês" aria-label="Próximo mês">›</button>
       </div>
       <div className="date-picker-grid date-picker-weekdays">
-        {DIAS_SEMANA.map((d, i) => <span key={i}>{d}</span>)}
+        {DIAS_SEMANA.map((d, i) => <span key={i} aria-hidden="true">{d}</span>)}
       </div>
       <div className="date-picker-grid">
         {gradeDoMes(anoView, mesView).map((dia, i) => {
@@ -100,6 +100,9 @@ function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar }) {
             <button
               key={i} type="button" disabled={desabilitado}
               className={`date-picker-day${selecionado ? ' selected' : ''}${ehHoje && !selecionado ? ' today' : ''}`}
+              aria-label={`${dia} de ${MESES[mesView - 1]} de ${anoView}`}
+              aria-pressed={selecionado}
+              aria-current={ehHoje ? 'date' : undefined}
               onClick={() => onEscolher(iso)}
             >
               {dia}
@@ -117,14 +120,20 @@ function CalendarioPopup({ valorIso, min, max, onEscolher, onFechar }) {
 // ou ano), e um valor fora de posição passava direto sem aviso. Confirma
 // assim que a data digitada fica completa e válida (não precisa de Enter),
 // mas Enter também confirma. Ao perder o foco com algo incompleto ou
-// inválido, volta pro último valor válido em vez de deixar o campo quebrado.
+// inválido, mantém a digitação visível e informa como corrigir, em vez de
+// apagar silenciosamente a tentativa da pessoa.
 // O ícone de calendário abre um seletor visual (CalendarioPopup) como
 // segunda forma de preencher, sem tirar a digitação livre.
-export default function DateInput({ value, onChange, min, max, ariaLabel }) {
+export default function DateInput({ value, onChange, min, max, ariaLabel, id }) {
   const [texto, setTexto] = useState(() => isoParaTexto(value));
   const [invalido, setInvalido] = useState(false);
+  const [mensagemErro, setMensagemErro] = useState('');
   const [calendarioAberto, setCalendarioAberto] = useState(false);
   const marcarModalSujo = useMarcarModalSujo();
+  const autoId = useId();
+  const inputId = id || `data-${autoId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const erroId = `${inputId}-erro`;
+  const calendarioId = `${inputId}-calendario`;
 
   // O campo é o dono da máscara enquanto a pessoa digita; só resincroniza
   // com o valor de fora quando ele muda por outro caminho (ex.: botão
@@ -132,11 +141,29 @@ export default function DateInput({ value, onChange, min, max, ariaLabel }) {
   useEffect(() => {
     setTexto(isoParaTexto(value));
     setInvalido(false);
+    setMensagemErro('');
   }, [value]);
+
+  const mensagemPara = (t) => {
+    if (t.length < 10) return 'Digite a data completa no formato dd/mm/aaaa.';
+    if (min && textoParaIso(t) && textoParaIso(t) < min) return 'A data está antes do período permitido.';
+    if (max && textoParaIso(t) && textoParaIso(t) > max) return 'A data está depois do período permitido.';
+    return 'Digite uma data válida no formato dd/mm/aaaa.';
+  };
+
+  const confirmarComFeedback = (t) => {
+    const ok = tentarConfirmar(t);
+    if (!ok) {
+      setInvalido(true);
+      setMensagemErro(mensagemPara(t));
+    }
+    return ok;
+  };
 
   const tentarConfirmar = (t) => {
     if (t.length === 0) {
       setInvalido(false);
+      setMensagemErro('');
       onChange('');
       return true;
     }
@@ -144,9 +171,11 @@ export default function DateInput({ value, onChange, min, max, ariaLabel }) {
     const iso = textoParaIso(t);
     if (!iso || (min && iso < min) || (max && iso > max)) {
       setInvalido(true);
+      setMensagemErro(mensagemPara(t));
       return false;
     }
     setInvalido(false);
+    setMensagemErro('');
     onChange(iso);
     return true;
   };
@@ -154,29 +183,31 @@ export default function DateInput({ value, onChange, min, max, ariaLabel }) {
   return (
     <div className="date-input">
       <input
+        id={inputId}
         type="text"
         inputMode="numeric"
         aria-label={ariaLabel}
-        aria-invalid={invalido || undefined}
         placeholder="dd/mm/aaaa"
         className={`form-control${invalido ? ' form-control-invalid' : ''}`}
         value={texto}
+        aria-invalid={invalido || undefined}
+        aria-describedby={invalido ? erroId : undefined}
         onChange={e => {
           const novo = formatarMascara(e.target.value);
           setTexto(novo);
           if (novo.length < 10) setInvalido(false);
           tentarConfirmar(novo);
         }}
-        onKeyDown={e => { if (e.key === 'Enter') tentarConfirmar(texto); }}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); confirmarComFeedback(texto); } }}
         onBlur={() => {
           if (!tentarConfirmar(texto)) {
-            setTexto(isoParaTexto(value));
-            setInvalido(false);
+            setInvalido(true);
+            setMensagemErro(mensagemPara(texto));
           }
         }}
       />
       <button
-        type="button" className="date-input-icon" title="Escolher no calendário"
+        type="button" className="date-input-icon" title="Escolher no calendário" aria-label="Escolher no calendário" aria-expanded={calendarioAberto} aria-controls={calendarioId}
         onClick={() => setCalendarioAberto(a => !a)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -188,8 +219,12 @@ export default function DateInput({ value, onChange, min, max, ariaLabel }) {
           valorIso={value || null}
           min={min}
           max={max}
+          id={calendarioId}
           onEscolher={(iso) => {
             onChange(iso);
+            setTexto(isoParaTexto(iso));
+            setInvalido(false);
+            setMensagemErro('');
             setCalendarioAberto(false);
             // Escolher pelo calendário não passa pelo <input> de verdade,
             // então não dispara onChange nativo nenhum — sem isso, o Modal
@@ -207,6 +242,7 @@ export default function DateInput({ value, onChange, min, max, ariaLabel }) {
           onFechar={() => setCalendarioAberto(false)}
         />
       )}
+      {invalido && <p id={erroId} className="date-input-error" role="alert">{mensagemErro}</p>}
     </div>
   );
 }

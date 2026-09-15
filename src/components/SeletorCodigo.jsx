@@ -1,4 +1,4 @@
-import { useState, useRef, useId } from 'react';
+import { useEffect, useState, useId } from 'react';
 import { normalizarBusca } from '../utils/formatters';
 
 // Combobox de código de ficha da declaração: a lista OFICIAL da Receita (a
@@ -31,6 +31,13 @@ export default function SeletorCodigo({ opcoes = [], value, onChange, placeholde
   const textoCampo = busca != null
     ? busca
     : (selecionada ? `${selecionada.codigo} - ${selecionada.nome}` : String(value ?? ''));
+  const opcaoMarcada = filtradas[marcado];
+  const opcaoMarcadaId = opcaoMarcada ? `${listId}-opcao-${marcado}` : undefined;
+
+  useEffect(() => {
+    if (!aberto || !opcaoMarcadaId) return;
+    document.getElementById(opcaoMarcadaId)?.scrollIntoView({ block: 'nearest' });
+  }, [aberto, opcaoMarcadaId, opcaoMarcada?.codigo]);
 
   const escolher = (codigo) => {
     onChange(String(codigo));
@@ -47,13 +54,13 @@ export default function SeletorCodigo({ opcoes = [], value, onChange, placeholde
   };
 
   const onKeyDown = (e) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setAberto(true); setMarcado(m => Math.min(m + 1, filtradas.length - 1)); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setAberto(true); setMarcado(m => Math.min(m + 1, Math.max(0, filtradas.length - 1))); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setMarcado(m => Math.max(m - 1, 0)); }
     else if (e.key === 'Enter') {
       e.preventDefault();
       if (aberto && filtradas[marcado]) escolher(filtradas[marcado].codigo);
       else { confirmarDigitado(); setAberto(false); }
-    } else if (e.key === 'Escape') { setAberto(false); setBusca(null); }
+    } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setAberto(false); setBusca(null); }
   };
 
   return (
@@ -63,6 +70,8 @@ export default function SeletorCodigo({ opcoes = [], value, onChange, placeholde
         role="combobox"
         aria-expanded={aberto}
         aria-controls={listId}
+        aria-autocomplete="list"
+        aria-activedescendant={aberto ? opcaoMarcadaId : undefined}
         autoComplete="off"
         placeholder={placeholder}
         value={textoCampo}
@@ -76,6 +85,7 @@ export default function SeletorCodigo({ opcoes = [], value, onChange, placeholde
           {filtradas.map((o, i) => (
             <li
               key={o.codigo}
+              id={`${listId}-opcao-${i}`}
               role="option"
               aria-selected={String(o.codigo) === String(value ?? '')}
               className={`${i === marcado ? 'marcado' : ''} ${String(o.codigo) === String(value ?? '') ? 'atual' : ''}`}

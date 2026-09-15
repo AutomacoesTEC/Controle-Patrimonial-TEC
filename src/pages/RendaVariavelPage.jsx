@@ -342,8 +342,10 @@ export default function RendaVariavelPage({ onImportar } = {}) {
           <div className="tabs" style={{ marginBottom: '20px' }}>
             {abas.map(a => (
               <button
+                type="button"
                 key={a.id}
                 className={`tab ${abaAtiva === a.id ? 'active' : ''}`}
+                aria-pressed={abaAtiva === a.id}
                 disabled={a.vazia}
                 title={a.vazia ? 'Sem dados nesta ficha' : undefined}
                 onClick={() => !a.vazia && setAba(a.id)}
@@ -359,7 +361,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
           <div className="tabs" style={{ marginBottom: '16px' }}>
             {grupos.map(g => {
               const ativo = (grupos.some(x => x.chave === benComuns) ? benComuns : grupos[0].chave) === g.chave;
-              return <button key={g.chave} className={`tab ${ativo ? 'active' : ''}`} onClick={() => setBenComuns(g.chave)}>{g.nome}</button>;
+              return <button type="button" key={g.chave} className={`tab ${ativo ? 'active' : ''}`} aria-pressed={ativo} onClick={() => setBenComuns(g.chave)}>{g.nome}</button>;
             })}
           </div>
         )}
@@ -507,7 +509,7 @@ export default function RendaVariavelPage({ onImportar } = {}) {
           <div className="tabs" style={{ marginBottom: '16px' }}>
             {gruposFii.map(g => {
               const ativo = (gruposFii.some(x => x.chave === benFii) ? benFii : gruposFii[0].chave) === g.chave;
-              return <button key={g.chave} className={`tab ${ativo ? 'active' : ''}`} onClick={() => setBenFii(g.chave)}>{g.nome}</button>;
+              return <button type="button" key={g.chave} className={`tab ${ativo ? 'active' : ''}`} aria-pressed={ativo} onClick={() => setBenFii(g.chave)}>{g.nome}</button>;
             })}
           </div>
         )}

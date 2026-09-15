@@ -66,15 +66,15 @@ export default function AcompanhamentoPage({ contextoInicial, onVoltar } = {}) {
   const exportar = () => exportListaToXlsx(a.lancamentos.filter(l => l.data >= de && l.data <= ate && (pessoa === 'todos' || a.contas.find(c => c.id === l.contaId)?.pessoa === pessoa || a.contas.find(c => c.id === l.destinoId)?.pessoa === pessoa)), [
     ['ID', l => l.id], ['Data financeira', l => l.data], ['Registrado em', l => l.criadoEm], ['Conta', l => nomeConta(l.contaId)], ['Destino', l => nomeConta(l.destinoId)], ['Tipo', l => l.tipo], ['Descrição', l => l.descricao], ['Contraparte', l => l.contraparte], ['Operação', l => nomeOperacao(l.operacaoId)], ['Valor', l => l.valor / 100], ['Cancelado em', l => l.canceladoEm || ''],
   ], 'Razão financeiro', 'acompanhamento', Number(mes.slice(0, 4)));
-  const botoes = (itens) => <div className="acomp-acoes">{itens.map(([rotulo, fn]) => <button key={rotulo} className="btn btn-sm btn-secondary" onClick={fn}>{rotulo}</button>)}</div>;
+  const botoes = (itens) => <div className="acomp-acoes">{itens.map(([rotulo, fn]) => <button type="button" key={rotulo} className="btn btn-sm btn-secondary" onClick={fn}>{rotulo}</button>)}</div>;
   const contasVisiveis = a.contas.filter(c => pessoa === 'todos' || c.pessoa === pessoa);
   return <>
-    <div className="page-header"><h2>Acompanhamento financeiro</h2><div className="page-header-actions"><button className="btn btn-secondary" onClick={exportar}>Exportar razão .xlsx</button><button className="btn btn-secondary" onClick={() => window.print()}>Imprimir</button></div></div>
+    <div className="page-header"><h2>Acompanhamento financeiro</h2><div className="page-header-actions"><button type="button" className="btn btn-secondary" onClick={exportar}>Exportar razão .xlsx</button><button type="button" className="btn btn-secondary" onClick={() => window.print()}>Imprimir</button></div></div>
     <div className="page-body acomp-page">
-      {onVoltar && <button className="btn btn-secondary" onClick={onVoltar}>Voltar ao Demonstrativo</button>}
+      {onVoltar && <button type="button" className="btn btn-secondary" onClick={onVoltar}>Voltar ao Demonstrativo</button>}
       <p>Caixa registrado por contas e extratos. Não altera a declaração nem substitui a diferença de conciliação fiscal. Contratos e parcelas não são recebimentos.</p>
       <div className="acomp-filtros"><label>Mês de consulta<input className="form-control" type="month" value={mes} onChange={e => { if (/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value) && !e.target.value.startsWith('0000')) setMes(e.target.value); }} /></label><label>Titularidade<select className="form-control" aria-label="Titularidade" value={pessoa} onChange={e => setPessoa(e.target.value)}><option value="todos">Saldo geral</option>{pessoas.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select></label></div>
-      <nav className="acomp-tabs" aria-label="Visões do acompanhamento">{[['caixa', 'Caixa e contas'], ['operacoes', 'Operações e parcelas'], ['conciliacao', 'Conciliação'], ['fechamento', 'Fechamento'], ['economico', 'Patrimônio econômico']].map(([v, t]) => <button key={v} className={`btn ${aba === v ? 'btn-primary' : 'btn-secondary'}`} aria-pressed={aba === v} onClick={() => setAba(v)}>{t}</button>)}</nav>
+      <nav className="acomp-tabs" aria-label="Visões do acompanhamento">{[['caixa', 'Caixa e contas'], ['operacoes', 'Operações e parcelas'], ['conciliacao', 'Conciliação'], ['fechamento', 'Fechamento'], ['economico', 'Patrimônio econômico']].map(([v, t]) => <button type="button" key={v} className={`btn ${aba === v ? 'btn-primary' : 'btn-secondary'}`} aria-pressed={aba === v} onClick={() => setAba(v)}>{t}</button>)}</nav>
       {aba === 'caixa' && <>
         <section className="card acomp-card">
           <h3>Disponibilidade financeira registrada</h3>

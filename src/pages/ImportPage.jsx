@@ -366,21 +366,27 @@ export default function ImportPage() {
             </p>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-          <div
+        <div className="import-zone-grid">
+          <button
+            type="button"
             className={`import-zone ${importType === 'pdf' ? 'active' : ''}`}
+            aria-pressed={importType === 'pdf'}
+            aria-label="Selecionar PDF da declaração para importar"
             onClick={() => { setImportType('pdf'); fileRef.current?.click(); }}
           >
             <h3>Importar PDF da Declaração</h3>
             <p>Arquivo .PDF gerado pelo programa IRPF (imagem da declaração)</p>
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
             className={`import-zone ${importType === 'dbk' ? 'active' : ''}`}
+            aria-pressed={importType === 'dbk'}
+            aria-label="Selecionar arquivo eletrônico para importar"
             onClick={() => { setImportType('dbk'); fileRef.current?.click(); }}
           >
             <h3>Importar Arquivo Eletrônico</h3>
             <p>Arquivo .DEC ou .DBK gerado pelo programa IRPF</p>
-          </div>
+          </button>
         </div>
 
         <input
@@ -405,7 +411,7 @@ export default function ImportPage() {
                 <div style={{
                   height: '100%',
                   width: `${Math.round((progress.current / progress.total) * 100)}%`,
-                  background: 'var(--gradient-primary)',
+                  background: 'var(--accent-primary)',
                   transition: 'width var(--transition-normal)',
                 }} />
               </div>
