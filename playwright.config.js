@@ -18,9 +18,12 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: 'npm run preview -- --port 4173',
+    // --host explícito: sem isso, "vite preview" liga em "localhost", que em
+    // alguns runners de CI resolve para ::1 (IPv6) - o servidor sobe, mas o
+    // healthcheck do Playwright em 127.0.0.1 nunca conecta e estoura os 30s.
+    command: 'npm run preview -- --port 4173 --host 127.0.0.1',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    timeout: 60_000,
   },
 });
