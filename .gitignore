@@ -74,6 +74,10 @@ __pycache__/
 # Saída do MCP do Playwright (instantâneos e log de console de sessão de teste)
 .playwright-mcp/
 
+# Saída do Playwright Test (e2e): relatório HTML, screenshots/traces de falha
+playwright-report/
+test-results/
+
 # Configuração de desenvolvimento local desta worktree (libera o caminho real do
 # node_modules para o Vite servir a fonte Inter).
 vite.live.config.mjs
