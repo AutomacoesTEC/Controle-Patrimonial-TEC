@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: Lint, arquitetura e mensagens de commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # commitlint e lint:changed precisam do histórico, não só do HEAD raso
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint (arquivos do PR contra main)
+        if: github.event_name == 'pull_request'
+        run: npx biome check --changed --no-errors-on-unmatched .
+      - name: Lint completo (informativo - débito pré-existente, não bloqueia)
+        if: always()
+        run: npm run lint
+        continue-on-error: true
+      - name: Contrato de arquitetura (dependency-cruiser)
+        run: npm run arch:check
+      - name: Mensagens de commit do PR
+        if: github.event_name == 'pull_request'
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
+      - name: Código/dependência morta (informativo - débito pré-existente, não bloqueia)
+        if: always()
+        run: npm run deadcode
+        continue-on-error: true
+
+  testes:
+    name: Testes unitários e build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:coverage
+      - name: Cobertura (Codecov)
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+      - run: npm run build
+
+  e2e:
+    name: Testes end-to-end (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - name: Relatório do Playwright (se algum teste falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

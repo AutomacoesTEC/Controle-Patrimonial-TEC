@@ -27,5 +27,11 @@ export default defineConfig({
       'src/irpf/dumpRowsPdfjs.audit.test.js',
       'e2e/**', // suíte do Playwright, roda via "npm run test:e2e", não vitest
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**'],
+      exclude: ['src/**/__fixtures__/**', 'src/**/*.test.js', 'src/**/*.audit.test.js'],
+    },
   },
 })

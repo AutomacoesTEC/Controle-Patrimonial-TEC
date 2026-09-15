@@ -78,6 +78,9 @@ __pycache__/
 playwright-report/
 test-results/
 
+# Relatório de cobertura do vitest (gerado, sobe pro Codecov via CI)
+coverage/
+
 # Configuração de desenvolvimento local desta worktree (libera o caminho real do
 # node_modules para o Vite servir a fonte Inter).
 vite.live.config.mjs
