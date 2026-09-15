@@ -10,6 +10,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Nenhum step de lint aqui é bloqueante. Motivo: nem "biome check --changed"
+  # nem "--staged" filtram por LINHA, só por ARQUIVO - um PR que toca um
+  # arquivo com débito de a11y pré-existente (ver Issue #2) reprovaria mesmo
+  # sem piorar nada. Volta a ser bloqueante quando esse débito for pago ou
+  # quando existir uma forma real de diff por linha.
   qualidade:
     name: Lint, arquitetura e mensagens de commit
     runs-on: ubuntu-latest
@@ -22,9 +27,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Lint (arquivos do PR contra main)
+      - name: Lint (arquivos do PR contra main, informativo - ver nota abaixo)
         if: github.event_name == 'pull_request'
         run: npx biome check --changed --no-errors-on-unmatched .
+        continue-on-error: true
       - name: Lint completo (informativo - débito pré-existente, não bloqueia)
         if: always()
         run: npm run lint
@@ -51,7 +57,6 @@ jobs:
       - run: npm ci
       - run: npm run test:coverage
       - name: Cobertura (Codecov)
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
