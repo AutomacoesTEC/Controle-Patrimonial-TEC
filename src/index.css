@@ -109,7 +109,13 @@ body{font-family:var(--font-family);font-size:14px;line-height:1.5;background:va
 .sidebar-toggle:hover{color:var(--accent-primary);border-color:var(--accent-primary)}
 .sidebar-header{padding:20px;border-bottom:1px solid var(--border-color);overflow:hidden}
 .sidebar-header-actions{display:flex;gap:6px;margin-top:10px}
-.sidebar-header-actions .btn{flex:1;min-width:0}
+/* .btn tem white-space:nowrap (correto para botão de uma linha em geral),
+   mas "Exportar Backup" não cabe ao lado de "Trocar Perfil" nos ~107px que
+   sobram de um sidebar de 260px dividido em dois - texto estourava a
+   lateral do menu (achado real, reportado com print). Aqui quebra em duas
+   linhas em vez de vazar; min-height (não height fixo) do .btn-sm já
+   acomoda a segunda linha sem cortar. */
+.sidebar-header-actions .btn{flex:1;min-width:0;white-space:normal;text-align:center;line-height:1.25}
 .sidebar-logo{display:flex;align-items:center;gap:12px}
 .sidebar-logo .logo-icon{width:40px;height:40px;display:block;border-radius:var(--radius-md);object-fit:contain;flex-shrink:0}
 /* min-width:0 no flex item: sem isso, o texto nunca encolhe abaixo da
@@ -1151,6 +1157,7 @@ button,input,select,textarea{font-family:var(--font-family);}
 .entrada-vitrine-regua span{display:block;height:4px;border-radius:2px;background:#fff;width:96px;}
 .entrada-vitrine-regua span + span{margin-top:5px;height:2px;width:56px;background:rgba(255,255,255,0.5);}
 .entrada-vitrine p{font-size:16px;line-height:1.65;color:rgba(255,255,255,0.74);margin:0;max-width:44ch;}
+.entrada-vitrine p + p{margin-top:12px;}
 @keyframes entrada-ciclo-mensagem{0%{opacity:0;transform:translate3d(-110%,0,0)}2.083%,31.25%{opacity:1;transform:translate3d(0,0,0)}33.333%,100%{opacity:0;transform:translate3d(110%,0,0)}}
 .entrada-ciclo:hover li,.entrada-ciclo:focus-within li{animation-play-state:paused;}
 @media (prefers-reduced-motion:reduce){
